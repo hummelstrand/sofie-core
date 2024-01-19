@@ -119,7 +119,8 @@ describe('rundown Timing Calculator', () => {
 			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -138,6 +139,7 @@ describe('rundown Timing Calculator', () => {
 				partExpectedDurations: {},
 				partPlayed: {},
 				partStartsAt: {},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 0,
 				totalPlaylistDuration: 0,
 				breakIsLastRundown: undefined,
@@ -183,7 +185,8 @@ describe('rundown Timing Calculator', () => {
 			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -241,6 +244,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 4000,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: undefined,
@@ -286,7 +290,8 @@ describe('rundown Timing Calculator', () => {
 			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -344,6 +349,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 4000,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: undefined,
@@ -391,7 +397,8 @@ describe('rundown Timing Calculator', () => {
 			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -451,6 +458,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 4000,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: undefined,
@@ -521,7 +529,8 @@ describe('rundown Timing Calculator', () => {
 				new Map(),
 				segmentsMap,
 				DEFAULT_DURATION,
-				[]
+				[],
+				{}
 			)
 			expect(result).toEqual(
 				literal<RundownTimingContext>({
@@ -579,6 +588,7 @@ describe('rundown Timing Calculator', () => {
 						part3: 2000,
 						part4: 3000,
 					},
+					partsInQuickLoop: {},
 					remainingPlaylistDuration: 4000,
 					totalPlaylistDuration: 4000,
 					breakIsLastRundown: undefined,
@@ -677,7 +687,8 @@ describe('rundown Timing Calculator', () => {
 				new Map(),
 				segmentsMap,
 				DEFAULT_DURATION,
-				[]
+				[],
+				{}
 			)
 			expect(result).toEqual(
 				literal<RundownTimingContext>({
@@ -735,6 +746,7 @@ describe('rundown Timing Calculator', () => {
 						part3: 3000,
 						part4: 3500,
 					},
+					partsInQuickLoop: {},
 					remainingPlaylistDuration: 3500,
 					totalPlaylistDuration: 7000,
 					breakIsLastRundown: false,
@@ -834,7 +846,8 @@ describe('rundown Timing Calculator', () => {
 				new Map(),
 				segmentsMap,
 				DEFAULT_DURATION,
-				[]
+				[],
+				{}
 			)
 			expect(result).toEqual(
 				literal<RundownTimingContext>({
@@ -892,6 +905,7 @@ describe('rundown Timing Calculator', () => {
 						part3: 3000,
 						part4: 10000,
 					},
+					partsInQuickLoop: {},
 					remainingPlaylistDuration: 1000,
 					totalPlaylistDuration: 7000,
 					breakIsLastRundown: false,
@@ -940,7 +954,8 @@ describe('rundown Timing Calculator', () => {
 				new Map(),
 				segmentsMap,
 				DEFAULT_NONZERO_DURATION,
-				[]
+				[],
+				{}
 			)
 			expect(result).toEqual(
 				literal<RundownTimingContext>({
@@ -998,6 +1013,7 @@ describe('rundown Timing Calculator', () => {
 						part3: 2000,
 						part4: 3000,
 					},
+					partsInQuickLoop: {},
 					remainingPlaylistDuration: 4000,
 					totalPlaylistDuration: 4000,
 					breakIsLastRundown: undefined,
@@ -1072,7 +1088,8 @@ describe('rundown Timing Calculator', () => {
 				new Map(),
 				segmentsMap,
 				DEFAULT_NONZERO_DURATION,
-				[]
+				[],
+				{}
 			)
 			expect(result).toEqual(
 				literal<RundownTimingContext>({
@@ -1137,6 +1154,7 @@ describe('rundown Timing Calculator', () => {
 						part4: 3000,
 						part5: 4000,
 					},
+					partsInQuickLoop: {},
 					remainingPlaylistDuration: 5000,
 					totalPlaylistDuration: 5000,
 					breakIsLastRundown: undefined,
@@ -1198,7 +1216,8 @@ describe('rundown Timing Calculator', () => {
 			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1256,6 +1275,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 8000,
 				totalPlaylistDuration: 8000,
 				breakIsLastRundown: undefined,
@@ -1323,7 +1343,8 @@ describe('rundown Timing Calculator', () => {
 			piecesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1381,6 +1402,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 7240,
 					part4: 8240,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 9240,
 				totalPlaylistDuration: 9240,
 				breakIsLastRundown: undefined,
@@ -1473,7 +1495,8 @@ describe('rundown Timing Calculator', () => {
 			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1531,6 +1554,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 2500,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,
@@ -1623,7 +1647,8 @@ describe('rundown Timing Calculator', () => {
 			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1681,6 +1706,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 3500,
 					part4: 4500,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 2000,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,
@@ -1779,7 +1805,8 @@ describe('rundown Timing Calculator', () => {
 			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1837,6 +1864,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 1500,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,
@@ -1929,7 +1957,8 @@ describe('rundown Timing Calculator', () => {
 			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1987,6 +2016,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 2500,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,
@@ -2079,7 +2109,8 @@ describe('rundown Timing Calculator', () => {
 			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -2137,6 +2168,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 3500,
 					part4: 4500,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 2000,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,
@@ -2235,7 +2267,8 @@ describe('rundown Timing Calculator', () => {
 			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			[],
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -2293,6 +2326,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 1500,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,

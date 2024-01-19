@@ -3,16 +3,23 @@ import { Meteor } from 'meteor/meteor'
 import * as PropTypes from 'prop-types'
 import { withTracker } from '../../../lib/ReactMeteorData/react-meteor-data'
 import { getCurrentTime, protectString } from '../../../../lib/lib'
-import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import { DBRundownPlaylist, QuickLoopMarkerType } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { PartInstance, wrapPartToTemporaryInstance } from '../../../../lib/collections/PartInstances'
 import { RundownTiming, TimeEventArgs } from './RundownTiming'
 import { Rundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
-import { RundownTimingCalculator, RundownTimingContext } from '../../../lib/rundownTiming'
+import {
+	RundownTimingCalculator,
+	RundownTimingContext,
+	TimingId,
+	getPartInstanceTimingId,
+} from '../../../lib/rundownTiming'
 import { PartId, PartInstanceId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { RundownPlaylistCollectionUtil } from '../../../../lib/collections/rundownPlaylistUtil'
 import { sortPartInstancesInSortedSegments } from '@sofie-automation/corelib/dist/playout/playlist'
 import { CalculateTimingsPiece } from '@sofie-automation/corelib/dist/playout/timings'
+import { isLoopDefined, isLoopLocked } from '../../../../lib/Rundown'
+import { RundownUtils } from '../../../lib/rundown'
 
 const TIMING_DEFAULT_REFRESH_INTERVAL = 1000 / 60 // the interval for high-resolution events (timeupdateHR)
 const LOW_RESOLUTION_TIMING_DECIMATOR = 15
@@ -50,6 +57,7 @@ interface IRundownTimingProviderTrackedProps {
 	segmentEntryPartInstances: MinimalPartInstance[]
 	segments: DBSegment[]
 	segmentsMap: Map<SegmentId, DBSegment>
+	partsInQuickLoop: Record<TimingId, boolean>
 }
 
 type MinimalPartInstance = Pick<
@@ -78,6 +86,7 @@ export const RundownTimingProvider = withTracker<
 			segmentEntryPartInstances: [],
 			segments: [],
 			segmentsMap: new Map(),
+			partsInQuickLoop: {},
 		}
 	}
 
@@ -165,6 +174,10 @@ export const RundownTimingProvider = withTracker<
 
 	partInstances = sortPartInstancesInSortedSegments(partInstances, segments)
 
+	partInstances = RundownUtils.deduplicatePartInstancesForQuickLoop(playlist, partInstances, currentPartInstance)
+
+	const partsInQuickLoop = findPartInstancesInQuickLoop(playlist, partInstances)
+
 	if (firstPartInstanceInCurrentSegmentPlay) segmentEntryPartInstances.push(firstPartInstanceInCurrentSegmentPlay)
 	if (firstPartInstanceInPreviousSegmentPlay) segmentEntryPartInstances.push(firstPartInstanceInPreviousSegmentPlay)
 
@@ -179,6 +192,7 @@ export const RundownTimingProvider = withTracker<
 		segmentEntryPartInstances,
 		segments,
 		segmentsMap,
+		partsInQuickLoop,
 	}
 })(
 	class RundownTimingProvider
@@ -329,7 +343,8 @@ export const RundownTimingProvider = withTracker<
 				pieces,
 				segmentsMap,
 				this.props.defaultDuration,
-				segmentEntryPartInstances
+				segmentEntryPartInstances,
+				this.props.partsInQuickLoop
 			)
 			if (!isSynced) {
 				this.durations = Object.assign(this.durations, updatedDurations)
@@ -343,6 +358,58 @@ export const RundownTimingProvider = withTracker<
 		}
 	}
 )
+
+function findPartInstancesInQuickLoop(
+	playlist: DBRundownPlaylist,
+	sortedPartInstances: MinimalPartInstance[]
+): Record<TimingId, boolean> {
+	const partsInQuickLoop: Record<TimingId, boolean> = {}
+	if (
+		!isLoopDefined(playlist) ||
+		isLoopLocked(playlist) // a crude way of disabling the dots when looping the entire playlist
+	) {
+		return partsInQuickLoop
+	}
+
+	let isInQuickLoop = playlist.quickLoop?.start?.type === QuickLoopMarkerType.PLAYLIST
+	let previousPartInstance: MinimalPartInstance | undefined = undefined
+	for (const partInstance of sortedPartInstances) {
+		if (
+			previousPartInstance &&
+			((playlist.quickLoop?.end?.type === QuickLoopMarkerType.PART &&
+				playlist.quickLoop.end.id === previousPartInstance.part._id) ||
+				(playlist.quickLoop?.end?.type === QuickLoopMarkerType.SEGMENT &&
+					playlist.quickLoop.end.id === previousPartInstance.segmentId) ||
+				(playlist.quickLoop?.end?.type === QuickLoopMarkerType.RUNDOWN &&
+					playlist.quickLoop.end.id === previousPartInstance.rundownId))
+		) {
+			isInQuickLoop = false
+			if (
+				playlist.quickLoop.start?.type !== QuickLoopMarkerType.PART ||
+				playlist.quickLoop.start?.id !== playlist.quickLoop.end?.id
+			) {
+				// when looping over a single part we need to include the three instances of that part shown at once, otherwise, we can break
+				break
+			}
+		}
+		if (
+			!isInQuickLoop &&
+			((playlist.quickLoop?.start?.type === QuickLoopMarkerType.PART &&
+				playlist.quickLoop.start.id === partInstance.part._id) ||
+				(playlist.quickLoop?.start?.type === QuickLoopMarkerType.SEGMENT &&
+					playlist.quickLoop.start.id === partInstance.segmentId) ||
+				(playlist.quickLoop?.start?.type === QuickLoopMarkerType.RUNDOWN &&
+					playlist.quickLoop.start.id === partInstance.rundownId))
+		) {
+			isInQuickLoop = true
+		}
+		if (isInQuickLoop) {
+			partsInQuickLoop[getPartInstanceTimingId(partInstance)] = true
+		}
+		previousPartInstance = partInstance
+	}
+	return partsInQuickLoop
+}
 
 function findCurrentAndPreviousPartInstance(
 	activePartInstances: MinimalPartInstance[],
