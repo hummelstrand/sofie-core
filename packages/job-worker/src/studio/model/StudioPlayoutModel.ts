@@ -65,4 +65,6 @@ export interface StudioPlayoutModel extends StudioPlayoutModelBase, BaseModel {
 	 * @param excludeRundownPlaylistId Ignore a given RundownPlaylist, useful to see if any other RundownPlaylists are active
 	 */
 	getActiveRundownPlaylists(excludeRundownPlaylistId?: RundownPlaylistId): ReadonlyDeep<DBRundownPlaylist[]>
+
+	updateRouteSetActive(routeSetId: string, isActive: boolean): void
 }

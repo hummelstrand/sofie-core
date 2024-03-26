@@ -34,6 +34,9 @@ export class StudioPlayoutModelImpl implements StudioPlayoutModel {
 
 	#timelineHasChanged = false
 	#timeline: TimelineComplete | null
+
+	#routeSetActive: Record<string, boolean> = {}
+
 	public get timeline(): TimelineComplete | null {
 		return this.#timeline
 	}
@@ -95,6 +98,10 @@ export class StudioPlayoutModelImpl implements StudioPlayoutModel {
 		this.#timelineHasChanged = true
 	}
 
+	updateRouteSetActive(routeSetId: string, isActive: boolean): void {
+		this.#routeSetActive[routeSetId] = isActive
+	}
+
 	/**
 	 * Discards all documents in this model, and marks it as unusable
 	 */
@@ -114,6 +121,20 @@ export class StudioPlayoutModelImpl implements StudioPlayoutModel {
 			await this.context.directCollections.Timelines.replace(this.#timeline)
 		}
 		this.#timelineHasChanged = false
+
+		const modifier: Record<string, boolean> = {}
+		for (const [routeSetId, isActive] of Object.entries<boolean>(this.#routeSetActive)) {
+			modifier[`routeSets.${routeSetId}.active`] = isActive
+		}
+
+		await this.context.directCollections.Studios.update(
+			{
+				_id: this.context.studioId,
+			},
+			{
+				$set: modifier,
+			}
+		)
 
 		await this.#baselineHelper.saveAllToDatabase()
 

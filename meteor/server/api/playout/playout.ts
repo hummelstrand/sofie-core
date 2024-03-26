@@ -42,6 +42,8 @@ export namespace ServerPlayoutAPI {
 	): Promise<void> {
 		logger.debug(`switchRouteSet "${access.studioId}" "${routeSetId}"=${state}`)
 
+		// TODO: change this to call a job worker method instead
+
 		const studio = access.studio
 
 		if (studio.routeSets[routeSetId] === undefined)

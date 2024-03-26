@@ -186,6 +186,12 @@ export enum StudioJobs {
 	 * Activate scratchpad mode for the Rundown containing the nexted Part.
 	 */
 	ActivateScratchpad = 'activateScratchpad',
+
+	/**
+	 * Switch the route of the studio
+	 * for use in ad.lib actions
+	 */
+	SwitchRouteSet = 'switchRouteSet',
 }
 
 export interface RundownPlayoutPropsBase {
@@ -326,6 +332,13 @@ export interface ActivateScratchpadProps extends RundownPlayoutPropsBase {
 	rundownId: RundownId
 }
 
+export interface SwitchRouteSetProps {
+	userEvent: string
+	studioId: StudioId
+	routeSetId: string
+	state: boolean
+}
+
 /**
  * Set of valid functions, of form:
  * `id: (data) => return`
@@ -377,6 +390,7 @@ export type StudioJobFunc = {
 	[StudioJobs.BlueprintIgnoreFixUpConfigForStudio]: () => void
 
 	[StudioJobs.ActivateScratchpad]: (data: ActivateScratchpadProps) => void
+	[StudioJobs.SwitchRouteSet]: (data: SwitchRouteSetProps) => void
 }
 
 export function getStudioQueueName(id: StudioId): string {
