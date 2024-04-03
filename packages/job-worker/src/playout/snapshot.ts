@@ -56,6 +56,11 @@ export async function handleGeneratePlaylistSnapshot(
 			{ rundownId: { $in: rundownIds } },
 			{ sort: { modified: -1 } }
 		) // @todo: check sorting order
+		const sofieIngestData = await context.directCollections.SofieIngestDataCache.findFetch(
+			{ rundownId: { $in: rundownIds } },
+			{ sort: { modified: -1 } }
+		) // @todo: check sorting order
+
 		// const userActions = await context.directCollections.UserActionsLog.findFetch({
 		// 	args: {
 		// 		$regex:
@@ -120,6 +125,7 @@ export async function handleGeneratePlaylistSnapshot(
 			playlist,
 			rundowns,
 			ingestData,
+			sofieIngestData,
 			baselineObjs,
 			baselineAdlibs,
 			segments,
@@ -396,6 +402,12 @@ export async function handleRestorePlaylistSnapshot(
 			context.directCollections.NrcsIngestDataCache,
 			{ rundownId: { $in: rundownIds } },
 			updateItemIds(snapshot.ingestData, true)
+		),
+		saveIntoDb(
+			context,
+			context.directCollections.SofieIngestDataCache,
+			{ rundownId: { $in: rundownIds } },
+			updateItemIds(snapshot.sofieIngestData || snapshot.ingestData, true)
 		),
 		saveIntoDb(
 			context,

@@ -45,6 +45,7 @@ import {
 	TranslationsBundles,
 	PackageContainerStatuses,
 	TimelineDatastore,
+	SofieIngestDataCache,
 } from '../../collections'
 import { Collections } from '../../collections/lib'
 import { generateTranslationBundleOriginId } from '../translationsBundles'
@@ -301,6 +302,13 @@ async function setDefaultDatatoDB(env: DefaultEnvironment, now: number) {
 		type: '' as any,
 	})
 	await NrcsIngestDataCache.mutableCollection.insertAsync({
+		_id: getRandomId(),
+		data: {} as any,
+		modified: 0,
+		rundownId,
+		type: '' as any,
+	})
+	await SofieIngestDataCache.mutableCollection.insertAsync({
 		_id: getRandomId(),
 		data: {} as any,
 		modified: 0,

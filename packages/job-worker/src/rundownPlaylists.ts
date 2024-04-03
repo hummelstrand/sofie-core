@@ -147,6 +147,7 @@ export async function removeRundownFromDb(context: JobContext, lock: RundownLock
 		context.directCollections.ExpectedMediaItems.remove({ rundownId: rundownId }),
 		context.directCollections.ExpectedPlayoutItems.remove({ rundownId: rundownId }),
 		context.directCollections.ExpectedPackages.remove({ rundownId: rundownId }),
+		context.directCollections.SofieIngestDataCache.remove({ rundownId: rundownId }),
 		context.directCollections.NrcsIngestDataCache.remove({ rundownId: rundownId }),
 		context.directCollections.RundownBaselineAdLibPieces.remove({ rundownId: rundownId }),
 		context.directCollections.Segments.remove({ rundownId: rundownId }),

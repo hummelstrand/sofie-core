@@ -68,6 +68,7 @@ import {
 	UserActionsLog,
 	Workers,
 	WorkerThreadStatuses,
+	SofieIngestDataCache,
 } from '../collections'
 import { AsyncOnlyMongoCollection, AsyncOnlyReadOnlyMongoCollection } from '../collections/collection'
 import { getCollectionKey } from '../collections/lib'
@@ -275,6 +276,7 @@ export async function cleanupOldDataInner(actuallyCleanup = false): Promise<Coll
 		}
 		await ownedByRundownId(AdLibActions)
 		await ownedByRundownId(AdLibPieces)
+		await ownedByRundownId(SofieIngestDataCache)
 		await ownedByRundownId(NrcsIngestDataCache)
 		;(await ownedByRundownId(Parts)).forEach((id) => removedParts.add(id))
 		await ownedByRundownId(RundownBaselineAdLibActions)

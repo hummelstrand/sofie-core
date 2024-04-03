@@ -283,6 +283,7 @@ export function getMockCollections(): {
 			BucketAdLibPieces: new MockMongoCollection<BucketAdLib>(CollectionName.BucketAdLibPieces),
 			ExpectedMediaItems: new MockMongoCollection(CollectionName.ExpectedMediaItems),
 			ExpectedPlayoutItems: new MockMongoCollection<ExpectedPlayoutItem>(CollectionName.ExpectedPlayoutItems),
+			SofieIngestDataCache: new MockMongoCollection<IngestDataCacheObj>(CollectionName.SofieIngestDataCache),
 			NrcsIngestDataCache: new MockMongoCollection<IngestDataCacheObj>(CollectionName.NrcsIngestDataCache),
 			Parts: new MockMongoCollection<DBPart>(CollectionName.Parts),
 			PartInstances: new MockMongoCollection<DBPartInstance>(CollectionName.PartInstances),
@@ -339,6 +340,7 @@ export interface IMockCollections {
 	BucketAdLibPieces: MockMongoCollection<BucketAdLib>
 	ExpectedMediaItems: MockMongoCollection<ExpectedMediaItem>
 	ExpectedPlayoutItems: MockMongoCollection<ExpectedPlayoutItem>
+	SofieIngestDataCache: MockMongoCollection<IngestDataCacheObj>
 	NrcsIngestDataCache: MockMongoCollection<IngestDataCacheObj>
 	Parts: MockMongoCollection<DBPart>
 	PartInstances: MockMongoCollection<DBPartInstance>

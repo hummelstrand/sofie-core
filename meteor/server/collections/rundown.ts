@@ -35,6 +35,13 @@ registerIndex(NrcsIngestDataCache, {
 	rundownId: 1,
 })
 
+export const SofieIngestDataCache = createAsyncOnlyReadOnlyMongoCollection<IngestDataCacheObj>(
+	CollectionName.SofieIngestDataCache
+)
+registerIndex(SofieIngestDataCache, {
+	rundownId: 1,
+})
+
 export const PartInstances = createAsyncOnlyReadOnlyMongoCollection<PartInstance>(CollectionName.PartInstances)
 registerIndex(PartInstances, {
 	rundownId: 1,

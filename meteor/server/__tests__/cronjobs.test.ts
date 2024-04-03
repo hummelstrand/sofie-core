@@ -51,6 +51,7 @@ import {
 	Snapshots,
 	UserActionsLog,
 	Segments,
+	SofieIngestDataCache,
 } from '../collections'
 import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { JSONBlobStringify } from '@sofie-automation/shared-lib/dist/lib/JSONBlob'
@@ -208,6 +209,46 @@ describe('cronjobs', () => {
 				_id: dataCache1Id,
 			})
 			expect(await NrcsIngestDataCache.findOneAsync(dataCache0Id)).toBeUndefined()
+		})
+		testInFiber('Remove SofieIngestDataCache objects that are not connected to any Rundown', async () => {
+			// Set up a mock rundown, a detached SofieIngestDataCache object and an object attached to the mock rundown
+			// Detached SofieIngestDataCache object 0
+			const dataCache0Id = protectString<IngestDataCacheObjId>(getRandomString())
+			await SofieIngestDataCache.mutableCollection.insertAsync({
+				_id: dataCache0Id,
+				data: {
+					externalId: '',
+					name: '',
+					segments: [],
+					type: '',
+				},
+				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
+				// this one is attached to rundown0
+				rundownId: getRandomId(),
+				type: IngestCacheType.RUNDOWN,
+			})
+			// Attached SofieIngestDataCache object 1
+			const dataCache1Id = protectString<IngestDataCacheObjId>(getRandomString())
+			await SofieIngestDataCache.mutableCollection.insertAsync({
+				_id: dataCache1Id,
+				data: {
+					externalId: '',
+					name: '',
+					segments: [],
+					type: '',
+				},
+				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
+				// just some random ID
+				rundownId: rundownId,
+				type: IngestCacheType.RUNDOWN,
+			})
+
+			await runCronjobs()
+
+			expect(await SofieIngestDataCache.findOneAsync(dataCache1Id)).toMatchObject({
+				_id: dataCache1Id,
+			})
+			expect(await SofieIngestDataCache.findOneAsync(dataCache0Id)).toBeUndefined()
 		})
 		testInFiber('Removes old PartInstances and PieceInstances', async () => {
 			// nightlyCronjobInner()
