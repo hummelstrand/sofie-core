@@ -1,4 +1,5 @@
 import type { IngestPart, MutableIngestPart } from '@sofie-automation/blueprints-integration'
+import { clone } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 
@@ -43,7 +44,7 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 
 	replacePayload(payload: ReadonlyDeep<TPartPayload>): void {
 		if (!_.isEqual(this.ingestPart.payload, payload)) {
-			this.ingestPart.payload = payload
+			this.ingestPart.payload = clone(payload)
 			this.#hasChanges = true
 		}
 	}
@@ -54,7 +55,7 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 		}
 
 		if (!_.isEqual(this.ingestPart.payload[key], value)) {
-			this.ingestPart.payload[key] = value
+			this.ingestPart.payload[key] = clone(value)
 			this.#hasChanges = true
 		}
 	}
