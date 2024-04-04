@@ -15,6 +15,25 @@ export interface ExtendedIngestRundown extends IngestRundown {
 	coreData: IBlueprintRundownDBData | undefined
 }
 
+export enum IncomingIngestPartChange {
+	Deleted = 'deleted',
+	Payload = 'payload',
+	Rank = 'rank',
+}
+export enum IncomingIngestSegmentChange {
+	Deleted = 'deleted',
+	// Contents = 'contents',
+	ContentsOrder = 'contentsOrder',
+	Payload = 'payload',
+	// Rank = 'rank',
+}
+export enum IncomingIngestRundownChange {
+	// Deleted = 'deleted',
+	Payload = 'payload',
+	CoreData = 'coreData',
+	Regenerate = 'regenerate',
+}
+
 export interface IncomingIngestChange {
 	/** Indicate that this change is from ingest operations */
 	source: 'ingest'
@@ -26,22 +45,19 @@ export interface IncomingIngestChange {
 	segmentOrderChanged?: boolean
 
 	/**
-	 * True when the payload of the rundown has changed.
-	 * TODO: should this be more specific?
+	 * Describes the changes to the rundown itself
 	 */
-	rundownPayloadChanged?: boolean
+	rundownChanges?: IncomingIngestRundownChange
 
 	/**
-	 * Contains the ids of the segments that have changed.
-	 * TODO: should this be more specific?
+	 * Describes the changes to the segments in the rundown
 	 */
-	changedSegmentIds?: string[]
+	segmentChanges?: Record<string, IncomingIngestSegmentChange>
 
 	/**
-	 * Contains the ids of the parts that have changed.
-	 * TODO: should this be more specific?
+	 * Descibes the changes to the parts in the rundown
 	 */
-	changedPartIds?: string[]
+	partsChanged?: Record<string, IncomingIngestPartChange>
 }
 
 export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {
@@ -53,8 +69,11 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	/** Something that identified the data source. eg "spreadsheet", "mos" */
 	readonly type: string
 
-	/** Raw payload of rundown metadata. Only used by the blueprints */
+	/** Payload of rundown metadata. For use by other blueprints methods */
 	readonly payload?: ReadonlyDeep<TRundownPayload>
+
+	// TODO - split payload into 'private' and 'public'? ie, one for `getRundown` and one for `getSegment`, so that we can affect the rundown generation without regenerating all of the segments.
+	// Or should we expect this blueprint stage to copy any needed properties into each of the segment/part payloads?
 
 	/** Array of segmsnts in this rundown */
 	readonly segments: ReadonlyArray<MutableIngestSegment<TSegmentPayload, TPartPayload>>
@@ -68,7 +87,7 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	/** Rank of the segment within the rundown */
 	readonly rank: number
 
-	/** Raw payload of segment metadata. Only used by the blueprints */
+	/** Payload of segment metadata. For use by other blueprints methods */
 	readonly payload?: ReadonlyDeep<TSegmentPayload>
 
 	/** Array of parts in this segment */
@@ -83,6 +102,6 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 	/** Rank of the part within the segment */
 	readonly rank: number
 
-	/** Raw payload of the part. Only used by the blueprints */
+	/** Payload of the part. For use by other blueprints methods */
 	readonly payload?: ReadonlyDeep<TPartPayload>
 }
