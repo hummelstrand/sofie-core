@@ -24,6 +24,7 @@ export interface IngestSegment {
 	externalId: string
 	/** Name of the segment */
 	name: string
+	/** Rank of the segment within the rundown */
 	rank: number
 
 	/** Raw payload of segment metadata. Only used by the blueprints */
@@ -37,7 +38,7 @@ export interface IngestPart {
 	externalId: string
 	/** Name of the part */
 	name: string
-	/** Rank of the part within the segmetn */
+	/** Rank of the part within the segment */
 	rank: number
 
 	/** Raw payload of the part. Only used by the blueprints */

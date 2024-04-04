@@ -6,7 +6,7 @@ import type { JSONBlob } from '@sofie-automation/shared-lib/dist/lib/JSONBlob'
 import type { MigrationStepStudio } from '../migrations'
 import type { ICommonContext, IFixUpConfigContext, IStudioBaselineContext, IStudioUserContext } from '../context'
 import type { IBlueprintShowStyleBase } from '../showStyle'
-import type { ExtendedIngestRundown } from '../ingest'
+import type { ExtendedIngestRundown, IncomingIngestChange, MutableIngestRundown } from '../ingest'
 import type { ExpectedPlayoutItemGeneric, IBlueprintResultRundownPlaylist, IBlueprintRundownDB } from '../documents'
 import type { BlueprintMappings } from '../studio'
 import type { TimelineObjectCoreExt, TSR } from '../timeline'
@@ -75,6 +75,15 @@ export interface StudioBlueprintManifest<TRawConfig = IBlueprintConfig, TProcess
 		config: TRawConfig,
 		coreConfig: BlueprintConfigCoreConfig
 	) => TProcessedConfig
+
+	/**
+	 * Process an ingest operation, to apply changes to the sofie interpretation of the ingest data
+	 */
+	processIngestData?: (
+		context: ICommonContext,
+		mutableIngestRundown: MutableIngestRundown,
+		changes: IncomingIngestChange
+	) => Promise<void>
 }
 
 export interface BlueprintResultStudioBaseline {
