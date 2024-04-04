@@ -39,6 +39,7 @@ import {
 	handleBucketRemoveAdlibPiece,
 } from '../../ingest/bucket/bucketAdlibs'
 import { handleBucketItemImport, handleBucketItemRegenerate } from '../../ingest/bucket/import'
+import { wrapMosIngestJob } from '../../ingest/mosDevice/lib'
 
 type ExecutableFunction<T extends keyof IngestJobFunc> = (
 	context: JobContext,
@@ -70,7 +71,7 @@ export const ingestJobHandlers: IngestJobHandlers = {
 	[IngestJobs.MosFullStory]: handleMosFullStory,
 	[IngestJobs.MosDeleteStory]: handleMosDeleteStory,
 	[IngestJobs.MosInsertStory]: handleMosInsertStories,
-	[IngestJobs.MosMoveStory]: handleMosMoveStories,
+	[IngestJobs.MosMoveStory]: wrapMosIngestJob(handleMosMoveStories),
 	[IngestJobs.MosSwapStory]: handleMosSwapStories,
 
 	[IngestJobs.ExpectedPackagesRegenerate]: handleExpectedPackagesRegenerate,

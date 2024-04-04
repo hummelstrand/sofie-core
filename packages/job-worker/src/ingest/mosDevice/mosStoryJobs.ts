@@ -12,7 +12,7 @@ import { JobContext } from '../../jobs'
 import { updateSegmentFromIngestData } from '../generationSegment'
 import { LocalIngestRundown } from '../ingestCache'
 import { getRundownId } from '../lib'
-import { runIngestUpdateOperation } from '../lock'
+import { UpdateIngestRundownResult, runIngestUpdateOperation } from '../lock'
 import { diffAndApplyChanges } from './diff'
 import { fixIllegalObject, parseMosString } from './lib'
 import { AnnotatedIngestPart, makeChangeToIngestParts, storiesToIngestParts } from './mosToIngest'
@@ -245,60 +245,53 @@ export async function handleMosSwapStories(context: JobContext, data: MosSwapSto
 /**
  * Move a list of mos stories
  */
-export async function handleMosMoveStories(context: JobContext, data: MosMoveStoryProps): Promise<void> {
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => {
-			if (ingestRundown) {
-				const ingestParts = getAnnotatedIngestParts(context, ingestRundown)
+export function handleMosMoveStories(
+	context: JobContext,
+	data: MosMoveStoryProps,
+	ingestRundown: LocalIngestRundown | undefined
+): UpdateIngestRundownResult {
+	if (!ingestRundown) {
+		throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+	}
 
-				// Get story data
-				const storyIds = data.stories.map(parseMosString)
+	const ingestParts = getAnnotatedIngestParts(context, ingestRundown)
 
-				const rundownId = getRundownId(context.studioId, data.rundownExternalId)
-				ingestRundown.segments = makeChangeToIngestParts(context, rundownId, ingestParts, (rundownParts) => {
-					// Extract the parts-to-be-moved:
-					const movingParts = _.sortBy(
-						rundownParts.filter((p) => storyIds.indexOf(p.externalId) !== -1),
-						(p) => storyIds.indexOf(p.externalId)
-					)
-					const filteredParts = rundownParts.filter((p) => storyIds.indexOf(p.externalId) === -1)
+	// Get story data
+	const storyIds = data.stories.map(parseMosString)
 
-					// Ensure all stories to move were found
-					const movingIds = _.map(movingParts, (p) => p.externalId)
-					const missingIds = _.filter(storyIds, (id) => movingIds.indexOf(id) === -1)
-					if (missingIds.length > 0) {
-						throw new Error(
-							`Parts ${missingIds.join(', ')} were not found in rundown ${data.rundownExternalId}`
-						)
-					}
+	const rundownId = getRundownId(context.studioId, data.rundownExternalId)
+	ingestRundown.segments = makeChangeToIngestParts(context, rundownId, ingestParts, (rundownParts) => {
+		// Extract the parts-to-be-moved:
+		const movingParts = _.sortBy(
+			rundownParts.filter((p) => storyIds.indexOf(p.externalId) !== -1),
+			(p) => storyIds.indexOf(p.externalId)
+		)
+		const filteredParts = rundownParts.filter((p) => storyIds.indexOf(p.externalId) === -1)
 
-					// Find insert point
-					const insertBeforePartExternalId = data.insertBeforeStoryId
-						? parseMosString(data.insertBeforeStoryId) || ''
-						: ''
-					const insertIndex = !insertBeforePartExternalId // insert last
-						? filteredParts.length
-						: filteredParts.findIndex((p) => p.externalId === insertBeforePartExternalId)
-					if (insertIndex === -1) {
-						throw new Error(
-							`Part ${insertBeforePartExternalId} was not found in rundown ${data.rundownExternalId}`
-						)
-					}
+		// Ensure all stories to move were found
+		const movingIds = _.map(movingParts, (p) => p.externalId)
+		const missingIds = _.filter(storyIds, (id) => movingIds.indexOf(id) === -1)
+		if (missingIds.length > 0) {
+			throw new Error(`Parts ${missingIds.join(', ')} were not found in rundown ${data.rundownExternalId}`)
+		}
 
-					// Reinsert parts
-					filteredParts.splice(insertIndex, 0, ...movingParts)
+		// Find insert point
+		const insertBeforePartExternalId = data.insertBeforeStoryId
+			? parseMosString(data.insertBeforeStoryId) || ''
+			: ''
+		const insertIndex = !insertBeforePartExternalId // insert last
+			? filteredParts.length
+			: filteredParts.findIndex((p) => p.externalId === insertBeforePartExternalId)
+		if (insertIndex === -1) {
+			throw new Error(`Part ${insertBeforePartExternalId} was not found in rundown ${data.rundownExternalId}`)
+		}
 
-					return filteredParts
-				})
+		// Reinsert parts
+		filteredParts.splice(insertIndex, 0, ...movingParts)
 
-				// We modify in-place
-				return ingestRundown
-			} else {
-				throw new Error(`Rundown "${data.rundownExternalId}" not found`)
-			}
-		},
-		diffAndApplyChanges
-	)
+		return filteredParts
+	})
+
+	// We modify in-place
+	return ingestRundown
 }

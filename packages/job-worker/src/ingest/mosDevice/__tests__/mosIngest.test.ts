@@ -14,7 +14,7 @@ import {
 	handleMosSwapStories,
 } from '../mosStoryJobs'
 import { handleMosRundownData, handleMosRundownReadyToAir, handleMosRundownStatus } from '../mosRundownJobs'
-import { parseMosString } from '../lib'
+import { parseMosString, wrapMosIngestJob } from '../lib'
 import { MockJobContext, setupDefaultJobEnvironment } from '../../../__mocks__/context'
 import { setupMockIngestDevice, setupMockShowStyleCompound } from '../../../__mocks__/presetCollections'
 import { fixSnapshot } from '../../../__mocks__/helpers/snapshot'
@@ -54,6 +54,8 @@ function getPartIdMap(segments: DBSegment[], parts: DBPart[]) {
 		return obj ? obj._rank : 99999
 	})
 }
+
+const handleMosMoveStoriesWrapped = wrapMosIngestJob(handleMosMoveStories)
 
 describe('Test recieved mos ingest payloads', () => {
 	let context: MockJobContext
@@ -972,7 +974,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const story0 = 'ro1;s1;p3'
 
-		await handleMosMoveStories(context, {
+		await handleMosMoveStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			insertBeforeStoryId: mosTypes.mosString128.create('ro1;s1;p2'),
@@ -1005,7 +1007,7 @@ describe('Test recieved mos ingest payloads', () => {
 			mosTypes.mosString128.create('ro1;s1;p3'),
 		]
 
-		await handleMosMoveStories(context, {
+		await handleMosMoveStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			insertBeforeStoryId: mosTypes.mosString128.create(''),
@@ -1037,7 +1039,7 @@ describe('Test recieved mos ingest payloads', () => {
 		]
 
 		await expect(
-			handleMosMoveStories(context, {
+			handleMosMoveStoriesWrapped(context, {
 				peripheralDeviceId: device._id,
 				rundownExternalId: rundown.externalId,
 				insertBeforeStoryId: beforeStoryId,
@@ -1060,7 +1062,7 @@ describe('Test recieved mos ingest payloads', () => {
 		]
 
 		await expect(
-			handleMosMoveStories(context, {
+			handleMosMoveStoriesWrapped(context, {
 				peripheralDeviceId: device._id,
 				rundownExternalId: rundown.externalId,
 				insertBeforeStoryId: beforeStoryId,
@@ -1085,7 +1087,7 @@ describe('Test recieved mos ingest payloads', () => {
 		]
 
 		await expect(
-			handleMosMoveStories(context, {
+			handleMosMoveStoriesWrapped(context, {
 				peripheralDeviceId: device._id,
 				rundownExternalId: rundown.externalId,
 				insertBeforeStoryId: beforeStoryId,

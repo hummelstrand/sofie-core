@@ -44,6 +44,8 @@ export interface UpdateIngestRundownChange {
 	changes: IncomingIngestChange
 }
 
+export type UpdateIngestRundownResult = /*UpdateIngestRundownChange*/ LocalIngestRundown | UpdateIngestRundownAction
+
 /**
  * Perform an ingest update operation on a rundown
  * This will automatically do some post-update data changes, to ensure the playout side (partinstances etc) is updated with the changes
@@ -56,9 +58,7 @@ export interface UpdateIngestRundownChange {
 export async function runIngestUpdateOperation(
 	context: JobContext,
 	data: IngestPropsBase,
-	updateNrcsIngestModelFcn: (
-		oldIngestRundown: LocalIngestRundown | undefined
-	) => UpdateIngestRundownChange | UpdateIngestRundownAction,
+	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult,
 	calcFcn: (
 		context: JobContext,
 		ingestModel: IngestModel,
@@ -84,7 +84,7 @@ export async function runIngestUpdateOperation(
 		const updatedIngestRundown = updateNrcsIngestModelFcn(clone(oldIngestRundown))
 		updateNrcsIngestModelSpan?.end()
 
-		let ingestRundownChanges: UpdateIngestRundownChange | undefined
+		let ingestRundownChanges: /*UpdateIngestRundownChange*/ LocalIngestRundown | undefined
 		switch (updatedIngestRundown) {
 			// case UpdateIngestRundownAction.REJECT:
 			// 	// Reject change
@@ -94,7 +94,7 @@ export async function runIngestUpdateOperation(
 				ingestRundownChanges = undefined
 				break
 			default:
-				ingestObjCache.update(updatedIngestRundown.ingestRundown)
+				ingestObjCache.update(updatedIngestRundown)
 				ingestRundownChanges = updatedIngestRundown
 				break
 		}
