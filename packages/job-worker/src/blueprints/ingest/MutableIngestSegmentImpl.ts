@@ -52,7 +52,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		}
 	}
 
-	replacePayload(payload: ReadonlyDeep<TSegmentPayload>): void {
+	replacePayload(payload: ReadonlyDeep<TSegmentPayload> | TSegmentPayload): void {
 		if (!_.isEqual(this.ingestSegment.payload, payload)) {
 			this.ingestSegment.payload = clone(payload)
 			this.#hasChanges = true

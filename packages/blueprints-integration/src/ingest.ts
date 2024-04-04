@@ -16,11 +16,13 @@ export interface ExtendedIngestRundown extends IngestRundown {
 }
 
 export enum IncomingIngestPartChange {
+	Inserted = 'inserted',
 	Deleted = 'deleted',
 	Payload = 'payload',
-	Rank = 'rank',
+	// Rank = 'rank',
 }
 export enum IncomingIngestSegmentChange {
+	Inserted = 'inserted',
 	Deleted = 'deleted',
 	// Contents = 'contents',
 	ContentsOrder = 'contentsOrder',
@@ -30,7 +32,7 @@ export enum IncomingIngestSegmentChange {
 export enum IncomingIngestRundownChange {
 	// Deleted = 'deleted',
 	Payload = 'payload',
-	CoreData = 'coreData',
+	// CoreData = 'coreData',
 	Regenerate = 'regenerate',
 }
 
@@ -77,6 +79,20 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 
 	/** Array of segmsnts in this rundown */
 	readonly segments: ReadonlyArray<MutableIngestSegment<TSegmentPayload, TPartPayload>>
+
+	removeAllSegments(): void
+
+	setName(name: string): void
+
+	replacePayload(payload: ReadonlyDeep<TRundownPayload> | TRundownPayload): void
+
+	setPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
+
+	defaultApplyChanges(
+		ingestRundown: IngestRundown,
+		changes: IncomingIngestChange,
+		options?: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+	): void
 }
 
 export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = unknown> {
@@ -92,6 +108,12 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 
 	/** Array of parts in this segment */
 	readonly parts: ReadonlyArray<MutableIngestPart<TPartPayload>>
+
+	setName(name: string): void
+
+	replacePayload(payload: ReadonlyDeep<TSegmentPayload> | TSegmentPayload): void
+
+	setPayloadProperty<TKey extends keyof TSegmentPayload>(key: TKey, value: TSegmentPayload[TKey]): void
 }
 
 export interface MutableIngestPart<TPartPayload = unknown> {
@@ -107,7 +129,17 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 
 	setName(name: string): void
 
-	replacePayload(payload: ReadonlyDeep<TPartPayload>): void
+	replacePayload(payload: ReadonlyDeep<TPartPayload> | TPartPayload): void
 
 	setPayloadProperty<TKey extends keyof TPartPayload>(key: TKey, value: TPartPayload[TKey]): void
+}
+
+export interface IngestDefaultChangesOptions<
+	TRundownPayload = unknown,
+	TSegmentPayload = unknown,
+	TPartPayload = unknown
+> {
+	transformRundownPayload: (payload: any) => TRundownPayload
+	transformSegmentPayload: (payload: any) => TSegmentPayload
+	transformPartPayload: (payload: any) => TPartPayload
 }

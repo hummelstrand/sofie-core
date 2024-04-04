@@ -42,7 +42,7 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 		}
 	}
 
-	replacePayload(payload: ReadonlyDeep<TPartPayload>): void {
+	replacePayload(payload: ReadonlyDeep<TPartPayload> | TPartPayload): void {
 		if (!_.isEqual(this.ingestPart.payload, payload)) {
 			this.ingestPart.payload = clone(payload)
 			this.#hasChanges = true

@@ -1,8 +1,14 @@
-import type { IngestRundown, MutableIngestRundown } from '@sofie-automation/blueprints-integration'
+import {
+	type IncomingIngestChange,
+	type IngestDefaultChangesOptions,
+	type IngestRundown,
+	type MutableIngestRundown,
+} from '@sofie-automation/blueprints-integration'
 import { clone, omit } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { MutableIngestSegmentImpl } from './MutableIngestSegmentImpl'
+import { defaultApplyChanges } from './defaultApplyChanges'
 
 export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown>
 	implements MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>
@@ -56,7 +62,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		}
 	}
 
-	replacePayload(payload: ReadonlyDeep<TRundownPayload>): void {
+	replacePayload(payload: ReadonlyDeep<TRundownPayload> | TRundownPayload): void {
 		if (!_.isEqual(this.ingestRundown.payload, payload)) {
 			this.ingestRundown.payload = clone(payload)
 			this.#hasChanges = true
@@ -75,4 +81,22 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	// TODO - segment/part mutation/replacement
+
+	removeAllSegments(): void {
+		// TODO - track what was deleted?
+		this.#segments.length = 0
+	}
+
+	defaultApplyChanges(
+		nrcsRundown: IngestRundown,
+		changes: IncomingIngestChange,
+		options?: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+	): void {
+		defaultApplyChanges(this, nrcsRundown, changes, {
+			transformRundownPayload: (payload) => payload as TRundownPayload,
+			transformSegmentPayload: (payload) => payload as TSegmentPayload,
+			transformPartPayload: (payload) => payload as TPartPayload,
+			...options,
+		})
+	}
 }
