@@ -10,6 +10,7 @@ import { RundownLock } from '../jobs/lock'
 import { UserError } from '@sofie-automation/corelib/dist/error'
 import { loadIngestModelFromRundownExternalId } from './model/implementation/LoadIngestModel'
 import { clone } from '@sofie-automation/corelib/dist/lib'
+import { IncomingIngestChange } from '@sofie-automation/blueprints-integration'
 
 /**
  * The result of the initial stage of an Ingest operation
@@ -38,21 +39,26 @@ export enum UpdateIngestRundownAction {
 	DELETE = 'delete',
 }
 
+export interface UpdateIngestRundownChange {
+	ingestRundown: LocalIngestRundown
+	changes: IncomingIngestChange
+}
+
 /**
  * Perform an ingest update operation on a rundown
  * This will automatically do some post-update data changes, to ensure the playout side (partinstances etc) is updated with the changes
  * @param context Context of the job being run
  * @param studioId Id of the studio the rundown belongs to
  * @param rundownExternalId ExternalId of the rundown to lock
- * @param updateCacheFcn Function to mutate the ingestData. Throw if the requested change is not valid. Return undefined to indicate the ingestData should be deleted
+ * @param updateNrcsIngestModelFcn Function to mutate the ingestData. Throw if the requested change is not valid. Return undefined to indicate the ingestData should be deleted
  * @param calcFcn Function to run to update the Rundown. Return the blob of data about the change to help the post-update perform its duties. Return null to indicate that nothing changed
  */
-export async function runIngestJob(
+export async function runIngestUpdateOperation(
 	context: JobContext,
 	data: IngestPropsBase,
-	updateCacheFcn: (
+	updateNrcsIngestModelFcn: (
 		oldIngestRundown: LocalIngestRundown | undefined
-	) => LocalIngestRundown | UpdateIngestRundownAction,
+	) => UpdateIngestRundownChange | UpdateIngestRundownAction,
 	calcFcn: (
 		context: JobContext,
 		ingestModel: IngestModel,
@@ -73,20 +79,23 @@ export async function runIngestJob(
 		const ingestObjCache = await RundownIngestDataCache.create(context, rundownId)
 
 		// Recalculate the ingest data
+		const updateNrcsIngestModelSpan = context.startSpan('ingest.calcFcn')
 		const oldIngestRundown = ingestObjCache.fetchRundown()
-		const updatedIngestRundown = updateCacheFcn(clone(oldIngestRundown))
-		let newIngestRundown: LocalIngestRundown | undefined
+		const updatedIngestRundown = updateNrcsIngestModelFcn(clone(oldIngestRundown))
+		updateNrcsIngestModelSpan?.end()
+
+		let ingestRundownChanges: UpdateIngestRundownChange | undefined
 		switch (updatedIngestRundown) {
 			// case UpdateIngestRundownAction.REJECT:
 			// 	// Reject change
 			// 	return
 			case UpdateIngestRundownAction.DELETE:
 				ingestObjCache.delete()
-				newIngestRundown = undefined
+				ingestRundownChanges = undefined
 				break
 			default:
-				ingestObjCache.update(updatedIngestRundown)
-				newIngestRundown = updatedIngestRundown
+				ingestObjCache.update(updatedIngestRundown.ingestRundown)
+				ingestRundownChanges = updatedIngestRundown
 				break
 		}
 		// Start saving the ingest data
@@ -101,12 +110,12 @@ export async function runIngestJob(
 			const beforeRundown = ingestModel.rundown
 			const beforePartMap = generatePartMap(ingestModel)
 
-			const span = context.startSpan('ingest.calcFcn')
-			const commitData = await calcFcn(context, ingestModel, newIngestRundown, oldIngestRundown)
-			span?.end()
+			const calcSpan = context.startSpan('ingest.calcFcn')
+			const commitData = await calcFcn(context, ingestModel, ingestRundownChanges, oldIngestRundown)
+			calcSpan?.end()
 
 			if (commitData) {
-				const span = context.startSpan('ingest.commit')
+				const commitSpan = context.startSpan('ingest.commit')
 				// The change is accepted. Perform some playout calculations and save it all
 				resultingError = await CommitIngestOperation(
 					context,
@@ -115,7 +124,7 @@ export async function runIngestJob(
 					beforePartMap,
 					commitData
 				)
-				span?.end()
+				commitSpan?.end()
 			} else {
 				// Should be no changes
 				ingestModel.assertNoChanges()

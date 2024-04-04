@@ -7,7 +7,7 @@ import {
 import { logger } from '../logging'
 import { JobContext } from '../jobs'
 import { regenerateSegmentsFromIngestData } from './generationSegment'
-import { runIngestJob, runWithRundownLock } from './lock'
+import { runIngestUpdateOperation, runWithRundownLock } from './lock'
 import { updateExpectedPackagesForPartModel, updateExpectedPackagesForRundownBaseline } from './expectedPackages'
 import { loadIngestModelFromRundown } from './model/implementation/LoadIngestModel'
 
@@ -44,7 +44,7 @@ export async function handleUpdatedPackageInfoForRundown(
 		return
 	}
 
-	return runIngestJob(
+	return runIngestUpdateOperation(
 		context,
 		data,
 		(ingestRundown) => {

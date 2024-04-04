@@ -42,22 +42,22 @@ export interface IncomingIngestChange {
 	 * True when the rank of any segment in the rundown has changed.
 	 * Expressing what exactly has changed non-trivial particularly how to represent that in this structure, so for now we just have a simple boolean.
 	 */
-	segmentOrderChanged: boolean
+	segmentOrderChanged?: boolean
 
 	/**
 	 * Describes the changes to the rundown itself
 	 */
-	rundownChanges: IncomingIngestRundownChange | null
+	rundownChanges?: IncomingIngestRundownChange | null
 
 	/**
 	 * Describes the changes to the segments in the rundown
 	 */
-	segmentChanges: Record<string, IncomingIngestSegmentChange>
+	segmentChanges?: Record<string, IncomingIngestSegmentChange>
 
 	/**
 	 * Descibes the changes to the parts in the rundown
 	 */
-	partsChanged: Record<string, IncomingIngestPartChange>
+	partsChanged?: Record<string, IncomingIngestPartChange>
 }
 
 export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {

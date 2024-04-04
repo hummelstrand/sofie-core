@@ -3,7 +3,7 @@ import { logger } from '../logging'
 import { updateRundownFromIngestData, updateRundownMetadataFromIngestData } from './generationRundown'
 import { makeNewIngestRundown } from './ingestCache'
 import { canRundownBeUpdated } from './lib'
-import { CommitIngestData, runIngestJob, runWithRundownLock, UpdateIngestRundownAction } from './lock'
+import { CommitIngestData, runIngestUpdateOperation, runWithRundownLock, UpdateIngestRundownAction } from './lock'
 import { removeRundownFromDb } from '../rundownPlaylists'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import { DBRundown, RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
@@ -21,7 +21,7 @@ import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/erro
  * Attempt to remove a rundown, or orphan it
  */
 export async function handleRemovedRundown(context: JobContext, data: IngestRemoveRundownProps): Promise<void> {
-	return runIngestJob(
+	return runIngestUpdateOperation(
 		context,
 		data,
 		() => {
@@ -92,7 +92,7 @@ export async function handleUserRemoveRundown(context: JobContext, data: UserRem
  * Insert or update a rundown with a new IngestRundown
  */
 export async function handleUpdatedRundown(context: JobContext, data: IngestUpdateRundownProps): Promise<void> {
-	return runIngestJob(
+	return runIngestUpdateOperation(
 		context,
 		data,
 		(ingestRundown) => {
@@ -124,7 +124,7 @@ export async function handleUpdatedRundownMetaData(
 	context: JobContext,
 	data: IngestUpdateRundownMetaDataProps
 ): Promise<void> {
-	return runIngestJob(
+	return runIngestUpdateOperation(
 		context,
 		data,
 		(ingestRundown) => {
@@ -154,7 +154,7 @@ export async function handleUpdatedRundownMetaData(
  * Regnerate a Rundown from the cached IngestRundown
  */
 export async function handleRegenerateRundown(context: JobContext, data: IngestRegenerateRundownProps): Promise<void> {
-	return runIngestJob(
+	return runIngestUpdateOperation(
 		context,
 		data,
 		(ingestRundown) => {

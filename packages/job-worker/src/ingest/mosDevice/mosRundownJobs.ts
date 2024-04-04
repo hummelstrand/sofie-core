@@ -12,7 +12,7 @@ import { getCurrentTime } from '../../lib'
 import _ = require('underscore')
 import { LocalIngestRundown } from '../ingestCache'
 import { getRundownId, getPartId, canRundownBeUpdated } from '../lib'
-import { runIngestJob, CommitIngestData, runWithRundownLock } from '../lock'
+import { runIngestUpdateOperation, CommitIngestData, runWithRundownLock } from '../lock'
 import { diffAndUpdateSegmentIds } from './diff'
 import { parseMosString } from './lib'
 import { groupedPartsToSegments, groupIngestParts, storiesToIngestParts } from './mosToIngest'
@@ -27,7 +27,7 @@ export async function handleMosRundownData(context: JobContext, data: MosRundown
 	if (parseMosString(data.mosRunningOrder.ID) !== data.rundownExternalId)
 		throw new Error('mosRunningOrder.ID and rundownExternalId mismatch!')
 
-	return runIngestJob(
+	return runIngestUpdateOperation(
 		context,
 		data,
 		(ingestRundown) => {
@@ -99,7 +99,7 @@ export async function handleMosRundownData(context: JobContext, data: MosRundown
  * Update the payload of a mos rundown, without changing any parts or segments
  */
 export async function handleMosRundownMetadata(context: JobContext, data: MosRundownMetadataProps): Promise<void> {
-	return runIngestJob(
+	return runIngestUpdateOperation(
 		context,
 		data,
 		(ingestRundown) => {
@@ -144,7 +144,7 @@ export async function handleMosRundownStatus(context: JobContext, data: MosRundo
  * Update the ready to air state of a mos rundown
  */
 export async function handleMosRundownReadyToAir(context: JobContext, data: MosRundownReadyToAirProps): Promise<void> {
-	return runIngestJob(
+	return runIngestUpdateOperation(
 		context,
 		data,
 		(ingestRundown) => {

@@ -2,14 +2,14 @@ import { getCurrentTime } from '../lib'
 import { JobContext } from '../jobs'
 import { updateSegmentFromIngestData } from './generationSegment'
 import { makeNewIngestPart } from './ingestCache'
-import { runIngestJob } from './lock'
+import { runIngestUpdateOperation } from './lock'
 import { IngestRemovePartProps, IngestUpdatePartProps } from '@sofie-automation/corelib/dist/worker/ingest'
 
 /**
  * Remove a Part from a Segment
  */
 export async function handleRemovedPart(context: JobContext, data: IngestRemovePartProps): Promise<void> {
-	return runIngestJob(
+	return runIngestUpdateOperation(
 		context,
 		data,
 		(ingestRundown) => {
@@ -41,7 +41,7 @@ export async function handleRemovedPart(context: JobContext, data: IngestRemoveP
  * Insert or update a Part in a Segment
  */
 export async function handleUpdatedPart(context: JobContext, data: IngestUpdatePartProps): Promise<void> {
-	return runIngestJob(
+	return runIngestUpdateOperation(
 		context,
 		data,
 		(ingestRundown) => {
