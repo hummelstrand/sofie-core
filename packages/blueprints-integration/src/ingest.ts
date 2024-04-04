@@ -42,22 +42,22 @@ export interface IncomingIngestChange {
 	 * True when the rank of any segment in the rundown has changed.
 	 * Expressing what exactly has changed non-trivial particularly how to represent that in this structure, so for now we just have a simple boolean.
 	 */
-	segmentOrderChanged?: boolean
+	segmentOrderChanged: boolean
 
 	/**
 	 * Describes the changes to the rundown itself
 	 */
-	rundownChanges?: IncomingIngestRundownChange
+	rundownChanges: IncomingIngestRundownChange | null
 
 	/**
 	 * Describes the changes to the segments in the rundown
 	 */
-	segmentChanges?: Record<string, IncomingIngestSegmentChange>
+	segmentChanges: Record<string, IncomingIngestSegmentChange>
 
 	/**
 	 * Descibes the changes to the parts in the rundown
 	 */
-	partsChanged?: Record<string, IncomingIngestPartChange>
+	partsChanged: Record<string, IncomingIngestPartChange>
 }
 
 export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {
@@ -84,8 +84,8 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	readonly externalId: string
 	/** Name of the segment */
 	readonly name: string
-	/** Rank of the segment within the rundown */
-	readonly rank: number
+	// /** Rank of the segment within the rundown */
+	// readonly rank: number
 
 	/** Payload of segment metadata. For use by other blueprints methods */
 	readonly payload?: ReadonlyDeep<TSegmentPayload>
@@ -99,9 +99,15 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 	readonly externalId: string
 	/** Name of the part */
 	readonly name: string
-	/** Rank of the part within the segment */
-	readonly rank: number
+	// /** Rank of the part within the segment */
+	// readonly rank: number
 
 	/** Payload of the part. For use by other blueprints methods */
-	readonly payload?: ReadonlyDeep<TPartPayload>
+	readonly payload: ReadonlyDeep<TPartPayload>
+
+	setName(name: string): void
+
+	replacePayload(payload: ReadonlyDeep<TPartPayload>): void
+
+	setPayloadProperty<TKey extends keyof TPartPayload>(key: TKey, value: TPartPayload[TKey]): void
 }
