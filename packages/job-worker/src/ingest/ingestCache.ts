@@ -16,6 +16,7 @@ import { SetOptional } from 'type-fest'
 import { groupByToMap, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 import { AnyBulkWriteOperation } from 'mongodb'
 import { diffAndReturnLatestObjects } from './model/implementation/utils'
+import { ICollection } from '../db'
 
 interface LocalIngestBase {
 	modified: number
@@ -53,14 +54,19 @@ export class RundownIngestDataCache {
 
 	private constructor(
 		private readonly context: JobContext,
+		private readonly collection: ICollection<IngestDataCacheObj>,
 		private readonly rundownId: RundownId,
 		private documents: IngestDataCacheObj[]
 	) {}
 
-	static async create(context: JobContext, rundownId: RundownId): Promise<RundownIngestDataCache> {
-		const docs = await context.directCollections.IngestDataCache.findFetch({ rundownId })
+	static async create(
+		context: JobContext,
+		collection: ICollection<IngestDataCacheObj>,
+		rundownId: RundownId
+	): Promise<RundownIngestDataCache> {
+		const docs = await collection.findFetch({ rundownId })
 
-		return new RundownIngestDataCache(context, rundownId, docs)
+		return new RundownIngestDataCache(context, collection, rundownId, docs)
 	}
 
 	fetchRundown(): LocalIngestRundown | undefined {
@@ -153,7 +159,7 @@ export class RundownIngestDataCache {
 			})
 		}
 
-		await this.context.directCollections.IngestDataCache.bulkWrite(updates)
+		await this.collection.bulkWrite(updates)
 	}
 }
 
