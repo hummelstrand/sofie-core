@@ -1,4 +1,4 @@
-import { IngestPart, IngestRundown, IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
+import { IngestRundown, IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
 import { IBlueprintRundownDBData } from './documents'
 import { ReadonlyDeep } from 'type-fest'
 
@@ -21,12 +21,12 @@ export enum IncomingIngestPartChange {
 	Payload = 'payload',
 	// Rank = 'rank',
 }
-export enum IncomingIngestSegmentChange {
+export enum IncomingIngestSegmentChangeEnum {
 	Inserted = 'inserted',
 	Deleted = 'deleted',
 	// Contents = 'contents',
-	ContentsOrder = 'contentsOrder',
-	Payload = 'payload',
+	// ContentsOrder = 'contentsOrder',
+	// Payload = 'payload',
 	// Rank = 'rank',
 }
 export enum IncomingIngestRundownChange {
@@ -35,6 +35,25 @@ export enum IncomingIngestRundownChange {
 	// CoreData = 'coreData',
 	Regenerate = 'regenerate',
 }
+
+export interface IncomingIngestSegmentChangeObject {
+	/**
+	 * True when the payload of the segment has changed.
+	 */
+	payloadChanged?: boolean
+
+	/**
+	 * True when the rank of any part in the segment has changed.
+	 */
+	partOrderChanged?: boolean
+
+	/**
+	 * Descibes the changes to the parts in the rundown
+	 */
+	partsChanged?: Record<string, IncomingIngestPartChange>
+}
+
+export type IncomingIngestSegmentChange = IncomingIngestSegmentChangeEnum | IncomingIngestSegmentChangeObject
 
 export interface IncomingIngestChange {
 	/** Indicate that this change is from ingest operations */
@@ -55,11 +74,6 @@ export interface IncomingIngestChange {
 	 * Describes the changes to the segments in the rundown
 	 */
 	segmentChanges?: Record<string, IncomingIngestSegmentChange>
-
-	/**
-	 * Descibes the changes to the parts in the rundown
-	 */
-	partsChanged?: Record<string, IncomingIngestPartChange>
 }
 
 export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {

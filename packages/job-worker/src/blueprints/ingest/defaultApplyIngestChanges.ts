@@ -6,6 +6,9 @@ import {
 	MutableIngestRundown,
 	IncomingIngestSegmentChange,
 	IngestSegment,
+	IncomingIngestSegmentChangeEnum,
+	MutableIngestSegment,
+	IncomingIngestSegmentChangeObject,
 } from '@sofie-automation/blueprints-integration'
 import { assertNever, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 
@@ -55,8 +58,6 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 		// Propogate segment changes
 		applySegmentChanges(mutableIngestRundown, nrcsRundown, changes, options)
 
-		// TODO - propogate part changes?
-
 		if (changes.segmentOrderChanged) {
 			// const orderedSegmentIds = changes.segmentOrderChanged.orderedSegmentIds
 			// TODO
@@ -93,7 +94,7 @@ function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 		const mutableSegment = mutableIngestRundown.getSegment(segmentId)
 
 		switch (change) {
-			case IncomingIngestSegmentChange.Inserted: {
+			case IncomingIngestSegmentChangeEnum.Inserted: {
 				if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
 
 				const segmentIndex = nrcsSegmentIds.indexOf(segmentId)
@@ -105,29 +106,37 @@ function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 				)
 				break
 			}
-			case IncomingIngestSegmentChange.Deleted: {
+			case IncomingIngestSegmentChangeEnum.Deleted: {
 				mutableIngestRundown.removeSegment(segmentId)
 
 				break
 			}
-			case IncomingIngestSegmentChange.ContentsOrder: {
+			default: {
 				if (!mutableSegment) throw new Error(`Segment ${segmentId} not found in rundown`)
 				if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
 
-				// TODO - what to do here?
+				applyChangesToSegment(mutableSegment, nrcsSegment, change, options)
 
 				break
 			}
-			case IncomingIngestSegmentChange.Payload: {
-				if (!mutableSegment) throw new Error(`Segment ${segmentId} not found in rundown`)
-				if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
-
-				mutableSegment.replacePayload(options.transformSegmentPayload(nrcsSegment.payload))
-				mutableSegment.setName(nrcsSegment.name)
-				break
-			}
-			default:
-				assertNever(change)
 		}
+	}
+}
+
+function applyChangesToSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
+	mutableSegment: MutableIngestSegment<TSegmentPayload, TPartPayload>,
+	nrcsSegment: IngestSegment,
+	change: IncomingIngestSegmentChangeObject,
+	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+) {
+	if (change.payloadChanged) {
+		mutableSegment.replacePayload(options.transformSegmentPayload(nrcsSegment.payload))
+		mutableSegment.setName(nrcsSegment.name)
+	}
+
+	// TODO - parts changed
+
+	if (change.partOrderChanged) {
+		// TODO - what to do here?
 	}
 }
