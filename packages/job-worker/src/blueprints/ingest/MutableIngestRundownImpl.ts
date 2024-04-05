@@ -1,8 +1,11 @@
 import {
+	IngestSegment,
 	type IncomingIngestChange,
 	type IngestDefaultChangesOptions,
 	type IngestRundown,
 	type MutableIngestRundown,
+	MutableIngestSegment,
+	MutableIngestPart,
 } from '@sofie-automation/blueprints-integration'
 import { clone, omit } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
@@ -81,6 +84,63 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	// TODO - segment/part mutation/replacement
+
+	findPart(id: string): MutableIngestPart<TPartPayload> | undefined {
+		for (const segment of this.#segments) {
+			const part = segment.getPart(id)
+			if (part) return part
+		}
+
+		return undefined
+	}
+
+	findPartAndSegment(partExternalId: string):
+		| {
+				part: MutableIngestPart<TPartPayload>
+				segment: MutableIngestSegment<TSegmentPayload, TPartPayload>
+		  }
+		| undefined {
+		for (const segment of this.#segments) {
+			const part = segment.getPart(partExternalId)
+			if (part) return { part, segment }
+		}
+		return undefined
+	}
+
+	getSegment(id: string): MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined {
+		return this.#segments.find((s) => s.externalId === id)
+	}
+
+	replaceSegment(
+		segment: IngestSegment,
+		beforeSegmentExternalId: string | null
+	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
+		this.removeSegment(segment.externalId)
+
+		const newSegment = new MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>(segment)
+
+		if (beforeSegmentExternalId) {
+			const beforeIndex = this.#segments.findIndex((s) => s.externalId === beforeSegmentExternalId)
+			if (beforeIndex === -1) throw new Error(`Segment "${beforeSegmentExternalId}" not found`)
+
+			this.#segments.splice(beforeIndex, 0, newSegment)
+		} else {
+			this.#segments.push(newSegment)
+		}
+
+		return newSegment
+	}
+
+	removeSegment(id: string): boolean {
+		const existingIndex = this.#segments.findIndex((s) => s.externalId === id)
+		if (existingIndex !== -1) {
+			this.#segments.splice(existingIndex, 1)
+
+			return true
+		} else {
+			return false
+		}
+	}
 
 	removeAllSegments(): void {
 		// TODO - track what was deleted?

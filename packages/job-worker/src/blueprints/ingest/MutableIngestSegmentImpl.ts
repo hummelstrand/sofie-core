@@ -45,6 +45,10 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		return this.ingestSegment.payload
 	}
 
+	getPart(id: string): MutableIngestPart<TPartPayload> | undefined {
+		return this.#parts.find((part) => part.ingestPart.externalId === id)
+	}
+
 	setName(name: string): void {
 		if (this.ingestSegment.name !== name) {
 			this.ingestSegment.name = name

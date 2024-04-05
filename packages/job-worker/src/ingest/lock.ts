@@ -11,7 +11,7 @@ import { UserError } from '@sofie-automation/corelib/dist/error'
 import { loadIngestModelFromRundownExternalId } from './model/implementation/LoadIngestModel'
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import { IncomingIngestChange } from '@sofie-automation/blueprints-integration'
-import { DatabasePersistedModel } from '../modelBase'
+// import { DatabasePersistedModel } from '../modelBase'
 
 /**
  * The result of the initial stage of an Ingest operation

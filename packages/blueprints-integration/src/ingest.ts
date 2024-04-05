@@ -1,4 +1,4 @@
-import { IngestRundown } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
+import { IngestRundown, IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
 import { IBlueprintRundownDBData } from './documents'
 import { ReadonlyDeep } from 'type-fest'
 
@@ -80,6 +80,24 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	/** Array of segmsnts in this rundown */
 	readonly segments: ReadonlyArray<MutableIngestSegment<TSegmentPayload, TPartPayload>>
 
+	findPart(id: string): MutableIngestPart<TPartPayload> | undefined
+
+	findPartAndSegment(partExternalId: string):
+		| {
+				part: MutableIngestPart<TPartPayload>
+				segment: MutableIngestSegment<TSegmentPayload, TPartPayload>
+		  }
+		| undefined
+
+	getSegment(id: string): MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined
+
+	replaceSegment(
+		segment: IngestSegment,
+		beforeSegmentExternalId: string | null
+	): MutableIngestSegment<TSegmentPayload, TPartPayload>
+
+	removeSegment(id: string): boolean
+
 	removeAllSegments(): void
 
 	setName(name: string): void
@@ -108,6 +126,8 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 
 	/** Array of parts in this segment */
 	readonly parts: ReadonlyArray<MutableIngestPart<TPartPayload>>
+
+	getPart(id: string): MutableIngestPart<TPartPayload> | undefined
 
 	setName(name: string): void
 
