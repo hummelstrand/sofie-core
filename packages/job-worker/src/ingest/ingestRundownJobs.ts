@@ -1,6 +1,6 @@
 import { JobContext } from '../jobs'
 import { logger } from '../logging'
-import { updateRundownFromIngestData, updateRundownMetadataFromIngestData } from './generationRundown'
+import { GenerateRundownMode, updateRundownFromIngestData } from './generationRundown'
 import { makeNewIngestRundown } from './ingestCache'
 import { canRundownBeUpdated } from './lib'
 import { CommitIngestData, runIngestUpdateOperation, runWithRundownLock, UpdateIngestRundownAction } from './lock'
@@ -110,7 +110,7 @@ export async function handleUpdatedRundown(context: JobContext, data: IngestUpda
 				context,
 				ingestModel,
 				ingestRundown,
-				data.isCreateAction,
+				data.isCreateAction ? GenerateRundownMode.Create : GenerateRundownMode.Update,
 				data.peripheralDeviceId ?? ingestModel.rundown?.peripheralDeviceId ?? null
 			)
 		}
@@ -140,10 +140,11 @@ export async function handleUpdatedRundownMetaData(
 		async (context, ingestModel, ingestRundown) => {
 			if (!ingestRundown) throw new Error(`handleUpdatedRundownMetaData lost the IngestRundown...`)
 
-			return updateRundownMetadataFromIngestData(
+			return updateRundownFromIngestData(
 				context,
 				ingestModel,
 				ingestRundown,
+				GenerateRundownMode.MetadataChange,
 				data.peripheralDeviceId ?? ingestModel.rundown?.peripheralDeviceId ?? null
 			)
 		}
@@ -169,7 +170,13 @@ export async function handleRegenerateRundown(context: JobContext, data: IngestR
 			// If the rundown is orphaned, then we can't regenerate as there wont be any data to use!
 			if (!ingestRundown) return null
 
-			return updateRundownFromIngestData(context, ingestModel, ingestRundown, false, data.peripheralDeviceId)
+			return updateRundownFromIngestData(
+				context,
+				ingestModel,
+				ingestRundown,
+				GenerateRundownMode.Update,
+				data.peripheralDeviceId
+			)
 		}
 	)
 }

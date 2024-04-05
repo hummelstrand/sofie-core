@@ -16,7 +16,7 @@ import { runIngestUpdateOperation, CommitIngestData, runWithRundownLock } from '
 import { diffAndUpdateSegmentIds } from './diff'
 import { parseMosString } from './lib'
 import { groupedPartsToSegments, groupIngestParts, storiesToIngestParts } from './mosToIngest'
-import { updateRundownFromIngestData, updateRundownMetadataFromIngestData } from '../generationRundown'
+import { GenerateRundownMode, updateRundownFromIngestData } from '../generationRundown'
 
 /**
  * Insert or update a mos rundown
@@ -80,7 +80,7 @@ export async function handleMosRundownData(context: JobContext, data: MosRundown
 				context,
 				ingestModel,
 				newIngestRundown,
-				!data.isUpdateOperation,
+				data.isUpdateOperation ? GenerateRundownMode.Update : GenerateRundownMode.Create,
 				data.peripheralDeviceId
 			)
 			if (res) {
@@ -116,7 +116,13 @@ export async function handleMosRundownMetadata(context: JobContext, data: MosRun
 		async (context, ingestModel, ingestRundown) => {
 			if (!ingestRundown) throw new Error(`handleMosRundownMetadata lost the IngestRundown...`)
 
-			return updateRundownMetadataFromIngestData(context, ingestModel, ingestRundown, data.peripheralDeviceId)
+			return updateRundownFromIngestData(
+				context,
+				ingestModel,
+				ingestRundown,
+				GenerateRundownMode.MetadataChange,
+				data.peripheralDeviceId
+			)
 		}
 	)
 }
@@ -165,7 +171,13 @@ export async function handleMosRundownReadyToAir(context: JobContext, data: MosR
 
 			ingestModel.setRundownAirStatus(data.status)
 
-			return updateRundownMetadataFromIngestData(context, ingestModel, ingestRundown, data.peripheralDeviceId)
+			return updateRundownFromIngestData(
+				context,
+				ingestModel,
+				ingestRundown,
+				GenerateRundownMode.MetadataChange,
+				data.peripheralDeviceId
+			)
 		}
 	)
 }
