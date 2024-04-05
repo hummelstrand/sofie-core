@@ -58,67 +58,81 @@ describe('defaultApplyChanges', () => {
 		tryMockClear(defaultOptions.transformPartPayload)
 	})
 
-	it('no changes', async () => {
-		const nrcsRundown = createBasicIngestRundown()
-		const mutableIngestRundown = new MutableIngestRundownImpl(clone(nrcsRundown))
+	describe('rundown changes', () => {
+		it('no changes', async () => {
+			const nrcsRundown = createBasicIngestRundown()
+			const mutableIngestRundown = new MutableIngestRundownImpl(clone(nrcsRundown))
 
-		// include some changes, which should be ignored
-		nrcsRundown.name = 'new name'
-		nrcsRundown.payload.myData = 'new data'
+			// include some changes, which should be ignored
+			nrcsRundown.name = 'new name'
+			nrcsRundown.payload.myData = 'new data'
 
-		const changes: IncomingIngestChange = { source: 'ingest' }
+			const changes: IncomingIngestChange = { source: 'ingest' }
 
-		expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
-		defaultApplyChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
-		expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
+			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
+			defaultApplyChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
 
-		expect(mutableIngestRundown.hasChanges).toBeFalsy()
-		expect(mutableIngestRundown.name).not.toEqual(nrcsRundown.name)
-		expect(mutableIngestRundown.payload).not.toEqual(nrcsRundown.payload)
-		expect(mutableIngestRundown.segments).toHaveLength(1)
+			expect(mutableIngestRundown.hasChanges).toBeFalsy()
+			expect(mutableIngestRundown.name).not.toEqual(nrcsRundown.name)
+			expect(mutableIngestRundown.payload).not.toEqual(nrcsRundown.payload)
+			expect(mutableIngestRundown.segments).toHaveLength(1)
+		})
+		it('rundown name and payload change', async () => {
+			const nrcsRundown = createBasicIngestRundown()
+			const mutableIngestRundown = new MutableIngestRundownImpl(clone(nrcsRundown))
+
+			// include some changes, which should be ignored
+			nrcsRundown.name = 'new name'
+			nrcsRundown.payload.myData = 'new data'
+
+			const changes: IncomingIngestChange = {
+				source: 'ingest',
+				rundownChanges: IncomingIngestRundownChange.Payload,
+			}
+
+			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
+			defaultApplyChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+			expect(defaultOptions.transformRundownPayload).toHaveBeenCalled()
+
+			expect(mutableIngestRundown.hasChanges).toBeTruthy()
+			expect(mutableIngestRundown.name).toEqual(nrcsRundown.name)
+			expect(mutableIngestRundown.payload).toEqual(nrcsRundown.payload)
+			expect(mutableIngestRundown.segments).toHaveLength(1)
+		})
+		it('rundown regenerate', async () => {
+			const nrcsRundown = createBasicIngestRundown()
+			const mutableIngestRundown = new MutableIngestRundownImpl(clone(nrcsRundown))
+
+			// include some changes, which should be ignored
+			nrcsRundown.name = 'new name'
+			nrcsRundown.payload.myData = 'new data'
+
+			const changes: IncomingIngestChange = {
+				source: 'ingest',
+				rundownChanges: IncomingIngestRundownChange.Regenerate,
+			}
+
+			const mockRemoveAllSegments = jest.fn(mutableIngestRundown.removeAllSegments.bind(mutableIngestRundown))
+			mutableIngestRundown.removeAllSegments = mockRemoveAllSegments
+
+			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
+			defaultApplyChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+			expect(defaultOptions.transformRundownPayload).toHaveBeenCalled()
+
+			expect(mutableIngestRundown.hasChanges).toBeTruthy()
+			expect(mutableIngestRundown.name).toEqual(nrcsRundown.name)
+			expect(mutableIngestRundown.payload).toEqual(nrcsRundown.payload)
+
+			// Ensure the segments were regenerated
+			expect(mockRemoveAllSegments).toHaveBeenCalledTimes(1)
+			expect(mutableIngestRundown.segments).toHaveLength(0)
+		})
 	})
-	it('rundown name and payload change', async () => {
-		const nrcsRundown = createBasicIngestRundown()
-		const mutableIngestRundown = new MutableIngestRundownImpl(clone(nrcsRundown))
 
-		// include some changes, which should be ignored
-		nrcsRundown.name = 'new name'
-		nrcsRundown.payload.myData = 'new data'
-
-		const changes: IncomingIngestChange = {
-			source: 'ingest',
-			rundownChanges: IncomingIngestRundownChange.Payload,
-		}
-
-		expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
-		defaultApplyChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
-		expect(defaultOptions.transformRundownPayload).toHaveBeenCalled()
-
-		expect(mutableIngestRundown.hasChanges).toBeTruthy()
-		expect(mutableIngestRundown.name).toEqual(nrcsRundown.name)
-		expect(mutableIngestRundown.payload).toEqual(nrcsRundown.payload)
-		expect(mutableIngestRundown.segments).toHaveLength(1)
+	describe('segment order changes', () => {
+		// TODO
 	})
-	it('rundown regenerate', async () => {
-		const nrcsRundown = createBasicIngestRundown()
-		const mutableIngestRundown = new MutableIngestRundownImpl(clone(nrcsRundown))
 
-		// include some changes, which should be ignored
-		nrcsRundown.name = 'new name'
-		nrcsRundown.payload.myData = 'new data'
-
-		const changes: IncomingIngestChange = {
-			source: 'ingest',
-			rundownChanges: IncomingIngestRundownChange.Regenerate,
-		}
-
-		expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
-		defaultApplyChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
-		expect(defaultOptions.transformRundownPayload).toHaveBeenCalled()
-
-		expect(mutableIngestRundown.hasChanges).toBeTruthy()
-		expect(mutableIngestRundown.name).toEqual(nrcsRundown.name)
-		expect(mutableIngestRundown.payload).toEqual(nrcsRundown.payload)
-		expect(mutableIngestRundown.segments).toHaveLength(0)
-	})
+	// TODO - more scenarios
 })

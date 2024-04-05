@@ -46,6 +46,13 @@ export function defaultApplyChanges<TRundownPayload, TSegmentPayload, TPartPaylo
 	// TODO - other portions
 
 	if (regenerateAllContents) {
-		// TODO?
+		// TODO regenerate everything
+	} else {
+		// TODO handle granular generation
+
+		if (changes.segmentOrderChanged) {
+			// const orderedSegmentIds = changes.segmentOrderChanged.orderedSegmentIds
+			// TODO
+		}
 	}
 }
