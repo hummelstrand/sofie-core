@@ -5,6 +5,7 @@ import {
 	IncomingIngestRundownChange,
 	MutableIngestRundown,
 	IncomingIngestSegmentChange,
+	IngestSegment,
 } from '@sofie-automation/blueprints-integration'
 import { assertNever, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 
@@ -48,8 +49,8 @@ export function defaultApplyChanges<TRundownPayload, TSegmentPayload, TPartPaylo
 
 	if (regenerateAllContents) {
 		// Regenerate all the segments
-		for (const segment of nrcsRundown.segments) {
-			mutableIngestRundown.replaceSegment(segment, null)
+		for (const nrcsSegment of nrcsRundown.segments) {
+			mutableIngestRundown.replaceSegment(transformSegmentAndPartPayloads(nrcsSegment, options), null)
 		}
 	} else {
 		const nrcsSegmentMap = normalizeArrayToMap(nrcsRundown.segments, 'externalId')
@@ -71,7 +72,10 @@ export function defaultApplyChanges<TRundownPayload, TSegmentPayload, TPartPaylo
 					const segmentIndex = nrcsSegmentIds.indexOf(segmentId)
 					const beforeSegmentId = segmentIndex !== -1 ? nrcsSegmentIds[segmentIndex + 1] ?? null : null
 
-					mutableIngestRundown.replaceSegment(nrcsSegment, beforeSegmentId)
+					mutableIngestRundown.replaceSegment(
+						transformSegmentAndPartPayloads(nrcsSegment, options),
+						beforeSegmentId
+					)
 					break
 				}
 				case IncomingIngestSegmentChange.Deleted: {
@@ -106,5 +110,16 @@ export function defaultApplyChanges<TRundownPayload, TSegmentPayload, TPartPaylo
 			// const orderedSegmentIds = changes.segmentOrderChanged.orderedSegmentIds
 			// TODO
 		}
+	}
+}
+
+function transformSegmentAndPartPayloads(segment: IngestSegment, options: IngestDefaultChangesOptions): IngestSegment {
+	return {
+		...segment,
+		payload: options.transformSegmentPayload(segment.payload),
+		parts: segment.parts.map((part) => ({
+			...part,
+			payload: options.transformPartPayload(part.payload),
+		})),
 	}
 }
