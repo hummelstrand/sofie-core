@@ -67,6 +67,24 @@ export async function handleBlueprintUpgradeForStudio(context: JobContext, _data
 			}),
 		])
 	)
+	const routeSets = Object.fromEntries(
+		Object.entries<unknown>(result.routeSets ?? {}).map((dev) => [
+			dev[0],
+			literal<Complete<StudioInputDevice>>({
+				peripheralDeviceId: undefined,
+				options: dev[1],
+			}),
+		])
+	)
+	const routeSetExclusivityGroups = Object.fromEntries(
+		Object.entries<unknown>(result.routeSetExclusivityGroups ?? {}).map((dev) => [
+			dev[0],
+			literal<Complete<StudioInputDevice>>({
+				peripheralDeviceId: undefined,
+				options: dev[1],
+			}),
+		])
+	)
 
 	await context.directCollections.Studios.update(context.studioId, {
 		$set: {
@@ -74,6 +92,8 @@ export async function handleBlueprintUpgradeForStudio(context: JobContext, _data
 			'peripheralDeviceSettings.playoutDevices.defaults': playoutDevices,
 			'peripheralDeviceSettings.ingestDevices.defaults': ingestDevices,
 			'peripheralDeviceSettings.inputDevices.defaults': inputDevices,
+			'settings.routeSets': routeSets,
+			'settings.routeSetExclusivityGroups': routeSetExclusivityGroups,
 			lastBlueprintConfig: {
 				blueprintHash: blueprint.blueprintDoc.blueprintHash,
 				blueprintId: blueprint.blueprintId,
