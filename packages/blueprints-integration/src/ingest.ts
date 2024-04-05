@@ -106,7 +106,7 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 
 	setPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
 
-	defaultApplyChanges(
+	defaultApplyIngestChanges(
 		ingestRundown: IngestRundown,
 		changes: IncomingIngestChange,
 		options?: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>

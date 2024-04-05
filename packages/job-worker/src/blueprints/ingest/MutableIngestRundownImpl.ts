@@ -11,7 +11,7 @@ import { clone, omit } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { MutableIngestSegmentImpl } from './MutableIngestSegmentImpl'
-import { defaultApplyChanges } from './defaultApplyChanges'
+import { defaultApplyIngestChanges } from './defaultApplyIngestChanges'
 
 export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown>
 	implements MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>
@@ -147,12 +147,12 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		this.#segments.length = 0
 	}
 
-	defaultApplyChanges(
+	defaultApplyIngestChanges(
 		nrcsRundown: IngestRundown,
 		changes: IncomingIngestChange,
 		options?: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
 	): void {
-		defaultApplyChanges(this, nrcsRundown, changes, {
+		defaultApplyIngestChanges(this, nrcsRundown, changes, {
 			transformRundownPayload: (payload) => payload as TRundownPayload,
 			transformSegmentPayload: (payload) => payload as TSegmentPayload,
 			transformPartPayload: (payload) => payload as TPartPayload,

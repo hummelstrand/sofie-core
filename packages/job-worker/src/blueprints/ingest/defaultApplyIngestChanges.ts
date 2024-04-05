@@ -9,13 +9,14 @@ import {
 } from '@sofie-automation/blueprints-integration'
 import { assertNever, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 
-export function defaultApplyChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
+export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
 	nrcsRundown: IngestRundown,
 	changes: IncomingIngestChange,
 	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
 ): void {
-	if (changes.source !== 'ingest') throw new Error(`Changes passed to defaultApplyChanges must be from ingest source`)
+	if (changes.source !== 'ingest')
+		throw new Error(`Changes passed to defaultApplyIngestChanges must be from ingest source`)
 
 	let regenerateAllContents = false
 

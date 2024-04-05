@@ -1,5 +1,5 @@
 import { MutableIngestRundownImpl } from '../MutableIngestRundownImpl'
-import { defaultApplyChanges } from '../defaultApplyChanges'
+import { defaultApplyIngestChanges } from '../defaultApplyIngestChanges'
 import {
 	IncomingIngestChange,
 	IncomingIngestRundownChange,
@@ -8,7 +8,7 @@ import {
 } from '@sofie-automation/blueprints-integration'
 import { clone } from '@sofie-automation/corelib/dist/lib'
 
-describe('defaultApplyChanges', () => {
+describe('defaultApplyIngestChanges', () => {
 	function createBasicIngestRundown(): IngestRundown {
 		return {
 			externalId: 'rd0',
@@ -70,7 +70,7 @@ describe('defaultApplyChanges', () => {
 			const changes: IncomingIngestChange = { source: 'ingest' }
 
 			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
-			defaultApplyChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
 			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
 
 			expect(mutableIngestRundown.hasChanges).toBeFalsy()
@@ -92,7 +92,7 @@ describe('defaultApplyChanges', () => {
 			}
 
 			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
-			defaultApplyChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
 			expect(defaultOptions.transformRundownPayload).toHaveBeenCalled()
 
 			expect(mutableIngestRundown.hasChanges).toBeTruthy()
@@ -117,7 +117,7 @@ describe('defaultApplyChanges', () => {
 			mutableIngestRundown.removeAllSegments = mockRemoveAllSegments
 
 			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
-			defaultApplyChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
 			expect(defaultOptions.transformRundownPayload).toHaveBeenCalled()
 
 			expect(mutableIngestRundown.hasChanges).toBeTruthy()
