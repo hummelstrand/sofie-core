@@ -105,6 +105,8 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 
 	getSegment(id: string): MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined
 
+	moveSegment(id: string, beforeSegmentExternalId: string | null): void
+
 	replaceSegment(
 		segment: IngestSegment,
 		beforeSegmentExternalId: string | null

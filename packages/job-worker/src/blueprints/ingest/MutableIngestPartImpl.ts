@@ -11,8 +11,9 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 		return this.#hasChanges
 	}
 
-	constructor(ingestPart: IngestPart) {
+	constructor(ingestPart: IngestPart, hasChanges = false) {
 		this.ingestPart = ingestPart
+		this.#hasChanges = hasChanges
 	}
 
 	get externalId(): string {

@@ -73,7 +73,7 @@ describe('defaultApplyIngestChanges', () => {
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
 			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
 
-			expect(mutableIngestRundown.hasChanges).toBeFalsy()
+			expect(mutableIngestRundown.hasChangesToRundown).toBeFalsy()
 			expect(mutableIngestRundown.name).not.toEqual(nrcsRundown.name)
 			expect(mutableIngestRundown.payload).not.toEqual(nrcsRundown.payload)
 			expect(mutableIngestRundown.segments).toHaveLength(1)
@@ -95,7 +95,7 @@ describe('defaultApplyIngestChanges', () => {
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
 			expect(defaultOptions.transformRundownPayload).toHaveBeenCalled()
 
-			expect(mutableIngestRundown.hasChanges).toBeTruthy()
+			expect(mutableIngestRundown.hasChangesToRundown).toBeTruthy()
 			expect(mutableIngestRundown.name).toEqual(nrcsRundown.name)
 			expect(mutableIngestRundown.payload).toEqual(nrcsRundown.payload)
 			expect(mutableIngestRundown.segments).toHaveLength(1)
@@ -120,7 +120,7 @@ describe('defaultApplyIngestChanges', () => {
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
 			expect(defaultOptions.transformRundownPayload).toHaveBeenCalled()
 
-			expect(mutableIngestRundown.hasChanges).toBeTruthy()
+			expect(mutableIngestRundown.hasChangesToRundown).toBeTruthy()
 			expect(mutableIngestRundown.name).toEqual(nrcsRundown.name)
 			expect(mutableIngestRundown.payload).toEqual(nrcsRundown.payload)
 

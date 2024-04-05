@@ -113,7 +113,8 @@ export class RundownIngestDataCache {
 	}
 
 	update(ingestRundown: LocalIngestRundown): void {
-		const cacheEntries: IngestDataCacheObj[] = generateCacheForRundown(this.rundownId, ingestRundown)
+		const generator = new RundownIngestDataCacheGenerator(this.rundownId)
+		const cacheEntries: IngestDataCacheObj[] = generator.generateCacheForRundown(ingestRundown)
 
 		this.documents = diffAndReturnLatestObjects(this.#changedDocumentIds, this.documents, cacheEntries)
 	}
@@ -163,63 +164,124 @@ export class RundownIngestDataCache {
 	}
 }
 
-function generateCacheForRundown(rundownId: RundownId, ingestRundown: LocalIngestRundown): IngestDataCacheObj[] {
-	// cache the Data
-	const cacheEntries: IngestDataCacheObj[] = []
-	const rundown: IngestDataCacheObjRundown = {
-		_id: protectString<IngestDataCacheObjId>(unprotectString(rundownId)),
-		type: IngestCacheType.RUNDOWN,
-		rundownId: rundownId,
-		modified: ingestRundown.modified,
-		data: {
-			..._.omit(ingestRundown, 'modified'),
-			segments: [], // omit the segments, they come as separate objects
-		},
-	}
-	cacheEntries.push(rundown)
+export class RundownIngestDataCacheGenerator {
+	constructor(public readonly rundownId: RundownId) {}
 
-	for (const segment of ingestRundown.segments) {
-		cacheEntries.push(...generateCacheForSegment(rundownId, segment))
+	getPartObjectId(partExternalId: string): IngestDataCacheObjId {
+		return protectString<IngestDataCacheObjId>(`${this.rundownId}_part_${partExternalId}`)
+	}
+	getSegmentObjectId(segmentExternalId: string): IngestDataCacheObjId {
+		return protectString<IngestDataCacheObjId>(`${this.rundownId}_segment_${segmentExternalId}`)
+	}
+	getRundownObjectId(): IngestDataCacheObjId {
+		return protectString<IngestDataCacheObjId>(unprotectString(this.rundownId))
 	}
 
-	return cacheEntries
-}
-function generateCacheForSegment(rundownId: RundownId, ingestSegment: LocalIngestSegment): IngestDataCacheObj[] {
-	const segmentId = getSegmentId(rundownId, ingestSegment.externalId)
-	const cacheEntries: Array<IngestDataCacheObjSegment | IngestDataCacheObjPart> = []
-
-	const segment: IngestDataCacheObjSegment = {
-		_id: protectString<IngestDataCacheObjId>(`${rundownId}_${segmentId}`),
-		type: IngestCacheType.SEGMENT,
-		rundownId: rundownId,
-		segmentId: segmentId,
-		modified: ingestSegment.modified,
-		data: {
-			..._.omit(ingestSegment, 'modified'),
-			parts: [], // omit the parts, they come as separate objects
-		},
-	}
-	cacheEntries.push(segment)
-
-	for (const part of ingestSegment.parts) {
-		cacheEntries.push(generateCacheForPart(rundownId, segmentId, part))
+	generatePartObject2(segmentId: SegmentId, part: IngestPart): IngestDataCacheObjPart {
+		return {
+			_id: this.getPartObjectId(part.externalId),
+			type: IngestCacheType.PART,
+			rundownId: this.rundownId,
+			segmentId: segmentId,
+			partId: getPartId(this.rundownId, part.externalId),
+			modified: 0, // Populated later
+			data: part,
+		}
 	}
 
-	return cacheEntries
-}
-function generateCacheForPart(
-	rundownId: RundownId,
-	segmentId: SegmentId,
-	part: LocalIngestPart
-): IngestDataCacheObjPart {
-	const partId = getPartId(rundownId, part.externalId)
-	return {
-		_id: protectString<IngestDataCacheObjId>(`${rundownId}_${partId}`),
-		type: IngestCacheType.PART,
-		rundownId: rundownId,
-		segmentId: segmentId,
-		partId: partId,
-		modified: part.modified,
-		data: _.omit(part, 'modified'),
+	/** @deprecated */
+	generatePartObject(segmentId: SegmentId, part: LocalIngestPart): IngestDataCacheObjPart {
+		return {
+			_id: this.getPartObjectId(part.externalId),
+			type: IngestCacheType.PART,
+			rundownId: this.rundownId,
+			segmentId: segmentId,
+			partId: getPartId(this.rundownId, part.externalId),
+			modified: part.modified,
+			data: _.omit(part, 'modified'),
+		}
+	}
+
+	generateSegmentObject2(ingestSegment: SetOptional<IngestSegment, 'parts'>): IngestDataCacheObjSegment {
+		return {
+			_id: this.getSegmentObjectId(ingestSegment.externalId),
+			type: IngestCacheType.SEGMENT,
+			rundownId: this.rundownId,
+			segmentId: getSegmentId(this.rundownId, ingestSegment.externalId),
+			modified: 0, // Populated later
+			data: {
+				...ingestSegment,
+				parts: [], // omit the parts, they come as separate objects
+			},
+		}
+	}
+
+	/** @deprecated */
+	generateSegmentObject(ingestSegment: SetOptional<LocalIngestSegment, 'parts'>): IngestDataCacheObjSegment {
+		return {
+			_id: this.getSegmentObjectId(ingestSegment.externalId),
+			type: IngestCacheType.SEGMENT,
+			rundownId: this.rundownId,
+			segmentId: getSegmentId(this.rundownId, ingestSegment.externalId),
+			modified: ingestSegment.modified,
+			data: {
+				..._.omit(ingestSegment, 'modified'),
+				parts: [], // omit the parts, they come as separate objects
+			},
+		}
+	}
+
+	generateRundownObject2(ingestRundown: SetOptional<IngestRundown, 'segments'>): IngestDataCacheObjRundown {
+		return {
+			_id: this.getRundownObjectId(),
+			type: IngestCacheType.RUNDOWN,
+			rundownId: this.rundownId,
+			modified: 0,
+			data: {
+				...ingestRundown,
+				segments: [], // omit the segments, they come as separate objects
+			},
+		}
+	}
+
+	/** @deprecated */
+	generateRundownObject(ingestRundown: LocalIngestRundown): IngestDataCacheObjRundown {
+		return {
+			_id: this.getRundownObjectId(),
+			type: IngestCacheType.RUNDOWN,
+			rundownId: this.rundownId,
+			modified: ingestRundown.modified,
+			data: {
+				..._.omit(ingestRundown, 'modified'),
+				segments: [], // omit the segments, they come as separate objects
+			},
+		}
+	}
+
+	generateCacheForRundown(ingestRundown: LocalIngestRundown): IngestDataCacheObj[] {
+		const cacheEntries: IngestDataCacheObj[] = []
+
+		const rundown = this.generateRundownObject(ingestRundown)
+		cacheEntries.push(rundown)
+
+		for (const segment of ingestRundown.segments) {
+			cacheEntries.push(...this.generateCacheForSegment(segment))
+		}
+
+		return cacheEntries
+	}
+
+	private generateCacheForSegment(ingestSegment: LocalIngestSegment): IngestDataCacheObj[] {
+		const cacheEntries: Array<IngestDataCacheObjSegment | IngestDataCacheObjPart> = []
+
+		const segment = this.generateSegmentObject(ingestSegment)
+		cacheEntries.push(segment)
+
+		const segmentId = getSegmentId(this.rundownId, ingestSegment.externalId)
+		for (const part of ingestSegment.parts) {
+			cacheEntries.push(this.generatePartObject(segmentId, part))
+		}
+
+		return cacheEntries
 	}
 }
