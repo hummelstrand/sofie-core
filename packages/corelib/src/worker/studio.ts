@@ -189,7 +189,7 @@ export enum StudioJobs {
 
 	/**
 	 * Switch the route of the studio
-	 * for use in ad.lib actions
+	 * for use in ad.lib actions and other triggers
 	 */
 	SwitchRouteSet = 'switchRouteSet',
 }
@@ -333,8 +333,6 @@ export interface ActivateScratchpadProps extends RundownPlayoutPropsBase {
 }
 
 export interface SwitchRouteSetProps {
-	userEvent: string
-	studioId: StudioId
 	routeSetId: string
 	state: boolean
 }

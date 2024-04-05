@@ -66,5 +66,10 @@ export interface StudioPlayoutModel extends StudioPlayoutModelBase, BaseModel {
 	 */
 	getActiveRundownPlaylists(excludeRundownPlaylistId?: RundownPlaylistId): ReadonlyDeep<DBRundownPlaylist[]>
 
+	/**
+	 * Update the active state of a RouteSet
+	 * @param routeSetId The RouteSet to update
+	 * @param isActive The new active state of the RouteSet
+	 */
 	updateRouteSetActive(routeSetId: string, isActive: boolean): void
 }

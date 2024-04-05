@@ -203,7 +203,7 @@ export class ActionExecutionContext extends ShowStyleUserContext implements IAct
 	}
 
 	async switchRouteSet(routeSetId: string, state: boolean): Promise<void> {
-		return this.switchRouteSet(routeSetId, state)
+		this._playoutModel.switchRouteSet(routeSetId, state)
 	}
 
 	async hackGetMediaObjectDuration(mediaId: string): Promise<number | undefined> {

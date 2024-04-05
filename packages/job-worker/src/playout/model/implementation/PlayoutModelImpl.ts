@@ -55,6 +55,7 @@ import { ExpectedPackageDBFromStudioBaselineObjects } from '@sofie-automation/co
 import { ExpectedPlayoutItemStudio } from '@sofie-automation/corelib/dist/dataModel/ExpectedPlayoutItem'
 import { StudioBaselineHelper } from '../../../studio/model/StudioBaselineHelper'
 import { EventsJobs } from '@sofie-automation/corelib/dist/worker/events'
+import { StudioJobs } from '@sofie-automation/corelib/dist/worker/studio'
 
 export class PlayoutModelReadonlyImpl implements PlayoutModelReadonly {
 	public readonly playlistId: RundownPlaylistId
@@ -411,6 +412,13 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 		this.allPartInstances.set(newPartInstance._id, partInstance)
 
 		return partInstance
+	}
+
+	async switchRouteSet(routeSetId: string, state: boolean): Promise<void> {
+		await this.context.queueStudioJob(StudioJobs.SwitchRouteSet, {
+			routeSetId,
+			state,
+		})
 	}
 
 	cycleSelectedPartInstances(): void {

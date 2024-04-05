@@ -18,6 +18,8 @@ import { DatabasePersistedModel } from '../../modelBase'
 import { ExpectedPackageDBFromStudioBaselineObjects } from '@sofie-automation/corelib/dist/dataModel/ExpectedPackages'
 import { ExpectedPlayoutItemStudio } from '@sofie-automation/corelib/dist/dataModel/ExpectedPlayoutItem'
 import { StudioBaselineHelper } from './StudioBaselineHelper'
+import { StudioRouteBehavior, StudioRouteSet } from '@sofie-automation/corelib/dist/dataModel/Studio'
+import { ReadonlyObjectDeep } from 'type-fest/source/readonly-deep'
 
 /**
  * This is a model used for studio operations.
@@ -99,7 +101,25 @@ export class StudioPlayoutModelImpl implements StudioPlayoutModel {
 	}
 
 	updateRouteSetActive(routeSetId: string, isActive: boolean): void {
-		this.#routeSetActive[routeSetId] = isActive
+		const studio = this.context.studio
+		logger.debug(`switchRouteSet "${studio}" "${routeSetId}"=${isActive}`)
+
+		if (studio.routeSets[routeSetId] === undefined) throw new Error(`RouteSet "${routeSetId}" not found!`)
+
+		const routeSet = studio.routeSets[routeSetId]
+		if (routeSet.behavior === StudioRouteBehavior.ACTIVATE_ONLY && isActive === false)
+			throw new Error(`RouteSet "${routeSetId}" is ACTIVATE_ONLY`)
+
+		if (studio.routeSets[routeSetId].exclusivityGroup && isActive === true) {
+			for (const [otherRouteSetId, otherRouteSet] of Object.entries<ReadonlyObjectDeep<StudioRouteSet>>(
+				studio.routeSets
+			)) {
+				if (otherRouteSetId === routeSetId) return
+				if (otherRouteSet.exclusivityGroup === routeSet.exclusivityGroup) {
+					this.#routeSetActive[routeSetId] = isActive
+				}
+			}
+		}
 	}
 
 	/**
