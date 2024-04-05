@@ -83,8 +83,6 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		}
 	}
 
-	// TODO - segment/part mutation/replacement
-
 	findPart(id: string): MutableIngestPart<TPartPayload> | undefined {
 		for (const segment of this.#segments) {
 			const part = segment.getPart(id)

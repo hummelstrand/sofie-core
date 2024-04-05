@@ -9,6 +9,8 @@ import {
 	IncomingIngestSegmentChangeEnum,
 	MutableIngestSegment,
 	IncomingIngestSegmentChangeObject,
+	IncomingIngestPartChange,
+	IngestPart,
 } from '@sofie-automation/blueprints-integration'
 import { assertNever, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 
@@ -69,10 +71,13 @@ function transformSegmentAndPartPayloads(segment: IngestSegment, options: Ingest
 	return {
 		...segment,
 		payload: options.transformSegmentPayload(segment.payload),
-		parts: segment.parts.map((part) => ({
-			...part,
-			payload: options.transformPartPayload(part.payload),
-		})),
+		parts: segment.parts.map((part) => transformPartPayload(part, options)),
+	}
+}
+function transformPartPayload(part: IngestPart, options: IngestDefaultChangesOptions): IngestPart {
+	return {
+		...part,
+		payload: options.transformPartPayload(part.payload),
 	}
 }
 
@@ -126,17 +131,58 @@ function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 function applyChangesToSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableSegment: MutableIngestSegment<TSegmentPayload, TPartPayload>,
 	nrcsSegment: IngestSegment,
-	change: IncomingIngestSegmentChangeObject,
+	segmentChange: IncomingIngestSegmentChangeObject,
 	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
 ) {
-	if (change.payloadChanged) {
+	if (segmentChange.payloadChanged) {
 		mutableSegment.replacePayload(options.transformSegmentPayload(nrcsSegment.payload))
 		mutableSegment.setName(nrcsSegment.name)
 	}
 
-	// TODO - parts changed
+	if (segmentChange.partsChanges) {
+		const nrcsPartMap = normalizeArrayToMap(nrcsSegment.parts, 'externalId')
+		const nrcsPartIds = nrcsSegment.parts.map((s) => s.externalId)
 
-	if (change.partOrderChanged) {
+		for (const [partId, change] of Object.entries<IncomingIngestPartChange | undefined>(
+			segmentChange.partsChanges
+		)) {
+			if (!change) continue
+
+			const nrcsPart = nrcsPartMap.get(partId)
+			const mutablePart = mutableSegment.getPart(partId)
+
+			switch (change) {
+				case IncomingIngestPartChange.Inserted: {
+					if (!nrcsPart) throw new Error(`Segment ${partId} not found in nrcs rundown`)
+
+					const partIndex = nrcsPartIds.indexOf(partId)
+					const beforePartId = partIndex !== -1 ? nrcsPartIds[partIndex + 1] ?? null : null
+
+					mutableSegment.replacePart(transformPartPayload(nrcsPart, options), beforePartId)
+					break
+				}
+				case IncomingIngestPartChange.Deleted: {
+					mutableSegment.removePart(partId)
+
+					break
+				}
+				case IncomingIngestPartChange.Payload: {
+					if (!mutablePart) throw new Error(`Part ${partId} not found in segment`)
+					if (!nrcsPart) throw new Error(`Part ${partId} not found in nrcs segment`)
+
+					mutablePart.replacePayload(options.transformPartPayload(nrcsPart.payload))
+					mutablePart.setName(nrcsPart.name)
+
+					break
+				}
+				default: {
+					assertNever(change)
+				}
+			}
+		}
+	}
+
+	if (segmentChange.partOrderChanged) {
 		// TODO - what to do here?
 	}
 }

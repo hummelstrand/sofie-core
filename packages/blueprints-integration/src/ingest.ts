@@ -1,4 +1,4 @@
-import { IngestRundown, IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
+import { IngestPart, IngestRundown, IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
 import { IBlueprintRundownDBData } from './documents'
 import { ReadonlyDeep } from 'type-fest'
 
@@ -50,7 +50,7 @@ export interface IncomingIngestSegmentChangeObject {
 	/**
 	 * Descibes the changes to the parts in the rundown
 	 */
-	partsChanged?: Record<string, IncomingIngestPartChange>
+	partsChanges?: Record<string, IncomingIngestPartChange>
 }
 
 export type IncomingIngestSegmentChange = IncomingIngestSegmentChangeEnum | IncomingIngestSegmentChangeObject
@@ -142,6 +142,10 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	readonly parts: ReadonlyArray<MutableIngestPart<TPartPayload>>
 
 	getPart(id: string): MutableIngestPart<TPartPayload> | undefined
+
+	replacePart(part: IngestPart, beforePartExternalId: string | null): MutableIngestPart<TPartPayload>
+
+	removePart(id: string): boolean
 
 	setName(name: string): void
 

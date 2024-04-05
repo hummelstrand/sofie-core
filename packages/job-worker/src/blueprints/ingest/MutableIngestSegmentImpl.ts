@@ -1,4 +1,9 @@
-import type { IngestSegment, MutableIngestPart, MutableIngestSegment } from '@sofie-automation/blueprints-integration'
+import type {
+	IngestPart,
+	IngestSegment,
+	MutableIngestPart,
+	MutableIngestSegment,
+} from '@sofie-automation/blueprints-integration'
 import { clone, omit } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
@@ -49,6 +54,37 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		return this.#parts.find((part) => part.ingestPart.externalId === id)
 	}
 
+	replacePart(part: IngestPart, beforePartExternalId: string | null): MutableIngestPart<TPartPayload> {
+		this.removePart(part.externalId)
+
+		const newPart = new MutableIngestPartImpl<TPartPayload>(part)
+
+		if (beforePartExternalId) {
+			const beforeIndex = this.#parts.findIndex((s) => s.externalId === beforePartExternalId)
+			if (beforeIndex === -1) throw new Error(`Part "${beforePartExternalId}" not found`)
+
+			this.#parts.splice(beforeIndex, 0, newPart)
+		} else {
+			this.#parts.push(newPart)
+		}
+
+		this.#hasChanges = true // TODO - should this be here?
+
+		return newPart
+	}
+
+	removePart(id: string): boolean {
+		const index = this.#parts.findIndex((part) => part.ingestPart.externalId === id)
+		if (index === -1) {
+			return false
+		}
+
+		this.#parts.splice(index, 1)
+		this.#hasChanges = true // TODO - should this be here?
+
+		return true
+	}
+
 	setName(name: string): void {
 		if (this.ingestSegment.name !== name) {
 			this.ingestSegment.name = name
@@ -73,6 +109,4 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 			this.#hasChanges = true
 		}
 	}
-
-	// TODO - part mutation/replacement
 }
