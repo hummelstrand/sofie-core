@@ -18,8 +18,6 @@ import { DatabasePersistedModel } from '../../modelBase'
 import { ExpectedPackageDBFromStudioBaselineObjects } from '@sofie-automation/corelib/dist/dataModel/ExpectedPackages'
 import { ExpectedPlayoutItemStudio } from '@sofie-automation/corelib/dist/dataModel/ExpectedPlayoutItem'
 import { StudioBaselineHelper } from './StudioBaselineHelper'
-import { StudioRouteBehavior, StudioRouteSet } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import { ReadonlyObjectDeep } from 'type-fest/source/readonly-deep'
 
 /**
  * This is a model used for studio operations.
@@ -36,8 +34,6 @@ export class StudioPlayoutModelImpl implements StudioPlayoutModel {
 
 	#timelineHasChanged = false
 	#timeline: TimelineComplete | null
-
-	#routeSetActive: Record<string, boolean> = {}
 
 	public get timeline(): TimelineComplete | null {
 		return this.#timeline
@@ -100,26 +96,8 @@ export class StudioPlayoutModelImpl implements StudioPlayoutModel {
 		this.#timelineHasChanged = true
 	}
 
-	updateRouteSetActive(routeSetId: string, isActive: boolean): void {
-		const studio = this.context.studio
-		logger.debug(`switchRouteSet "${studio}" "${routeSetId}"=${isActive}`)
-
-		if (studio.routeSets[routeSetId] === undefined) throw new Error(`RouteSet "${routeSetId}" not found!`)
-
-		const routeSet = studio.routeSets[routeSetId]
-		if (routeSet.behavior === StudioRouteBehavior.ACTIVATE_ONLY && isActive === false)
-			throw new Error(`RouteSet "${routeSetId}" is ACTIVATE_ONLY`)
-
-		if (studio.routeSets[routeSetId].exclusivityGroup && isActive === true) {
-			for (const [otherRouteSetId, otherRouteSet] of Object.entries<ReadonlyObjectDeep<StudioRouteSet>>(
-				studio.routeSets
-			)) {
-				if (otherRouteSetId === routeSetId) return
-				if (otherRouteSet.exclusivityGroup === routeSet.exclusivityGroup) {
-					this.#routeSetActive[routeSetId] = isActive
-				}
-			}
-		}
+	async switchRouteSet(routeSetId: string, isActive: boolean): Promise<void> {
+		await this.#baselineHelper.updateRouteSetActive(routeSetId, isActive)
 	}
 
 	/**
@@ -141,20 +119,6 @@ export class StudioPlayoutModelImpl implements StudioPlayoutModel {
 			await this.context.directCollections.Timelines.replace(this.#timeline)
 		}
 		this.#timelineHasChanged = false
-
-		const modifier: Record<string, boolean> = {}
-		for (const [routeSetId, isActive] of Object.entries<boolean>(this.#routeSetActive)) {
-			modifier[`routeSets.${routeSetId}.active`] = isActive
-		}
-
-		await this.context.directCollections.Studios.update(
-			{
-				_id: this.context.studioId,
-			},
-			{
-				$set: modifier,
-			}
-		)
 
 		await this.#baselineHelper.saveAllToDatabase()
 
