@@ -45,64 +45,14 @@ export function defaultApplyChanges<TRundownPayload, TSegmentPayload, TPartPaylo
 			assertNever(changes.rundownChanges)
 	}
 
-	// TODO - other portions
-
 	if (regenerateAllContents) {
 		// Regenerate all the segments
 		for (const nrcsSegment of nrcsRundown.segments) {
 			mutableIngestRundown.replaceSegment(transformSegmentAndPartPayloads(nrcsSegment, options), null)
 		}
 	} else {
-		const nrcsSegmentMap = normalizeArrayToMap(nrcsRundown.segments, 'externalId')
-		const nrcsSegmentIds = nrcsRundown.segments.map((s) => s.externalId)
-
 		// Propogate segment changes
-		for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(
-			changes.segmentChanges || {}
-		)) {
-			if (!change) continue
-
-			const nrcsSegment = nrcsSegmentMap.get(segmentId)
-			const mutableSegment = mutableIngestRundown.getSegment(segmentId)
-
-			switch (change) {
-				case IncomingIngestSegmentChange.Inserted: {
-					if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
-
-					const segmentIndex = nrcsSegmentIds.indexOf(segmentId)
-					const beforeSegmentId = segmentIndex !== -1 ? nrcsSegmentIds[segmentIndex + 1] ?? null : null
-
-					mutableIngestRundown.replaceSegment(
-						transformSegmentAndPartPayloads(nrcsSegment, options),
-						beforeSegmentId
-					)
-					break
-				}
-				case IncomingIngestSegmentChange.Deleted: {
-					mutableIngestRundown.removeSegment(segmentId)
-
-					break
-				}
-				case IncomingIngestSegmentChange.ContentsOrder: {
-					if (!mutableSegment) throw new Error(`Segment ${segmentId} not found in rundown`)
-					if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
-
-					// TODO - what to do here?
-
-					break
-				}
-				case IncomingIngestSegmentChange.Payload: {
-					if (!mutableSegment) throw new Error(`Segment ${segmentId} not found in rundown`)
-					if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
-
-					mutableSegment.replacePayload(options.transformSegmentPayload(nrcsSegment.payload))
-					mutableSegment.setName(nrcsSegment.name)
-					break
-				}
-				default:
-					assertNever(change)
-			}
-		}
+		applySegmentChanges(mutableIngestRundown, nrcsRundown, changes, options)
 
 		// TODO - propogate part changes?
 
@@ -121,5 +71,62 @@ function transformSegmentAndPartPayloads(segment: IngestSegment, options: Ingest
 			...part,
 			payload: options.transformPartPayload(part.payload),
 		})),
+	}
+}
+
+function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
+	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
+	nrcsRundown: IngestRundown,
+	changes: IncomingIngestChange,
+	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+) {
+	if (!changes.segmentChanges) return
+
+	const nrcsSegmentMap = normalizeArrayToMap(nrcsRundown.segments, 'externalId')
+	const nrcsSegmentIds = nrcsRundown.segments.map((s) => s.externalId)
+
+	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes.segmentChanges)) {
+		if (!change) continue
+
+		const nrcsSegment = nrcsSegmentMap.get(segmentId)
+		const mutableSegment = mutableIngestRundown.getSegment(segmentId)
+
+		switch (change) {
+			case IncomingIngestSegmentChange.Inserted: {
+				if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
+
+				const segmentIndex = nrcsSegmentIds.indexOf(segmentId)
+				const beforeSegmentId = segmentIndex !== -1 ? nrcsSegmentIds[segmentIndex + 1] ?? null : null
+
+				mutableIngestRundown.replaceSegment(
+					transformSegmentAndPartPayloads(nrcsSegment, options),
+					beforeSegmentId
+				)
+				break
+			}
+			case IncomingIngestSegmentChange.Deleted: {
+				mutableIngestRundown.removeSegment(segmentId)
+
+				break
+			}
+			case IncomingIngestSegmentChange.ContentsOrder: {
+				if (!mutableSegment) throw new Error(`Segment ${segmentId} not found in rundown`)
+				if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
+
+				// TODO - what to do here?
+
+				break
+			}
+			case IncomingIngestSegmentChange.Payload: {
+				if (!mutableSegment) throw new Error(`Segment ${segmentId} not found in rundown`)
+				if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
+
+				mutableSegment.replacePayload(options.transformSegmentPayload(nrcsSegment.payload))
+				mutableSegment.setName(nrcsSegment.name)
+				break
+			}
+			default:
+				assertNever(change)
+		}
 	}
 }
