@@ -2,7 +2,7 @@ import { getCurrentTime } from '../lib'
 import { JobContext } from '../jobs'
 import { regenerateSegmentsFromIngestData } from './generationSegment'
 import { makeNewIngestSegment } from './ingestCache'
-import { CommitIngestData, runIngestUpdateOperation, UpdateIngestRundownAction } from './lock'
+import { CommitIngestData } from './lock'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import {
@@ -12,7 +12,7 @@ import {
 	IngestUpdateSegmentRanksProps,
 	RemoveOrphanedSegmentsProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
-import { runIngestUpdateOperationNew } from './runOperation'
+import { runIngestJobWithThingNew, runIngestUpdateOperationNew } from './runOperation'
 import { IncomingIngestSegmentChangeEnum } from '@sofie-automation/blueprints-integration'
 
 /**
@@ -141,68 +141,56 @@ export async function handleRemoveOrphanedSegemnts(
 	context: JobContext,
 	data: RemoveOrphanedSegmentsProps
 ): Promise<void> {
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => ingestRundown ?? UpdateIngestRundownAction.DELETE,
-		async (_context, ingestModel, ingestRundown) => {
-			if (!ingestRundown) throw new Error(`handleRemoveOrphanedSegemnts lost the IngestRundown...`)
+	return runIngestJobWithThingNew(context, data, async (_context, ingestModel, ingestRundown) => {
+		// Find the segments that are still orphaned (in case they have resynced before this executes)
+		// We flag them for deletion again, and they will either be kept if they are somehow playing, or purged if they are not
+		const stillOrphanedSegments = ingestModel.getOrderedSegments().filter((s) => !!s.segment.orphaned)
 
-			// Find the segments that are still orphaned (in case they have resynced before this executes)
-			// We flag them for deletion again, and they will either be kept if they are somehow playing, or purged if they are not
-			const stillOrphanedSegments = ingestModel.getOrderedSegments().filter((s) => !!s.segment.orphaned)
+		// Note: scratchpad segments are ignored here, as they will never be in the ingestModel
 
-			// Note: scratchpad segments are ignored here, as they will never be in the ingestModel
+		const stillHiddenSegments = stillOrphanedSegments.filter(
+			(s) =>
+				s.segment.orphaned === SegmentOrphanedReason.HIDDEN &&
+				data.orphanedHiddenSegmentIds.includes(s.segment._id)
+		)
 
-			const stillHiddenSegments = stillOrphanedSegments.filter(
+		const stillDeletedSegmentIds = stillOrphanedSegments
+			.filter(
 				(s) =>
-					s.segment.orphaned === SegmentOrphanedReason.HIDDEN &&
-					data.orphanedHiddenSegmentIds.includes(s.segment._id)
+					s.segment.orphaned === SegmentOrphanedReason.DELETED &&
+					data.orphanedDeletedSegmentIds.includes(s.segment._id)
 			)
+			.map((s) => s.segment._id)
 
-			const stillDeletedSegmentIds = stillOrphanedSegments
-				.filter(
-					(s) =>
-						s.segment.orphaned === SegmentOrphanedReason.DELETED &&
-						data.orphanedDeletedSegmentIds.includes(s.segment._id)
-				)
-				.map((s) => s.segment._id)
+		const hiddenSegmentIds = ingestModel
+			.getOrderedSegments()
+			.filter((s) => !!stillHiddenSegments.find((a) => a.segment._id === s.segment._id))
+			.map((s) => s.segment._id)
 
-			const hiddenSegmentIds = ingestModel
-				.getOrderedSegments()
-				.filter((s) => !!stillHiddenSegments.find((a) => a.segment._id === s.segment._id))
-				.map((s) => s.segment._id)
+		const { result } = await regenerateSegmentsFromIngestData(context, ingestModel, ingestRundown, hiddenSegmentIds)
 
-			const { result } = await regenerateSegmentsFromIngestData(
-				context,
-				ingestModel,
-				ingestRundown,
-				hiddenSegmentIds
-			)
+		const changedHiddenSegments = result?.changedSegmentIds ?? []
 
-			const changedHiddenSegments = result?.changedSegmentIds ?? []
-
-			// Make sure any orphaned hidden segments arent marked as hidden
-			for (const segment of stillHiddenSegments) {
-				if (!changedHiddenSegments.includes(segment.segment._id)) {
-					if (segment.segment.isHidden && segment.segment.orphaned === SegmentOrphanedReason.HIDDEN) {
-						segment.setOrphaned(undefined)
-						changedHiddenSegments.push(segment.segment._id)
-					}
+		// Make sure any orphaned hidden segments arent marked as hidden
+		for (const segment of stillHiddenSegments) {
+			if (!changedHiddenSegments.includes(segment.segment._id)) {
+				if (segment.segment.isHidden && segment.segment.orphaned === SegmentOrphanedReason.HIDDEN) {
+					segment.setOrphaned(undefined)
+					changedHiddenSegments.push(segment.segment._id)
 				}
 			}
-
-			if (changedHiddenSegments.length === 0 && stillDeletedSegmentIds.length === 0) {
-				// Nothing could have changed, so take a shortcut and skip any saving
-				return null
-			}
-
-			return literal<CommitIngestData>({
-				changedSegmentIds: changedHiddenSegments,
-				removedSegmentIds: stillDeletedSegmentIds,
-				renamedSegments: new Map(),
-				removeRundown: false,
-			})
 		}
-	)
+
+		if (changedHiddenSegments.length === 0 && stillDeletedSegmentIds.length === 0) {
+			// Nothing could have changed, so take a shortcut and skip any saving
+			return null
+		}
+
+		return literal<CommitIngestData>({
+			changedSegmentIds: changedHiddenSegments,
+			removedSegmentIds: stillDeletedSegmentIds,
+			renamedSegments: new Map(),
+			removeRundown: false,
+		})
+	})
 }

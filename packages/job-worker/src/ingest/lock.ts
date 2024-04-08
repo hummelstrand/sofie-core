@@ -39,8 +39,6 @@ export enum UpdateIngestRundownAction {
 	FORCE_DELETE = 'force-delete',
 }
 
-export type UpdateIngestRundownResult = LocalIngestRundown | UpdateIngestRundownAction
-
 /**
  * Perform an ingest update operation on a rundown
  * This will automatically do some post-update data changes, to ensure the playout side (partinstances etc) is updated with the changes
@@ -53,7 +51,9 @@ export type UpdateIngestRundownResult = LocalIngestRundown | UpdateIngestRundown
 export async function runIngestUpdateOperation(
 	context: JobContext,
 	data: IngestPropsBase,
-	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult,
+	updateNrcsIngestModelFcn: (
+		oldIngestRundown: LocalIngestRundown | undefined
+	) => LocalIngestRundown | UpdateIngestRundownAction,
 	calcFcn: (
 		context: JobContext,
 		ingestModel: IngestModel,
@@ -66,7 +66,7 @@ export async function runIngestUpdateOperation(
 	}
 
 	const rundownId = getRundownId(context.studioId, data.rundownExternalId)
-	return runWithRundownLockInner(context, rundownId, async (rundownLock) => {
+	return runWithRundownLockWithoutFetchingRundown(context, rundownId, async (rundownLock) => {
 		const span = context.startSpan(`ingestLockFunction.${context.studioId}`)
 
 		// Load the old ingest data
@@ -157,7 +157,7 @@ export async function runWithRundownLock<TRes>(
 		throw new Error(`Job is missing rundownId`)
 	}
 
-	return runWithRundownLockInner(context, rundownId, async (lock) => {
+	return runWithRundownLockWithoutFetchingRundown(context, rundownId, async (lock) => {
 		const rundown = await context.directCollections.Rundowns.findOne(rundownId)
 		if (rundown && rundown.studioId !== context.studioId) {
 			throw new Error(`Job rundown "${rundownId}" not found or for another studio`)
@@ -171,7 +171,7 @@ export async function runWithRundownLock<TRes>(
  * Lock the rundown for a quick task without the cache
  */
 // nocommit should not be exported
-export async function runWithRundownLockInner<TRes>(
+export async function runWithRundownLockWithoutFetchingRundown<TRes>(
 	context: JobContext,
 	rundownId: RundownId,
 	fcn: (lock: RundownLock) => Promise<TRes>

@@ -2,10 +2,9 @@ import { JobContext } from '../../jobs'
 import { ReadonlyDeep } from 'type-fest'
 import { IngestModel } from '../model/IngestModel'
 import { LocalIngestRundown, LocalIngestSegment } from '../ingestCache'
-import { canRundownBeUpdated, getSegmentId } from '../lib'
-import { calculateSegmentsFromIngestData } from '../generationSegment'
+import { getSegmentId } from '../lib'
 import _ = require('underscore')
-import { clone, deleteAllUndefinedProperties, literal, normalizeArrayFunc } from '@sofie-automation/corelib/dist/lib'
+import { clone, deleteAllUndefinedProperties, normalizeArrayFunc } from '@sofie-automation/corelib/dist/lib'
 import { SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import {
 	IncomingIngestChange,
@@ -13,7 +12,7 @@ import {
 	IncomingIngestSegmentChangeEnum,
 	IngestSegment,
 } from '@sofie-automation/blueprints-integration'
-import { DBSegment, SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
+import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { CommitIngestData } from '../lock'
 
 /**
@@ -99,100 +98,13 @@ export function generateMosIngestDiffTemp(
 }
 
 /**
- * Update the Rundown for new Ingest data
- * Performs a diff of the ingest data, and applies the changes including re-running blueprints on any changed segments
- * @param context Context of the job being run
- * @param ingestModel Ingest model for Rundown being updated
- * @param newIngestRundown New ingest data (if any)
- * @param oldIngestRundown Last known ingest data (if any)
- * @returns Map of the SegmentId changes
- */
-export async function diffAndApplyChanges(
-	context: JobContext,
-	ingestModel: IngestModel,
-	newIngestRundown: ReadonlyDeep<LocalIngestRundown> | undefined,
-	oldIngestRundown: ReadonlyDeep<LocalIngestRundown> | undefined
-	// newIngestParts: AnnotatedIngestPart[]
-): Promise<CommitIngestData | null> {
-	if (!newIngestRundown) throw new Error(`diffAndApplyChanges lost the new IngestRundown...`)
-	if (!oldIngestRundown) throw new Error(`diffAndApplyChanges lost the old IngestRundown...`)
-
-	const rundown = ingestModel.getRundown()
-	if (!canRundownBeUpdated(rundown, false)) return null
-
-	const span = context.startSpan('mosDevice.ingest.diffAndApplyChanges')
-
-	// Fetch all existing segments:
-	const oldSegments = ingestModel.getOrderedSegments().map((segment) => ({
-		externalId: segment.segment.externalId,
-		externalModified: segment.segment.externalModified,
-		_rank: segment.segment._rank,
-	}))
-
-	const oldSegmentEntries = compileSegmentEntries(oldIngestRundown.segments)
-	const newSegmentEntries = compileSegmentEntries(newIngestRundown.segments)
-	const segmentDiff = diffSegmentEntries(oldSegmentEntries, newSegmentEntries, oldSegments)
-
-	// Note: We may not need to do some of these quick updates anymore, but they are cheap so can stay for now
-
-	// Update segment ranks:
-	for (const [segmentExternalId, newRank] of Object.entries<number>(segmentDiff.onlyRankChanged)) {
-		const segment = ingestModel.getSegmentByExternalId(segmentExternalId)
-		if (segment) {
-			segment.setRank(newRank)
-		}
-	}
-
-	// Updated segments that has had their segment.externalId changed:
-	const renamedSegments = applyExternalIdDiff(ingestModel, segmentDiff, true)
-
-	// Figure out which segments need to be regenerated
-	const segmentsToRegenerate = Object.values<LocalIngestSegment>(segmentDiff.added)
-	for (const changedSegment of Object.values<LocalIngestSegment>(segmentDiff.changed)) {
-		// Rank changes are handled above
-		if (!segmentDiff.onlyRankChanged[changedSegment.externalId]) {
-			segmentsToRegenerate.push(changedSegment)
-		}
-	}
-
-	// Create/Update segments
-	const changedSegmentIds = await calculateSegmentsFromIngestData(
-		context,
-		ingestModel,
-		_.sortBy(segmentsToRegenerate, (se) => se.rank),
-		null
-	)
-
-	// Remove/orphan old segments
-	const orphanedSegmentIds: SegmentId[] = []
-	for (const segmentExternalId of Object.keys(segmentDiff.removed)) {
-		const segment = ingestModel.getSegmentByExternalId(segmentExternalId)
-		if (segment) {
-			// We orphan it and queue for deletion. the commit phase will complete if possible
-			orphanedSegmentIds.push(segment.segment._id)
-			segment.setOrphaned(SegmentOrphanedReason.DELETED)
-
-			segment.removeAllParts()
-		}
-	}
-
-	span?.end()
-	return literal<CommitIngestData>({
-		changedSegmentIds: changedSegmentIds,
-		removedSegmentIds: orphanedSegmentIds, // Only inform about the ones that werent renamed
-		renamedSegments: renamedSegments,
-
-		removeRundown: false,
-	})
-}
-
-/**
  * Apply the externalId renames from a DiffSegmentEntries
  * @param ingestModel Ingest model of the rundown being updated
  * @param segmentDiff Calculated Diff
  * @returns Map of the SegmentId changes
  */
-function applyExternalIdDiff(
+// nocommit: This needs to be rewritten and reused elsewhere
+export function applyExternalIdDiff(
 	ingestModel: IngestModel,
 	segmentDiff: Pick<DiffSegmentEntries, 'externalIdChanged' | 'onlyRankChanged'>,
 	canDiscardParts: boolean

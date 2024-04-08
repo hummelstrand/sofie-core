@@ -1,4 +1,4 @@
-import { IngestPart } from '@sofie-automation/blueprints-integration'
+import { IncomingIngestRundownChange, IngestPart } from '@sofie-automation/blueprints-integration'
 import { PartId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import {
@@ -17,6 +17,7 @@ import { diffAndUpdateSegmentIds } from './diff'
 import { parseMosString } from './lib'
 import { groupedPartsToSegments, groupIngestParts, storiesToIngestParts } from './mosToIngest'
 import { GenerateRundownMode, updateRundownFromIngestData } from '../generationRundown'
+import { runIngestJobWithThingNew, runIngestUpdateOperationNew } from '../runOperation'
 
 /**
  * Insert or update a mos rundown
@@ -99,32 +100,23 @@ export async function handleMosRundownData(context: JobContext, data: MosRundown
  * Update the payload of a mos rundown, without changing any parts or segments
  */
 export async function handleMosRundownMetadata(context: JobContext, data: MosRundownMetadataProps): Promise<void> {
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => {
-			if (ingestRundown) {
-				ingestRundown.payload = _.extend(ingestRundown.payload, data.mosRunningOrderBase)
-				ingestRundown.modified = getCurrentTime()
+	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+		if (ingestRundown) {
+			ingestRundown.payload = _.extend(ingestRundown.payload, data.mosRunningOrderBase)
+			ingestRundown.modified = getCurrentTime()
 
+			return {
 				// We modify in-place
-				return ingestRundown
-			} else {
-				throw new Error(`Rundown "${data.rundownExternalId}" not found`)
-			}
-		},
-		async (context, ingestModel, ingestRundown) => {
-			if (!ingestRundown) throw new Error(`handleMosRundownMetadata lost the IngestRundown...`)
-
-			return updateRundownFromIngestData(
-				context,
-				ingestModel,
 				ingestRundown,
-				GenerateRundownMode.MetadataChange,
-				data.peripheralDeviceId
-			)
+				changes: {
+					source: 'ingest',
+					rundownChanges: IncomingIngestRundownChange.Payload,
+				},
+			}
+		} else {
+			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
-	)
+	})
 }
 
 /**
@@ -150,34 +142,21 @@ export async function handleMosRundownStatus(context: JobContext, data: MosRundo
  * Update the ready to air state of a mos rundown
  */
 export async function handleMosRundownReadyToAir(context: JobContext, data: MosRundownReadyToAirProps): Promise<void> {
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => {
-			if (ingestRundown) {
-				// No change
-				return ingestRundown
-			} else {
-				throw new Error(`Rundown "${data.rundownExternalId}" not found`)
-			}
-		},
-		async (context, ingestModel, ingestRundown) => {
-			if (!ingestRundown) throw new Error(`handleMosRundownReadyToAir lost the IngestRundown...`)
+	// nocommit, maybe this should be using the 'standard' flow instead of this custom one?
+	return runIngestJobWithThingNew(context, data, async (context, ingestModel, ingestRundown) => {
+		if (!ingestModel.rundown || ingestModel.rundown.airStatus === data.status) return null
 
-			if (!ingestModel.rundown || ingestModel.rundown.airStatus === data.status) return null
+		// If rundown is orphaned, then it should be ignored
+		if (ingestModel.rundown.orphaned) return null
 
-			// If rundown is orphaned, then it should be ignored
-			if (ingestModel.rundown.orphaned) return null
+		ingestModel.setRundownAirStatus(data.status)
 
-			ingestModel.setRundownAirStatus(data.status)
-
-			return updateRundownFromIngestData(
-				context,
-				ingestModel,
-				ingestRundown,
-				GenerateRundownMode.MetadataChange,
-				data.peripheralDeviceId
-			)
-		}
-	)
+		return updateRundownFromIngestData(
+			context,
+			ingestModel,
+			ingestRundown,
+			GenerateRundownMode.MetadataChange,
+			data.peripheralDeviceId
+		)
+	})
 }

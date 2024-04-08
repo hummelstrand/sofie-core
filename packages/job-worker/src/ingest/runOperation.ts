@@ -7,7 +7,12 @@ import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/error'
 import { loadIngestModelFromRundownExternalId } from './model/implementation/LoadIngestModel'
 import { Complete, clone } from '@sofie-automation/corelib/dist/lib'
-import { CommitIngestData, UpdateIngestRundownAction, generatePartMap, runWithRundownLockInner } from './lock'
+import {
+	CommitIngestData,
+	UpdateIngestRundownAction,
+	generatePartMap,
+	runWithRundownLockWithoutFetchingRundown,
+} from './lock'
 import { DatabasePersistedModel } from '../modelBase'
 import { IncomingIngestChange, IngestRundown } from '@sofie-automation/blueprints-integration'
 import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
@@ -40,6 +45,78 @@ export interface ComputedIngestChanges {
 export type ComputedIngestChanges2 = ComputedIngestChanges | UpdateIngestRundownAction
 
 /**
+ * Perform an TODO description here
+ * This will automatically do some post-update data changes, to ensure the playout side (partinstances etc) is updated with the changes
+ * @param context Context of the job being run
+ * @param studioId Id of the studio the rundown belongs to
+ * @param rundownExternalId ExternalId of the rundown to lock
+ * @param updateNrcsIngestModelFcn Function to mutate the ingestData. Throw if the requested change is not valid. Return undefined to indicate the ingestData should be deleted
+ * @param calcFcn Function to run to update the Rundown. Return the blob of data about the change to help the post-update perform its duties. Return null to indicate that nothing changed
+ */
+export async function runIngestJobWithThingNew(
+	context: JobContext,
+	data: IngestPropsBase,
+	doWorkFcn: (
+		context: JobContext,
+		ingestModel: IngestModel,
+		ingestRundown: LocalIngestRundown
+	) => Promise<CommitIngestData | null>
+): Promise<void> {
+	if (!data.rundownExternalId) {
+		throw new Error(`Job is missing rundownExternalId`)
+	}
+
+	const rundownId = getRundownId(context.studioId, data.rundownExternalId)
+	return runWithRundownLockWithoutFetchingRundown(context, rundownId, async (rundownLock) => {
+		const span = context.startSpan(`ingestLockFunction.${context.studioId}`)
+
+		// Load the old ingest data
+		const pIngestModel = loadIngestModelFromRundownExternalId(context, rundownLock, data.rundownExternalId)
+		pIngestModel.catch(() => null) // Prevent unhandled promise rejection
+		const sofieIngestObjectCache = await RundownIngestDataCache.create(
+			context,
+			context.directCollections.SofieIngestDataCache,
+			rundownId
+		)
+		const sofieIngestRundown = sofieIngestObjectCache.fetchRundown()
+		if (!sofieIngestRundown) throw new Error('No SofieIngestRundown found')
+
+		let resultingError: UserError | void | undefined
+
+		try {
+			const ingestModel = await pIngestModel
+
+			// Load any 'before' data for the commit,
+			const beforeRundown = ingestModel.rundown
+			const beforePartMap = generatePartMap(ingestModel)
+
+			// Perform the update operation
+			const commitData = await doWorkFcn(context, ingestModel, sofieIngestRundown)
+
+			if (commitData) {
+				const commitSpan = context.startSpan('ingest.commit')
+				// The change is accepted. Perform some playout calculations and save it all
+				resultingError = await CommitIngestOperation(
+					context,
+					ingestModel,
+					beforeRundown,
+					beforePartMap,
+					commitData
+				)
+				commitSpan?.end()
+			} else {
+				// Should be no changes
+				ingestModel.assertNoChanges()
+			}
+		} finally {
+			span?.end()
+		}
+
+		if (resultingError) throw resultingError
+	})
+}
+
+/**
  * Perform an ingest update operation on a rundown
  * This will automatically do some post-update data changes, to ensure the playout side (partinstances etc) is updated with the changes
  * @param context Context of the job being run
@@ -58,7 +135,7 @@ export async function runIngestUpdateOperationNew(
 	}
 
 	const rundownId = getRundownId(context.studioId, data.rundownExternalId)
-	return runWithRundownLockInner(context, rundownId, async (rundownLock) => {
+	return runWithRundownLockWithoutFetchingRundown(context, rundownId, async (rundownLock) => {
 		const span = context.startSpan(`ingestLockFunction.${context.studioId}`)
 
 		// Load the old ingest data
