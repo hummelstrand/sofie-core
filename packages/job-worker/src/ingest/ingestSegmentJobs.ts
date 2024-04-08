@@ -1,10 +1,7 @@
-import { SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { getCurrentTime } from '../lib'
 import { JobContext } from '../jobs'
-import { logger } from '../logging'
-import { regenerateSegmentsFromIngestData, updateSegmentFromIngestData } from './generationSegment'
+import { regenerateSegmentsFromIngestData } from './generationSegment'
 import { makeNewIngestSegment } from './ingestCache'
-import { canSegmentBeUpdated, getSegmentId } from './lib'
 import { CommitIngestData, runIngestUpdateOperation, UpdateIngestRundownAction } from './lock'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { literal } from '@sofie-automation/corelib/dist/lib'
@@ -15,82 +12,71 @@ import {
 	IngestUpdateSegmentRanksProps,
 	RemoveOrphanedSegmentsProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
+import { runIngestUpdateOperationNew } from './runOperation'
+import { IncomingIngestSegmentChangeEnum } from '@sofie-automation/blueprints-integration'
 
 /**
  * Regnerate a Segment from the cached IngestSegment
  */
 export async function handleRegenerateSegment(context: JobContext, data: IngestRegenerateSegmentProps): Promise<void> {
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => {
-			if (ingestRundown) {
-				// Ensure the target segment exists in the cache
-				const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
-				if (!ingestSegment) {
-					throw new Error(
-						`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to update`
-					)
-				}
-
-				// We modify in-place
-				return ingestRundown
-			} else {
-				throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+		if (ingestRundown) {
+			// Ensure the target segment exists in the cache
+			const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
+			if (!ingestSegment) {
+				throw new Error(
+					`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to update`
+				)
 			}
-		},
-		async (context, ingestModel, ingestRundown) => {
-			const ingestSegment = ingestRundown?.segments?.find((s) => s.externalId === data.segmentExternalId)
-			if (!ingestSegment) throw new Error(`IngestSegment "${data.segmentExternalId}" is missing!`)
-			return updateSegmentFromIngestData(context, ingestModel, ingestSegment, false)
+
+			return {
+				// We modify in-place
+				ingestRundown,
+				changes: {
+					source: 'ingest',
+					segmentChanges: {
+						[data.segmentExternalId]: {
+							payloadChanged: true,
+						},
+					},
+				},
+			}
+		} else {
+			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
-	)
+	})
 }
 
 /**
  * Attempt to remove a segment, or orphan it
  */
 export async function handleRemovedSegment(context: JobContext, data: IngestRemoveSegmentProps): Promise<void> {
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => {
-			if (ingestRundown) {
-				const oldSegmentsLength = ingestRundown.segments.length
-				ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== data.segmentExternalId)
-				ingestRundown.modified = getCurrentTime()
+	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+		if (ingestRundown) {
+			const oldSegmentsLength = ingestRundown.segments.length
+			ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== data.segmentExternalId)
+			ingestRundown.modified = getCurrentTime()
 
-				if (ingestRundown.segments.length === oldSegmentsLength) {
-					throw new Error(
-						`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to remove`
-					)
-				}
+			if (ingestRundown.segments.length === oldSegmentsLength) {
+				throw new Error(
+					`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to remove`
+				)
+			}
 
+			return {
 				// We modify in-place
-				return ingestRundown
-			} else {
-				throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+				ingestRundown,
+				changes: {
+					source: 'ingest',
+					segmentChanges: {
+						[data.segmentExternalId]: IncomingIngestSegmentChangeEnum.Deleted,
+					},
+				},
 			}
-		},
-		async (_context, ingestModel) => {
-			const rundown = ingestModel.getRundown()
-			const segmentId = getSegmentId(rundown._id, data.segmentExternalId)
-			const segment = ingestModel.getSegment(segmentId)
-
-			if (!canSegmentBeUpdated(rundown, segment, false)) {
-				// segment has already been deleted
-				return null
-			} else {
-				return literal<CommitIngestData>({
-					changedSegmentIds: [],
-					removedSegmentIds: [segmentId],
-					renamedSegments: new Map(),
-
-					removeRundown: false,
-				})
-			}
+		} else {
+			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
-	)
+	})
 }
 
 /**
@@ -98,27 +84,26 @@ export async function handleRemovedSegment(context: JobContext, data: IngestRemo
  */
 export async function handleUpdatedSegment(context: JobContext, data: IngestUpdateSegmentProps): Promise<void> {
 	const segmentExternalId = data.ingestSegment.externalId
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => {
-			if (ingestRundown) {
-				ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== segmentExternalId)
-				ingestRundown.segments.push(makeNewIngestSegment(data.ingestSegment))
-				ingestRundown.modified = getCurrentTime()
+	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+		if (ingestRundown) {
+			ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== segmentExternalId)
+			ingestRundown.segments.push(makeNewIngestSegment(data.ingestSegment))
+			ingestRundown.modified = getCurrentTime()
 
+			return {
 				// We modify in-place
-				return ingestRundown
-			} else {
-				throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+				ingestRundown,
+				changes: {
+					source: 'ingest',
+					segmentChanges: {
+						[segmentExternalId]: IncomingIngestSegmentChangeEnum.Inserted, // This forces downstream to do a full diff themselves
+					},
+				},
 			}
-		},
-		async (context, ingestModel, ingestRundown) => {
-			const ingestSegment = ingestRundown?.segments?.find((s) => s.externalId === segmentExternalId)
-			if (!ingestSegment) throw new Error(`IngestSegment "${segmentExternalId}" is missing!`)
-			return updateSegmentFromIngestData(context, ingestModel, ingestSegment, data.isCreateAction)
+		} else {
+			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
-	)
+	})
 }
 
 /**
@@ -128,44 +113,25 @@ export async function handleUpdatedSegmentRanks(
 	context: JobContext,
 	data: IngestUpdateSegmentRanksProps
 ): Promise<void> {
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => {
-			if (ingestRundown) {
-				// Update ranks on ingest data
-				for (const segment of ingestRundown.segments) {
-					segment.rank = data.newRanks[segment.externalId] ?? segment.rank
-				}
+	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+		if (ingestRundown) {
+			// Update ranks on ingest data
+			for (const segment of ingestRundown.segments) {
+				segment.rank = data.newRanks[segment.externalId] ?? segment.rank
+			}
+
+			return {
 				// We modify in-place
-				return ingestRundown
-			} else {
-				throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+				ingestRundown,
+				changes: {
+					source: 'ingest',
+					segmentOrderChanged: true,
+				},
 			}
-		},
-		async (_context, ingestModel) => {
-			const changedSegmentIds: SegmentId[] = []
-			for (const [externalId, rank] of Object.entries<number>(data.newRanks)) {
-				const segment = ingestModel.getSegmentByExternalId(externalId)
-				if (segment) {
-					const changed = segment.setRank(rank)
-
-					if (!changed) {
-						logger.warn(`Failed to update rank of segment "${externalId}" (${data.rundownExternalId})`)
-					} else {
-						changedSegmentIds.push(segment?.segment._id)
-					}
-				}
-			}
-
-			return literal<CommitIngestData>({
-				changedSegmentIds,
-				removedSegmentIds: [],
-				renamedSegments: new Map(),
-				removeRundown: false,
-			})
+		} else {
+			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
-	)
+	})
 }
 
 /**

@@ -4,18 +4,12 @@ import { LocalIngestRundown, LocalIngestSegment, RundownIngestDataCache } from '
 import { canRundownBeUpdated, getRundownId } from './lib'
 import { JobContext } from '../jobs'
 import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
-import { UserError } from '@sofie-automation/corelib/dist/error'
+import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/error'
 import { loadIngestModelFromRundownExternalId } from './model/implementation/LoadIngestModel'
 import { clone } from '@sofie-automation/corelib/dist/lib'
-import {
-	CommitIngestData,
-	UpdateIngestRundownAction,
-	UpdateIngestRundownChange,
-	generatePartMap,
-	runWithRundownLockInner,
-} from './lock'
+import { CommitIngestData, UpdateIngestRundownAction, generatePartMap, runWithRundownLockInner } from './lock'
 import { DatabasePersistedModel } from '../modelBase'
-import { IngestRundown } from '@sofie-automation/blueprints-integration'
+import { IncomingIngestChange, IngestRundown } from '@sofie-automation/blueprints-integration'
 import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
 import { CommonContext } from '../blueprints/context'
 import { PeripheralDeviceId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
@@ -24,6 +18,11 @@ import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromInge
 import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import _ = require('underscore')
+
+export interface UpdateIngestRundownChange {
+	ingestRundown: LocalIngestRundown
+	changes: IncomingIngestChange
+}
 
 export type UpdateIngestRundownResult2 = UpdateIngestRundownChange | UpdateIngestRundownAction
 
@@ -37,6 +36,9 @@ export interface ComputedIngestChanges {
 	segmentsToRegenerate: LocalIngestSegment[]
 	regenerateRundown: boolean // TODO - full vs metadata?
 }
+
+// nocommit - this needs a better name
+export type ComputedIngestChanges2 = ComputedIngestChanges | UpdateIngestRundownAction
 
 /**
  * Perform an ingest update operation on a rundown
@@ -89,15 +91,12 @@ export async function runIngestUpdateOperationNew(
 		let resultingError: UserError | void | undefined
 
 		try {
-			const newNrcsIngestRundown = nrcsIngestObjectCache.fetchRundown()
-
 			// Update the Sofie ingest view
 			const sofieIngestObjectCache = await pSofieIngestObjectCache
 			const oldSofieIngestRundown = clone(sofieIngestObjectCache.fetchRundown())
 			const computedChanges = await updateSofieIngestRundown(
 				context,
 				rundownId,
-				newNrcsIngestRundown,
 				sofieIngestObjectCache,
 				ingestRundownChanges
 			)
@@ -134,48 +133,48 @@ function updateNrcsIngestObjects(
 	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult2
 ): {
 	oldNrcsIngestRundown: LocalIngestRundown | undefined
-	ingestRundownChanges: UpdateIngestRundownChange | undefined
+	ingestRundownChanges: UpdateIngestRundownResult2
 } {
 	const updateNrcsIngestModelSpan = context.startSpan('ingest.calcFcn')
 	const oldNrcsIngestRundown = nrcsIngestObjectCache.fetchRundown()
 	const updatedIngestRundown = updateNrcsIngestModelFcn(clone(oldNrcsIngestRundown))
 	updateNrcsIngestModelSpan?.end()
 
-	let ingestRundownChanges: UpdateIngestRundownChange | undefined
 	switch (updatedIngestRundown) {
 		// case UpdateIngestRundownAction.REJECT:
 		// 	// Reject change
 		// 	return
 		case UpdateIngestRundownAction.DELETE:
+		case UpdateIngestRundownAction.FORCE_DELETE:
 			nrcsIngestObjectCache.delete()
-			ingestRundownChanges = undefined
 			break
 		default:
 			nrcsIngestObjectCache.update(updatedIngestRundown.ingestRundown)
-			ingestRundownChanges = updatedIngestRundown
 			break
 	}
 
 	return {
 		oldNrcsIngestRundown,
-		ingestRundownChanges,
+		ingestRundownChanges: updatedIngestRundown,
 	}
 }
 
 async function updateSofieIngestRundown(
 	context: JobContext,
 	rundownId: RundownId,
-	newNrcsIngestRundown: IngestRundown | undefined,
 	sofieIngestObjectCache: RundownIngestDataCache,
-	ingestRundownChanges: UpdateIngestRundownChange | undefined
-): Promise<ComputedIngestChanges | null> {
-	if (!newNrcsIngestRundown) {
+	ingestRundownChanges: UpdateIngestRundownResult2
+): Promise<ComputedIngestChanges2 | null> {
+	if (
+		ingestRundownChanges === UpdateIngestRundownAction.DELETE ||
+		ingestRundownChanges === UpdateIngestRundownAction.FORCE_DELETE
+	) {
 		// Also delete the Sofie view of the Rundown
 		// nocommit Is this correct? Or should we keep the Sofie view as-is until the rundown is deleted? Or perhaps even let the blueprints decide?
 		sofieIngestObjectCache.delete()
 
-		return null
-	} else if (ingestRundownChanges) {
+		return ingestRundownChanges
+	} else {
 		const studioBlueprint = context.studioBlueprint.blueprint
 
 		const sofieIngestRundown = sofieIngestObjectCache.fetchRundown()
@@ -191,12 +190,15 @@ async function updateSofieIngestRundown(
 
 			await studioBlueprint.processIngestData(
 				blueprintContext,
-				newNrcsIngestRundown,
+				ingestRundownChanges.ingestRundown,
 				mutableIngestRundown,
 				ingestRundownChanges.changes
 			)
 		} else {
-			mutableIngestRundown.defaultApplyIngestChanges(newNrcsIngestRundown, ingestRundownChanges.changes)
+			mutableIngestRundown.defaultApplyIngestChanges(
+				ingestRundownChanges.ingestRundown,
+				ingestRundownChanges.changes
+			)
 		}
 
 		const resultChanges = mutableIngestRundown.intoIngestRundown(rundownId, sofieIngestRundown)
@@ -207,16 +209,13 @@ async function updateSofieIngestRundown(
 		sofieIngestObjectCache.removeAllOtherDocuments(resultChanges.allCacheObjectIds)
 
 		return resultChanges.computedChanges
-	} else {
-		// nocommit - should this be doing a delete?
-		return null
 	}
 }
 
 async function updateSofieRundownModel(
 	context: JobContext,
 	pIngestModel: Promise<IngestModel & DatabasePersistedModel>,
-	computedIngestChanges: ComputedIngestChanges | null,
+	computedIngestChanges: ComputedIngestChanges2 | null,
 	oldSofieIngestRundown: LocalIngestRundown | undefined,
 	peripheralDeviceId: PeripheralDeviceId | null
 ) {
@@ -226,8 +225,30 @@ async function updateSofieRundownModel(
 	const beforeRundown = ingestModel.rundown
 	const beforePartMap = generatePartMap(ingestModel)
 
-	let commitData: CommitIngestData | null
-	if (computedIngestChanges) {
+	let commitData: CommitIngestData | null = null
+
+	if (
+		computedIngestChanges === UpdateIngestRundownAction.DELETE ||
+		computedIngestChanges === UpdateIngestRundownAction.FORCE_DELETE
+	) {
+		// Check if it exists and can be deleted
+		const rundown = ingestModel.rundown
+		if (rundown) {
+			const canRemove =
+				computedIngestChanges === UpdateIngestRundownAction.FORCE_DELETE || canRundownBeUpdated(rundown, false)
+			if (!canRemove) throw UserError.create(UserErrorMessage.RundownRemoveWhileActive, { name: rundown.name })
+
+			// The rundown has been deleted
+			commitData = {
+				changedSegmentIds: [],
+				removedSegmentIds: [],
+				renamedSegments: new Map(),
+
+				removeRundown: true,
+				returnRemoveFailure: true,
+			}
+		}
+	} else if (computedIngestChanges) {
 		const calcSpan = context.startSpan('ingest.calcFcn')
 		commitData = await applyCalculatedIngestChangesToModel(
 			context,
@@ -237,18 +258,6 @@ async function updateSofieRundownModel(
 			peripheralDeviceId
 		)
 		calcSpan?.end()
-	} else {
-		// The rundown has been deleted
-		// nocommit verify this is sensible
-		commitData = {
-			changedSegmentIds: [],
-			removedSegmentIds: [],
-			renamedSegments: new Map(),
-
-			removeRundown: true,
-
-			returnRemoveFailure: false,
-		}
 	}
 
 	let resultingError: UserError | void | undefined

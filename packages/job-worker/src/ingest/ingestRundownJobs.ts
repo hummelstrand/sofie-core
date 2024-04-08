@@ -1,11 +1,8 @@
 import { JobContext } from '../jobs'
 import { logger } from '../logging'
-import { GenerateRundownMode, updateRundownFromIngestData } from './generationRundown'
 import { makeNewIngestRundown } from './ingestCache'
-import { canRundownBeUpdated } from './lib'
-import { CommitIngestData, runIngestUpdateOperation, runWithRundownLock, UpdateIngestRundownAction } from './lock'
+import { runWithRundownLock, UpdateIngestRundownAction } from './lock'
 import { removeRundownFromDb } from '../rundownPlaylists'
-import { literal } from '@sofie-automation/corelib/dist/lib'
 import { DBRundown, RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import {
 	IngestRegenerateRundownProps,
@@ -15,34 +12,18 @@ import {
 	UserRemoveRundownProps,
 	UserUnsyncRundownProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
-import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/error'
+import { UpdateIngestRundownResult2, runIngestUpdateOperationNew } from './runOperation'
+import { IncomingIngestRundownChange } from '@sofie-automation/blueprints-integration'
+import { getCurrentTime } from '../lib'
 
 /**
  * Attempt to remove a rundown, or orphan it
  */
 export async function handleRemovedRundown(context: JobContext, data: IngestRemoveRundownProps): Promise<void> {
-	return runIngestUpdateOperation(
-		context,
-		data,
-		() => {
-			// Remove it
-			return UpdateIngestRundownAction.DELETE
-		},
-		async (_context, ingestModel) => {
-			const rundown = ingestModel.getRundown()
-
-			const canRemove = data.forceDelete || canRundownBeUpdated(rundown, false)
-			if (!canRemove) throw UserError.create(UserErrorMessage.RundownRemoveWhileActive, { name: rundown.name })
-
-			return literal<CommitIngestData>({
-				changedSegmentIds: [],
-				removedSegmentIds: [],
-				renamedSegments: new Map(),
-				removeRundown: true,
-				returnRemoveFailure: true,
-			})
-		}
-	)
+	return runIngestUpdateOperationNew(context, data, () => {
+		// Remove it
+		return data.forceDelete ? UpdateIngestRundownAction.FORCE_DELETE : UpdateIngestRundownAction.DELETE
+	})
 }
 
 /**
@@ -92,29 +73,19 @@ export async function handleUserRemoveRundown(context: JobContext, data: UserRem
  * Insert or update a rundown with a new IngestRundown
  */
 export async function handleUpdatedRundown(context: JobContext, data: IngestUpdateRundownProps): Promise<void> {
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => {
-			if (ingestRundown || data.isCreateAction) {
-				// We want to regenerate unmodified
-				return makeNewIngestRundown(data.ingestRundown)
-			} else {
-				throw new Error(`Rundown "${data.rundownExternalId}" not found`)
-			}
-		},
-		async (context, ingestModel, ingestRundown) => {
-			if (!ingestRundown) throw new Error(`regenerateRundown lost the IngestRundown...`)
-
-			return updateRundownFromIngestData(
-				context,
-				ingestModel,
-				ingestRundown,
-				data.isCreateAction ? GenerateRundownMode.Create : GenerateRundownMode.Update,
-				data.peripheralDeviceId ?? ingestModel.rundown?.peripheralDeviceId ?? null
-			)
+	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+		if (ingestRundown || data.isCreateAction) {
+			return {
+				ingestRundown: makeNewIngestRundown(data.ingestRundown),
+				changes: {
+					source: 'ingest',
+					rundownChanges: IncomingIngestRundownChange.Regenerate,
+				},
+			} satisfies UpdateIngestRundownResult2
+		} else {
+			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
-	)
+	})
 }
 
 /**
@@ -124,61 +95,43 @@ export async function handleUpdatedRundownMetaData(
 	context: JobContext,
 	data: IngestUpdateRundownMetaDataProps
 ): Promise<void> {
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => {
-			if (ingestRundown) {
-				return {
-					...makeNewIngestRundown(data.ingestRundown),
+	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+		if (ingestRundown) {
+			return {
+				ingestRundown: {
+					...data.ingestRundown,
+					modified: getCurrentTime(),
 					segments: ingestRundown.segments,
-				}
-			} else {
-				throw new Error(`Rundown "${data.rundownExternalId}" not found`)
-			}
-		},
-		async (context, ingestModel, ingestRundown) => {
-			if (!ingestRundown) throw new Error(`handleUpdatedRundownMetaData lost the IngestRundown...`)
-
-			return updateRundownFromIngestData(
-				context,
-				ingestModel,
-				ingestRundown,
-				GenerateRundownMode.MetadataChange,
-				data.peripheralDeviceId ?? ingestModel.rundown?.peripheralDeviceId ?? null
-			)
+				},
+				changes: {
+					source: 'ingest',
+					rundownChanges: IncomingIngestRundownChange.Payload,
+				},
+			} satisfies UpdateIngestRundownResult2
+		} else {
+			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
-	)
+	})
 }
 
 /**
  * Regnerate a Rundown from the cached IngestRundown
  */
 export async function handleRegenerateRundown(context: JobContext, data: IngestRegenerateRundownProps): Promise<void> {
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => {
-			if (ingestRundown) {
+	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+		if (ingestRundown) {
+			return {
 				// We want to regenerate unmodified
-				return ingestRundown
-			} else {
-				throw new Error(`Rundown "${data.rundownExternalId}" not found`)
-			}
-		},
-		async (context, ingestModel, ingestRundown) => {
-			// If the rundown is orphaned, then we can't regenerate as there wont be any data to use!
-			if (!ingestRundown) return null
-
-			return updateRundownFromIngestData(
-				context,
-				ingestModel,
 				ingestRundown,
-				GenerateRundownMode.Update,
-				data.peripheralDeviceId
-			)
+				changes: {
+					source: 'ingest',
+					rundownChanges: IncomingIngestRundownChange.Regenerate,
+				},
+			} satisfies UpdateIngestRundownResult2
+		} else {
+			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
-	)
+	})
 }
 
 /**

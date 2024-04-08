@@ -10,8 +10,6 @@ import { RundownLock } from '../jobs/lock'
 import { UserError } from '@sofie-automation/corelib/dist/error'
 import { loadIngestModelFromRundownExternalId } from './model/implementation/LoadIngestModel'
 import { clone } from '@sofie-automation/corelib/dist/lib'
-import { IncomingIngestChange } from '@sofie-automation/blueprints-integration'
-// import { DatabasePersistedModel } from '../modelBase'
 
 /**
  * The result of the initial stage of an Ingest operation
@@ -38,14 +36,10 @@ export interface CommitIngestData {
 
 export enum UpdateIngestRundownAction {
 	DELETE = 'delete',
+	FORCE_DELETE = 'force-delete',
 }
 
-export interface UpdateIngestRundownChange {
-	ingestRundown: LocalIngestRundown
-	changes: IncomingIngestChange
-}
-
-export type UpdateIngestRundownResult = /*UpdateIngestRundownChange*/ LocalIngestRundown | UpdateIngestRundownAction
+export type UpdateIngestRundownResult = LocalIngestRundown | UpdateIngestRundownAction
 
 /**
  * Perform an ingest update operation on a rundown
@@ -89,12 +83,13 @@ export async function runIngestUpdateOperation(
 		const updatedIngestRundown = updateNrcsIngestModelFcn(clone(oldIngestRundown))
 		updateNrcsIngestModelSpan?.end()
 
-		let ingestRundownChanges: /*UpdateIngestRundownChange*/ LocalIngestRundown | undefined
+		let ingestRundownChanges: LocalIngestRundown | undefined
 		switch (updatedIngestRundown) {
 			// case UpdateIngestRundownAction.REJECT:
 			// 	// Reject change
 			// 	return
 			case UpdateIngestRundownAction.DELETE:
+			case UpdateIngestRundownAction.FORCE_DELETE:
 				ingestObjCache.delete()
 				ingestRundownChanges = undefined
 				break
