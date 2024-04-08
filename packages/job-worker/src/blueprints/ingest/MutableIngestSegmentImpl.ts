@@ -26,9 +26,10 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		return this.#segmentHasChanges
 	}
 
-	constructor(ingestSegment: IngestSegment) {
+	constructor(ingestSegment: IngestSegment, hasChanges = false) {
 		this.ingestSegment = omit(ingestSegment, 'parts')
-		this.#parts = ingestSegment.parts.map((part) => new MutableIngestPartImpl(part))
+		this.#parts = ingestSegment.parts.map((part) => new MutableIngestPartImpl<TPartPayload>(part, hasChanges))
+		this.#segmentHasChanges = hasChanges
 	}
 
 	get parts(): MutableIngestPart<TPartPayload>[] {

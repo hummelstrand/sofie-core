@@ -69,6 +69,10 @@ export class RundownIngestDataCache {
 		return new RundownIngestDataCache(context, collection, rundownId, docs)
 	}
 
+	isEmpty(): boolean {
+		return this.documents.length === 0
+	}
+
 	fetchRundown(): LocalIngestRundown | undefined {
 		const span = this.context.startSpan('ingest.ingestCache.loadCachedRundownData')
 
@@ -126,6 +130,37 @@ export class RundownIngestDataCache {
 		}
 
 		this.documents = []
+	}
+
+	removeAllOtherDocuments(documentIdsToKeep: IngestDataCacheObjId[]): void {
+		const documentIdsToKeepSet = new Set<IngestDataCacheObjId>(documentIdsToKeep)
+
+		const newDocuments: IngestDataCacheObj[] = []
+		for (const document of this.documents) {
+			if (!documentIdsToKeepSet.has(document._id)) {
+				this.#changedDocumentIds.add(document._id)
+			} else {
+				newDocuments.push(document)
+			}
+		}
+		this.documents = newDocuments
+	}
+
+	replaceDocuments(changedCacheObjects: IngestDataCacheObj[]): void {
+		const changedObjectsMap = normalizeArrayToMap(changedCacheObjects, '_id')
+
+		const newDocuments: IngestDataCacheObj[] = []
+		for (const document of this.documents) {
+			const newDocument = changedObjectsMap.get(document._id)
+
+			if (newDocument) {
+				newDocuments.push(newDocument)
+				this.#changedDocumentIds.add(newDocument._id)
+			} else {
+				newDocuments.push(document)
+			}
+		}
+		this.documents = newDocuments
 	}
 
 	async saveToDatabase(): Promise<void> {

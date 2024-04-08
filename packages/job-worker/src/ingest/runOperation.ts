@@ -7,10 +7,32 @@ import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UserError } from '@sofie-automation/corelib/dist/error'
 import { loadIngestModelFromRundownExternalId } from './model/implementation/LoadIngestModel'
 import { clone } from '@sofie-automation/corelib/dist/lib'
-import { UpdateIngestRundownAction, UpdateIngestRundownChange, generatePartMap, runWithRundownLockInner } from './lock'
+import {
+	CommitIngestData,
+	UpdateIngestRundownAction,
+	UpdateIngestRundownChange,
+	generatePartMap,
+	runWithRundownLockInner,
+} from './lock'
 import { DatabasePersistedModel } from '../modelBase'
+import { IngestRundown, IngestSegment } from '@sofie-automation/blueprints-integration'
+import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
+import { CommonContext } from '../blueprints/context'
+import { RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { ReadonlyDeep } from 'type-fest'
 
 export type UpdateIngestRundownResult2 = UpdateIngestRundownChange | UpdateIngestRundownAction
+
+// nocommit - this needs a better name
+export interface ComputedIngestChanges {
+	ingestRundown: IngestRundown
+
+	// define what needs regenerating
+	segmentsToRemove: string[]
+	segmentsUpdatedRanks: Record<string, number> // contains the new rank
+	segmentsToRegenerate: IngestSegment[]
+	regenerateRundown: boolean // TODO - full vs metadata?
+}
 
 /**
  * Perform an ingest update operation on a rundown
@@ -36,6 +58,13 @@ export async function runIngestUpdateOperationNew(
 
 		// Load the old ingest data
 		const pIngestModel = loadIngestModelFromRundownExternalId(context, rundownLock, data.rundownExternalId)
+		pIngestModel.catch(() => null) // Prevent unhandled promise rejection
+		const pSofieIngestObjectCache = RundownIngestDataCache.create(
+			context,
+			context.directCollections.SofieIngestDataCache,
+			rundownId
+		)
+		pSofieIngestObjectCache.catch(() => null) // Prevent unhandled promise rejection
 		const nrcsIngestObjectCache = await RundownIngestDataCache.create(
 			context,
 			context.directCollections.NrcsIngestDataCache,
@@ -51,27 +80,37 @@ export async function runIngestUpdateOperationNew(
 
 		// Start saving the nrcs ingest data
 		const pSaveNrcsIngestChanges = nrcsIngestObjectCache.saveToDatabase()
+		pSaveNrcsIngestChanges.catch(() => null) // Prevent unhandled promise rejection
 
 		let resultingError: UserError | void | undefined
 
 		try {
-			// Update the Sofie ingest view
+			const newNrcsIngestRundown = nrcsIngestObjectCache.fetchRundown()
 
-			// TODO
+			// Update the Sofie ingest view
+			const sofieIngestObjectCache = await pSofieIngestObjectCache
+			const oldSofieIngestRundown = clone(sofieIngestObjectCache.fetchRundown())
+			const computedChanges = await updateSofieIngestRundown(
+				context,
+				rundownId,
+				newNrcsIngestRundown,
+				sofieIngestObjectCache,
+				ingestRundownChanges
+			)
 
 			// Start saving the Sofie ingest data
-			// const pSaveSofieIngestChanges = sofieIngestObjectCache.saveToDatabase()
+			const pSaveSofieIngestChanges = sofieIngestObjectCache.saveToDatabase()
 
 			try {
 				resultingError = await updateSofieRundownModel(
 					context,
 					pIngestModel,
-					ingestRundownChanges,
+					computedChanges,
 					oldSofieIngestRundown
 				)
 			} finally {
 				// Ensure we save the sofie ingest data
-				// await pSaveSofieIngestChanges
+				await pSaveSofieIngestChanges
 			}
 		} finally {
 			// Ensure we save the nrcs ingest data
@@ -118,10 +157,61 @@ function updateNrcsIngestObjects(
 	}
 }
 
+async function updateSofieIngestRundown(
+	context: JobContext,
+	rundownId: RundownId,
+	newNrcsIngestRundown: IngestRundown | undefined,
+	sofieIngestObjectCache: RundownIngestDataCache,
+	ingestRundownChanges: UpdateIngestRundownChange | undefined
+): Promise<ComputedIngestChanges | null> {
+	if (!newNrcsIngestRundown) {
+		// Also delete the Sofie view of the Rundown
+		// nocommit Is this correct? Or should we keep the Sofie view as-is until the rundown is deleted? Or perhaps even let the blueprints decide?
+		sofieIngestObjectCache.delete()
+
+		return null
+	} else if (ingestRundownChanges) {
+		const studioBlueprint = context.studioBlueprint.blueprint
+
+		const sofieIngestRundown = sofieIngestObjectCache.fetchRundown()
+
+		const mutableIngestRundown = new MutableIngestRundownImpl(clone(sofieIngestRundown))
+
+		// Let blueprints apply changes to the Sofie ingest data
+		if (typeof studioBlueprint.processIngestData === 'function') {
+			const blueprintContext = new CommonContext({
+				name: 'processIngestData',
+				identifier: `studio:${context.studioId},blueprint:${studioBlueprint.blueprintId}`,
+			})
+
+			await studioBlueprint.processIngestData(
+				blueprintContext,
+				newNrcsIngestRundown,
+				mutableIngestRundown,
+				ingestRundownChanges.changes
+			)
+		} else {
+			mutableIngestRundown.defaultApplyIngestChanges(newNrcsIngestRundown, ingestRundownChanges.changes)
+		}
+
+		const resultChanges = mutableIngestRundown.intoIngestRundown(rundownId, sofieIngestRundown)
+		//  const newSofieIngestRundown = resultChanges.ingestRundown
+
+		// Sync changes to the cache
+		sofieIngestObjectCache.replaceDocuments(resultChanges.changedCacheObjects)
+		sofieIngestObjectCache.removeAllOtherDocuments(resultChanges.allCacheObjectIds)
+
+		return resultChanges.computedChanges
+	} else {
+		// nocommit - should this be doing a delete?
+		return null
+	}
+}
+
 async function updateSofieRundownModel(
 	context: JobContext,
 	pIngestModel: Promise<IngestModel & DatabasePersistedModel>,
-	ingestRundownChanges: UpdateIngestRundownChange | undefined,
+	computedIngestChanges: ComputedIngestChanges | null,
 	oldSofieIngestRundown: LocalIngestRundown | undefined
 ) {
 	const ingestModel = await pIngestModel
@@ -130,9 +220,29 @@ async function updateSofieRundownModel(
 	const beforeRundown = ingestModel.rundown
 	const beforePartMap = generatePartMap(ingestModel)
 
-	const calcSpan = context.startSpan('ingest.calcFcn')
-	const commitData = await calcFcn(context, ingestModel, ingestRundownChanges, oldSofieIngestRundown)
-	calcSpan?.end()
+	let commitData: CommitIngestData | null
+	if (computedIngestChanges) {
+		const calcSpan = context.startSpan('ingest.calcFcn')
+		commitData = await applyCalculatedIngestChangesToModel(
+			context,
+			ingestModel,
+			computedIngestChanges,
+			oldSofieIngestRundown
+		)
+		calcSpan?.end()
+	} else {
+		// The rundown has been deleted
+		// nocommit verify this is sensible
+		commitData = {
+			changedSegmentIds: [],
+			removedSegmentIds: [],
+			renamedSegments: new Map(),
+
+			removeRundown: true,
+
+			returnRemoveFailure: false,
+		}
+	}
 
 	let resultingError: UserError | void | undefined
 
@@ -147,4 +257,13 @@ async function updateSofieRundownModel(
 	}
 
 	return resultingError
+}
+
+async function applyCalculatedIngestChangesToModel(
+	context: JobContext,
+	ingestModel: IngestModel,
+	computedIngestChanges: ComputedIngestChanges,
+	oldIngestRundown: ReadonlyDeep<IngestRundown> | undefined
+): Promise<CommitIngestData> | null {
+	// TODO
 }
