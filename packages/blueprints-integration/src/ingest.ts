@@ -91,7 +91,7 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	// TODO - split payload into 'private' and 'public'? ie, one for `getRundown` and one for `getSegment`, so that we can affect the rundown generation without regenerating all of the segments.
 	// Or should we expect this blueprint stage to copy any needed properties into each of the segment/part payloads?
 
-	/** Array of segmsnts in this rundown */
+	/** Array of segments in this rundown */
 	readonly segments: ReadonlyArray<MutableIngestSegment<TSegmentPayload, TPartPayload>>
 
 	findPart(id: string): MutableIngestPart<TPartPayload> | undefined

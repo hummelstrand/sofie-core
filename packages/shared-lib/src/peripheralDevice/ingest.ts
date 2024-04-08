@@ -16,7 +16,7 @@ export interface IngestRundown {
 	/** Raw payload of rundown metadata. Only used by the blueprints */
 	payload?: any
 
-	/** Array of segmsnts in this rundown */
+	/** Array of segments in this rundown */
 	segments: IngestSegment[]
 }
 export interface IngestSegment {

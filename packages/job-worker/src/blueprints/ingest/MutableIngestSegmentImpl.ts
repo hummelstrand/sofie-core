@@ -8,7 +8,7 @@ import { Complete, clone, omit } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { MutableIngestPartImpl } from './MutableIngestPartImpl'
-import { RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
+import { LocalIngestPart, RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
 import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { getSegmentId } from '../../ingest/lib'
 import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
@@ -117,24 +117,25 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	}
 
 	intoChangesInfo(generator: RundownIngestDataCacheGenerator): {
-		ingestParts: IngestPart[]
+		ingestParts: LocalIngestPart[]
 		changedCacheObjects: IngestDataCacheObj[]
 		allCacheObjectIds: IngestDataCacheObjId[]
 		segmentHasChanges: boolean
 		partOrderHasChanged: boolean
 	} {
-		const ingestParts: IngestPart[] = []
+		const ingestParts: LocalIngestPart[] = []
 		const changedCacheObjects: IngestDataCacheObj[] = []
 		const allCacheObjectIds: IngestDataCacheObjId[] = []
 
 		const segmentId = getSegmentId(generator.rundownId, this.ingestSegment.externalId)
 
 		this.#parts.forEach((part, rank) => {
-			const ingestPart: Complete<IngestPart> = {
+			const ingestPart: Complete<LocalIngestPart> = {
 				externalId: part.externalId,
 				rank,
 				name: part.name,
 				payload: part.payload,
+				modified: 0,
 			}
 
 			allCacheObjectIds.push(generator.getPartObjectId(ingestPart.externalId))

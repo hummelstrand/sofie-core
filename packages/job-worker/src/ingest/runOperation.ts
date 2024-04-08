@@ -6,14 +6,13 @@ import { JobContext } from '../jobs'
 import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/error'
 import { loadIngestModelFromRundownExternalId } from './model/implementation/LoadIngestModel'
-import { clone } from '@sofie-automation/corelib/dist/lib'
+import { Complete, clone } from '@sofie-automation/corelib/dist/lib'
 import { CommitIngestData, UpdateIngestRundownAction, generatePartMap, runWithRundownLockInner } from './lock'
 import { DatabasePersistedModel } from '../modelBase'
 import { IncomingIngestChange, IngestRundown } from '@sofie-automation/blueprints-integration'
 import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
 import { CommonContext } from '../blueprints/context'
 import { PeripheralDeviceId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { ReadonlyDeep } from 'type-fest'
 import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromIngestDataInner } from './generationRundown'
 import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
@@ -78,11 +77,7 @@ export async function runIngestUpdateOperationNew(
 		)
 
 		// Update the NRCS ingest view
-		const { oldNrcsIngestRundown, ingestRundownChanges } = updateNrcsIngestObjects(
-			context,
-			nrcsIngestObjectCache,
-			updateNrcsIngestModelFcn
-		)
+		const ingestRundownChanges = updateNrcsIngestObjects(context, nrcsIngestObjectCache, updateNrcsIngestModelFcn)
 
 		// Start saving the nrcs ingest data
 		const pSaveNrcsIngestChanges = nrcsIngestObjectCache.saveToDatabase()
@@ -93,7 +88,6 @@ export async function runIngestUpdateOperationNew(
 		try {
 			// Update the Sofie ingest view
 			const sofieIngestObjectCache = await pSofieIngestObjectCache
-			const oldSofieIngestRundown = clone(sofieIngestObjectCache.fetchRundown())
 			const computedChanges = await updateSofieIngestRundown(
 				context,
 				rundownId,
@@ -109,7 +103,6 @@ export async function runIngestUpdateOperationNew(
 					context,
 					pIngestModel,
 					computedChanges,
-					oldSofieIngestRundown,
 					data.peripheralDeviceId
 				)
 			} finally {
@@ -131,10 +124,7 @@ function updateNrcsIngestObjects(
 	context: JobContext,
 	nrcsIngestObjectCache: RundownIngestDataCache,
 	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult2
-): {
-	oldNrcsIngestRundown: LocalIngestRundown | undefined
-	ingestRundownChanges: UpdateIngestRundownResult2
-} {
+): UpdateIngestRundownResult2 {
 	const updateNrcsIngestModelSpan = context.startSpan('ingest.calcFcn')
 	const oldNrcsIngestRundown = nrcsIngestObjectCache.fetchRundown()
 	const updatedIngestRundown = updateNrcsIngestModelFcn(clone(oldNrcsIngestRundown))
@@ -153,10 +143,7 @@ function updateNrcsIngestObjects(
 			break
 	}
 
-	return {
-		oldNrcsIngestRundown,
-		ingestRundownChanges: updatedIngestRundown,
-	}
+	return updatedIngestRundown
 }
 
 async function updateSofieIngestRundown(
@@ -177,9 +164,21 @@ async function updateSofieIngestRundown(
 	} else {
 		const studioBlueprint = context.studioBlueprint.blueprint
 
+		const nrcsIngestRundown = ingestRundownChanges.ingestRundown
 		const sofieIngestRundown = sofieIngestObjectCache.fetchRundown()
 
-		const mutableIngestRundown = new MutableIngestRundownImpl(clone(sofieIngestRundown))
+		const mutableIngestRundown = sofieIngestRundown
+			? new MutableIngestRundownImpl(clone(sofieIngestRundown))
+			: new MutableIngestRundownImpl(
+					{
+						externalId: nrcsIngestRundown.externalId,
+						name: nrcsIngestRundown.name,
+						type: nrcsIngestRundown.type,
+						segments: [],
+						payload: undefined,
+					} satisfies Complete<IngestRundown>,
+					true
+			  )
 
 		// Let blueprints apply changes to the Sofie ingest data
 		if (typeof studioBlueprint.processIngestData === 'function') {
@@ -190,15 +189,12 @@ async function updateSofieIngestRundown(
 
 			await studioBlueprint.processIngestData(
 				blueprintContext,
-				ingestRundownChanges.ingestRundown,
+				nrcsIngestRundown,
 				mutableIngestRundown,
 				ingestRundownChanges.changes
 			)
 		} else {
-			mutableIngestRundown.defaultApplyIngestChanges(
-				ingestRundownChanges.ingestRundown,
-				ingestRundownChanges.changes
-			)
+			mutableIngestRundown.defaultApplyIngestChanges(nrcsIngestRundown, ingestRundownChanges.changes)
 		}
 
 		const resultChanges = mutableIngestRundown.intoIngestRundown(rundownId, sofieIngestRundown)
@@ -216,7 +212,6 @@ async function updateSofieRundownModel(
 	context: JobContext,
 	pIngestModel: Promise<IngestModel & DatabasePersistedModel>,
 	computedIngestChanges: ComputedIngestChanges2 | null,
-	oldSofieIngestRundown: LocalIngestRundown | undefined,
 	peripheralDeviceId: PeripheralDeviceId | null
 ) {
 	const ingestModel = await pIngestModel
@@ -254,7 +249,6 @@ async function updateSofieRundownModel(
 			context,
 			ingestModel,
 			computedIngestChanges,
-			oldSofieIngestRundown,
 			peripheralDeviceId
 		)
 		calcSpan?.end()
@@ -279,7 +273,6 @@ async function applyCalculatedIngestChangesToModel(
 	context: JobContext,
 	ingestModel: IngestModel,
 	computedIngestChanges: ComputedIngestChanges,
-	oldIngestRundown: ReadonlyDeep<IngestRundown> | undefined,
 	peripheralDeviceId: PeripheralDeviceId | null
 ): Promise<CommitIngestData | null> {
 	const newIngestRundown = computedIngestChanges.ingestRundown

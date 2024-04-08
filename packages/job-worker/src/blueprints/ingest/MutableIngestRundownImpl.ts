@@ -13,7 +13,7 @@ import _ = require('underscore')
 import { MutableIngestSegmentImpl } from './MutableIngestSegmentImpl'
 import { defaultApplyIngestChanges } from './defaultApplyIngestChanges'
 import { IngestDataCacheObjId, RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
+import { LocalIngestSegment, RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
 import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import type { ComputedIngestChanges } from '../../ingest/runOperation'
 
@@ -42,9 +42,10 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		return this.#segmentOrderChanged
 	}
 
-	constructor(ingestRundown: IngestRundown) {
+	constructor(ingestRundown: IngestRundown, hasChanges = false) {
 		this.ingestRundown = omit(ingestRundown, 'segments')
 		this.#segments = ingestRundown.segments.map((segment) => new MutableIngestSegmentImpl(segment))
+		this.#hasChangesToRundown = hasChanges
 	}
 
 	get segments(): MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>[] {
@@ -208,21 +209,22 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	): MutableIngestRundownChanges {
 		const generator = new RundownIngestDataCacheGenerator(rundownId)
 
-		const ingestSegments: IngestSegment[] = []
+		const ingestSegments: LocalIngestSegment[] = []
 		const changedCacheObjects: IngestDataCacheObj[] = []
 		const allCacheObjectIds: IngestDataCacheObjId[] = []
 
-		const segmentsToRegenerate: IngestSegment[] = []
+		const segmentsToRegenerate: LocalIngestSegment[] = []
 
 		this.#segments.forEach((segment, rank) => {
 			const segmentInfo = segment.intoChangesInfo(generator)
 
-			const ingestSegment: Complete<IngestSegment> = {
+			const ingestSegment: Complete<LocalIngestSegment> = {
 				externalId: segment.externalId,
 				rank,
 				name: segment.name,
 				payload: segment.payload,
 				parts: segmentInfo.ingestParts,
+				modified: 0,
 			}
 
 			ingestSegments.push(ingestSegment)
@@ -271,6 +273,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 				ingestRundown: {
 					...this.ingestRundown,
 					segments: ingestSegments,
+					modified: 0,
 				},
 
 				segmentsToRemove: removedSegmentIds,
