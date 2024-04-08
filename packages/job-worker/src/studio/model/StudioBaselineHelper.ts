@@ -33,6 +33,19 @@ export class StudioBaselineHelper {
 	}
 
 	async saveAllToDatabase(): Promise<void> {
+		const modifier: Record<string, boolean> = {}
+
+		for (const [routeSetId, isActive] of Object.entries<boolean>(this.#routeSetActive)) {
+			modifier[`routeSets.${routeSetId}.active`] = isActive
+		}
+		await this.#context.directCollections.Studios.update(
+			{
+				_id: this.#context.studioId,
+			},
+			{
+				$set: modifier,
+			}
+		)
 		await Promise.all([
 			this.#pendingExpectedPlayoutItems
 				? saveIntoDb(
@@ -76,22 +89,6 @@ export class StudioBaselineHelper {
 				if (otherRouteSetId === routeSetId) return
 				if (otherRouteSet.exclusivityGroup === routeSet.exclusivityGroup) {
 					this.#routeSetActive[routeSetId] = isActive
-					const modifier: Record<string, boolean> = {}
-					const span = this.#context.startSpan('StudioBaselineHelper.updateRouteSetActive.saveAllToDatabase')
-
-					for (const [routeSetId, isActive] of Object.entries<boolean>(this.#routeSetActive)) {
-						modifier[`routeSets.${routeSetId}.active`] = isActive
-					}
-					await this.#context.directCollections.Studios.update(
-						{
-							_id: this.#context.studioId,
-						},
-						{
-							$set: modifier,
-						}
-					)
-					await this.saveAllToDatabase()
-					if (span) span.end()
 				}
 			}
 		}
