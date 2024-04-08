@@ -52,7 +52,7 @@ export async function handleGeneratePlaylistSnapshot(
 
 		const rundowns = await context.directCollections.Rundowns.findFetch({ playlistId: playlist._id })
 		const rundownIds = rundowns.map((i) => i._id)
-		const ingestData = await context.directCollections.IngestDataCache.findFetch(
+		const ingestData = await context.directCollections.NrcsIngestDataCache.findFetch(
 			{ rundownId: { $in: rundownIds } },
 			{ sort: { modified: -1 } }
 		) // @todo: check sorting order
@@ -393,7 +393,7 @@ export async function handleRestorePlaylistSnapshot(
 		saveIntoDb(context, context.directCollections.Rundowns, { playlistId }, snapshot.rundowns),
 		saveIntoDb(
 			context,
-			context.directCollections.IngestDataCache,
+			context.directCollections.NrcsIngestDataCache,
 			{ rundownId: { $in: rundownIds } },
 			updateItemIds(snapshot.ingestData, true)
 		),

@@ -13,7 +13,7 @@ export enum CollectionName {
 	ExpectedPackageWorkStatuses = 'expectedPackageWorkStatuses',
 	ExpectedPlayoutItems = 'expectedPlayoutItems',
 	ExternalMessageQueue = 'externalMessageQueue',
-	IngestDataCache = 'ingestDataCache',
+	NrcsIngestDataCache = 'ingestDataCache',
 	MediaObjects = 'mediaObjects',
 	MediaWorkFlows = 'mediaWorkFlows',
 	MediaWorkFlowSteps = 'mediaWorkFlowSteps',

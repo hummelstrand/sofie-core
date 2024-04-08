@@ -32,7 +32,7 @@ import {
 	ExpectedPackageWorkStatuses,
 	ExpectedPlayoutItems,
 	ExternalMessageQueue,
-	IngestDataCache,
+	NrcsIngestDataCache,
 	PackageContainerPackageStatuses,
 	PackageInfos,
 	PeripheralDeviceCommands,
@@ -300,7 +300,7 @@ async function setDefaultDatatoDB(env: DefaultEnvironment, now: number) {
 		tryCount: 0,
 		type: '' as any,
 	})
-	await IngestDataCache.mutableCollection.insertAsync({
+	await NrcsIngestDataCache.mutableCollection.insertAsync({
 		_id: getRandomId(),
 		data: {} as any,
 		modified: 0,

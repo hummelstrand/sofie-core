@@ -36,7 +36,7 @@ import {
 	ExpectedPackageWorkStatuses,
 	ExpectedPlayoutItems,
 	ExternalMessageQueue,
-	IngestDataCache,
+	NrcsIngestDataCache,
 	MediaObjects,
 	MediaWorkFlows,
 	MediaWorkFlowSteps,
@@ -275,7 +275,7 @@ export async function cleanupOldDataInner(actuallyCleanup = false): Promise<Coll
 		}
 		await ownedByRundownId(AdLibActions)
 		await ownedByRundownId(AdLibPieces)
-		await ownedByRundownId(IngestDataCache)
+		await ownedByRundownId(NrcsIngestDataCache)
 		;(await ownedByRundownId(Parts)).forEach((id) => removedParts.add(id))
 		await ownedByRundownId(RundownBaselineAdLibActions)
 		await ownedByRundownId(RundownBaselineAdLibPieces)

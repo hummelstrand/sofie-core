@@ -38,7 +38,7 @@ export async function runIngestUpdateOperationNew(
 		const pIngestModel = loadIngestModelFromRundownExternalId(context, rundownLock, data.rundownExternalId)
 		const nrcsIngestObjectCache = await RundownIngestDataCache.create(
 			context,
-			context.directCollections.IngestDataCache,
+			context.directCollections.NrcsIngestDataCache,
 			rundownId
 		)
 

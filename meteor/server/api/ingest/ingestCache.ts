@@ -4,7 +4,7 @@ import { IngestRundown, IngestSegment, IngestPart } from '@sofie-automation/blue
 import { logger } from '../../../lib/logging'
 import { profiler } from '../profiler'
 import { RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { IngestDataCache } from '../../collections'
+import { NrcsIngestDataCache } from '../../collections'
 import { IngestCacheType, IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { groupByToMap } from '@sofie-automation/corelib/dist/lib'
 
@@ -23,7 +23,7 @@ export class RundownIngestDataCache {
 	private constructor(private readonly rundownId: RundownId, private readonly documents: IngestDataCacheObj[]) {}
 
 	static async create(rundownId: RundownId): Promise<RundownIngestDataCache> {
-		const docs = await IngestDataCache.findFetchAsync({ rundownId })
+		const docs = await NrcsIngestDataCache.findFetchAsync({ rundownId })
 
 		return new RundownIngestDataCache(rundownId, docs)
 	}

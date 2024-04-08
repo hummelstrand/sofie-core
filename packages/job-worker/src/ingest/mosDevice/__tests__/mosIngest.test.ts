@@ -445,7 +445,7 @@ describe('Test recieved mos ingest payloads', () => {
 		// Clean up after ourselves:
 		const partsToRemove = await context.mockCollections.Parts.findFetch({ externalId: 'ro1;s1;newPart1' })
 		await context.mockCollections.Parts.remove({ _id: { $in: partsToRemove.map((p) => p._id) } })
-		await context.mockCollections.IngestDataCache.remove({
+		await context.mockCollections.NrcsIngestDataCache.remove({
 			rundownId: rundown._id,
 			type: IngestCacheType.PART,
 			partId: { $in: partsToRemove.map((p) => p._id) },

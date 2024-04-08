@@ -42,7 +42,7 @@ import '../cronjobs'
 import '../api/peripheralDevice'
 import {
 	CoreSystem,
-	IngestDataCache,
+	NrcsIngestDataCache,
 	PartInstances,
 	Parts,
 	PeripheralDeviceCommands,
@@ -169,11 +169,11 @@ describe('cronjobs', () => {
 			await PeripheralDevices.removeAsync({})
 		})
 
-		testInFiber('Remove IngestDataCache objects that are not connected to any Rundown', async () => {
-			// Set up a mock rundown, a detached IngestDataCache object and an object attached to the mock rundown
-			// Detached IngestDataCache object 0
+		testInFiber('Remove NrcsIngestDataCache objects that are not connected to any Rundown', async () => {
+			// Set up a mock rundown, a detached NrcsIngestDataCache object and an object attached to the mock rundown
+			// Detached NrcsIngestDataCache object 0
 			const dataCache0Id = protectString<IngestDataCacheObjId>(getRandomString())
-			await IngestDataCache.mutableCollection.insertAsync({
+			await NrcsIngestDataCache.mutableCollection.insertAsync({
 				_id: dataCache0Id,
 				data: {
 					externalId: '',
@@ -186,9 +186,9 @@ describe('cronjobs', () => {
 				rundownId: getRandomId(),
 				type: IngestCacheType.RUNDOWN,
 			})
-			// Attached IngestDataCache object 1
+			// Attached NrcsIngestDataCache object 1
 			const dataCache1Id = protectString<IngestDataCacheObjId>(getRandomString())
-			await IngestDataCache.mutableCollection.insertAsync({
+			await NrcsIngestDataCache.mutableCollection.insertAsync({
 				_id: dataCache1Id,
 				data: {
 					externalId: '',
@@ -204,10 +204,10 @@ describe('cronjobs', () => {
 
 			await runCronjobs()
 
-			expect(await IngestDataCache.findOneAsync(dataCache1Id)).toMatchObject({
+			expect(await NrcsIngestDataCache.findOneAsync(dataCache1Id)).toMatchObject({
 				_id: dataCache1Id,
 			})
-			expect(await IngestDataCache.findOneAsync(dataCache0Id)).toBeUndefined()
+			expect(await NrcsIngestDataCache.findOneAsync(dataCache0Id)).toBeUndefined()
 		})
 		testInFiber('Removes old PartInstances and PieceInstances', async () => {
 			// nightlyCronjobInner()

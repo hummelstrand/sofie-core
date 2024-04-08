@@ -45,7 +45,7 @@ import {
 	ShowStyleBaseId,
 	StudioId,
 } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { IngestDataCache, Parts, Pieces, Rundowns } from '../collections'
+import { NrcsIngestDataCache, Parts, Pieces, Rundowns } from '../collections'
 import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { verifyHashedToken } from './singleUseTokens'
 
@@ -65,7 +65,7 @@ async function pieceSetInOutPoints(
 	})
 	if (!rundown) throw new Meteor.Error(501, `Rundown "${part.rundownId}" not found!`)
 
-	const partCache = await IngestDataCache.findOneAsync({
+	const partCache = await NrcsIngestDataCache.findOneAsync({
 		rundownId: rundown._id,
 		partId: part._id,
 		type: IngestCacheType.PART,
