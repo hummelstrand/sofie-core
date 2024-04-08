@@ -68,7 +68,7 @@ export const ingestJobHandlers: IngestJobHandlers = {
 	[IngestJobs.MosRundownMetadata]: handleMosRundownMetadata,
 	[IngestJobs.MosRundownStatus]: handleMosRundownStatus,
 	[IngestJobs.MosRundownReadyToAir]: handleMosRundownReadyToAir,
-	[IngestJobs.MosFullStory]: handleMosFullStory,
+	[IngestJobs.MosFullStory]: wrapMosIngestJob(handleMosFullStory),
 	[IngestJobs.MosDeleteStory]: wrapMosIngestJob(handleMosDeleteStory),
 	[IngestJobs.MosInsertStory]: wrapMosIngestJob(handleMosInsertStories),
 	[IngestJobs.MosMoveStory]: wrapMosIngestJob(handleMosMoveStories),

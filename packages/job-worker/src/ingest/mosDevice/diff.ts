@@ -7,10 +7,14 @@ import { calculateSegmentsFromIngestData } from '../generationSegment'
 import _ = require('underscore')
 import { clone, deleteAllUndefinedProperties, literal, normalizeArrayFunc } from '@sofie-automation/corelib/dist/lib'
 import { SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { IngestSegment } from '@sofie-automation/blueprints-integration'
-import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
+import {
+	IncomingIngestChange,
+	IncomingIngestSegmentChange,
+	IncomingIngestSegmentChangeEnum,
+	IngestSegment,
+} from '@sofie-automation/blueprints-integration'
+import { DBSegment, SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { CommitIngestData } from '../lock'
-import { IngestSegmentModel } from '../model/IngestSegmentModel'
 
 /**
  * Update the Ids of Segments based on new Ingest data
@@ -29,7 +33,12 @@ export function diffAndUpdateSegmentIds(
 ): CommitIngestData['renamedSegments'] {
 	const span = context.startSpan('mosDevice.ingest.diffAndApplyChanges')
 
-	const oldSegments = ingestModel.getOrderedSegments()
+	const oldSegments = ingestModel.getOrderedSegments().map((segment) => ({
+		externalId: segment.segment.externalId,
+		externalModified: segment.segment.externalModified,
+		_rank: segment.segment._rank,
+	}))
+
 	const oldSegmentEntries = compileSegmentEntries(oldIngestRundown.segments)
 	const newSegmentEntries = compileSegmentEntries(newIngestRundown.segments)
 	const segmentDiff = diffSegmentEntries(oldSegmentEntries, newSegmentEntries, oldSegments)
@@ -39,6 +48,54 @@ export function diffAndUpdateSegmentIds(
 
 	span?.end()
 	return renamedSegments
+}
+
+export function generateMosIngestDiffTemp(
+	oldIngestSegments: LocalIngestSegment[] | undefined,
+	newIngestSegments: LocalIngestSegment[]
+): IncomingIngestChange {
+	// Fetch all existing segments:
+	const miniSegments: SegmentMini[] | null =
+		oldIngestSegments?.map((segment) => ({
+			externalId: segment.externalId,
+			externalModified: segment.modified,
+			_rank: segment.rank,
+		})) ?? null
+
+	const oldSegmentEntries = compileSegmentEntries(oldIngestSegments ?? [])
+	const newSegmentEntries = compileSegmentEntries(newIngestSegments)
+	const segmentDiff = diffSegmentEntries(oldSegmentEntries, newSegmentEntries, miniSegments)
+
+	const onlyRankChangedSet = new Set(Object.keys(segmentDiff.onlyRankChanged))
+
+	// /** Reference to segments which only had their ranks updated */
+	// onlyRankChanged: { [segmentExternalId: string]: number } // contains the new rank
+
+	// /** Reference to segments which has been REMOVED, but it looks like there is an ADDED segment that is closely related to the removed one */
+	// externalIdChanged: { [removedSegmentExternalId: string]: string } // contains the added segment's externalId
+
+	const segmentChanges: Record<string, IncomingIngestSegmentChange> = {}
+
+	for (const id of Object.keys(segmentDiff.removed)) {
+		segmentChanges[id] = IncomingIngestSegmentChangeEnum.Deleted
+	}
+	for (const id of Object.keys(segmentDiff.changed)) {
+		if (!onlyRankChangedSet.has(id)) {
+			// TODO - should this be more granular?
+			segmentChanges[id] = IncomingIngestSegmentChangeEnum.Inserted
+		}
+	}
+	for (const id of Object.keys(segmentDiff.added)) {
+		segmentChanges[id] = IncomingIngestSegmentChangeEnum.Inserted
+	}
+
+	// nocommit implement something for externalIdChanged
+
+	return {
+		source: 'ingest',
+		segmentChanges,
+		segmentOrderChanged: Object.keys(segmentDiff.onlyRankChanged).length > 0,
+	}
 }
 
 /**
@@ -66,7 +123,11 @@ export async function diffAndApplyChanges(
 	const span = context.startSpan('mosDevice.ingest.diffAndApplyChanges')
 
 	// Fetch all existing segments:
-	const oldSegments = ingestModel.getOrderedSegments()
+	const oldSegments = ingestModel.getOrderedSegments().map((segment) => ({
+		externalId: segment.segment.externalId,
+		externalModified: segment.segment.externalModified,
+		_rank: segment.segment._rank,
+	}))
 
 	const oldSegmentEntries = compileSegmentEntries(oldIngestRundown.segments)
 	const newSegmentEntries = compileSegmentEntries(newIngestRundown.segments)
@@ -206,6 +267,8 @@ export interface DiffSegmentEntries {
 	externalIdChanged: { [removedSegmentExternalId: string]: string } // contains the added segment's externalId
 }
 
+export type SegmentMini = Pick<DBSegment, 'externalId' | 'externalModified' | '_rank'>
+
 /**
  * Perform a diff of SegmentEntries, to calculate what has changed.
  * Considers that the ids of some IngestSegments could have changed
@@ -217,7 +280,7 @@ export interface DiffSegmentEntries {
 export function diffSegmentEntries(
 	oldSegmentEntries: SegmentEntries,
 	newSegmentEntries: SegmentEntries,
-	oldSegments: IngestSegmentModel[] | null
+	oldSegments: SegmentMini[] | null
 ): DiffSegmentEntries {
 	const diff: DiffSegmentEntries = {
 		added: {},
@@ -228,12 +291,12 @@ export function diffSegmentEntries(
 		onlyRankChanged: {},
 		externalIdChanged: {},
 	}
-	const oldSegmentMap: { [externalId: string]: IngestSegmentModel } | null =
-		oldSegments === null ? null : normalizeArrayFunc(oldSegments, (segment) => segment.segment.externalId)
+	const oldSegmentMap: { [externalId: string]: SegmentMini } | null =
+		oldSegments === null ? null : normalizeArrayFunc(oldSegments, (segment) => segment.externalId)
 
 	_.each(newSegmentEntries, (newSegmentEntry, segmentExternalId) => {
 		const oldSegmentEntry = oldSegmentEntries[segmentExternalId] as IngestSegment | undefined
-		let oldSegment: IngestSegmentModel | undefined
+		let oldSegment: SegmentMini | undefined
 		if (oldSegmentMap) {
 			oldSegment = oldSegmentMap[newSegmentEntry.externalId]
 			if (!oldSegment) {
@@ -243,7 +306,7 @@ export function diffSegmentEntries(
 			}
 		}
 		if (oldSegmentEntry) {
-			const modifiedIsEqual = oldSegment ? newSegmentEntry.modified === oldSegment.segment.externalModified : true
+			const modifiedIsEqual = oldSegment ? newSegmentEntry.modified === oldSegment.externalModified : true
 
 			// ensure there are no 'undefined' properties
 			deleteAllUndefinedProperties(oldSegmentEntry)
@@ -252,7 +315,7 @@ export function diffSegmentEntries(
 			// deep compare:
 			const ingestContentIsEqual = _.isEqual(_.omit(newSegmentEntry, 'rank'), _.omit(oldSegmentEntry, 'rank'))
 			const rankIsEqual = oldSegment
-				? newSegmentEntry.rank === oldSegment.segment._rank
+				? newSegmentEntry.rank === oldSegment._rank
 				: newSegmentEntry.rank === oldSegmentEntry.rank
 
 			// Compare the modified timestamps:

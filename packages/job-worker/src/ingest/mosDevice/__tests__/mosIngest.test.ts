@@ -55,7 +55,11 @@ function getPartIdMap(segments: DBSegment[], parts: DBPart[]) {
 	})
 }
 
+const handleMosDeleteStoryWrapped = wrapMosIngestJob(handleMosDeleteStory)
+const handleMosFullStoryWrapped = wrapMosIngestJob(handleMosFullStory)
+const handleMosInsertStoriesWrapped = wrapMosIngestJob(handleMosInsertStories)
 const handleMosMoveStoriesWrapped = wrapMosIngestJob(handleMosMoveStories)
+const handleMosSwapStoriesWrapped = wrapMosIngestJob(handleMosSwapStories)
 
 describe('Test recieved mos ingest payloads', () => {
 	let context: MockJobContext
@@ -424,7 +428,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const newPartData = mockRO.newItem('ro1;s1;newPart1', 'SEGMENT1;new1')
 
-		await handleMosInsertStories(context, {
+		await handleMosInsertStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			insertBeforeStoryId: mosTypes.mosString128.create('ro1;s1;p3'),
@@ -463,7 +467,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const newPartData = mockRO.newItem('ro1;s1;newPart2', 'SEGMENT1;new2')
 
-		await handleMosInsertStories(context, {
+		await handleMosInsertStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			insertBeforeStoryId: mosTypes.mosString128.create('ro1;s1;p3'),
@@ -490,7 +494,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const newPartData = mockRO.newItem('ro1;s1b;newPart1', 'SEGMENT1B;new1')
 
-		await handleMosInsertStories(context, {
+		await handleMosInsertStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			insertBeforeStoryId: mosTypes.mosString128.create('ro1;s2;p1'),
@@ -603,7 +607,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const newPartData = mockRO.newItem('ro1;s1;newPart1', 'SEGMENT1;new1')
 
-		await handleMosInsertStories(context, {
+		await handleMosInsertStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			insertBeforeStoryId: mosTypes.mosString128.create('ro1;s1;p2'),
@@ -633,7 +637,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const newPartData = mockRO.newItem('ro1;s1;newPart2', 'SEGMENT1;new2')
 
-		await handleMosInsertStories(context, {
+		await handleMosInsertStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			insertBeforeStoryId: mosTypes.mosString128.create('ro1;s1;p3'),
@@ -689,7 +693,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const partExternalIds = ['ro1;s3;p1', 'ro1;s3;p2']
 
-		await handleMosDeleteStory(context, {
+		await handleMosDeleteStoryWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			stories: partExternalIds.map((i) => mosTypes.mosString128.create(i)),
@@ -738,7 +742,7 @@ describe('Test recieved mos ingest payloads', () => {
 			Body: [],
 		})
 
-		await handleMosFullStory(context, {
+		await handleMosFullStoryWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			story: story,
@@ -809,7 +813,7 @@ describe('Test recieved mos ingest payloads', () => {
 		const story0 = mosTypes.mosString128.create('ro1;s1;p2')
 		const story1 = mosTypes.mosString128.create('ro1;s1;p3')
 
-		await handleMosSwapStories(context, {
+		await handleMosSwapStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			story0,
@@ -840,7 +844,7 @@ describe('Test recieved mos ingest payloads', () => {
 		const story0 = mosTypes.mosString128.create('ro1;s1;p1')
 		const story1 = mosTypes.mosString128.create('ro1;s1;p3')
 
-		await handleMosSwapStories(context, {
+		await handleMosSwapStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			story0,
@@ -916,7 +920,7 @@ describe('Test recieved mos ingest payloads', () => {
 		const story0 = mosTypes.mosString128.create('ro1;s3;p1')
 		const story1 = mosTypes.mosString128.create('ro1;s4;p1')
 
-		await handleMosSwapStories(context, {
+		await handleMosSwapStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			story0,
@@ -949,7 +953,7 @@ describe('Test recieved mos ingest payloads', () => {
 		const story0 = mosTypes.mosString128.create('ro1;s1;p2')
 		const story1 = mosTypes.mosString128.create('ro1;s2;p2')
 
-		await handleMosSwapStories(context, {
+		await handleMosSwapStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			story0,
@@ -1121,7 +1125,7 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(partsInSegmentBefore).toHaveLength(3)
 
 		// This should only remove the first part in the segment. The other parts will be regenerated
-		await handleMosDeleteStory(context, {
+		await handleMosDeleteStoryWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			stories: [mosTypes.mosString128.create(partExternalId)],
@@ -1150,7 +1154,7 @@ describe('Test recieved mos ingest payloads', () => {
 		newStoryId: string,
 		newStoryName: string
 	): Promise<void> {
-		return handleMosInsertStories(context, {
+		return handleMosInsertStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: runningOrderId,
 			insertBeforeStoryId: mosTypes.mosString128.create(oldStoryId),
@@ -1432,7 +1436,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		// insert a part after segment1
 		const newPartData = mockRO.newItem('ro1;s2a;newPart1', 'SEGMENT2pre;new1')
-		await handleMosInsertStories(context, {
+		await handleMosInsertStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			insertBeforeStoryId: mosTypes.mosString128.create('ro1;s2;p1'),
@@ -1467,7 +1471,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		// Replace the story with itself, but different slug
 		const replacementPartData = mockRO.newItem('ro1;s2a;newPart1', 'SEGMENT2;new1')
-		await handleMosInsertStories(context, {
+		await handleMosInsertStoriesWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			insertBeforeStoryId: replacementPartData.ID,
