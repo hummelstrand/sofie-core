@@ -1,7 +1,7 @@
 import { IngestModel } from './model/IngestModel'
 import { CommitIngestOperation } from './commit'
-import { LocalIngestRundown, RundownIngestDataCache } from './ingestCache'
-import { getRundownId } from './lib'
+import { LocalIngestRundown, LocalIngestSegment, RundownIngestDataCache } from './ingestCache'
+import { canRundownBeUpdated, getRundownId } from './lib'
 import { JobContext } from '../jobs'
 import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UserError } from '@sofie-automation/corelib/dist/error'
@@ -15,22 +15,26 @@ import {
 	runWithRundownLockInner,
 } from './lock'
 import { DatabasePersistedModel } from '../modelBase'
-import { IngestRundown, IngestSegment } from '@sofie-automation/blueprints-integration'
+import { IngestRundown } from '@sofie-automation/blueprints-integration'
 import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
 import { CommonContext } from '../blueprints/context'
-import { RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { PeripheralDeviceId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { ReadonlyDeep } from 'type-fest'
+import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromIngestDataInner } from './generationRundown'
+import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
+import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
+import _ = require('underscore')
 
 export type UpdateIngestRundownResult2 = UpdateIngestRundownChange | UpdateIngestRundownAction
 
 // nocommit - this needs a better name
 export interface ComputedIngestChanges {
-	ingestRundown: IngestRundown
+	ingestRundown: LocalIngestRundown
 
 	// define what needs regenerating
 	segmentsToRemove: string[]
 	segmentsUpdatedRanks: Record<string, number> // contains the new rank
-	segmentsToRegenerate: IngestSegment[]
+	segmentsToRegenerate: LocalIngestSegment[]
 	regenerateRundown: boolean // TODO - full vs metadata?
 }
 
@@ -106,7 +110,8 @@ export async function runIngestUpdateOperationNew(
 					context,
 					pIngestModel,
 					computedChanges,
-					oldSofieIngestRundown
+					oldSofieIngestRundown,
+					data.peripheralDeviceId
 				)
 			} finally {
 				// Ensure we save the sofie ingest data
@@ -212,7 +217,8 @@ async function updateSofieRundownModel(
 	context: JobContext,
 	pIngestModel: Promise<IngestModel & DatabasePersistedModel>,
 	computedIngestChanges: ComputedIngestChanges | null,
-	oldSofieIngestRundown: LocalIngestRundown | undefined
+	oldSofieIngestRundown: LocalIngestRundown | undefined,
+	peripheralDeviceId: PeripheralDeviceId | null
 ) {
 	const ingestModel = await pIngestModel
 
@@ -227,7 +233,8 @@ async function updateSofieRundownModel(
 			context,
 			ingestModel,
 			computedIngestChanges,
-			oldSofieIngestRundown
+			oldSofieIngestRundown,
+			peripheralDeviceId
 		)
 		calcSpan?.end()
 	} else {
@@ -263,7 +270,108 @@ async function applyCalculatedIngestChangesToModel(
 	context: JobContext,
 	ingestModel: IngestModel,
 	computedIngestChanges: ComputedIngestChanges,
-	oldIngestRundown: ReadonlyDeep<IngestRundown> | undefined
-): Promise<CommitIngestData> | null {
-	// TODO
+	oldIngestRundown: ReadonlyDeep<IngestRundown> | undefined,
+	peripheralDeviceId: PeripheralDeviceId | null
+): Promise<CommitIngestData | null> {
+	const newIngestRundown = computedIngestChanges.ingestRundown
+
+	// Ensure the rundown can be updated
+	const rundown = ingestModel.rundown
+	if (!canRundownBeUpdated(rundown, false)) return null
+
+	const span = context.startSpan('ingest.applyCalculatedIngestChangesToModel')
+
+	if (!rundown || computedIngestChanges.regenerateRundown) {
+		// Do a full regeneration
+
+		const result = await updateRundownFromIngestData(
+			context,
+			ingestModel,
+			newIngestRundown,
+			GenerateRundownMode.Create,
+			peripheralDeviceId
+		)
+
+		span?.end()
+		return result
+	} else {
+		// Update segment ranks:
+		for (const [segmentExternalId, newRank] of Object.entries<number>(computedIngestChanges.segmentsUpdatedRanks)) {
+			const segment = ingestModel.getSegmentByExternalId(segmentExternalId)
+			if (segment) {
+				segment.setRank(newRank)
+			}
+		}
+
+		// Updated segments that has had their segment.externalId changed:
+		const renamedSegments = new Map<SegmentId, SegmentId>() // nocommit: reimplement: applyExternalIdDiff(ingestModel, segmentDiff, true)
+
+		// If requested, regenerate the rundown in the 'metadata' mode
+		if (computedIngestChanges.regenerateRundown) {
+			const regenerateCommitData = await updateRundownFromIngestDataInner(
+				context,
+				ingestModel,
+				newIngestRundown,
+				GenerateRundownMode.MetadataChange, // TODO - full vs metadata?
+				peripheralDeviceId
+			)
+			if (regenerateCommitData?.regenerateAllContents) {
+				const regeneratedSegmentIds = await calculateSegmentsAndRemovalsFromIngestData(
+					context,
+					ingestModel,
+					newIngestRundown,
+					regenerateCommitData.allRundownWatchedPackages
+				)
+
+				// TODO - should this include the ones which were renamed/updated ranks above?
+				return {
+					changedSegmentIds: regeneratedSegmentIds.changedSegmentIds,
+					removedSegmentIds: regeneratedSegmentIds.removedSegmentIds,
+					renamedSegments: renamedSegments,
+
+					removeRundown: false,
+				} satisfies CommitIngestData
+			}
+		}
+
+		// Create/Update segments
+		const segmentsToRegenerate = _.sortBy([...computedIngestChanges.segmentsToRegenerate], (se) => se.rank)
+		const changedSegmentIds = await calculateSegmentsFromIngestData(
+			context,
+			ingestModel,
+			segmentsToRegenerate,
+			null
+		)
+
+		const changedSegmentIdsSet = new Set<SegmentId>(changedSegmentIds)
+		for (const segmentId of Object.keys(computedIngestChanges.segmentsUpdatedRanks)) {
+			changedSegmentIdsSet.add(ingestModel.getSegmentIdFromExternalId(segmentId))
+		}
+		// TODO - include changed external ids?
+
+		// Remove/orphan old segments
+		const orphanedSegmentIds: SegmentId[] = []
+		for (const segmentExternalId of computedIngestChanges.segmentsToRemove) {
+			const segment = ingestModel.getSegmentByExternalId(segmentExternalId)
+			if (segment) {
+				// We orphan it and queue for deletion. the commit phase will complete if possible
+				orphanedSegmentIds.push(segment.segment._id)
+				segment.setOrphaned(SegmentOrphanedReason.DELETED)
+
+				segment.removeAllParts()
+
+				// It can't also have been changed if it is deleted
+				changedSegmentIdsSet.delete(segment.segment._id)
+			}
+		}
+
+		span?.end()
+		return {
+			changedSegmentIds: Array.from(changedSegmentIdsSet),
+			removedSegmentIds: orphanedSegmentIds, // Only inform about the ones that werent renamed
+			renamedSegments: renamedSegments,
+
+			removeRundown: false,
+		} satisfies CommitIngestData
+	}
 }

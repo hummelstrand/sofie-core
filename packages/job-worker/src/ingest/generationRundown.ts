@@ -35,6 +35,10 @@ export enum GenerateRundownMode {
 	MetadataChange = 'metadata-change',
 }
 
+export interface CommitIngestDataExt extends CommitIngestData {
+	didRegenerateRundown: boolean
+}
+
 /**
  * Regenerate and save a whole Rundown
  * @param context Context for the running job
@@ -50,7 +54,54 @@ export async function updateRundownFromIngestData(
 	ingestRundown: LocalIngestRundown,
 	generateMode: GenerateRundownMode,
 	peripheralDeviceId: PeripheralDeviceId | null
-): Promise<CommitIngestData | null> {
+): Promise<CommitIngestDataExt | null> {
+	const span = context.startSpan('ingest.rundownInput.updateRundownFromIngestData')
+
+	const regenerateAllContents = await updateRundownFromIngestDataInner(
+		context,
+		ingestModel,
+		ingestRundown,
+		generateMode,
+		peripheralDeviceId
+	)
+
+	if (!regenerateAllContents) return null
+
+	const regenerateSegmentsChanges = regenerateAllContents.regenerateAllContents
+		? await calculateSegmentsAndRemovalsFromIngestData(
+				context,
+				ingestModel,
+				ingestRundown,
+				regenerateAllContents.allRundownWatchedPackages
+		  )
+		: undefined
+
+	logger.info(`Rundown ${ingestModel.rundownId} update complete`)
+
+	span?.end()
+	return literal<CommitIngestDataExt>({
+		changedSegmentIds: regenerateSegmentsChanges?.changedSegmentIds ?? [],
+		removedSegmentIds: regenerateSegmentsChanges?.removedSegmentIds ?? [],
+		renamedSegments: new Map(),
+
+		didRegenerateRundown: regenerateAllContents.regenerateAllContents,
+
+		removeRundown: false,
+	})
+}
+
+export interface UpdateRundownInnerResult {
+	allRundownWatchedPackages: WatchedPackagesHelper
+	regenerateAllContents: boolean
+}
+
+export async function updateRundownFromIngestDataInner(
+	context: JobContext,
+	ingestModel: IngestModel,
+	ingestRundown: LocalIngestRundown,
+	generateMode: GenerateRundownMode,
+	peripheralDeviceId: PeripheralDeviceId | null
+): Promise<UpdateRundownInnerResult | null> {
 	if (!canRundownBeUpdated(ingestModel.rundown, generateMode === GenerateRundownMode.Create)) return null
 
 	const existingRundown = ingestModel.rundown
@@ -58,11 +109,10 @@ export async function updateRundownFromIngestData(
 		throw new Error(`Rundown "${ingestRundown.externalId}" does not exist`)
 	}
 
-	const span = context.startSpan('ingest.rundownInput.updateRundownFromIngestData')
-
 	const pPeripheralDevice = peripheralDeviceId
 		? context.directCollections.PeripheralDevices.findOne(peripheralDeviceId)
 		: undefined
+	pPeripheralDevice?.catch(() => null) // Ensure no uncaught promise rejections
 
 	logger.info(`${ingestModel.rundown ? 'Updating' : 'Adding'} rundown ${ingestModel.rundownId}`)
 
@@ -123,25 +173,10 @@ export async function updateRundownFromIngestData(
 		}
 	}
 
-	const regenerateSegmentsChanges = regenerateAllContents
-		? await calculateSegmentsAndRemovalsFromIngestData(
-				context,
-				ingestModel,
-				ingestRundown,
-				allRundownWatchedPackages
-		  )
-		: undefined
-
-	logger.info(`Rundown ${dbRundown._id} update complete`)
-
-	span?.end()
-	return literal<CommitIngestData>({
-		changedSegmentIds: regenerateSegmentsChanges?.changedSegmentIds ?? [],
-		removedSegmentIds: regenerateSegmentsChanges?.removedSegmentIds ?? [],
-		renamedSegments: new Map(),
-
-		removeRundown: false,
-	})
+	return {
+		allRundownWatchedPackages,
+		regenerateAllContents,
+	}
 }
 
 /**

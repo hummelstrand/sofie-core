@@ -591,6 +591,8 @@ export async function calculateSegmentsAndRemovalsFromIngestData(
 		removedSegmentIds.push(oldSegment.segment._id)
 		changedSegmentIds.push(oldSegment.segment._id)
 		oldSegment.setOrphaned(SegmentOrphanedReason.DELETED)
+
+		oldSegment.removeAllParts()
 	}
 
 	return { changedSegmentIds, removedSegmentIds }
