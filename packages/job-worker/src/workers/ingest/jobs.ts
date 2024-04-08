@@ -69,10 +69,10 @@ export const ingestJobHandlers: IngestJobHandlers = {
 	[IngestJobs.MosRundownStatus]: handleMosRundownStatus,
 	[IngestJobs.MosRundownReadyToAir]: handleMosRundownReadyToAir,
 	[IngestJobs.MosFullStory]: handleMosFullStory,
-	[IngestJobs.MosDeleteStory]: handleMosDeleteStory,
-	[IngestJobs.MosInsertStory]: handleMosInsertStories,
+	[IngestJobs.MosDeleteStory]: wrapMosIngestJob(handleMosDeleteStory),
+	[IngestJobs.MosInsertStory]: wrapMosIngestJob(handleMosInsertStories),
 	[IngestJobs.MosMoveStory]: wrapMosIngestJob(handleMosMoveStories),
-	[IngestJobs.MosSwapStory]: handleMosSwapStories,
+	[IngestJobs.MosSwapStory]: wrapMosIngestJob(handleMosSwapStories),
 
 	[IngestJobs.ExpectedPackagesRegenerate]: handleExpectedPackagesRegenerate,
 	[IngestJobs.PackageInfosUpdatedRundown]: handleUpdatedPackageInfoForRundown,

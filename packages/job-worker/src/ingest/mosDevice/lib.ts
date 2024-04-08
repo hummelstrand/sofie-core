@@ -44,10 +44,14 @@ export function parseMosString(str: MOS.IMOSString128): string {
 	return (str as any).toString()
 }
 
+export type WrappedMosIngestJobFunction = (ingestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult
 export function wrapMosIngestJob<TData extends IngestPropsBase>(
-	fcn: (context: JobContext, data: TData, ingestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult
+	fcn: (context: JobContext, data: TData) => WrappedMosIngestJobFunction | null
 ): (context: JobContext, data: TData) => Promise<void> {
 	return async (context, data) => {
+		const executeFcn = fcn(context, data)
+		if (!executeFcn) return
+
 		return runIngestUpdateOperation(
 			context,
 			data,
@@ -56,7 +60,7 @@ export function wrapMosIngestJob<TData extends IngestPropsBase>(
 					throw new Error(`Rundown "${data.rundownExternalId}" is not a MOS rundown`)
 				}
 
-				return fcn(context, data, ingestRundown)
+				return executeFcn(ingestRundown)
 			},
 			diffAndApplyChanges
 		)
