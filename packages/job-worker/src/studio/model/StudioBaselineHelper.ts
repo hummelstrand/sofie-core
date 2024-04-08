@@ -33,8 +33,9 @@ export class StudioBaselineHelper {
 	}
 
 	async saveAllToDatabase(): Promise<void> {
+		/** Check and update routeSetID state
+		 */
 		const modifier: Record<string, boolean> = {}
-
 		for (const [routeSetId, isActive] of Object.entries<boolean>(this.#routeSetActive)) {
 			modifier[`routeSets.${routeSetId}.active`] = isActive
 		}
@@ -46,6 +47,7 @@ export class StudioBaselineHelper {
 				$set: modifier,
 			}
 		)
+
 		await Promise.all([
 			this.#pendingExpectedPlayoutItems
 				? saveIntoDb(
