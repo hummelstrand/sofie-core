@@ -4,6 +4,6 @@ import { runJobWithStudioPlayoutModel } from './lock'
 
 export async function handleSwitchRouteSet(context: JobContext, data: SwitchRouteSetProps): Promise<void> {
 	await runJobWithStudioPlayoutModel(context, async (studioPlayoutModel) => {
-		studioPlayoutModel.updateRouteSetActive(data.routeSetId, data.state)
+		studioPlayoutModel.switchRouteSet(data.routeSetId, data.state)
 	})
 }

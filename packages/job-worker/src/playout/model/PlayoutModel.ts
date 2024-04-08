@@ -189,7 +189,7 @@ export interface PlayoutModel extends PlayoutModelReadonly, StudioPlayoutModelBa
 	activatePlaylist(rehearsal: boolean): RundownPlaylistActivationId
 
 	/**
-	 * swticth the state of a RouteSet
+	 * Update the active state of a RouteSet
 	 * @param routeSetId
 	 * @param isActive
 	 */
