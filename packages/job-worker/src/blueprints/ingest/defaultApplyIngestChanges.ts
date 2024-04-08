@@ -92,6 +92,9 @@ function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	const nrcsSegmentMap = normalizeArrayToMap(nrcsRundown.segments, 'externalId')
 	const nrcsSegmentIds = nrcsRundown.segments.map((s) => s.externalId)
 
+	// Perform the inserts last, so that we can ensure they happen in a sensible order
+	const segmentsToInsert: IngestSegment[] = []
+
 	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes.segmentChanges)) {
 		if (!change) continue
 
@@ -102,13 +105,8 @@ function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 			case IncomingIngestSegmentChangeEnum.Inserted: {
 				if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
 
-				const segmentIndex = nrcsSegmentIds.indexOf(segmentId)
-				const beforeSegmentId = segmentIndex !== -1 ? nrcsSegmentIds[segmentIndex + 1] ?? null : null
+				segmentsToInsert.push(nrcsSegment)
 
-				mutableIngestRundown.replaceSegment(
-					transformSegmentAndPartPayloads(nrcsSegment, options),
-					beforeSegmentId
-				)
 				break
 			}
 			case IncomingIngestSegmentChangeEnum.Deleted: {
@@ -125,6 +123,15 @@ function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 				break
 			}
 		}
+	}
+
+	// Now we can insert them in descending order
+	segmentsToInsert.sort((a, b) => nrcsSegmentIds.indexOf(b.externalId) - nrcsSegmentIds.indexOf(a.externalId))
+	for (const nrcsSegment of segmentsToInsert) {
+		const segmentIndex = nrcsSegmentIds.indexOf(nrcsSegment.externalId)
+		const beforeSegmentId = segmentIndex !== -1 ? nrcsSegmentIds[segmentIndex + 1] ?? null : null
+
+		mutableIngestRundown.replaceSegment(transformSegmentAndPartPayloads(nrcsSegment, options), beforeSegmentId)
 	}
 }
 
@@ -143,6 +150,9 @@ function applyChangesToSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
 		const nrcsPartMap = normalizeArrayToMap(nrcsSegment.parts, 'externalId')
 		const nrcsPartIds = nrcsSegment.parts.map((s) => s.externalId)
 
+		// Perform the inserts last, so that we can ensure they happen in a sensible order
+		const partsToInsert: IngestPart[] = []
+
 		for (const [partId, change] of Object.entries<IncomingIngestPartChange | undefined>(
 			segmentChange.partsChanges
 		)) {
@@ -155,10 +165,7 @@ function applyChangesToSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
 				case IncomingIngestPartChange.Inserted: {
 					if (!nrcsPart) throw new Error(`Segment ${partId} not found in nrcs rundown`)
 
-					const partIndex = nrcsPartIds.indexOf(partId)
-					const beforePartId = partIndex !== -1 ? nrcsPartIds[partIndex + 1] ?? null : null
-
-					mutableSegment.replacePart(transformPartPayload(nrcsPart, options), beforePartId)
+					partsToInsert.push(nrcsPart)
 					break
 				}
 				case IncomingIngestPartChange.Deleted: {
@@ -179,6 +186,15 @@ function applyChangesToSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
 					assertNever(change)
 				}
 			}
+		}
+
+		// Now we can insert them in descending order
+		partsToInsert.sort((a, b) => nrcsPartIds.indexOf(b.externalId) - nrcsPartIds.indexOf(a.externalId))
+		for (const nrcsPart of partsToInsert) {
+			const partIndex = nrcsPartIds.indexOf(nrcsPart.externalId)
+			const beforePartId = partIndex !== -1 ? nrcsPartIds[partIndex + 1] ?? null : null
+
+			mutableSegment.replacePart(transformPartPayload(nrcsPart, options), beforePartId)
 		}
 	}
 

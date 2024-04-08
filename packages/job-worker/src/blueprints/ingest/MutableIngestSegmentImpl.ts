@@ -28,7 +28,9 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 
 	constructor(ingestSegment: IngestSegment, hasChanges = false) {
 		this.ingestSegment = omit(ingestSegment, 'parts')
-		this.#parts = ingestSegment.parts.map((part) => new MutableIngestPartImpl<TPartPayload>(part, hasChanges))
+		this.#parts = [...ingestSegment.parts]
+			.sort((a, b) => a.rank - b.rank)
+			.map((part) => new MutableIngestPartImpl<TPartPayload>(part, hasChanges))
 		this.#segmentHasChanges = hasChanges
 	}
 
@@ -48,10 +50,10 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	// 	return this.#ingestPart.rank
 	// }
 
-	get payload(): ReadonlyDeep<TSegmentPayload> {
-		if (!this.ingestSegment.payload) {
-			throw new Error('Segment payload is not set')
-		}
+	get payload(): ReadonlyDeep<TSegmentPayload> | undefined {
+		// if (!this.ingestSegment.payload) {
+		//     throw new Error('Segment payload is not set')
+		// }
 
 		return this.ingestSegment.payload
 	}
@@ -121,11 +123,13 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		changedCacheObjects: IngestDataCacheObj[]
 		allCacheObjectIds: IngestDataCacheObjId[]
 		segmentHasChanges: boolean
+		partIdsWithChanges: string[]
 		partOrderHasChanged: boolean
 	} {
 		const ingestParts: LocalIngestPart[] = []
 		const changedCacheObjects: IngestDataCacheObj[] = []
 		const allCacheObjectIds: IngestDataCacheObjId[] = []
+		const partIdsWithChanges: string[] = []
 
 		const segmentId = getSegmentId(generator.rundownId, this.ingestSegment.externalId)
 
@@ -143,6 +147,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 
 			if (part.hasChanges) {
 				changedCacheObjects.push(generator.generatePartObject2(segmentId, ingestPart))
+				partIdsWithChanges.push(ingestPart.externalId)
 			}
 		})
 
@@ -151,6 +156,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 			changedCacheObjects,
 			allCacheObjectIds,
 			segmentHasChanges: this.#segmentHasChanges,
+			partIdsWithChanges,
 			partOrderHasChanged: this.#partOrderHasChanged,
 		}
 	}

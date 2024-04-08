@@ -86,7 +86,7 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	readonly type: string
 
 	/** Payload of rundown metadata. For use by other blueprints methods */
-	readonly payload?: ReadonlyDeep<TRundownPayload>
+	readonly payload: ReadonlyDeep<TRundownPayload> | undefined
 
 	// TODO - split payload into 'private' and 'public'? ie, one for `getRundown` and one for `getSegment`, so that we can affect the rundown generation without regenerating all of the segments.
 	// Or should we expect this blueprint stage to copy any needed properties into each of the segment/part payloads?
@@ -138,7 +138,7 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	// readonly rank: number
 
 	/** Payload of segment metadata. For use by other blueprints methods */
-	readonly payload?: ReadonlyDeep<TSegmentPayload>
+	readonly payload: ReadonlyDeep<TSegmentPayload> | undefined
 
 	/** Array of parts in this segment */
 	readonly parts: ReadonlyArray<MutableIngestPart<TPartPayload>>
@@ -165,7 +165,7 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 	// readonly rank: number
 
 	/** Payload of the part. For use by other blueprints methods */
-	readonly payload: ReadonlyDeep<TPartPayload>
+	readonly payload: ReadonlyDeep<TPartPayload> | undefined
 
 	setName(name: string): void
 

@@ -44,7 +44,9 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 	constructor(ingestRundown: IngestRundown, hasChanges = false) {
 		this.ingestRundown = omit(ingestRundown, 'segments')
-		this.#segments = ingestRundown.segments.map((segment) => new MutableIngestSegmentImpl(segment))
+		this.#segments = [...ingestRundown.segments]
+			.sort((a, b) => a.rank - b.rank)
+			.map((segment) => new MutableIngestSegmentImpl(segment))
 		this.#hasChangesToRundown = hasChanges
 	}
 
@@ -68,10 +70,10 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	// 	return this.#ingestPart.rank
 	// }
 
-	get payload(): ReadonlyDeep<TRundownPayload> {
-		if (!this.ingestRundown.payload) {
-			throw new Error('Rundown payload is not set')
-		}
+	get payload(): ReadonlyDeep<TRundownPayload> | undefined {
+		//if (!this.ingestRundown.payload) {
+		//	throw new Error('Rundown payload is not set')
+		//}
 
 		return this.ingestRundown.payload
 	}
@@ -131,16 +133,14 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		const segment = this.#segments.find((s) => s.externalId === id)
 		if (!segment) throw new Error(`Segment "${id}" not found`)
 
+		this.removeSegment(id)
+
 		if (beforeSegmentExternalId) {
 			const beforeIndex = this.#segments.findIndex((s) => s.externalId === beforeSegmentExternalId)
 			if (beforeIndex === -1) throw new Error(`Segment "${beforeSegmentExternalId}" not found`)
 
-			this.removeSegment(id)
-
 			this.#segments.splice(beforeIndex, 0, segment)
 		} else {
-			this.removeSegment(id)
-
 			this.#segments.push(segment)
 		}
 
@@ -153,16 +153,14 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
 		const newSegment = new MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>(segment, true)
 
+		this.removeSegment(segment.externalId)
+
 		if (beforeSegmentExternalId) {
 			const beforeIndex = this.#segments.findIndex((s) => s.externalId === beforeSegmentExternalId)
 			if (beforeIndex === -1) throw new Error(`Segment "${beforeSegmentExternalId}" not found`)
 
-			this.removeSegment(segment.externalId)
-
 			this.#segments.splice(beforeIndex, 0, newSegment)
 		} else {
-			this.removeSegment(segment.externalId)
-
 			this.#segments.push(newSegment)
 		}
 
@@ -219,7 +217,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			const segmentInfo = segment.intoChangesInfo(generator)
 
 			const ingestSegment: Complete<LocalIngestSegment> = {
-				externalId: segment.externalId,
+				externalId: segment.ingestSegment.externalId,
 				rank,
 				name: segment.name,
 				payload: segment.payload,
@@ -237,7 +235,11 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 				changedCacheObjects.push(generator.generateSegmentObject2(ingestSegment))
 			}
 
-			if (segmentInfo.segmentHasChanges || segmentInfo.partOrderHasChanged) {
+			if (
+				segmentInfo.segmentHasChanges ||
+				segmentInfo.partOrderHasChanged ||
+				segmentInfo.partIdsWithChanges.length > 0
+			) {
 				segmentsToRegenerate.push(ingestSegment)
 			}
 		})

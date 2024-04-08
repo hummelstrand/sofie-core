@@ -28,10 +28,10 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 	// 	return this.#ingestPart.rank
 	// }
 
-	get payload(): ReadonlyDeep<TPartPayload> {
-		if (!this.ingestPart.payload) {
-			throw new Error('Part payload is not set')
-		}
+	get payload(): ReadonlyDeep<TPartPayload> | undefined {
+		//if (!this.ingestPart.payload) {
+		//	throw new Error('Part payload is not set')
+		//}
 
 		return this.ingestPart.payload
 	}

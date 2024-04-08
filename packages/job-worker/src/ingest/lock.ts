@@ -48,6 +48,8 @@ export enum UpdateIngestRundownAction {
  * @param updateNrcsIngestModelFcn Function to mutate the ingestData. Throw if the requested change is not valid. Return undefined to indicate the ingestData should be deleted
  * @param calcFcn Function to run to update the Rundown. Return the blob of data about the change to help the post-update perform its duties. Return null to indicate that nothing changed
  */
+// nocommit This should be removed asap, it has been replaced by a new implementation
+// @deprecated
 export async function runIngestUpdateOperation(
 	context: JobContext,
 	data: IngestPropsBase,
@@ -76,6 +78,11 @@ export async function runIngestUpdateOperation(
 			context.directCollections.NrcsIngestDataCache, // TODO - is this the correct one?
 			rundownId
 		)
+		const hackSofieIngestObjCache = await RundownIngestDataCache.create(
+			context,
+			context.directCollections.SofieIngestDataCache,
+			rundownId
+		)
 
 		// Recalculate the ingest data
 		const updateNrcsIngestModelSpan = context.startSpan('ingest.calcFcn')
@@ -91,15 +98,18 @@ export async function runIngestUpdateOperation(
 			case UpdateIngestRundownAction.DELETE:
 			case UpdateIngestRundownAction.FORCE_DELETE:
 				ingestObjCache.delete()
+				hackSofieIngestObjCache.delete()
 				ingestRundownChanges = undefined
 				break
 			default:
 				ingestObjCache.update(updatedIngestRundown)
+				hackSofieIngestObjCache.update(updatedIngestRundown)
 				ingestRundownChanges = updatedIngestRundown
 				break
 		}
 		// Start saving the ingest data
 		const pSaveIngestChanges = ingestObjCache.saveToDatabase()
+		await hackSofieIngestObjCache.saveToDatabase()
 
 		let resultingError: UserError | void | undefined
 

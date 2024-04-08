@@ -79,7 +79,7 @@ export async function runIngestJobWithThingNew(
 			rundownId
 		)
 		const sofieIngestRundown = sofieIngestObjectCache.fetchRundown()
-		if (!sofieIngestRundown) throw new Error('No SofieIngestRundown found')
+		if (!sofieIngestRundown) throw new Error(`SofieIngestRundown "${rundownId}" not found`)
 
 		let resultingError: UserError | void | undefined
 
@@ -303,22 +303,22 @@ async function updateSofieRundownModel(
 		computedIngestChanges === UpdateIngestRundownAction.DELETE ||
 		computedIngestChanges === UpdateIngestRundownAction.FORCE_DELETE
 	) {
-		// Check if it exists and can be deleted
-		const rundown = ingestModel.rundown
-		if (rundown) {
-			const canRemove =
-				computedIngestChanges === UpdateIngestRundownAction.FORCE_DELETE || canRundownBeUpdated(rundown, false)
-			if (!canRemove) throw UserError.create(UserErrorMessage.RundownRemoveWhileActive, { name: rundown.name })
+		// Get the rundown, and fail if it doesn't exist
+		const rundown = ingestModel.getRundown()
 
-			// The rundown has been deleted
-			commitData = {
-				changedSegmentIds: [],
-				removedSegmentIds: [],
-				renamedSegments: new Map(),
+		// Check if it can be deleted
+		const canRemove =
+			computedIngestChanges === UpdateIngestRundownAction.FORCE_DELETE || canRundownBeUpdated(rundown, false)
+		if (!canRemove) throw UserError.create(UserErrorMessage.RundownRemoveWhileActive, { name: rundown.name })
 
-				removeRundown: true,
-				returnRemoveFailure: true,
-			}
+		// The rundown has been deleted
+		commitData = {
+			changedSegmentIds: [],
+			removedSegmentIds: [],
+			renamedSegments: new Map(),
+
+			removeRundown: true,
+			returnRemoveFailure: true,
 		}
 	} else if (computedIngestChanges) {
 		const calcSpan = context.startSpan('ingest.calcFcn')
