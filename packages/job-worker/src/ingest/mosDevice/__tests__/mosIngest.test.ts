@@ -1213,7 +1213,7 @@ describe('Test recieved mos ingest payloads', () => {
 		}
 	}
 
-	test.skip('Rename segment during update while on air', async () => {
+	test('Rename segment during update while on air', async () => {
 		await resetOrphanedRundown()
 
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as DBRundown

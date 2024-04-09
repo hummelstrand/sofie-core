@@ -12,8 +12,7 @@ import { getCurrentTime } from '../../lib'
 import _ = require('underscore')
 import { LocalIngestRundown } from '../ingestCache'
 import { getRundownId, getPartId, canRundownBeUpdated } from '../lib'
-import { runIngestUpdateOperation, CommitIngestData, runWithRundownLock } from '../lock'
-import { diffAndUpdateSegmentIds } from './diff'
+import { runWithRundownLock } from '../lock'
 import { parseMosString } from './lib'
 import { groupedPartsToSegments, groupIngestParts, storiesToIngestParts } from './mosToIngest'
 import { GenerateRundownMode, updateRundownFromIngestData } from '../generationRundown'
@@ -28,72 +27,47 @@ export async function handleMosRundownData(context: JobContext, data: MosRundown
 	if (parseMosString(data.mosRunningOrder.ID) !== data.rundownExternalId)
 		throw new Error('mosRunningOrder.ID and rundownExternalId mismatch!')
 
-	return runIngestUpdateOperation(
-		context,
-		data,
-		(ingestRundown) => {
-			const rundownId = getRundownId(context.studioId, data.rundownExternalId)
-			const parts = _.compact(
-				storiesToIngestParts(context, rundownId, data.mosRunningOrder.Stories || [], data.isUpdateOperation, [])
-			)
-			const groupedStories = groupIngestParts(parts)
+	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+		const rundownId = getRundownId(context.studioId, data.rundownExternalId)
+		const parts = _.compact(
+			storiesToIngestParts(context, rundownId, data.mosRunningOrder.Stories || [], data.isUpdateOperation, [])
+		)
+		const groupedStories = groupIngestParts(parts)
 
-			// If this is a reload of a RO, then use cached data to make the change more seamless
-			if (data.isUpdateOperation && ingestRundown) {
-				const partCacheMap = new Map<PartId, IngestPart>()
-				for (const segment of ingestRundown.segments) {
-					for (const part of segment.parts) {
-						partCacheMap.set(getPartId(rundownId, part.externalId), part)
-					}
-				}
-
-				for (const annotatedPart of parts) {
-					const cached = partCacheMap.get(annotatedPart.partId)
-					if (cached && !annotatedPart.ingest.payload) {
-						annotatedPart.ingest.payload = cached.payload
-					}
+		// If this is a reload of a RO, then use cached data to make the change more seamless
+		if (data.isUpdateOperation && ingestRundown) {
+			const partCacheMap = new Map<PartId, IngestPart>()
+			for (const segment of ingestRundown.segments) {
+				for (const part of segment.parts) {
+					partCacheMap.set(getPartId(rundownId, part.externalId), part)
 				}
 			}
 
-			const ingestSegments = groupedPartsToSegments(rundownId, groupedStories)
+			for (const annotatedPart of parts) {
+				const cached = partCacheMap.get(annotatedPart.partId)
+				if (cached && !annotatedPart.ingest.payload) {
+					annotatedPart.ingest.payload = cached.payload
+				}
+			}
+		}
 
-			return literal<LocalIngestRundown>({
+		const ingestSegments = groupedPartsToSegments(rundownId, groupedStories)
+
+		return {
+			ingestRundown: literal<LocalIngestRundown>({
 				externalId: data.rundownExternalId,
 				name: parseMosString(data.mosRunningOrder.Slug),
 				type: 'mos',
 				segments: ingestSegments,
 				payload: data.mosRunningOrder,
 				modified: getCurrentTime(),
-			})
-		},
-		async (context, ingestModel, newIngestRundown, oldIngestRundown) => {
-			if (!newIngestRundown) throw new Error(`handleMosRundownData lost the IngestRundown...`)
-
-			if (!canRundownBeUpdated(ingestModel.rundown, !data.isUpdateOperation)) return null
-
-			let renamedSegments: CommitIngestData['renamedSegments'] = new Map()
-			if (ingestModel.rundown && oldIngestRundown) {
-				// If we already have a rundown, update any modified segment ids
-				renamedSegments = diffAndUpdateSegmentIds(context, ingestModel, oldIngestRundown, newIngestRundown)
-			}
-
-			const res = await updateRundownFromIngestData(
-				context,
-				ingestModel,
-				newIngestRundown,
-				data.isUpdateOperation ? GenerateRundownMode.Update : GenerateRundownMode.Create,
-				data.peripheralDeviceId
-			)
-			if (res) {
-				return {
-					...res,
-					renamedSegments: renamedSegments,
-				}
-			} else {
-				return null
-			}
+			}),
+			changes: {
+				source: 'ingest',
+				rundownChanges: IncomingIngestRundownChange.Regenerate, // nocommit this is too coarse
+			},
 		}
-	)
+	})
 }
 
 /**

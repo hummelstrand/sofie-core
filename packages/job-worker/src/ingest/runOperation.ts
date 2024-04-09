@@ -1,5 +1,5 @@
-import { IngestModel } from './model/IngestModel'
-import { CommitIngestOperation } from './commit'
+import { IngestModel, IngestModelReadonly } from './model/IngestModel'
+import { BeforeIngestOperationPartMap, CommitIngestOperation } from './commit'
 import { LocalIngestRundown, LocalIngestSegment, RundownIngestDataCache } from './ingestCache'
 import { canRundownBeUpdated, getRundownId, getSegmentId } from './lib'
 import { JobContext } from '../jobs'
@@ -7,28 +7,28 @@ import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/error'
 import { loadIngestModelFromRundownExternalId } from './model/implementation/LoadIngestModel'
 import { Complete, clone } from '@sofie-automation/corelib/dist/lib'
-import {
-	CommitIngestData,
-	UpdateIngestRundownAction,
-	generatePartMap,
-	runWithRundownLockWithoutFetchingRundown,
-} from './lock'
+import { CommitIngestData, runWithRundownLockWithoutFetchingRundown } from './lock'
 import { DatabasePersistedModel } from '../modelBase'
 import { IncomingIngestChange, IngestRundown } from '@sofie-automation/blueprints-integration'
 import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
 import { CommonContext } from '../blueprints/context'
-import { PeripheralDeviceId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { PartId, PeripheralDeviceId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromIngestDataInner } from './generationRundown'
 import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import _ = require('underscore')
+
+export enum UpdateIngestRundownAction {
+	DELETE = 'delete',
+	FORCE_DELETE = 'force-delete',
+}
 
 export interface UpdateIngestRundownChange {
 	ingestRundown: LocalIngestRundown
 	changes: IncomingIngestChange
 }
 
-export type UpdateIngestRundownResult2 = UpdateIngestRundownChange | UpdateIngestRundownAction
+export type UpdateIngestRundownResult = UpdateIngestRundownChange | UpdateIngestRundownAction
 
 // nocommit - this needs a better name
 export interface ComputedIngestChanges {
@@ -130,7 +130,7 @@ export async function runIngestJobWithThingNew(
 export async function runIngestUpdateOperationNew(
 	context: JobContext,
 	data: IngestPropsBase,
-	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult2
+	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult
 ): Promise<void> {
 	if (!data.rundownExternalId) {
 		throw new Error(`Job is missing rundownExternalId`)
@@ -202,8 +202,8 @@ export async function runIngestUpdateOperationNew(
 function updateNrcsIngestObjects(
 	context: JobContext,
 	nrcsIngestObjectCache: RundownIngestDataCache,
-	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult2
-): UpdateIngestRundownResult2 {
+	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult
+): UpdateIngestRundownResult {
 	const updateNrcsIngestModelSpan = context.startSpan('ingest.calcFcn')
 	const oldNrcsIngestRundown = nrcsIngestObjectCache.fetchRundown()
 	const updatedIngestRundown = updateNrcsIngestModelFcn(clone(oldNrcsIngestRundown))
@@ -229,7 +229,7 @@ async function updateSofieIngestRundown(
 	context: JobContext,
 	rundownId: RundownId,
 	sofieIngestObjectCache: RundownIngestDataCache,
-	ingestRundownChanges: UpdateIngestRundownResult2
+	ingestRundownChanges: UpdateIngestRundownResult
 ): Promise<ComputedIngestChanges2 | null> {
 	if (
 		ingestRundownChanges === UpdateIngestRundownAction.DELETE ||
@@ -341,6 +341,8 @@ async function updateSofieRundownModel(
 		)
 		calcSpan?.end()
 	}
+
+	// console.log('commitData', commitData, computedIngestChanges)
 
 	let resultingError: UserError | void | undefined
 
@@ -510,4 +512,18 @@ function applyExternalIdDiff(
 	}
 
 	return renamedSegments
+}
+
+function generatePartMap(ingestModel: IngestModelReadonly): BeforeIngestOperationPartMap {
+	const rundown = ingestModel.rundown
+	if (!rundown) return new Map()
+
+	const res = new Map<SegmentId, Array<{ id: PartId; rank: number }>>()
+	for (const segment of ingestModel.getAllSegments()) {
+		res.set(
+			segment.segment._id,
+			segment.parts.map((p) => ({ id: p.part._id, rank: p.part._rank }))
+		)
+	}
+	return res
 }

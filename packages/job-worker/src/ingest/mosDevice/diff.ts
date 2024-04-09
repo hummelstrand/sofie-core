@@ -1,11 +1,7 @@
-import { JobContext } from '../../jobs'
 import { ReadonlyDeep } from 'type-fest'
-import { IngestModel } from '../model/IngestModel'
-import { LocalIngestRundown, LocalIngestSegment } from '../ingestCache'
-import { getSegmentId } from '../lib'
+import { LocalIngestSegment } from '../ingestCache'
 import _ = require('underscore')
 import { clone, deleteAllUndefinedProperties, normalizeArrayFunc } from '@sofie-automation/corelib/dist/lib'
-import { SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import {
 	IncomingIngestChange,
 	IncomingIngestPartChange,
@@ -14,41 +10,6 @@ import {
 	IngestSegment,
 } from '@sofie-automation/blueprints-integration'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
-import { CommitIngestData } from '../lock'
-
-/**
- * Update the Ids of Segments based on new Ingest data
- * This assumes that no segments/parts were added or removed between the two LocalIngestRundowns provided
- * @param context Context of the job being run
- * @param ingestModel Ingest model for Rundown being updated
- * @param oldIngestRundown Last known ingest data
- * @param newIngestRundown New ingest data
- * @returns Map of the SegmentId changes
- */
-export function diffAndUpdateSegmentIds(
-	context: JobContext,
-	ingestModel: IngestModel,
-	oldIngestRundown: ReadonlyDeep<LocalIngestRundown>,
-	newIngestRundown: ReadonlyDeep<LocalIngestRundown>
-): CommitIngestData['renamedSegments'] {
-	const span = context.startSpan('mosDevice.ingest.diffAndApplyChanges')
-
-	const oldSegments = ingestModel.getOrderedSegments().map((segment) => ({
-		externalId: segment.segment.externalId,
-		externalModified: segment.segment.externalModified,
-		_rank: segment.segment._rank,
-	}))
-
-	const oldSegmentEntries = compileSegmentEntries(oldIngestRundown.segments)
-	const newSegmentEntries = compileSegmentEntries(newIngestRundown.segments)
-	const segmentDiff = diffSegmentEntries(oldSegmentEntries, newSegmentEntries, oldSegments)
-
-	// Updated segments that has had their segment.externalId changed:
-	const renamedSegments = applyExternalIdDiff(ingestModel, segmentDiff, false)
-
-	span?.end()
-	return renamedSegments
-}
 
 export function generateMosIngestDiffTemp(
 	oldIngestSegments: LocalIngestSegment[] | undefined,
@@ -120,50 +81,6 @@ export function generateMosIngestDiffTemp(
 		segmentChanges,
 		segmentOrderChanged: Object.keys(segmentDiff.onlyRankChanged).length > 0,
 	}
-}
-
-/**
- * Apply the externalId renames from a DiffSegmentEntries
- * @param ingestModel Ingest model of the rundown being updated
- * @param segmentDiff Calculated Diff
- * @returns Map of the SegmentId changes
- */
-// nocommit: This needs to be rewritten and reused elsewhere
-export function applyExternalIdDiff(
-	ingestModel: IngestModel,
-	segmentDiff: Pick<DiffSegmentEntries, 'externalIdChanged' | 'onlyRankChanged'>,
-	canDiscardParts: boolean
-): CommitIngestData['renamedSegments'] {
-	// Updated segments that has had their segment.externalId changed:
-	const renamedSegments = new Map<SegmentId, SegmentId>()
-	for (const [oldSegmentExternalId, newSegmentExternalId] of Object.entries<string>(segmentDiff.externalIdChanged)) {
-		const oldSegmentId = getSegmentId(ingestModel.rundownId, oldSegmentExternalId)
-		const newSegmentId = getSegmentId(ingestModel.rundownId, newSegmentExternalId)
-
-		// Track the rename
-		renamedSegments.set(oldSegmentId, newSegmentId)
-
-		// If the segment doesnt exist (it should), then there isn't a segment to rename
-		const oldSegment = ingestModel.getSegment(oldSegmentId)
-		if (!oldSegment) continue
-
-		if (ingestModel.getSegment(newSegmentId)) {
-			// If the new SegmentId already exists, we need to discard the old one rather than trying to merge it.
-			// This can only be done if the caller is expecting to regenerate Segments
-			const canDiscardPartsForSegment = canDiscardParts && !segmentDiff.onlyRankChanged[oldSegmentExternalId]
-			if (!canDiscardPartsForSegment) {
-				throw new Error(`Cannot merge Segments with only rank changes`)
-			}
-
-			// Remove the old Segment and it's contents, the new one will be generated shortly
-			ingestModel.removeSegment(oldSegmentId)
-		} else {
-			// Perform the rename
-			ingestModel.changeSegmentId(oldSegmentId, newSegmentId)
-		}
-	}
-
-	return renamedSegments
 }
 
 /**

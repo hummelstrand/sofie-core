@@ -1,7 +1,7 @@
 import { JobContext } from '../jobs'
 import { logger } from '../logging'
 import { makeNewIngestRundown } from './ingestCache'
-import { runWithRundownLock, UpdateIngestRundownAction } from './lock'
+import { runWithRundownLock } from './lock'
 import { removeRundownFromDb } from '../rundownPlaylists'
 import { DBRundown, RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import {
@@ -12,7 +12,7 @@ import {
 	UserRemoveRundownProps,
 	UserUnsyncRundownProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
-import { UpdateIngestRundownResult2, runIngestUpdateOperationNew } from './runOperation'
+import { UpdateIngestRundownAction, UpdateIngestRundownResult, runIngestUpdateOperationNew } from './runOperation'
 import { IncomingIngestRundownChange } from '@sofie-automation/blueprints-integration'
 import { getCurrentTime } from '../lib'
 
@@ -81,7 +81,7 @@ export async function handleUpdatedRundown(context: JobContext, data: IngestUpda
 					source: 'ingest',
 					rundownChanges: IncomingIngestRundownChange.Regenerate,
 				},
-			} satisfies UpdateIngestRundownResult2
+			} satisfies UpdateIngestRundownResult
 		} else {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
@@ -107,7 +107,7 @@ export async function handleUpdatedRundownMetaData(
 					source: 'ingest',
 					rundownChanges: IncomingIngestRundownChange.Payload,
 				},
-			} satisfies UpdateIngestRundownResult2
+			} satisfies UpdateIngestRundownResult
 		} else {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
@@ -127,7 +127,7 @@ export async function handleRegenerateRundown(context: JobContext, data: IngestR
 					source: 'ingest',
 					rundownChanges: IncomingIngestRundownChange.Regenerate,
 				},
-			} satisfies UpdateIngestRundownResult2
+			} satisfies UpdateIngestRundownResult
 		} else {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}

@@ -6,7 +6,7 @@ import _ = require('underscore')
 import { JobContext } from '../../jobs'
 import { LocalIngestRundown } from '../ingestCache'
 import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
-import { UpdateIngestRundownResult2, runIngestUpdateOperationNew } from '../runOperation'
+import { UpdateIngestRundownResult, runIngestUpdateOperationNew } from '../runOperation'
 
 export function getPartIdFromMosStory(rundownId: RundownId, partMosId: MOS.IMOSString128 | string): PartId {
 	if (!partMosId) throw new Error('parameter partMosId missing!')
@@ -43,7 +43,7 @@ export function parseMosString(str: MOS.IMOSString128): string {
 	return (str as any).toString()
 }
 
-export type WrappedMosIngestJobFunction = (ingestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult2
+export type WrappedMosIngestJobFunction = (ingestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult
 export function wrapMosIngestJob<TData extends IngestPropsBase>(
 	fcn: (context: JobContext, data: TData) => WrappedMosIngestJobFunction | null
 ): (context: JobContext, data: TData) => Promise<void> {
