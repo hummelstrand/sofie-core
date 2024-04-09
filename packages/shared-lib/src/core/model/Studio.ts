@@ -1,4 +1,5 @@
-// import { BlueprintMapping, TSR } from '@sofie-automation/blueprints-integration'
+import { BlueprintMapping } from '../model/Timeline'
+import { TSR } from '../../tsr'
 
 export interface StudioRouteSetExclusivityGroup {
 	name: string
@@ -45,7 +46,7 @@ export interface ResultingMappingRoutes {
 }
 export interface ResultingMappingRoute {
 	outputMappedLayer: string
-	deviceType?: any //TSR.DeviceType
-	remapping?: Partial<any> //BlueprintMapping>
+	deviceType?: TSR.DeviceType
+	remapping?: Partial<BlueprintMapping>
 	routeType: StudioRouteType
 }
