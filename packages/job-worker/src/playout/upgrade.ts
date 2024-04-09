@@ -73,12 +73,12 @@ export async function handleBlueprintUpgradeForStudio(context: JobContext, _data
 		Object.entries<unknown>(result.routeSets ?? {}).map((dev) => [
 			dev[0],
 			literal<Complete<StudioRouteSet>>({
-				name: '', //dev[1]?.name ?? '',
-				active: false, // dev[1].options ?? {},
-				defaultActive: false, //dev[1].defaultActive ?? false,
-				behavior: 1, //dev[1].behavior ?? {},
-				exclusivityGroup: undefined, //dev[1].exclusivityGroup ?? undefined,
-				routes: [], //dev[1].routes,
+				name: (dev[1] as StudioRouteSet).name ?? '',
+				active: (dev[1] as StudioRouteSet).active ?? false,
+				defaultActive: (dev[1] as StudioRouteSet).defaultActive ?? false,
+				behavior: (dev[1] as StudioRouteSet).behavior ?? {},
+				exclusivityGroup: (dev[1] as StudioRouteSet).exclusivityGroup ?? undefined,
+				routes: (dev[1] as StudioRouteSet).routes,
 			}),
 		])
 	)
@@ -86,7 +86,7 @@ export async function handleBlueprintUpgradeForStudio(context: JobContext, _data
 		Object.entries<unknown>(result.routeSetExclusivityGroups ?? {}).map((dev) => [
 			dev[0],
 			literal<Complete<StudioRouteSetExclusivityGroup>>({
-				name: '', //dev[1].name,
+				name: (dev[1] as StudioRouteSetExclusivityGroup).name,
 			}),
 		])
 	)
