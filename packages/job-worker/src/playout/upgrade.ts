@@ -4,6 +4,8 @@ import {
 	StudioIngestDevice,
 	StudioInputDevice,
 	StudioPlayoutDevice,
+	StudioRouteSet,
+	StudioRouteSetExclusivityGroup,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
 import { Complete, clone, literal } from '@sofie-automation/corelib/dist/lib'
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
@@ -70,18 +72,21 @@ export async function handleBlueprintUpgradeForStudio(context: JobContext, _data
 	const routeSets = Object.fromEntries(
 		Object.entries<unknown>(result.routeSets ?? {}).map((dev) => [
 			dev[0],
-			literal<Complete<StudioInputDevice>>({
-				peripheralDeviceId: undefined,
-				options: dev[1],
+			literal<Complete<StudioRouteSet>>({
+				name: '', //dev[1]?.name ?? '',
+				active: false, // dev[1].options ?? {},
+				defaultActive: false, //dev[1].defaultActive ?? false,
+				behavior: 1, //dev[1].behavior ?? {},
+				exclusivityGroup: undefined, //dev[1].exclusivityGroup ?? undefined,
+				routes: [], //dev[1].routes,
 			}),
 		])
 	)
 	const routeSetExclusivityGroups = Object.fromEntries(
 		Object.entries<unknown>(result.routeSetExclusivityGroups ?? {}).map((dev) => [
 			dev[0],
-			literal<Complete<StudioInputDevice>>({
-				peripheralDeviceId: undefined,
-				options: dev[1],
+			literal<Complete<StudioRouteSetExclusivityGroup>>({
+				name: '', //dev[1].name,
 			}),
 		])
 	)
