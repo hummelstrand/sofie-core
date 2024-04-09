@@ -11,6 +11,10 @@ import type { ExpectedPlayoutItemGeneric, IBlueprintResultRundownPlaylist, IBlue
 import type { BlueprintMappings } from '../studio'
 import type { TimelineObjectCoreExt, TSR } from '../timeline'
 import type { ExpectedPackage } from '../package'
+import type {
+	StudioRouteSet,
+	StudioRouteSetExclusivityGroup,
+} from '@sofie-automation/shared-lib/dist/core/model/Studio'
 
 export interface StudioBlueprintManifest<TRawConfig = IBlueprintConfig, TProcessedConfig = unknown>
 	extends BlueprintManifestBase {
@@ -109,9 +113,9 @@ export interface BlueprintResultApplyStudioConfig {
 	/** Input-gateway subdevices */
 	inputDevices: Record<string, unknown>
 	/** Route Sets */
-	routeSets: Record<string, unknown>
+	routeSets: Record<string, StudioRouteSet>
 	/** Route Set Exclusivity Groups */
-	routeSetExclusivityGroups: Record<string, unknown>
+	routeSetExclusivityGroups: Record<string, StudioRouteSetExclusivityGroup>
 }
 
 export interface IStudioConfigPreset<TConfig = IBlueprintConfig> {
