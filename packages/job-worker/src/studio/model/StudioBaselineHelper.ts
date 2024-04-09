@@ -22,7 +22,11 @@ export class StudioBaselineHelper {
 	}
 
 	hasChanges(): boolean {
-		return !!this.#pendingExpectedPackages || !!this.#pendingExpectedPlayoutItems
+		return (
+			!!this.#pendingExpectedPackages ||
+			!!this.#pendingExpectedPlayoutItems ||
+			Object.keys(this.#routeSetActive).length > 0
+		)
 	}
 
 	setExpectedPackages(packages: ExpectedPackageDBFromStudioBaselineObjects[]): void {
@@ -33,21 +37,6 @@ export class StudioBaselineHelper {
 	}
 
 	async saveAllToDatabase(): Promise<void> {
-		/** Check and update routeSetID state
-		 */
-		const modifier: Record<string, boolean> = {}
-		for (const [routeSetId, isActive] of Object.entries<boolean>(this.#routeSetActive)) {
-			modifier[`routeSets.${routeSetId}.active`] = isActive
-		}
-		await this.#context.directCollections.Studios.update(
-			{
-				_id: this.#context.studioId,
-			},
-			{
-				$set: modifier,
-			}
-		)
-
 		await Promise.all([
 			this.#pendingExpectedPlayoutItems
 				? saveIntoDb(
@@ -68,13 +57,24 @@ export class StudioBaselineHelper {
 						this.#pendingExpectedPackages
 				  )
 				: undefined,
+			Object.keys(this.#routeSetActive).length > 0
+				? this.#context.directCollections.Studios.update(
+						{
+							_id: this.#context.studioId,
+						},
+						{
+							$set: this.#routeSetActive,
+						}
+				  )
+				: undefined,
 		])
 
 		this.#pendingExpectedPlayoutItems = undefined
 		this.#pendingExpectedPackages = undefined
+		this.#routeSetActive = {}
 	}
 
-	async updateRouteSetActive(routeSetId: string, isActive: boolean): Promise<void> {
+	updateRouteSetActive(routeSetId: string, isActive: boolean): void {
 		const studio = this.#context.studio
 		logger.debug(`switchRouteSet "${studio}" "${routeSetId}"=${isActive}`)
 
@@ -88,9 +88,9 @@ export class StudioBaselineHelper {
 			for (const [otherRouteSetId, otherRouteSet] of Object.entries<ReadonlyObjectDeep<StudioRouteSet>>(
 				studio.routeSets
 			)) {
-				if (otherRouteSetId === routeSetId) return
+				if (otherRouteSetId === routeSetId) continue
 				if (otherRouteSet.exclusivityGroup === routeSet.exclusivityGroup) {
-					this.#routeSetActive[routeSetId] = isActive
+					this.#routeSetActive[`routeSets.${routeSetId}.active`] = isActive
 				}
 			}
 		}

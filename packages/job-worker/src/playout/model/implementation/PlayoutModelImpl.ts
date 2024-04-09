@@ -413,8 +413,8 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 		return partInstance
 	}
 
-	async switchRouteSet(routeSetId: string, isActive: boolean): Promise<void> {
-		await this.#baselineHelper.updateRouteSetActive(routeSetId, isActive)
+	switchRouteSet(routeSetId: string, isActive: boolean): void {
+		this.#baselineHelper.updateRouteSetActive(routeSetId, isActive)
 	}
 
 	cycleSelectedPartInstances(): void {
