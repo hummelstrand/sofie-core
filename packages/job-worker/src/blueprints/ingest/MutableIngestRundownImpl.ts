@@ -231,11 +231,26 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 		const segmentsToRegenerate: LocalIngestSegment[] = []
 
+		const usedSegmentIds = new Set<string>()
+		const usedPartIds = new Set<string>()
+
 		this.#segments.forEach((segment, rank) => {
+			if (usedSegmentIds.has(segment.externalId)) {
+				throw new Error(`Segment "${segment.externalId}" is used more than once`)
+			}
+			usedSegmentIds.add(segment.externalId)
+
 			const segmentInfo = segment.intoChangesInfo(generator)
 
+			for (const part of segmentInfo.ingestParts) {
+				if (usedPartIds.has(part.externalId)) {
+					throw new Error(`Part "${part.externalId}" is used more than once`)
+				}
+				usedPartIds.add(part.externalId)
+			}
+
 			const ingestSegment: Complete<LocalIngestSegment> = {
-				externalId: segment.ingestSegment.externalId,
+				externalId: segment.externalId,
 				rank,
 				name: segment.name,
 				payload: segment.payload,
@@ -250,7 +265,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			allCacheObjectIds.push(...segmentInfo.allCacheObjectIds)
 
 			if (segmentInfo.segmentHasChanges) {
-				changedCacheObjects.push(generator.generateSegmentObject2(ingestSegment))
+				changedCacheObjects.push(generator.generateSegmentObject(ingestSegment))
 			}
 
 			if (
@@ -284,7 +299,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 		// Check if this rundown object has changed
 		if (this.#hasChangesToRundown) {
-			changedCacheObjects.push(generator.generateRundownObject2(this.ingestRundown))
+			changedCacheObjects.push(generator.generateRundownObject(this.ingestRundown))
 		}
 		allCacheObjectIds.push(generator.getRundownObjectId())
 

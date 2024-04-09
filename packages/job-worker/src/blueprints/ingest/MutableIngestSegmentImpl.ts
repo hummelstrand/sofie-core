@@ -182,7 +182,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 			ingestParts.push(ingestPart)
 
 			if (part.hasChanges) {
-				changedCacheObjects.push(generator.generatePartObject2(segmentId, ingestPart))
+				changedCacheObjects.push(generator.generatePartObject(segmentId, ingestPart))
 				partIdsWithChanges.push(ingestPart.externalId)
 			}
 		})
