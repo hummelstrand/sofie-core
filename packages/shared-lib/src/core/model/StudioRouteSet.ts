@@ -1,4 +1,4 @@
-import { BlueprintMapping } from '../model/Timeline'
+import { BlueprintMapping } from './Timeline'
 import { TSR } from '../../tsr'
 
 export interface StudioRouteSetExclusivityGroup {

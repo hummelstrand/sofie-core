@@ -14,7 +14,7 @@ import type { ExpectedPackage } from '../package'
 import type {
 	StudioRouteSet,
 	StudioRouteSetExclusivityGroup,
-} from '@sofie-automation/shared-lib/dist/core/model/Studio'
+} from '@sofie-automation/shared-lib/dist/core/model/StudioRouteSet'
 
 export interface StudioBlueprintManifest<TRawConfig = IBlueprintConfig, TProcessedConfig = unknown>
 	extends BlueprintManifestBase {

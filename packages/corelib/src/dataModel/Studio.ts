@@ -11,7 +11,7 @@ import {
 	StudioRouteSet,
 	StudioRouteSetExclusivityGroup,
 	StudioRouteType,
-} from '@sofie-automation/shared-lib/dist/core/model/Studio'
+} from '@sofie-automation/shared-lib/dist/core/model/StudioRouteSet'
 
 export { MappingsExt, MappingExt, MappingsHash }
 
