@@ -194,13 +194,6 @@ export interface IRundownPlaylistActivateScratchpadAction extends ITriggeredActi
 	filterChain: (IRundownPlaylistFilterLink | IGUIContextFilterLink)[]
 }
 
-export interface IRundownPlaylistSwitchRouteSetAction extends ITriggeredActionBase {
-	action: PlayoutActions.switchRouteSet
-	filterChain: (IRundownPlaylistFilterLink | IGUIContextFilterLink)[]
-	routeSetId: string
-	state: boolean
-}
-
 export interface ITakeAction extends ITriggeredActionBase {
 	action: PlayoutActions.take
 	filterChain: (IRundownPlaylistFilterLink | IGUIContextFilterLink)[]

@@ -71,11 +71,6 @@ function getArguments(t: TFunction, action: SomeAction): string[] {
 			break
 		case PlayoutActions.resyncRundownPlaylist:
 			break
-		case PlayoutActions.switchRouteSet:
-			if (action.routeSetId) {
-				result.push(t('Route Set ID: {{routeSetId}}', { routeSetId: action.routeSetId, state: action.state }))
-			}
-			break
 		case ClientActions.shelf:
 			if (action.state === true) {
 				result.push(t('Open'))
@@ -137,8 +132,6 @@ function hasArguments(action: SomeAction): boolean {
 			return false
 		case PlayoutActions.resyncRundownPlaylist:
 			return false
-		case PlayoutActions.switchRouteSet:
-			return !!(action.routeSetId || action.state)
 		case ClientActions.shelf:
 			return true
 		case ClientActions.goToOnAirLine:
@@ -183,8 +176,6 @@ function actionToLabel(t: TFunction, action: SomeAction['action']): string {
 			return t('Take')
 		case PlayoutActions.resyncRundownPlaylist:
 			return t('Resync with NRCS')
-		case PlayoutActions.switchRouteSet:
-			return t('Switch Route Set')
 		case ClientActions.shelf:
 			return t('Shelf')
 		case ClientActions.rewindSegments:
@@ -223,39 +214,6 @@ function getActionParametersEditor(
 	onChange: (newVal: Partial<typeof action>) => void
 ): React.ReactElement | null {
 	switch (action.action) {
-		case PlayoutActions.switchRouteSet:
-			return (
-				<div className="mts">
-					<EditAttribute
-						className="form-control"
-						modifiedClassName="bghl"
-						type={'text'}
-						label={t('Route Set ID')}
-						overrideDisplayValue={action.routeSetId}
-						attribute={''}
-						updateFunction={(_e, newVal) => {
-							onChange({
-								...action,
-								routeSetId: newVal,
-							})
-						}}
-					/>
-					<EditAttribute
-						className="form-control"
-						modifiedClassName="bghl"
-						type={'toggle'}
-						label={t('Activate')}
-						overrideDisplayValue={action.state}
-						attribute={''}
-						updateFunction={(_e, newVal) => {
-							onChange({
-								...action,
-								state: newVal,
-							})
-						}}
-					/>
-				</div>
-			)
 		case PlayoutActions.activateRundownPlaylist:
 			return (
 				<div className="mts">
