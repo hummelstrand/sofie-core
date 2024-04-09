@@ -76,7 +76,7 @@ export class StudioBaselineHelper {
 
 	updateRouteSetActive(routeSetId: string, isActive: boolean): void {
 		const studio = this.#context.studio
-		logger.debug(`switchRouteSet "${studio}" "${routeSetId}"=${isActive}`)
+		logger.debug(`switchRouteSet "${studio._id}" "${routeSetId}"=${isActive}`)
 
 		if (studio.routeSets[routeSetId] === undefined) throw new Error(`RouteSet "${routeSetId}" not found!`)
 
@@ -84,13 +84,15 @@ export class StudioBaselineHelper {
 		if (routeSet.behavior === StudioRouteBehavior.ACTIVATE_ONLY && isActive === false)
 			throw new Error(`RouteSet "${routeSetId}" is ACTIVATE_ONLY`)
 
-		if (studio.routeSets[routeSetId].exclusivityGroup) {
+		this.#routeSetActive[`routeSets.${routeSetId}.active`] = isActive
+		// Deactivate other routeSets in the same exclusivity group:
+		if (studio.routeSets[routeSetId].exclusivityGroup && isActive === true) {
 			for (const [otherRouteSetId, otherRouteSet] of Object.entries<ReadonlyObjectDeep<StudioRouteSet>>(
 				studio.routeSets
 			)) {
 				if (otherRouteSetId === routeSetId) continue
 				if (otherRouteSet.exclusivityGroup === routeSet.exclusivityGroup) {
-					this.#routeSetActive[`routeSets.${routeSetId}.active`] = isActive
+					this.#routeSetActive[`routeSets.${otherRouteSetId}.active`] = false
 				}
 			}
 		}
