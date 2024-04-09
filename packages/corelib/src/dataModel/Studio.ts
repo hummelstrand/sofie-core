@@ -109,8 +109,8 @@ export interface DBStudio {
 
 	_rundownVersionHash: string
 
-	routeSets: Record<string, StudioRouteSet>
-	routeSetExclusivityGroups: Record<string, StudioRouteSetExclusivityGroup>
+	routeSets: ObjectWithOverrides<Record<string, StudioRouteSet>>
+	routeSetExclusivityGroups: ObjectWithOverrides<Record<string, StudioRouteSetExclusivityGroup>>
 
 	/** Contains settings for which Package Containers are present in the studio.
 	 * (These are used by the Package Manager and the Expected Packages)
