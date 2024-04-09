@@ -32,7 +32,10 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 
 			mutableIngestRundown.setName(nrcsRundown.name)
 			mutableIngestRundown.removeAllSegments()
+			mutableIngestRundown.forceFullRegenerate()
 			regenerateAllContents = true
+
+			// TODO - segment renames need to be preserved through this route
 
 			break
 		}
@@ -55,6 +58,8 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 		// Regenerate all the segments
 		for (const nrcsSegment of nrcsRundown.segments) {
 			mutableIngestRundown.replaceSegment(transformSegmentAndPartPayloads(nrcsSegment, options), null)
+
+			// TODO - segment renames should be preserved?
 		}
 	} else {
 		// Propogate segment changes
@@ -117,6 +122,19 @@ function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	// Perform the inserts last, so that we can ensure they happen in a sensible order
 	const segmentsToInsert: IngestSegment[] = []
 
+	// Perform any renames before any other changes
+	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes.segmentChanges)) {
+		if (!change) continue
+
+		if (change && typeof change === 'object' && change.oldExternalId) {
+			const mutableSegment = mutableIngestRundown.getSegment(change.oldExternalId)
+			if (!mutableSegment) throw new Error(`Segment ${change.oldExternalId} not found in rundown`)
+
+			mutableIngestRundown.renameSegment(change.oldExternalId, segmentId)
+		}
+	}
+
+	// Apply changes and delete segments
 	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes.segmentChanges)) {
 		if (!change) continue
 
@@ -147,7 +165,7 @@ function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 		}
 	}
 
-	// Now we can insert them in descending order
+	// Now we can insert the new ones in descending order
 	segmentsToInsert.sort((a, b) => nrcsSegmentIds.indexOf(b.externalId) - nrcsSegmentIds.indexOf(a.externalId))
 	for (const nrcsSegment of segmentsToInsert) {
 		const segmentIndex = nrcsSegmentIds.indexOf(nrcsSegment.externalId)

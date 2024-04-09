@@ -1,7 +1,7 @@
 import { IngestModel } from './model/IngestModel'
 import { CommitIngestOperation } from './commit'
 import { LocalIngestRundown, LocalIngestSegment, RundownIngestDataCache } from './ingestCache'
-import { canRundownBeUpdated, getRundownId } from './lib'
+import { canRundownBeUpdated, getRundownId, getSegmentId } from './lib'
 import { JobContext } from '../jobs'
 import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/error'
@@ -22,6 +22,7 @@ import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromInge
 import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import _ = require('underscore')
+import { RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 
 export interface UpdateIngestRundownChange {
 	ingestRundown: LocalIngestRundown
@@ -39,6 +40,8 @@ export interface ComputedIngestChanges {
 	segmentsUpdatedRanks: Record<string, number> // contains the new rank
 	segmentsToRegenerate: LocalIngestSegment[]
 	regenerateRundown: boolean // TODO - full vs metadata?
+
+	segmentRenames: Record<string, string> // old -> new
 }
 
 // nocommit - this needs a better name
@@ -155,6 +158,10 @@ export async function runIngestUpdateOperationNew(
 
 		// Update the NRCS ingest view
 		const ingestRundownChanges = updateNrcsIngestObjects(context, nrcsIngestObjectCache, updateNrcsIngestModelFcn)
+
+		console.log(ingestRundownChanges)
+
+		// console.log('ingestRundownChanges', JSON.stringify(ingestRundownChanges, undefined, 4))
 
 		// Start saving the nrcs ingest data
 		const pSaveNrcsIngestChanges = nrcsIngestObjectCache.saveToDatabase()
@@ -356,7 +363,8 @@ async function applyCalculatedIngestChangesToModel(
 
 	// Ensure the rundown can be updated
 	const rundown = ingestModel.rundown
-	if (!canRundownBeUpdated(rundown, false)) return null
+	// if (!canRundownBeUpdated(rundown, false)) return null
+	if (!canRundownBeUpdated(rundown, computedIngestChanges.regenerateRundown)) return null
 
 	const span = context.startSpan('ingest.applyCalculatedIngestChangesToModel')
 
@@ -371,6 +379,8 @@ async function applyCalculatedIngestChangesToModel(
 			peripheralDeviceId
 		)
 
+		// nocommit any segment renames?
+
 		span?.end()
 		return result
 	} else {
@@ -383,7 +393,7 @@ async function applyCalculatedIngestChangesToModel(
 		}
 
 		// Updated segments that has had their segment.externalId changed:
-		const renamedSegments = new Map<SegmentId, SegmentId>() // nocommit: reimplement: applyExternalIdDiff(ingestModel, segmentDiff, true)
+		const renamedSegments = applyExternalIdDiff(ingestModel, computedIngestChanges, true)
 
 		// If requested, regenerate the rundown in the 'metadata' mode
 		if (computedIngestChanges.regenerateRundown) {
@@ -453,4 +463,47 @@ async function applyCalculatedIngestChangesToModel(
 			removeRundown: false,
 		} satisfies CommitIngestData
 	}
+}
+
+/**
+ * Apply the externalId renames from a DiffSegmentEntries
+ * @param ingestModel Ingest model of the rundown being updated
+ * @param segmentDiff Calculated Diff
+ * @returns Map of the SegmentId changes
+ */
+function applyExternalIdDiff(
+	ingestModel: IngestModel,
+	segmentDiff: Pick<ComputedIngestChanges, 'segmentRenames' | 'segmentsUpdatedRanks'>,
+	canDiscardParts: boolean
+): CommitIngestData['renamedSegments'] {
+	// Updated segments that has had their segment.externalId changed:
+	const renamedSegments = new Map<SegmentId, SegmentId>()
+	for (const [oldSegmentExternalId, newSegmentExternalId] of Object.entries<string>(segmentDiff.segmentRenames)) {
+		const oldSegmentId = getSegmentId(ingestModel.rundownId, oldSegmentExternalId)
+		const newSegmentId = getSegmentId(ingestModel.rundownId, newSegmentExternalId)
+
+		// Track the rename
+		renamedSegments.set(oldSegmentId, newSegmentId)
+
+		// If the segment doesnt exist (it should), then there isn't a segment to rename
+		const oldSegment = ingestModel.getSegment(oldSegmentId)
+		if (!oldSegment) continue
+
+		if (ingestModel.getSegment(newSegmentId)) {
+			// If the new SegmentId already exists, we need to discard the old one rather than trying to merge it.
+			// This can only be done if the caller is expecting to regenerate Segments
+			const canDiscardPartsForSegment = canDiscardParts && !segmentDiff.segmentsUpdatedRanks[oldSegmentExternalId]
+			if (!canDiscardPartsForSegment) {
+				throw new Error(`Cannot merge Segments with only rank changes`)
+			}
+
+			// Remove the old Segment and it's contents, the new one will be generated shortly
+			ingestModel.removeSegment(oldSegmentId)
+		} else {
+			// Perform the rename
+			ingestModel.changeSegmentId(oldSegmentId, newSegmentId)
+		}
+	}
+
+	return renamedSegments
 }

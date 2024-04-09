@@ -38,6 +38,12 @@ export enum IncomingIngestRundownChange {
 
 export interface IncomingIngestSegmentChangeObject {
 	/**
+	 * If set, this Segment has been renamed from the specified id
+	 * @deprecated This is temporary for MOS compatibility
+	 */
+	oldExternalId?: string
+
+	/**
 	 * True when the payload of the segment has changed.
 	 */
 	payloadChanged?: boolean
@@ -113,9 +119,13 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 		beforeSegmentExternalId: string | null
 	): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
+	renameSegment(oldId: string, newId: string): MutableIngestSegment<TSegmentPayload, TPartPayload>
+
 	removeSegment(id: string): boolean
 
 	removeAllSegments(): void
+
+	forceFullRegenerate(): void
 
 	setName(name: string): void
 

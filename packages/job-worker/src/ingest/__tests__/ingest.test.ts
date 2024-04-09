@@ -719,6 +719,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(context.mockCollections.Rundowns.findOne()).resolves.toBeTruthy()
 		await context.mockCollections.Rundowns.update({}, { $set: { orphaned: RundownOrphanedReason.DELETED } })
+		await context.mockCollections.NrcsIngestDataCache.remove({})
 
 		const rundown0 = (await context.mockCollections.Rundowns.findOne({ externalId: externalId })) as DBRundown
 		expect(rundown0).toBeTruthy()
@@ -746,12 +747,14 @@ describe('Test ingest actions for rundowns and segments', () => {
 		}
 
 		// Submit an update trying to remove a segment
-		await handleUpdatedRundown(context, {
-			peripheralDeviceId: device._id,
-			rundownExternalId: rundownData.externalId,
-			ingestRundown: rundownData,
-			isCreateAction: false,
-		})
+		await expect(
+			handleUpdatedRundown(context, {
+				peripheralDeviceId: device._id,
+				rundownExternalId: rundownData.externalId,
+				ingestRundown: rundownData,
+				isCreateAction: false,
+			})
+		).rejects.toThrow(/Rundown(.+)not found/)
 
 		// Segment count should not have changed
 		const rundown1 = (await context.mockCollections.Rundowns.findOne({ externalId: externalId })) as DBRundown
@@ -797,6 +800,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			],
 		}
 
+		console.log('run from here')
 		await handleUpdatedRundown(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundownData.externalId,
@@ -812,6 +816,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 	test('dataSegmentCreate in deleted rundown', async () => {
 		await expect(context.mockCollections.Rundowns.findOne()).resolves.toBeTruthy()
 		await context.mockCollections.Rundowns.update({}, { $set: { orphaned: RundownOrphanedReason.DELETED } })
+		await context.mockCollections.NrcsIngestDataCache.remove({})
 
 		const rundown0 = (await context.mockCollections.Rundowns.findOne({ externalId: externalId })) as DBRundown
 		expect(rundown0).toBeTruthy()
@@ -825,12 +830,14 @@ describe('Test ingest actions for rundowns and segments', () => {
 			parts: [],
 		}
 
-		await handleUpdatedSegment(context, {
-			peripheralDeviceId: device._id,
-			rundownExternalId: externalId,
-			ingestSegment: ingestSegment,
-			isCreateAction: true,
-		})
+		await expect(
+			handleUpdatedSegment(context, {
+				peripheralDeviceId: device._id,
+				rundownExternalId: externalId,
+				ingestSegment: ingestSegment,
+				isCreateAction: true,
+			})
+		).rejects.toThrow(/Rundown(.+)not found/)
 
 		await expect(context.mockCollections.Segments.findOne({ externalId: segExternalId })).resolves.toBeFalsy()
 
@@ -991,6 +998,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 		const rundown = (await context.mockCollections.Rundowns.findOne({ externalId: externalId })) as DBRundown
 		expect(rundown).toBeTruthy()
 		await context.mockCollections.Rundowns.update({}, { $set: { orphaned: RundownOrphanedReason.DELETED } })
+		await context.mockCollections.NrcsIngestDataCache.remove({})
 		await context.mockCollections.Segments.update({ rundownId: rundown._id }, { $unset: { orphaned: 1 } })
 		await expect(context.mockCollections.Segments.findFetch({ rundownId: rundown._id })).resolves.toHaveLength(3)
 
@@ -1228,15 +1236,18 @@ describe('Test ingest actions for rundowns and segments', () => {
 		).resolves.toHaveLength(1)
 
 		await context.mockCollections.Rundowns.update({}, { $set: { orphaned: RundownOrphanedReason.DELETED } })
+		await context.mockCollections.NrcsIngestDataCache.remove({})
 		await context.mockCollections.Segments.update({ rundownId: rundown._id }, { $unset: { orphaned: 1 } })
 
 		await expect(context.mockCollections.Segments.findFetch({ rundownId: rundown._id })).resolves.toHaveLength(3)
 
-		await handleRemovedSegment(context, {
-			peripheralDeviceId: device._id,
-			rundownExternalId: externalId,
-			segmentExternalId: segExternalId,
-		})
+		await expect(
+			handleRemovedSegment(context, {
+				peripheralDeviceId: device._id,
+				rundownExternalId: externalId,
+				segmentExternalId: segExternalId,
+			})
+		).rejects.toThrow(/Rundown(.+)not found/)
 
 		await expect(context.mockCollections.Segments.findFetch({ rundownId: rundown._id })).resolves.toHaveLength(3)
 		await expect(context.mockCollections.Segments.findOne({ externalId: segExternalId })).resolves.toBeTruthy()

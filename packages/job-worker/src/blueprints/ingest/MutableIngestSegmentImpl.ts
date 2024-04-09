@@ -17,6 +17,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	implements MutableIngestSegment<TSegmentPayload, TPartPayload>
 {
 	readonly ingestSegment: Omit<IngestSegment, 'parts'>
+	originalExternalId: string
 	#segmentHasChanges = false
 	#partOrderHasChanged = false
 
@@ -27,6 +28,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	}
 
 	constructor(ingestSegment: IngestSegment, hasChanges = false) {
+		this.originalExternalId = ingestSegment.externalId
 		this.ingestSegment = omit(ingestSegment, 'parts')
 		this.#parts = [...ingestSegment.parts]
 			.sort((a, b) => a.rank - b.rank)
@@ -129,6 +131,10 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		return true
 	}
 
+	setExternalId(id: string): void {
+		this.ingestSegment.externalId = id
+	}
+
 	setName(name: string): void {
 		if (this.ingestSegment.name !== name) {
 			this.ingestSegment.name = name
@@ -161,6 +167,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		segmentHasChanges: boolean
 		partIdsWithChanges: string[]
 		partOrderHasChanged: boolean
+		originalExternalId: string
 	} {
 		const ingestParts: LocalIngestPart[] = []
 		const changedCacheObjects: IngestDataCacheObj[] = []
@@ -194,6 +201,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 			segmentHasChanges: this.#segmentHasChanges,
 			partIdsWithChanges,
 			partOrderHasChanged: this.#partOrderHasChanged,
+			originalExternalId: this.originalExternalId,
 		}
 	}
 }

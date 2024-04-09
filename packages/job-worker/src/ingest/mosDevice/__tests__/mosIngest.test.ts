@@ -1416,7 +1416,7 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(playlist2.name).not.toEqual(playlist.name)
 	})
 
-	test.skip('mosRoStoryReplace: Combine into start of segment', async () => {
+	test('mosRoStoryReplace: Combine into start of segment', async () => {
 		await resetOrphanedRundown()
 
 		const mosRO = mockRO.roCreate()

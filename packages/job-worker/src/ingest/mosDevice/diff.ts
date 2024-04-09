@@ -8,6 +8,7 @@ import { clone, deleteAllUndefinedProperties, normalizeArrayFunc } from '@sofie-
 import { SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import {
 	IncomingIngestChange,
+	IncomingIngestPartChange,
 	IncomingIngestSegmentChange,
 	IncomingIngestSegmentChangeEnum,
 	IngestSegment,
@@ -67,12 +68,6 @@ export function generateMosIngestDiffTemp(
 
 	const onlyRankChangedSet = new Set(Object.keys(segmentDiff.onlyRankChanged))
 
-	// /** Reference to segments which only had their ranks updated */
-	// onlyRankChanged: { [segmentExternalId: string]: number } // contains the new rank
-
-	// /** Reference to segments which has been REMOVED, but it looks like there is an ADDED segment that is closely related to the removed one */
-	// externalIdChanged: { [removedSegmentExternalId: string]: string } // contains the added segment's externalId
-
 	const segmentChanges: Record<string, IncomingIngestSegmentChange> = {}
 
 	for (const id of Object.keys(segmentDiff.removed)) {
@@ -88,7 +83,37 @@ export function generateMosIngestDiffTemp(
 		segmentChanges[id] = IncomingIngestSegmentChangeEnum.Inserted
 	}
 
-	// nocommit implement something for externalIdChanged
+	for (const [oldId, newId] of Object.entries<string>(segmentDiff.externalIdChanged)) {
+		if (
+			segmentChanges[newId] &&
+			segmentChanges[newId] !== IncomingIngestSegmentChangeEnum.Inserted &&
+			segmentChanges[newId] !== IncomingIngestSegmentChangeEnum.Deleted
+		)
+			continue // Not supported for now
+
+		if (segmentChanges[oldId] === IncomingIngestSegmentChangeEnum.Deleted) delete segmentChanges[oldId]
+
+		const partsChanges: Record<string, IncomingIngestPartChange> = {}
+		const oldIngestSegment = oldIngestSegments?.find((s) => s.externalId === oldId)
+		if (oldIngestSegment) {
+			for (const oldPart of oldIngestSegment.parts) {
+				partsChanges[oldPart.externalId] = IncomingIngestPartChange.Deleted
+			}
+		}
+		const newIngestSegment = newIngestSegments.find((s) => s.externalId === newId)
+		if (newIngestSegment) {
+			for (const newPart of newIngestSegment.parts) {
+				partsChanges[newPart.externalId] = IncomingIngestPartChange.Inserted
+			}
+		}
+
+		segmentChanges[newId] = {
+			oldExternalId: oldId,
+			payloadChanged: true,
+			partOrderChanged: true,
+			partsChanges,
+		}
+	}
 
 	return {
 		source: 'ingest',
