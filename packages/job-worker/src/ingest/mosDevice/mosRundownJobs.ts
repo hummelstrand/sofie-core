@@ -16,7 +16,7 @@ import { runWithRundownLock } from '../lock'
 import { parseMosString } from './lib'
 import { groupedPartsToSegments, groupIngestParts, storiesToIngestParts } from './mosToIngest'
 import { GenerateRundownMode, updateRundownFromIngestData } from '../generationRundown'
-import { runIngestJobWithThingNew, runIngestUpdateOperationNew } from '../runOperation'
+import { runCustomIngestUpdateOperation, runIngestUpdateOperation } from '../runOperation'
 
 /**
  * Insert or update a mos rundown
@@ -27,7 +27,7 @@ export async function handleMosRundownData(context: JobContext, data: MosRundown
 	if (parseMosString(data.mosRunningOrder.ID) !== data.rundownExternalId)
 		throw new Error('mosRunningOrder.ID and rundownExternalId mismatch!')
 
-	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+	return runIngestUpdateOperation(context, data, (ingestRundown) => {
 		const rundownId = getRundownId(context.studioId, data.rundownExternalId)
 		const parts = _.compact(
 			storiesToIngestParts(context, rundownId, data.mosRunningOrder.Stories || [], data.isUpdateOperation, [])
@@ -74,7 +74,7 @@ export async function handleMosRundownData(context: JobContext, data: MosRundown
  * Update the payload of a mos rundown, without changing any parts or segments
  */
 export async function handleMosRundownMetadata(context: JobContext, data: MosRundownMetadataProps): Promise<void> {
-	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+	return runIngestUpdateOperation(context, data, (ingestRundown) => {
 		if (ingestRundown) {
 			ingestRundown.payload = _.extend(ingestRundown.payload, data.mosRunningOrderBase)
 			ingestRundown.modified = getCurrentTime()
@@ -117,7 +117,7 @@ export async function handleMosRundownStatus(context: JobContext, data: MosRundo
  */
 export async function handleMosRundownReadyToAir(context: JobContext, data: MosRundownReadyToAirProps): Promise<void> {
 	// nocommit, maybe this should be using the 'standard' flow instead of this custom one?
-	return runIngestJobWithThingNew(context, data, async (context, ingestModel, ingestRundown) => {
+	return runCustomIngestUpdateOperation(context, data, async (context, ingestModel, ingestRundown) => {
 		if (!ingestModel.rundown || ingestModel.rundown.airStatus === data.status) return null
 
 		// If rundown is orphaned, then it should be ignored

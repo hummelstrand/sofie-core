@@ -10,7 +10,7 @@ import { regenerateSegmentsFromIngestData } from './generationSegment'
 import { runWithRundownLock } from './lock'
 import { updateExpectedPackagesForPartModel, updateExpectedPackagesForRundownBaseline } from './expectedPackages'
 import { loadIngestModelFromRundown } from './model/implementation/LoadIngestModel'
-import { runIngestJobWithThingNew } from './runOperation'
+import { runCustomIngestUpdateOperation } from './runOperation'
 
 /**
  * Debug: Regenerate ExpectedPackages for a Rundown
@@ -45,7 +45,7 @@ export async function handleUpdatedPackageInfoForRundown(
 		return
 	}
 
-	return runIngestJobWithThingNew(context, data, async (context, ingestModel, ingestRundown) => {
+	return runCustomIngestUpdateOperation(context, data, async (context, ingestModel, ingestRundown) => {
 		if (!ingestRundown) throw new Error('onUpdatedPackageInfoForRundown called but ingestData is undefined')
 
 		/** All segments that need updating */

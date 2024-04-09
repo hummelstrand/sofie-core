@@ -47,15 +47,13 @@ export interface ComputedIngestChanges {
 export type ComputedIngestChanges2 = ComputedIngestChanges | UpdateIngestRundownAction
 
 /**
- * Perform an TODO description here
+ * Perform an 'ingest' update operation which modifies a Rundown without modifying the ingest data
  * This will automatically do some post-update data changes, to ensure the playout side (partinstances etc) is updated with the changes
  * @param context Context of the job being run
- * @param studioId Id of the studio the rundown belongs to
- * @param rundownExternalId ExternalId of the rundown to lock
- * @param updateNrcsIngestModelFcn Function to mutate the ingestData. Throw if the requested change is not valid. Return undefined to indicate the ingestData should be deleted
- * @param calcFcn Function to run to update the Rundown. Return the blob of data about the change to help the post-update perform its duties. Return null to indicate that nothing changed
+ * @param data Ids for the rundown and peripheral device
+ * @param doWorkFcn Function to run to update the Rundown. Return the blob of data about the change to help the post-update perform its duties. Return null to indicate that nothing changed
  */
-export async function runIngestJobWithThingNew(
+export async function runCustomIngestUpdateOperation(
 	context: JobContext,
 	data: IngestPropsBase,
 	doWorkFcn: (
@@ -122,12 +120,10 @@ export async function runIngestJobWithThingNew(
  * Perform an ingest update operation on a rundown
  * This will automatically do some post-update data changes, to ensure the playout side (partinstances etc) is updated with the changes
  * @param context Context of the job being run
- * @param studioId Id of the studio the rundown belongs to
- * @param rundownExternalId ExternalId of the rundown to lock
+ * @param data Ids for the rundown and peripheral device
  * @param updateNrcsIngestModelFcn Function to mutate the ingestData. Throw if the requested change is not valid. Return undefined to indicate the ingestData should be deleted
- * @param calcFcn Function to run to update the Rundown. Return the blob of data about the change to help the post-update perform its duties. Return null to indicate that nothing changed
  */
-export async function runIngestUpdateOperationNew(
+export async function runIngestUpdateOperation(
 	context: JobContext,
 	data: IngestPropsBase,
 	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult

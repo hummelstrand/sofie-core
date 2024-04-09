@@ -6,7 +6,7 @@ import _ = require('underscore')
 import { JobContext } from '../../jobs'
 import { LocalIngestRundown } from '../ingestCache'
 import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
-import { UpdateIngestRundownResult, runIngestUpdateOperationNew } from '../runOperation'
+import { UpdateIngestRundownResult, runIngestUpdateOperation } from '../runOperation'
 
 export function getPartIdFromMosStory(rundownId: RundownId, partMosId: MOS.IMOSString128 | string): PartId {
 	if (!partMosId) throw new Error('parameter partMosId missing!')
@@ -51,7 +51,7 @@ export function wrapMosIngestJob<TData extends IngestPropsBase>(
 		const executeFcn = fcn(context, data)
 		if (!executeFcn) return
 
-		return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+		return runIngestUpdateOperation(context, data, (ingestRundown) => {
 			if (ingestRundown && ingestRundown.type !== 'mos') {
 				throw new Error(`Rundown "${data.rundownExternalId}" is not a MOS rundown`)
 			}

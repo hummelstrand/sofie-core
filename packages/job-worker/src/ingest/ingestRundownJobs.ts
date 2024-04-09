@@ -12,7 +12,7 @@ import {
 	UserRemoveRundownProps,
 	UserUnsyncRundownProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
-import { UpdateIngestRundownAction, UpdateIngestRundownResult, runIngestUpdateOperationNew } from './runOperation'
+import { UpdateIngestRundownAction, UpdateIngestRundownResult, runIngestUpdateOperation } from './runOperation'
 import { IncomingIngestRundownChange } from '@sofie-automation/blueprints-integration'
 import { getCurrentTime } from '../lib'
 
@@ -20,7 +20,7 @@ import { getCurrentTime } from '../lib'
  * Attempt to remove a rundown, or orphan it
  */
 export async function handleRemovedRundown(context: JobContext, data: IngestRemoveRundownProps): Promise<void> {
-	return runIngestUpdateOperationNew(context, data, () => {
+	return runIngestUpdateOperation(context, data, () => {
 		// Remove it
 		return data.forceDelete ? UpdateIngestRundownAction.FORCE_DELETE : UpdateIngestRundownAction.DELETE
 	})
@@ -73,7 +73,7 @@ export async function handleUserRemoveRundown(context: JobContext, data: UserRem
  * Insert or update a rundown with a new IngestRundown
  */
 export async function handleUpdatedRundown(context: JobContext, data: IngestUpdateRundownProps): Promise<void> {
-	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+	return runIngestUpdateOperation(context, data, (ingestRundown) => {
 		if (ingestRundown || data.isCreateAction) {
 			return {
 				ingestRundown: makeNewIngestRundown(data.ingestRundown),
@@ -95,7 +95,7 @@ export async function handleUpdatedRundownMetaData(
 	context: JobContext,
 	data: IngestUpdateRundownMetaDataProps
 ): Promise<void> {
-	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+	return runIngestUpdateOperation(context, data, (ingestRundown) => {
 		if (ingestRundown) {
 			return {
 				ingestRundown: {
@@ -118,7 +118,7 @@ export async function handleUpdatedRundownMetaData(
  * Regnerate a Rundown from the cached IngestRundown
  */
 export async function handleRegenerateRundown(context: JobContext, data: IngestRegenerateRundownProps): Promise<void> {
-	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+	return runIngestUpdateOperation(context, data, (ingestRundown) => {
 		if (ingestRundown) {
 			return {
 				// We want to regenerate unmodified

@@ -12,14 +12,14 @@ import {
 	IngestUpdateSegmentRanksProps,
 	RemoveOrphanedSegmentsProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
-import { runIngestJobWithThingNew, runIngestUpdateOperationNew } from './runOperation'
+import { runCustomIngestUpdateOperation, runIngestUpdateOperation } from './runOperation'
 import { IncomingIngestSegmentChangeEnum } from '@sofie-automation/blueprints-integration'
 
 /**
  * Regnerate a Segment from the cached IngestSegment
  */
 export async function handleRegenerateSegment(context: JobContext, data: IngestRegenerateSegmentProps): Promise<void> {
-	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+	return runIngestUpdateOperation(context, data, (ingestRundown) => {
 		if (ingestRundown) {
 			// Ensure the target segment exists in the cache
 			const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
@@ -51,7 +51,7 @@ export async function handleRegenerateSegment(context: JobContext, data: IngestR
  * Attempt to remove a segment, or orphan it
  */
 export async function handleRemovedSegment(context: JobContext, data: IngestRemoveSegmentProps): Promise<void> {
-	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+	return runIngestUpdateOperation(context, data, (ingestRundown) => {
 		if (ingestRundown) {
 			const oldSegmentsLength = ingestRundown.segments.length
 			ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== data.segmentExternalId)
@@ -86,7 +86,7 @@ export async function handleUpdatedSegment(context: JobContext, data: IngestUpda
 	const segmentExternalId = data.ingestSegment.externalId
 	if (!segmentExternalId) throw new Error('Segment externalId must be set!')
 
-	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+	return runIngestUpdateOperation(context, data, (ingestRundown) => {
 		if (ingestRundown) {
 			const countBefore = ingestRundown.segments.length
 			ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== segmentExternalId)
@@ -119,7 +119,7 @@ export async function handleUpdatedSegmentRanks(
 	context: JobContext,
 	data: IngestUpdateSegmentRanksProps
 ): Promise<void> {
-	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+	return runIngestUpdateOperation(context, data, (ingestRundown) => {
 		if (ingestRundown) {
 			let hasChange = false
 
@@ -153,7 +153,7 @@ export async function handleRemoveOrphanedSegemnts(
 	context: JobContext,
 	data: RemoveOrphanedSegmentsProps
 ): Promise<void> {
-	return runIngestJobWithThingNew(context, data, async (_context, ingestModel, ingestRundown) => {
+	return runCustomIngestUpdateOperation(context, data, async (_context, ingestModel, ingestRundown) => {
 		// Find the segments that are still orphaned (in case they have resynced before this executes)
 		// We flag them for deletion again, and they will either be kept if they are somehow playing, or purged if they are not
 		const stillOrphanedSegments = ingestModel.getOrderedSegments().filter((s) => !!s.segment.orphaned)

@@ -2,14 +2,14 @@ import { getCurrentTime } from '../lib'
 import { JobContext } from '../jobs'
 import { makeNewIngestPart } from './ingestCache'
 import { IngestRemovePartProps, IngestUpdatePartProps } from '@sofie-automation/corelib/dist/worker/ingest'
-import { UpdateIngestRundownChange, runIngestUpdateOperationNew } from './runOperation'
+import { UpdateIngestRundownChange, runIngestUpdateOperation } from './runOperation'
 import { IncomingIngestPartChange } from '@sofie-automation/blueprints-integration'
 
 /**
  * Remove a Part from a Segment
  */
 export async function handleRemovedPart(context: JobContext, data: IngestRemovePartProps): Promise<void> {
-	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+	return runIngestUpdateOperation(context, data, (ingestRundown) => {
 		if (ingestRundown) {
 			const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
 			if (!ingestSegment) {
@@ -55,7 +55,7 @@ export async function handleRemovedPart(context: JobContext, data: IngestRemoveP
  * Insert or update a Part in a Segment
  */
 export async function handleUpdatedPart(context: JobContext, data: IngestUpdatePartProps): Promise<void> {
-	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
+	return runIngestUpdateOperation(context, data, (ingestRundown) => {
 		if (ingestRundown) {
 			const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
 			if (!ingestSegment) {
