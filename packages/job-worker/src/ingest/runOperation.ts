@@ -22,7 +22,6 @@ import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromInge
 import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import _ = require('underscore')
-import { RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 
 export interface UpdateIngestRundownChange {
 	ingestRundown: LocalIngestRundown
@@ -159,10 +158,6 @@ export async function runIngestUpdateOperationNew(
 		// Update the NRCS ingest view
 		const ingestRundownChanges = updateNrcsIngestObjects(context, nrcsIngestObjectCache, updateNrcsIngestModelFcn)
 
-		console.log(ingestRundownChanges)
-
-		// console.log('ingestRundownChanges', JSON.stringify(ingestRundownChanges, undefined, 4))
-
 		// Start saving the nrcs ingest data
 		const pSaveNrcsIngestChanges = nrcsIngestObjectCache.saveToDatabase()
 		pSaveNrcsIngestChanges.catch(() => null) // Prevent unhandled promise rejection
@@ -251,6 +246,8 @@ async function updateSofieIngestRundown(
 		const nrcsIngestRundown = ingestRundownChanges.ingestRundown
 		const sofieIngestRundown = sofieIngestObjectCache.fetchRundown()
 
+		sortIngestRundown(nrcsIngestRundown)
+
 		const mutableIngestRundown = sofieIngestRundown
 			? new MutableIngestRundownImpl(clone(sofieIngestRundown))
 			: new MutableIngestRundownImpl(
@@ -289,6 +286,13 @@ async function updateSofieIngestRundown(
 		sofieIngestObjectCache.removeAllOtherDocuments(resultChanges.allCacheObjectIds)
 
 		return resultChanges.computedChanges
+	}
+}
+
+function sortIngestRundown(rundown: IngestRundown): void {
+	rundown.segments.sort((a, b) => a.rank - b.rank)
+	for (const segment of rundown.segments) {
+		segment.parts.sort((a, b) => a.rank - b.rank)
 	}
 }
 

@@ -84,9 +84,15 @@ export async function handleRemovedSegment(context: JobContext, data: IngestRemo
  */
 export async function handleUpdatedSegment(context: JobContext, data: IngestUpdateSegmentProps): Promise<void> {
 	const segmentExternalId = data.ingestSegment.externalId
+	if (!segmentExternalId) throw new Error('Segment externalId must be set!')
+
 	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
 		if (ingestRundown) {
+			const countBefore = ingestRundown.segments.length
 			ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== segmentExternalId)
+			if (countBefore === ingestRundown.segments.length && !data.isCreateAction)
+				throw new Error(`Segment "${data.ingestSegment.externalId}" not found`)
+
 			ingestRundown.segments.push(makeNewIngestSegment(data.ingestSegment))
 			ingestRundown.modified = getCurrentTime()
 
@@ -115,9 +121,15 @@ export async function handleUpdatedSegmentRanks(
 ): Promise<void> {
 	return runIngestUpdateOperationNew(context, data, (ingestRundown) => {
 		if (ingestRundown) {
+			let hasChange = false
+
 			// Update ranks on ingest data
 			for (const segment of ingestRundown.segments) {
-				segment.rank = data.newRanks[segment.externalId] ?? segment.rank
+				const newRank = Number(data.newRanks[segment.externalId])
+				if (!isNaN(newRank)) {
+					segment.rank = newRank
+					hasChange = true
+				}
 			}
 
 			return {
@@ -125,7 +137,7 @@ export async function handleUpdatedSegmentRanks(
 				ingestRundown,
 				changes: {
 					source: 'ingest',
-					segmentOrderChanged: true,
+					segmentOrderChanged: hasChange,
 				},
 			}
 		} else {
