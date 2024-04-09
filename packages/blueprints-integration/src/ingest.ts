@@ -105,7 +105,8 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 
 	getSegment(id: string): MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined
 
-	moveSegment(id: string, beforeSegmentExternalId: string | null): void
+	moveSegmentBefore(id: string, beforeSegmentExternalId: string | null): void
+	moveSegmentAfter(id: string, afterSegmentExternalId: string | null): void
 
 	replaceSegment(
 		segment: IngestSegment,
@@ -144,6 +145,9 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	readonly parts: ReadonlyArray<MutableIngestPart<TPartPayload>>
 
 	getPart(id: string): MutableIngestPart<TPartPayload> | undefined
+
+	movePartBefore(id: string, beforePartExternalId: string | null): void
+	movePartAfter(id: string, afterPartExternalId: string | null): void
 
 	replacePart(part: IngestPart, beforePartExternalId: string | null): MutableIngestPart<TPartPayload>
 

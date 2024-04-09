@@ -998,7 +998,7 @@ describe('Test recieved mos ingest payloads', () => {
 		await expectRundownToMatchSnapshot(rundown._id, true, true)
 	})
 
-	test.skip('mosRoStoryMove: Move whole segment to end', async () => {
+	test('mosRoStoryMove: Move whole segment to end', async () => {
 		await resetOrphanedRundown()
 
 		const playlist = (await context.mockCollections.RundownPlaylists.findOne()) as DBRundownPlaylist
@@ -1269,7 +1269,7 @@ describe('Test recieved mos ingest payloads', () => {
 		}
 	})
 
-	test.skip('Rename segment during resync while on air', async () => {
+	test('Rename segment during resync while on air', async () => {
 		const mosRO = mockRO.roCreate()
 
 		await resetOrphanedRundown()

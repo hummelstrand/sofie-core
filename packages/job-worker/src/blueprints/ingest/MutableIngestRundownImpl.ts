@@ -129,7 +129,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		return this.#segments.find((s) => s.externalId === id)
 	}
 
-	moveSegment(id: string, beforeSegmentExternalId: string | null): void {
+	moveSegmentBefore(id: string, beforeSegmentExternalId: string | null): void {
 		const segment = this.#segments.find((s) => s.externalId === id)
 		if (!segment) throw new Error(`Segment "${id}" not found`)
 
@@ -142,6 +142,24 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			this.#segments.splice(beforeIndex, 0, segment)
 		} else {
 			this.#segments.push(segment)
+		}
+
+		this.#segmentOrderChanged = true
+	}
+
+	moveSegmentAfter(id: string, afterSegmentExternalId: string | null): void {
+		const segment = this.#segments.find((s) => s.externalId === id)
+		if (!segment) throw new Error(`Segment "${id}" not found`)
+
+		this.removeSegment(id)
+
+		if (afterSegmentExternalId) {
+			const beforeIndex = this.#segments.findIndex((s) => s.externalId === afterSegmentExternalId)
+			if (beforeIndex === -1) throw new Error(`Segment "${afterSegmentExternalId}" not found`)
+
+			this.#segments.splice(beforeIndex + 1, 0, segment)
+		} else {
+			this.#segments.unshift(segment)
 		}
 
 		this.#segmentOrderChanged = true

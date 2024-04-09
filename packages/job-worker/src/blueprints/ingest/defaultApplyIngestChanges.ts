@@ -61,8 +61,30 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 		applySegmentChanges(mutableIngestRundown, nrcsRundown, changes, options)
 
 		if (changes.segmentOrderChanged) {
-			// const orderedSegmentIds = changes.segmentOrderChanged.orderedSegmentIds
-			// TODO
+			// Figure out which segments don't have a new rank, and will need interpolating
+			const missingNewRank: Array<{ segmentId: string; afterId: string | null }> = []
+			const segmentIdRanksInRundown = normalizeArrayToMap(nrcsRundown.segments, 'externalId')
+			mutableIngestRundown.segments.forEach((segment, i) => {
+				if (!segmentIdRanksInRundown.has(segment.externalId)) {
+					missingNewRank.push({
+						segmentId: segment.externalId,
+						afterId: i > 0 ? mutableIngestRundown.segments[i - 1].externalId : null,
+					})
+				}
+			})
+
+			// Run through the segments in reverse order, so that we can insert them in the correct order
+			for (let i = nrcsRundown.segments.length - 1; i >= 0; i--) {
+				const nrcsSegment = nrcsRundown.segments[i]
+				const beforeNrcsSegment: IngestSegment | undefined = nrcsRundown.segments[i + 1]
+
+				mutableIngestRundown.moveSegmentBefore(nrcsSegment.externalId, beforeNrcsSegment?.externalId ?? null)
+			}
+
+			// Run through the segments without a defined rank, and ensure they are positioned after the same segment as before
+			for (const segmentInfo of missingNewRank) {
+				mutableIngestRundown.moveSegmentAfter(segmentInfo.segmentId, segmentInfo.afterId)
+			}
 		}
 	}
 }
@@ -199,6 +221,29 @@ function applyChangesToSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
 	}
 
 	if (segmentChange.partOrderChanged) {
-		// TODO - what to do here?
+		// Figure out which segments don't have a new rank, and will need interpolating
+		const missingNewRank: Array<{ partId: string; afterId: string | null }> = []
+		const partIdRanksInSegment = normalizeArrayToMap(nrcsSegment.parts, 'externalId')
+		mutableSegment.parts.forEach((part, i) => {
+			if (!partIdRanksInSegment.has(part.externalId)) {
+				missingNewRank.push({
+					partId: part.externalId,
+					afterId: i > 0 ? mutableSegment.parts[i - 1].externalId : null,
+				})
+			}
+		})
+
+		// Run through the segments in reverse order, so that we can insert them in the correct order
+		for (let i = nrcsSegment.parts.length - 1; i >= 0; i--) {
+			const nrcsPart = nrcsSegment.parts[i]
+			const beforeNrcsPart: IngestPart | undefined = nrcsSegment.parts[i + 1]
+
+			mutableSegment.movePartBefore(nrcsPart.externalId, beforeNrcsPart?.externalId ?? null)
+		}
+
+		// Run through the segments without a defined rank, and ensure they are positioned after the same segment as before
+		for (const segmentInfo of missingNewRank) {
+			mutableSegment.movePartAfter(segmentInfo.partId, segmentInfo.afterId)
+		}
 	}
 }

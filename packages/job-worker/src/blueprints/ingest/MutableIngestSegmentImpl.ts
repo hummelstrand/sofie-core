@@ -62,6 +62,42 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		return this.#parts.find((part) => part.ingestPart.externalId === id)
 	}
 
+	movePartBefore(id: string, beforePartExternalId: string | null): void {
+		const part = this.#parts.find((p) => p.externalId === id)
+		if (!part) throw new Error(`Part "${id}" not found`)
+
+		this.removePart(id)
+
+		if (beforePartExternalId) {
+			const beforeIndex = this.#parts.findIndex((p) => p.externalId === beforePartExternalId)
+			if (beforeIndex === -1) throw new Error(`Part "${beforePartExternalId}" not found`)
+
+			this.#parts.splice(beforeIndex, 0, part)
+		} else {
+			this.#parts.push(part)
+		}
+
+		this.#partOrderHasChanged = true
+	}
+
+	movePartAfter(id: string, afterPartExternalId: string | null): void {
+		const part = this.#parts.find((p) => p.externalId === id)
+		if (!part) throw new Error(`Part "${id}" not found`)
+
+		this.removePart(id)
+
+		if (afterPartExternalId) {
+			const beforeIndex = this.#parts.findIndex((p) => p.externalId === afterPartExternalId)
+			if (beforeIndex === -1) throw new Error(`Part "${afterPartExternalId}" not found`)
+
+			this.#parts.splice(beforeIndex + 1, 0, part)
+		} else {
+			this.#parts.unshift(part)
+		}
+
+		this.#partOrderHasChanged = true
+	}
+
 	replacePart(part: IngestPart, beforePartExternalId: string | null): MutableIngestPart<TPartPayload> {
 		this.removePart(part.externalId)
 
