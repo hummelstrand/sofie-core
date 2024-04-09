@@ -40,6 +40,7 @@ import {
 } from '../../ingest/bucket/bucketAdlibs'
 import { handleBucketItemImport, handleBucketItemRegenerate } from '../../ingest/bucket/import'
 import { wrapMosIngestJob } from '../../ingest/mosDevice/lib'
+import { handleUserExecuteChangeOperation } from '../../ingest/userOperation'
 
 type ExecutableFunction<T extends keyof IngestJobFunc> = (
 	context: JobContext,
@@ -79,6 +80,7 @@ export const ingestJobHandlers: IngestJobHandlers = {
 
 	[IngestJobs.UserRemoveRundown]: handleUserRemoveRundown,
 	[IngestJobs.UserUnsyncRundown]: handleUserUnsyncRundown,
+	[IngestJobs.UserExecuteChangeOperation]: handleUserExecuteChangeOperation,
 
 	[IngestJobs.BucketItemImport]: handleBucketItemImport,
 	[IngestJobs.BucketItemRegenerate]: handleBucketItemRegenerate,

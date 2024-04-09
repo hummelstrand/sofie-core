@@ -327,6 +327,12 @@ export interface NewUserActionAPI extends MethodContext {
 		playlistId: RundownPlaylistId,
 		rundownId: RundownId
 	): Promise<ClientAPI.ClientResponse<void>>
+	executeUserChangeOperation(
+		userEvent: string,
+		eventTime: Time,
+		rundownId: RundownId,
+		payload: any
+	): Promise<ClientAPI.ClientResponse<void>>
 }
 
 export enum UserActionAPIMethods {
@@ -407,6 +413,7 @@ export enum UserActionAPIMethods {
 	'disablePeripheralSubDevice' = 'userAction.system.disablePeripheralSubDevice',
 
 	'activateScratchpadMode' = 'userAction.activateScratchpadMode',
+	'executeUserChangeOperation' = 'userAction.executeUserChangeOperation',
 }
 
 export interface ReloadRundownPlaylistResponse {

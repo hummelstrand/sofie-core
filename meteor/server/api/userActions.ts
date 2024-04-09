@@ -48,6 +48,9 @@ import {
 import { NrcsIngestDataCache, Parts, Pieces, Rundowns } from '../collections'
 import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { verifyHashedToken } from './singleUseTokens'
+import { runIngestOperation } from './ingest/lib'
+import { RundownPlaylistContentWriteAccess } from '../security/rundownPlaylist'
+import { IngestJobs } from '@sofie-automation/corelib/dist/worker/ingest'
 
 async function pieceSetInOutPoints(
 	access: VerifiedRundownPlaylistContentAccess,
@@ -1215,6 +1218,31 @@ class ServerUserActionAPI
 			{
 				playlistId: playlistId,
 				rundownId: rundownId,
+			}
+		)
+	}
+
+	async executeUserChangeOperation(
+		userEvent: string,
+		eventTime: Time,
+		rundownId: RundownId,
+		payload: any
+	): Promise<ClientAPI.ClientResponse<void>> {
+		return ServerClientAPI.runUserActionInLog(
+			this,
+			userEvent,
+			eventTime,
+			'executeUserChangeOperation',
+			[payload],
+			async () => {
+				const access = await RundownPlaylistContentWriteAccess.rundown(this, rundownId)
+				if (!access.rundown) throw new Error(`Rundown "${rundownId}" not found`)
+
+				await runIngestOperation(access.rundown.studioId, IngestJobs.UserExecuteChangeOperation, {
+					rundownExternalId: access.rundown.externalId,
+					peripheralDeviceId: null,
+					payload,
+				})
 			}
 		)
 	}

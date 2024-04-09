@@ -168,6 +168,8 @@ export class RundownIngestDataCache {
 	}
 
 	async saveToDatabase(): Promise<void> {
+		if (this.#changedDocumentIds.size === 0) return
+
 		const documentsMap = normalizeArrayToMap(this.documents, '_id')
 
 		const updates: AnyBulkWriteOperation<IngestDataCacheObj>[] = []

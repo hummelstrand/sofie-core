@@ -82,6 +82,13 @@ export interface IncomingIngestChange {
 	segmentChanges?: Record<string, IncomingIngestSegmentChange>
 }
 
+export interface UserOperationChange {
+	/** Indicate that this change is from user operations */
+	source: 'user'
+
+	payload: any // TODO - define this
+}
+
 export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {
 	/** Id of the rundown as reported by the ingest gateway. Must be unique for each rundown owned by the gateway */
 	readonly externalId: string

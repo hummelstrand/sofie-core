@@ -9,7 +9,7 @@ import { loadIngestModelFromRundownExternalId } from './model/implementation/Loa
 import { Complete, clone } from '@sofie-automation/corelib/dist/lib'
 import { CommitIngestData, runWithRundownLockWithoutFetchingRundown } from './lock'
 import { DatabasePersistedModel } from '../modelBase'
-import { IncomingIngestChange, IngestRundown } from '@sofie-automation/blueprints-integration'
+import { IncomingIngestChange, IngestRundown, UserOperationChange } from '@sofie-automation/blueprints-integration'
 import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
 import { CommonContext } from '../blueprints/context'
 import { PartId, PeripheralDeviceId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
@@ -25,7 +25,7 @@ export enum UpdateIngestRundownAction {
 
 export interface UpdateIngestRundownChange {
 	ingestRundown: LocalIngestRundown
-	changes: IncomingIngestChange
+	changes: IncomingIngestChange | UserOperationChange
 }
 
 export type UpdateIngestRundownResult = UpdateIngestRundownChange | UpdateIngestRundownAction
@@ -128,6 +128,24 @@ export async function runIngestUpdateOperation(
 	data: IngestPropsBase,
 	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult
 ): Promise<void> {
+	return runIngestUpdateOperationBase(context, data, async (nrcsIngestObjectCache) =>
+		updateNrcsIngestObjects(context, nrcsIngestObjectCache, updateNrcsIngestModelFcn)
+	)
+}
+
+/**
+ * Perform an ingest update operation on a rundown
+ * This will automatically do some post-update data changes, to ensure the playout side (partinstances etc) is updated with the changes
+ * @param context Context of the job being run
+ * @param data Ids for the rundown and peripheral device
+ * @param updateNrcsIngestModelFcn Function to mutate the ingestData. Throw if the requested change is not valid. Return undefined to indicate the ingestData should be deleted
+ */
+// nocommit - this needs a better name
+export async function runIngestUpdateOperationBase(
+	context: JobContext,
+	data: IngestPropsBase,
+	executeFcn: (nrcsIngestObjectCache: RundownIngestDataCache) => Promise<UpdateIngestRundownResult>
+): Promise<void> {
 	if (!data.rundownExternalId) {
 		throw new Error(`Job is missing rundownExternalId`)
 	}
@@ -151,8 +169,10 @@ export async function runIngestUpdateOperation(
 			rundownId
 		)
 
-		// Update the NRCS ingest view
-		const ingestRundownChanges = updateNrcsIngestObjects(context, nrcsIngestObjectCache, updateNrcsIngestModelFcn)
+		const ingestRundownChanges = await executeFcn(nrcsIngestObjectCache)
+
+		// // Update the NRCS ingest view
+		// const ingestRundownChanges = updateNrcsIngestObjects(context, nrcsIngestObjectCache, updateNrcsIngestModelFcn)
 
 		// Start saving the nrcs ingest data
 		const pSaveNrcsIngestChanges = nrcsIngestObjectCache.saveToDatabase()
@@ -186,7 +206,7 @@ export async function runIngestUpdateOperation(
 			}
 		} finally {
 			// Ensure we save the nrcs ingest data
-			await pSaveNrcsIngestChanges
+			// await pSaveNrcsIngestChanges
 
 			span?.end()
 		}
@@ -270,8 +290,10 @@ async function updateSofieIngestRundown(
 				mutableIngestRundown,
 				ingestRundownChanges.changes
 			)
-		} else {
+		} else if (ingestRundownChanges.changes.source === 'ingest') {
 			mutableIngestRundown.defaultApplyIngestChanges(nrcsIngestRundown, ingestRundownChanges.changes)
+		} else {
+			throw new Error(`Blueprint missing processIngestData function`)
 		}
 
 		const resultChanges = mutableIngestRundown.intoIngestRundown(rundownId, sofieIngestRundown)
