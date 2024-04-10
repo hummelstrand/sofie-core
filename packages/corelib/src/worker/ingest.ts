@@ -229,7 +229,7 @@ export interface UserRemoveRundownProps extends UserRundownPropsBase {
 export type UserUnsyncRundownProps = UserRundownPropsBase
 
 export interface UserExecuteChangeOperationProps extends IngestPropsBase {
-	payload: any // TODO: Define this
+	operation: any // TODO: Define this
 }
 
 export interface BucketItemImportProps {

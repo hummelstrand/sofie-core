@@ -1226,14 +1226,14 @@ class ServerUserActionAPI
 		userEvent: string,
 		eventTime: Time,
 		rundownId: RundownId,
-		payload: any
+		operation: any
 	): Promise<ClientAPI.ClientResponse<void>> {
 		return ServerClientAPI.runUserActionInLog(
 			this,
 			userEvent,
 			eventTime,
 			'executeUserChangeOperation',
-			[payload],
+			[operation],
 			async () => {
 				const access = await RundownPlaylistContentWriteAccess.rundown(this, rundownId)
 				if (!access.rundown) throw new Error(`Rundown "${rundownId}" not found`)
@@ -1241,7 +1241,7 @@ class ServerUserActionAPI
 				await runIngestOperation(access.rundown.studioId, IngestJobs.UserExecuteChangeOperation, {
 					rundownExternalId: access.rundown.externalId,
 					peripheralDeviceId: null,
-					payload,
+					operation,
 				})
 			}
 		)

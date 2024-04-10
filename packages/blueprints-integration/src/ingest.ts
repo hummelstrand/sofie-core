@@ -22,7 +22,7 @@ export enum IncomingIngestPartChange {
 	// Rank = 'rank',
 }
 export enum IncomingIngestSegmentChangeEnum {
-	Inserted = 'inserted',
+	Inserted = 'inserted', // nocommit: or "replaced" / "upsert"?
 	Deleted = 'deleted',
 	// Contents = 'contents',
 	// ContentsOrder = 'contentsOrder',
@@ -31,6 +31,7 @@ export enum IncomingIngestSegmentChangeEnum {
 }
 export enum IncomingIngestRundownChange {
 	// Deleted = 'deleted',
+	// nocommit: describe these
 	Payload = 'payload',
 	// CoreData = 'coreData',
 	Regenerate = 'regenerate',
@@ -67,7 +68,9 @@ export interface IncomingIngestChange {
 
 	/**
 	 * True when the rank of any segment in the rundown has changed.
-	 * Expressing what exactly has changed non-trivial particularly how to represent that in this structure, so for now we just have a simple boolean.
+	 * Expressing what exactly has changed non-trivial particularly how to represent that in this structure,
+	 * so for now we just have a simple boolean.
+	 * If this is false, no segments have been reordered, added or removed. // nocommit: confirm this
 	 */
 	segmentOrderChanged?: boolean
 
@@ -82,11 +85,15 @@ export interface IncomingIngestChange {
 	segmentChanges?: Record<string, IncomingIngestSegmentChange>
 }
 
-export interface UserOperationChange {
+export type DefaultUserOperations = {
+	type: '__sofie-move-segment'
+}
+
+export interface UserOperationChange<TCustomBlueprintOperations = never> {
 	/** Indicate that this change is from user operations */
 	source: 'user'
 
-	payload: any // TODO - define this
+	operation: DefaultUserOperations | TCustomBlueprintOperations
 }
 
 export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {
@@ -101,7 +108,7 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	/** Payload of rundown metadata. For use by other blueprints methods */
 	readonly payload: ReadonlyDeep<TRundownPayload> | undefined
 
-	// TODO - split payload into 'private' and 'public'? ie, one for `getRundown` and one for `getSegment`, so that we can affect the rundown generation without regenerating all of the segments.
+	// nocommit - split payload into 'private' and 'public'? ie, one for `getRundown` and one for `getSegment`, so that we can affect the rundown generation without regenerating all of the segments.
 	// Or should we expect this blueprint stage to copy any needed properties into each of the segment/part payloads?
 
 	/** Array of segments in this rundown */
@@ -122,11 +129,12 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	moveSegmentAfter(id: string, afterSegmentExternalId: string | null): void
 
 	replaceSegment(
-		segment: IngestSegment,
+		segment: Omit<IngestSegment, 'rank'>,
 		beforeSegmentExternalId: string | null
 	): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
-	renameSegment(oldId: string, newId: string): MutableIngestSegment<TSegmentPayload, TPartPayload>
+	// nocommit - better naming of this method?
+	renameSegment(oldExternalId: string, newExternalId: string): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
 	removeSegment(id: string): boolean
 
@@ -134,12 +142,17 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 
 	forceFullRegenerate(): void
 
+	/** Set name of the Rundown */
 	setName(name: string): void
 
 	replacePayload(payload: ReadonlyDeep<TRundownPayload> | TRundownPayload): void
 
 	setPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
+	// nocommit: is this better than exposing the payload property?
+	// getPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
+	// clearPayload<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
 
+	// :eyes:
 	defaultApplyIngestChanges(
 		ingestRundown: IngestRundown,
 		changes: IncomingIngestChange,
@@ -170,6 +183,9 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 
 	removePart(id: string): boolean
 
+	// nocommit: implement this
+	// forceRegenerate(): void
+
 	setName(name: string): void
 
 	replacePayload(payload: ReadonlyDeep<TSegmentPayload> | TSegmentPayload): void
@@ -195,12 +211,14 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 	setPayloadProperty<TKey extends keyof TPartPayload>(key: TKey, value: TPartPayload[TKey]): void
 }
 
+export type TransformPayloadFunction<T> = (payload: any, oldPayload: ReadonlyDeep<T> | undefined) => T | ReadonlyDeep<T>
+
 export interface IngestDefaultChangesOptions<
 	TRundownPayload = unknown,
 	TSegmentPayload = unknown,
 	TPartPayload = unknown
 > {
-	transformRundownPayload: (payload: any) => TRundownPayload
-	transformSegmentPayload: (payload: any) => TSegmentPayload
-	transformPartPayload: (payload: any) => TPartPayload
+	transformRundownPayload: TransformPayloadFunction<TRundownPayload>
+	transformSegmentPayload: TransformPayloadFunction<TSegmentPayload>
+	transformPartPayload: TransformPayloadFunction<TPartPayload>
 }

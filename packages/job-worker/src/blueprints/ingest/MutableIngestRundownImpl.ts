@@ -90,6 +90,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	replacePayload(payload: ReadonlyDeep<TRundownPayload> | TRundownPayload): void {
+		// nocommit: track the changes so the diffing can be done at the end
 		if (!_.isEqual(this.ingestRundown.payload, payload)) {
 			this.ingestRundown.payload = clone(payload)
 			this.#hasChangesToRundown = true
@@ -101,6 +102,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			throw new Error('Rundown payload is not set')
 		}
 
+		// nocommit: track the changes so the diffing can be done at the end
 		if (!_.isEqual(this.ingestRundown.payload[key], value)) {
 			this.ingestRundown.payload[key] = clone(value)
 			this.#hasChangesToRundown = true
@@ -137,7 +139,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		const segment = this.#segments.find((s) => s.externalId === id)
 		if (!segment) throw new Error(`Segment "${id}" not found`)
 
-		this.removeSegment(id)
+		this.#removeSegment(id)
 
 		if (beforeSegmentExternalId) {
 			const beforeIndex = this.#segments.findIndex((s) => s.externalId === beforeSegmentExternalId)
@@ -155,7 +157,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		const segment = this.#segments.find((s) => s.externalId === id)
 		if (!segment) throw new Error(`Segment "${id}" not found`)
 
-		this.removeSegment(id)
+		this.#removeSegment(id)
 
 		if (afterSegmentExternalId) {
 			const beforeIndex = this.#segments.findIndex((s) => s.externalId === afterSegmentExternalId)
@@ -180,7 +182,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			newSegment.originalExternalId = oldSegment.originalExternalId
 		}
 
-		this.removeSegment(segment.externalId)
+		this.#removeSegment(segment.externalId)
 
 		if (beforeSegmentExternalId) {
 			const beforeIndex = this.#segments.findIndex((s) => s.externalId === beforeSegmentExternalId)
@@ -205,7 +207,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			throw new Error(`Segment "${newId}" already exists`)
 			// // Segment id is already in use, ensure it is regenerated and remove the old segment
 			// targetSegment.forceRegenerate()
-			// this.removeSegment(oldId)
+			// this.#removeSegment(oldId)
 			// return targetSegment
 		} else {
 			segment.setExternalId(newId)
@@ -214,7 +216,11 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		}
 	}
 
-	removeSegment(id: string): boolean {
+	/**
+	 * Remove a segment
+	 * Note: this is separate from the removeSegment method to allow for internal use when methods are overridden in tests
+	 */
+	#removeSegment(id: string): boolean {
 		const existingIndex = this.#segments.findIndex((s) => s.externalId === id)
 		if (existingIndex !== -1) {
 			this.#segments.splice(existingIndex, 1)
@@ -225,6 +231,10 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		} else {
 			return false
 		}
+	}
+
+	removeSegment(id: string): boolean {
+		return this.#removeSegment(id)
 	}
 
 	removeAllSegments(): void {
@@ -246,6 +256,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		})
 	}
 
+	/** Note: This is NOT exposed to blueprints */
 	intoIngestRundown(
 		rundownId: RundownId,
 		originalSofieIngestRundown: IngestRundown | undefined

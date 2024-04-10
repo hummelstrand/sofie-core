@@ -331,7 +331,7 @@ export interface NewUserActionAPI extends MethodContext {
 		userEvent: string,
 		eventTime: Time,
 		rundownId: RundownId,
-		payload: any
+		operation: any
 	): Promise<ClientAPI.ClientResponse<void>>
 }
 

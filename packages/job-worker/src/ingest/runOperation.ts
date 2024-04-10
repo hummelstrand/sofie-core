@@ -286,11 +286,12 @@ async function updateSofieIngestRundown(
 
 			await studioBlueprint.processIngestData(
 				blueprintContext,
-				nrcsIngestRundown,
 				mutableIngestRundown,
+				nrcsIngestRundown,
 				ingestRundownChanges.changes
 			)
 		} else if (ingestRundownChanges.changes.source === 'ingest') {
+			// Blueprints has not defined a processIngestData()
 			mutableIngestRundown.defaultApplyIngestChanges(nrcsIngestRundown, ingestRundownChanges.changes)
 		} else {
 			throw new Error(`Blueprint missing processIngestData function`)
@@ -448,7 +449,7 @@ async function applyCalculatedIngestChangesToModel(
 		}
 
 		// Create/Update segments
-		const segmentsToRegenerate = _.sortBy([...computedIngestChanges.segmentsToRegenerate], (se) => se.rank)
+		const segmentsToRegenerate = _.sortBy([...computedIngestChanges.segmentsToRegenerate], (se) => se.rank) // nocommit: is this sort necessary?
 		const changedSegmentIds = await calculateSegmentsFromIngestData(
 			context,
 			ingestModel,

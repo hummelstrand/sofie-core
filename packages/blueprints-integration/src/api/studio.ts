@@ -87,8 +87,8 @@ export interface StudioBlueprintManifest<TRawConfig = IBlueprintConfig, TProcess
 	 */
 	processIngestData?: (
 		context: ICommonContext,
-		nrcsIngestRundown: IngestRundown,
 		mutableIngestRundown: MutableIngestRundown,
+		nrcsIngestRundown: IngestRundown,
 		changes: IncomingIngestChange | UserOperationChange
 	) => Promise<void>
 }

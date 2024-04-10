@@ -11,6 +11,7 @@ import {
 	IncomingIngestSegmentChangeObject,
 	IncomingIngestPartChange,
 	IngestPart,
+	MutableIngestPart,
 } from '@sofie-automation/blueprints-integration'
 import { assertNever, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 
@@ -28,7 +29,9 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 	switch (changes.rundownChanges) {
 		case IncomingIngestRundownChange.Regenerate: {
 			// Future: should this be able to merge?
-			mutableIngestRundown.replacePayload(options.transformRundownPayload(nrcsRundown.payload))
+			mutableIngestRundown.replacePayload(
+				options.transformRundownPayload(nrcsRundown.payload, mutableIngestRundown.payload)
+			)
 
 			mutableIngestRundown.setName(nrcsRundown.name)
 			mutableIngestRundown.removeAllSegments()
@@ -41,7 +44,9 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 		}
 		case IncomingIngestRundownChange.Payload: {
 			// Future: should this be able to merge?
-			mutableIngestRundown.replacePayload(options.transformRundownPayload(nrcsRundown.payload))
+			mutableIngestRundown.replacePayload(
+				options.transformRundownPayload(nrcsRundown.payload, mutableIngestRundown.payload)
+			)
 
 			mutableIngestRundown.setName(nrcsRundown.name)
 			break
@@ -57,13 +62,22 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 	if (regenerateAllContents) {
 		// Regenerate all the segments
 		for (const nrcsSegment of nrcsRundown.segments) {
-			mutableIngestRundown.replaceSegment(transformSegmentAndPartPayloads(nrcsSegment, options), null)
+			mutableIngestRundown.replaceSegment(
+				transformSegmentAndPartPayloads(
+					nrcsSegment,
+					mutableIngestRundown.getSegment(nrcsSegment.externalId),
+					options
+				),
+				null
+			)
 
 			// TODO - segment renames should be preserved?
 		}
 	} else {
 		// Propogate segment changes
-		applyAllSegmentChanges(mutableIngestRundown, nrcsRundown, changes, options)
+		if (changes.segmentChanges) {
+			applyAllSegmentChanges(mutableIngestRundown, nrcsRundown, changes.segmentChanges, options)
+		}
 
 		if (changes.segmentOrderChanged) {
 			applySegmentOrder(mutableIngestRundown, nrcsRundown)
@@ -71,7 +85,10 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 	}
 }
 
-function applySegmentOrder(mutableIngestRundown: MutableIngestRundown, nrcsRundown: IngestRundown) {
+function applySegmentOrder<TRundownPayload, TSegmentPayload, TPartPayload>(
+	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
+	nrcsRundown: IngestRundown
+) {
 	// Figure out which segments don't have a new rank, and will need interpolating
 	const missingNewRank: Array<{ segmentId: string; afterId: string | null }> = []
 	const segmentIdRanksInRundown = normalizeArrayToMap(nrcsRundown.segments, 'externalId')
@@ -87,9 +104,21 @@ function applySegmentOrder(mutableIngestRundown: MutableIngestRundown, nrcsRundo
 	// Run through the segments in reverse order, so that we can insert them in the correct order
 	for (let i = nrcsRundown.segments.length - 1; i >= 0; i--) {
 		const nrcsSegment = nrcsRundown.segments[i]
-		const beforeNrcsSegment: IngestSegment | undefined = nrcsRundown.segments[i + 1]
 
-		mutableIngestRundown.moveSegmentBefore(nrcsSegment.externalId, beforeNrcsSegment?.externalId ?? null)
+		// If the Segment doesn't exist, ignore it
+		if (!mutableIngestRundown.getSegment(nrcsSegment.externalId)) continue
+
+		// Find the first valid segment after this one
+		let beforeNrcsSegmentId: string | null = null
+		for (let o = i + 1; o < nrcsRundown.segments.length; o++) {
+			const otherSegment = nrcsRundown.segments[o]
+			if (mutableIngestRundown.getSegment(otherSegment.externalId)) {
+				beforeNrcsSegmentId = otherSegment.externalId
+				break
+			}
+		}
+
+		mutableIngestRundown.moveSegmentBefore(nrcsSegment.externalId, beforeNrcsSegmentId)
 	}
 
 	// Run through the segments without a defined rank, and ensure they are positioned after the same segment as before
@@ -98,28 +127,40 @@ function applySegmentOrder(mutableIngestRundown: MutableIngestRundown, nrcsRundo
 	}
 }
 
-function transformSegmentAndPartPayloads(segment: IngestSegment, options: IngestDefaultChangesOptions): IngestSegment {
+function transformSegmentAndPartPayloads<TRundownPayload, TSegmentPayload, TPartPayload>(
+	segment: IngestSegment,
+	mutableSegment: MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined,
+	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+): IngestSegment {
 	return {
 		...segment,
-		payload: options.transformSegmentPayload(segment.payload),
-		parts: segment.parts.map((part) => transformPartPayload(part, options)),
+		payload: options.transformSegmentPayload(segment.payload, mutableSegment?.payload),
+		parts: segment.parts.map((part) =>
+			transformPartPayload(
+				part,
+				mutableSegment?.getPart(part.externalId), // TODO: should this search the entire rundown?
+				options
+			)
+		),
 	}
 }
-function transformPartPayload(part: IngestPart, options: IngestDefaultChangesOptions): IngestPart {
+function transformPartPayload<TRundownPayload, TSegmentPayload, TPartPayload>(
+	part: IngestPart,
+	mutablePart: MutableIngestPart<TPartPayload> | undefined,
+	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+): IngestPart {
 	return {
 		...part,
-		payload: options.transformPartPayload(part.payload),
+		payload: options.transformPartPayload(part.payload, mutablePart?.payload),
 	}
 }
 
 function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
 	nrcsRundown: IngestRundown,
-	changes: IncomingIngestChange,
+	changes: Record<string, IncomingIngestSegmentChange>,
 	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
 ) {
-	if (!changes.segmentChanges) return
-
 	const nrcsSegmentMap = normalizeArrayToMap(nrcsRundown.segments, 'externalId')
 	const nrcsSegmentIds = nrcsRundown.segments.map((s) => s.externalId)
 
@@ -127,10 +168,10 @@ function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	const segmentsToInsert: IngestSegment[] = []
 
 	// Perform any renames before any other changes
-	applySegmentRenames(mutableIngestRundown, changes.segmentChanges)
+	applySegmentRenames(mutableIngestRundown, changes)
 
 	// Apply changes and delete segments
-	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes.segmentChanges)) {
+	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes)) {
 		if (!change) continue
 
 		const nrcsSegment = nrcsSegmentMap.get(segmentId)
@@ -143,12 +184,19 @@ function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 		const segmentIndex = nrcsSegmentIds.indexOf(nrcsSegment.externalId)
 		const beforeSegmentId = segmentIndex !== -1 ? nrcsSegmentIds[segmentIndex + 1] ?? null : null
 
-		mutableIngestRundown.replaceSegment(transformSegmentAndPartPayloads(nrcsSegment, options), beforeSegmentId)
+		mutableIngestRundown.replaceSegment(
+			transformSegmentAndPartPayloads(
+				nrcsSegment,
+				mutableIngestRundown.getSegment(nrcsSegment.externalId),
+				options
+			),
+			beforeSegmentId
+		)
 	}
 }
 
-function applySegmentRenames(
-	mutableIngestRundown: MutableIngestRundown,
+function applySegmentRenames<TRundownPayload, TSegmentPayload, TPartPayload>(
+	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
 	changes: Record<string, IncomingIngestSegmentChange>
 ) {
 	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes)) {
@@ -204,7 +252,7 @@ function applyChangesObjectForSingleSegment<TRundownPayload, TSegmentPayload, TP
 	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
 ) {
 	if (segmentChange.payloadChanged) {
-		mutableSegment.replacePayload(options.transformSegmentPayload(nrcsSegment.payload))
+		mutableSegment.replacePayload(options.transformSegmentPayload(nrcsSegment.payload, mutableSegment.payload))
 		mutableSegment.setName(nrcsSegment.name)
 	}
 
@@ -230,7 +278,10 @@ function applyChangesObjectForSingleSegment<TRundownPayload, TSegmentPayload, TP
 			const partIndex = nrcsPartIds.indexOf(nrcsPart.externalId)
 			const beforePartId = partIndex !== -1 ? nrcsPartIds[partIndex + 1] ?? null : null
 
-			mutableSegment.replacePart(transformPartPayload(nrcsPart, options), beforePartId)
+			mutableSegment.replacePart(
+				transformPartPayload(nrcsPart, mutableSegment.getPart(nrcsPart.externalId), options),
+				beforePartId
+			)
 		}
 	}
 
@@ -266,7 +317,7 @@ function applyChangesForPart<TRundownPayload, TSegmentPayload, TPartPayload>(
 			if (!mutablePart) throw new Error(`Part ${partId} not found in segment`)
 			if (!nrcsPart) throw new Error(`Part ${partId} not found in nrcs segment`)
 
-			mutablePart.replacePayload(options.transformPartPayload(nrcsPart.payload))
+			mutablePart.replacePayload(options.transformPartPayload(nrcsPart.payload, mutablePart.payload))
 			mutablePart.setName(nrcsPart.name)
 
 			break
