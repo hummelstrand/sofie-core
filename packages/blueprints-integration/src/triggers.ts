@@ -194,7 +194,7 @@ export interface IRundownPlaylistActivateScratchpadAction extends ITriggeredActi
 	filterChain: (IRundownPlaylistFilterLink | IGUIContextFilterLink)[]
 }
 
-export interface IRundownPlaylistSwitchRouteSetAction extends ITriggeredActionBase {
+export interface ISwitchRouteSetAction extends ITriggeredActionBase {
 	action: PlayoutActions.switchRouteSet
 	filterChain: (IRundownPlaylistFilterLink | IGUIContextFilterLink)[]
 	routeSetId: string
@@ -323,6 +323,7 @@ export type SomeAction =
 	| IShowEntireCurrentSegmentAction
 	| IMiniShelfQueueAdLib
 	| IModifyShiftRegister
+	| ISwitchRouteSetAction
 
 export interface IBlueprintTriggeredActions {
 	_id: string
