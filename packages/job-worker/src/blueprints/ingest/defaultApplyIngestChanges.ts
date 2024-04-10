@@ -14,6 +14,7 @@ import {
 	MutableIngestPart,
 } from '@sofie-automation/blueprints-integration'
 import { assertNever, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
+import { ReadonlyDeep } from 'type-fest'
 
 export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
@@ -24,13 +25,14 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 	if (changes.source !== 'ingest')
 		throw new Error(`Changes passed to defaultApplyIngestChanges must be from ingest source`)
 
+	const payloadTransformers = new PayloadTransformers(options, mutableIngestRundown)
+
 	let regenerateAllContents = false
 
 	switch (changes.rundownChanges) {
 		case IncomingIngestRundownChange.Regenerate: {
-			// Future: should this be able to merge?
 			mutableIngestRundown.replacePayload(
-				options.transformRundownPayload(nrcsRundown.payload, mutableIngestRundown.payload)
+				payloadTransformers.transformRundownPayload(nrcsRundown, mutableIngestRundown)
 			)
 
 			mutableIngestRundown.setName(nrcsRundown.name)
@@ -43,9 +45,8 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 			break
 		}
 		case IncomingIngestRundownChange.Payload: {
-			// Future: should this be able to merge?
 			mutableIngestRundown.replacePayload(
-				options.transformRundownPayload(nrcsRundown.payload, mutableIngestRundown.payload)
+				payloadTransformers.transformRundownPayload(nrcsRundown, mutableIngestRundown)
 			)
 
 			mutableIngestRundown.setName(nrcsRundown.name)
@@ -63,10 +64,9 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 		// Regenerate all the segments
 		for (const nrcsSegment of nrcsRundown.segments) {
 			mutableIngestRundown.replaceSegment(
-				transformSegmentAndPartPayloads(
+				payloadTransformers.transformPayloadsOnSegmentAndParts(
 					nrcsSegment,
-					mutableIngestRundown.getSegment(nrcsSegment.externalId),
-					options
+					mutableIngestRundown.getSegment(nrcsSegment.externalId)
 				),
 				null
 			)
@@ -76,7 +76,7 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 	} else {
 		// Propogate segment changes
 		if (changes.segmentChanges) {
-			applyAllSegmentChanges(mutableIngestRundown, nrcsRundown, changes.segmentChanges, options)
+			applyAllSegmentChanges(mutableIngestRundown, nrcsRundown, changes.segmentChanges, payloadTransformers)
 		}
 
 		if (changes.segmentOrderChanged) {
@@ -127,39 +127,11 @@ function applySegmentOrder<TRundownPayload, TSegmentPayload, TPartPayload>(
 	}
 }
 
-function transformSegmentAndPartPayloads<TRundownPayload, TSegmentPayload, TPartPayload>(
-	segment: IngestSegment,
-	mutableSegment: MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined,
-	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
-): IngestSegment {
-	return {
-		...segment,
-		payload: options.transformSegmentPayload(segment.payload, mutableSegment?.payload),
-		parts: segment.parts.map((part) =>
-			transformPartPayload(
-				part,
-				mutableSegment?.getPart(part.externalId), // TODO: should this search the entire rundown?
-				options
-			)
-		),
-	}
-}
-function transformPartPayload<TRundownPayload, TSegmentPayload, TPartPayload>(
-	part: IngestPart,
-	mutablePart: MutableIngestPart<TPartPayload> | undefined,
-	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
-): IngestPart {
-	return {
-		...part,
-		payload: options.transformPartPayload(part.payload, mutablePart?.payload),
-	}
-}
-
 function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
 	nrcsRundown: IngestRundown,
 	changes: Record<string, IncomingIngestSegmentChange>,
-	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+	payloadTransformers: PayloadTransformers<TRundownPayload, TSegmentPayload, TPartPayload>
 ) {
 	const nrcsSegmentMap = normalizeArrayToMap(nrcsRundown.segments, 'externalId')
 	const nrcsSegmentIds = nrcsRundown.segments.map((s) => s.externalId)
@@ -175,7 +147,14 @@ function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 		if (!change) continue
 
 		const nrcsSegment = nrcsSegmentMap.get(segmentId)
-		applyChangesForSingleSegment(mutableIngestRundown, nrcsSegment, segmentsToInsert, segmentId, change, options)
+		applyChangesForSingleSegment(
+			mutableIngestRundown,
+			nrcsSegment,
+			segmentsToInsert,
+			segmentId,
+			change,
+			payloadTransformers
+		)
 	}
 
 	// Now we can insert the new ones in descending order
@@ -185,10 +164,9 @@ function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 		const beforeSegmentId = segmentIndex !== -1 ? nrcsSegmentIds[segmentIndex + 1] ?? null : null
 
 		mutableIngestRundown.replaceSegment(
-			transformSegmentAndPartPayloads(
+			payloadTransformers.transformPayloadsOnSegmentAndParts(
 				nrcsSegment,
-				mutableIngestRundown.getSegment(nrcsSegment.externalId),
-				options
+				mutableIngestRundown.getSegment(nrcsSegment.externalId)
 			),
 			beforeSegmentId
 		)
@@ -217,7 +195,7 @@ function applyChangesForSingleSegment<TRundownPayload, TSegmentPayload, TPartPay
 	segmentsToInsert: IngestSegment[],
 	segmentId: string,
 	change: IncomingIngestSegmentChange,
-	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+	payloadTransformers: PayloadTransformers<TRundownPayload, TSegmentPayload, TPartPayload>
 ) {
 	const mutableSegment = mutableIngestRundown.getSegment(segmentId)
 
@@ -238,7 +216,7 @@ function applyChangesForSingleSegment<TRundownPayload, TSegmentPayload, TPartPay
 			if (!mutableSegment) throw new Error(`Segment ${segmentId} not found in rundown`)
 			if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
 
-			applyChangesObjectForSingleSegment(mutableSegment, nrcsSegment, change, options)
+			applyChangesObjectForSingleSegment(mutableSegment, nrcsSegment, change, payloadTransformers)
 
 			break
 		}
@@ -249,10 +227,10 @@ function applyChangesObjectForSingleSegment<TRundownPayload, TSegmentPayload, TP
 	mutableSegment: MutableIngestSegment<TSegmentPayload, TPartPayload>,
 	nrcsSegment: IngestSegment,
 	segmentChange: IncomingIngestSegmentChangeObject,
-	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+	payloadTransformers: PayloadTransformers<TRundownPayload, TSegmentPayload, TPartPayload>
 ) {
 	if (segmentChange.payloadChanged) {
-		mutableSegment.replacePayload(options.transformSegmentPayload(nrcsSegment.payload, mutableSegment.payload))
+		mutableSegment.replacePayload(payloadTransformers.transformSegmentPayload(nrcsSegment, mutableSegment))
 		mutableSegment.setName(nrcsSegment.name)
 	}
 
@@ -269,7 +247,7 @@ function applyChangesObjectForSingleSegment<TRundownPayload, TSegmentPayload, TP
 			if (!change) continue
 
 			const nrcsPart = nrcsPartMap.get(partId)
-			applyChangesForPart(mutableSegment, nrcsPart, partsToInsert, partId, change, options)
+			applyChangesForPart(mutableSegment, nrcsPart, partsToInsert, partId, change, payloadTransformers)
 		}
 
 		// Now we can insert them in descending order
@@ -279,11 +257,7 @@ function applyChangesObjectForSingleSegment<TRundownPayload, TSegmentPayload, TP
 			const beforePartId = partIndex !== -1 ? nrcsPartIds[partIndex + 1] ?? null : null
 
 			mutableSegment.replacePart(
-				transformPartPayload(
-					nrcsPart,
-					mutableSegment.getPart(nrcsPart.externalId), // TODO: should this search the entire rundown?
-					options
-				),
+				payloadTransformers.transformPayloadOnPart(nrcsPart, mutableSegment.getPart(nrcsPart.externalId)),
 				beforePartId
 			)
 		}
@@ -300,7 +274,7 @@ function applyChangesForPart<TRundownPayload, TSegmentPayload, TPartPayload>(
 	partsToInsert: IngestPart[],
 	partId: string,
 	change: IncomingIngestPartChange,
-	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+	payloadTransformers: PayloadTransformers<TRundownPayload, TSegmentPayload, TPartPayload>
 ) {
 	const mutablePart = mutableSegment.getPart(partId)
 
@@ -321,7 +295,7 @@ function applyChangesForPart<TRundownPayload, TSegmentPayload, TPartPayload>(
 			if (!mutablePart) throw new Error(`Part ${partId} not found in segment`)
 			if (!nrcsPart) throw new Error(`Part ${partId} not found in nrcs segment`)
 
-			mutablePart.replacePayload(options.transformPartPayload(nrcsPart.payload, mutablePart.payload))
+			mutablePart.replacePayload(payloadTransformers.transformPartPayload(nrcsPart, mutablePart))
 			mutablePart.setName(nrcsPart.name)
 
 			break
@@ -368,5 +342,73 @@ function applyPartOrder(mutableSegment: MutableIngestSegment, nrcsSegment: Inges
 	// Run through the segments without a defined rank, and ensure they are positioned after the same segment as before
 	for (const segmentInfo of missingNewRank) {
 		mutableSegment.movePartAfter(segmentInfo.partId, segmentInfo.afterId)
+	}
+}
+
+class PayloadTransformers<TRundownPayload, TSegmentPayload, TPartPayload> {
+	readonly #options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+	readonly #initialMutableParts = new Map<string, MutableIngestPart<TPartPayload>>()
+	readonly #initialMutableSegments = new Map<string, MutableIngestSegment<TSegmentPayload, TPartPayload>>()
+
+	constructor(
+		options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>,
+		mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>
+	) {
+		this.#options = options
+
+		// Collect all of the Part payloads before any operation was run
+		for (const segment of mutableIngestRundown.segments) {
+			this.#initialMutableSegments.set(segment.externalId, segment)
+
+			for (const part of segment.parts) {
+				this.#initialMutableParts.set(part.externalId, part)
+			}
+		}
+	}
+
+	transformRundownPayload(
+		nrcsRundown: IngestRundown,
+		mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>
+	): ReadonlyDeep<TRundownPayload> | TRundownPayload {
+		return this.#options.transformRundownPayload(nrcsRundown.payload, mutableIngestRundown.payload)
+	}
+
+	transformSegmentPayload(
+		nrcsSegment: IngestSegment,
+		mutableSegment: MutableIngestSegment<TSegmentPayload, TPartPayload>
+	): ReadonlyDeep<TSegmentPayload> | TSegmentPayload {
+		return this.#options.transformSegmentPayload(nrcsSegment.payload, mutableSegment?.payload)
+	}
+
+	transformPartPayload(
+		nrcsPart: IngestPart,
+		mutablePart: MutableIngestPart<TPartPayload>
+	): ReadonlyDeep<TPartPayload> | TPartPayload {
+		return this.#options.transformPartPayload(nrcsPart.payload, mutablePart?.payload)
+	}
+
+	transformPayloadsOnSegmentAndParts(
+		segment: IngestSegment,
+		mutableSegment: MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined
+	): IngestSegment {
+		return {
+			...segment,
+			payload: this.#options.transformSegmentPayload(
+				segment.payload,
+				mutableSegment ? mutableSegment.payload : this.#initialMutableSegments.get(segment.externalId)?.payload
+			),
+			parts: segment.parts.map((part) =>
+				this.transformPayloadOnPart(part, mutableSegment?.getPart(part.externalId))
+			),
+		}
+	}
+	transformPayloadOnPart(part: IngestPart, mutablePart: MutableIngestPart<TPartPayload> | undefined): IngestPart {
+		return {
+			...part,
+			payload: this.#options.transformPartPayload(
+				part.payload,
+				mutablePart ? mutablePart.payload : this.#initialMutableParts.get(part.externalId)?.payload
+			),
+		}
 	}
 }

@@ -336,8 +336,8 @@ describe('defaultApplyIngestChanges', () => {
 			expect(mockCalls[2]).toEqual({ target: 'rundown', name: 'setName', args: [nrcsRundown.name] })
 			expect(mockCalls[3]).toEqual({ target: 'rundown', name: 'removeAllSegments', args: [] })
 			expect(mockCalls[4]).toEqual({ target: 'rundown', name: 'forceFullRegenerate', args: [] })
-			expect(mockCalls[5]).toEqual({ target: 'options', name: 'transformSegmentPayload', args: [false] })
-			expect(mockCalls[6]).toEqual({ target: 'options', name: 'transformPartPayload', args: [false] })
+			expect(mockCalls[5]).toEqual({ target: 'options', name: 'transformSegmentPayload', args: [true] })
+			expect(mockCalls[6]).toEqual({ target: 'options', name: 'transformPartPayload', args: [true] })
 			expect(mockCalls[7]).toMatchObject({ target: 'rundown', name: 'replaceSegment' })
 			expect(mutableIngestRundown.segments).toHaveLength(1)
 		})
@@ -861,6 +861,47 @@ describe('defaultApplyIngestChanges', () => {
 				defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
 
 				expect(mockCalls).toHaveLength(0)
+			})
+
+			it('move part across segments', async () => {
+				const nrcsRundown = createMediumIngestRundown()
+				const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
+					clone(nrcsRundown)
+				)
+
+				// Move the part
+				const removed = nrcsRundown.segments[0].parts.splice(0, 1)
+				nrcsRundown.segments[1].parts.unshift(...removed)
+
+				console.log(JSON.stringify(nrcsRundown.segments, undefined, 4))
+
+				const changes: IncomingIngestChange = {
+					source: 'ingest',
+					segmentChanges: {
+						seg0: {
+							partsChanges: {
+								part0: IncomingIngestPartChange.Deleted,
+							},
+						},
+						seg1: {
+							partsChanges: {
+								part0: IncomingIngestPartChange.Inserted,
+							},
+						},
+					},
+				}
+
+				// should run without error
+				defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+
+				expect(mockCalls).toHaveLength(3)
+				expect(mockCalls[0]).toEqual({ target: 'segment seg0', name: 'removePart', args: ['part0'] })
+				expect(mockCalls[1]).toEqual({ target: 'options', name: 'transformPartPayload', args: [true] })
+				expect(mockCalls[2]).toMatchObject({
+					target: 'segment seg1',
+					name: 'replacePart',
+					args: [{ externalId: 'part0' }, 'part2'],
+				})
 			})
 		})
 	})
