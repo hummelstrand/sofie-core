@@ -113,9 +113,9 @@ export interface BlueprintResultApplyStudioConfig {
 	/** Input-gateway subdevices */
 	inputDevices: Record<string, unknown>
 	/** Route Sets */
-	routeSets: Record<string, StudioRouteSet>
+	routeSets?: Record<string, StudioRouteSet>
 	/** Route Set Exclusivity Groups */
-	routeSetExclusivityGroups: Record<string, StudioRouteSetExclusivityGroup>
+	routeSetExclusivityGroups?: Record<string, StudioRouteSetExclusivityGroup>
 }
 
 export interface IStudioConfigPreset<TConfig = IBlueprintConfig> {
