@@ -306,7 +306,7 @@ function applyChangesForPart<TRundownPayload, TSegmentPayload, TPartPayload>(
 
 	switch (change) {
 		case IncomingIngestPartChange.Inserted: {
-			if (!nrcsPart) throw new Error(`Segment ${partId} not found in nrcs rundown`)
+			if (!nrcsPart) throw new Error(`Part ${partId} not found in nrcs rundown`)
 
 			// Batch the inserts to be performed last
 			partsToInsert.push(nrcsPart)

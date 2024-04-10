@@ -2,6 +2,7 @@ import { MutableIngestRundownImpl } from '../MutableIngestRundownImpl'
 import { defaultApplyIngestChanges } from '../defaultApplyIngestChanges'
 import {
 	IncomingIngestChange,
+	IncomingIngestPartChange,
 	IncomingIngestRundownChange,
 	IncomingIngestSegmentChangeEnum,
 	IngestDefaultChangesOptions,
@@ -11,10 +12,8 @@ import {
 	MutableIngestSegment,
 } from '@sofie-automation/blueprints-integration'
 import { clone } from '@sofie-automation/corelib/dist/lib'
-import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 
 describe('defaultApplyIngestChanges', () => {
-	const rundownId = protectString('rundown0')
 	function createBasicIngestRundown(): IngestRundown {
 		return {
 			externalId: 'rd0',
@@ -193,24 +192,6 @@ describe('defaultApplyIngestChanges', () => {
 		}
 	}
 
-	const defaultOptions: IngestDefaultChangesOptions<unknown, unknown, unknown> = {
-		transformRundownPayload: jest.fn((payload) => payload),
-		transformSegmentPayload: jest.fn((payload) => payload),
-		transformPartPayload: jest.fn((payload) => payload),
-	}
-
-	function tryMockClear(fn: any) {
-		if (jest.isMockFunction(fn)) {
-			fn.mockClear()
-		}
-	}
-
-	beforeEach(() => {
-		tryMockClear(defaultOptions.transformRundownPayload)
-		tryMockClear(defaultOptions.transformSegmentPayload)
-		tryMockClear(defaultOptions.transformPartPayload)
-	})
-
 	/**
 	 * This creates a MutableIngestRundownImpl from an IngestRundown, and wraps all methods to record the mutation calls made to the rundown and its contents
 	 */
@@ -218,6 +199,21 @@ describe('defaultApplyIngestChanges', () => {
 		const mutableIngestRundown = new MutableIngestRundownImpl(clone(nrcsRundown))
 
 		const mockCalls: Array<{ target: string; name: string; args: any[] }> = []
+
+		const defaultOptions: IngestDefaultChangesOptions<unknown, unknown, unknown> = {
+			transformRundownPayload: jest.fn((payload, oldPayload) => {
+				mockCalls.push({ target: 'options', name: 'transformRundownPayload', args: [!!oldPayload] })
+				return payload
+			}),
+			transformSegmentPayload: jest.fn((payload, oldPayload) => {
+				mockCalls.push({ target: 'options', name: 'transformSegmentPayload', args: [!!oldPayload] })
+				return payload
+			}),
+			transformPartPayload: jest.fn((payload, oldPayload) => {
+				mockCalls.push({ target: 'options', name: 'transformPartPayload', args: [!!oldPayload] })
+				return payload
+			}),
+		}
 
 		function wrapMethod<TObj, TName extends keyof TObj & string>(
 			target: string,
@@ -288,6 +284,7 @@ describe('defaultApplyIngestChanges', () => {
 
 		return {
 			mutableIngestRundown: mutableIngestRundown as MutableIngestRundown,
+			defaultOptions,
 			mockCalls,
 		}
 	}
@@ -295,36 +292,33 @@ describe('defaultApplyIngestChanges', () => {
 	describe('rundown changes', () => {
 		it('no changes', async () => {
 			const nrcsRundown = createBasicIngestRundown()
-			const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
+			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: IncomingIngestChange = { source: 'ingest' }
 
-			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
-			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
 
 			expect(mockCalls).toHaveLength(0)
 		})
 		it('rundown name and payload change', async () => {
 			const nrcsRundown = createBasicIngestRundown()
-			const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
+			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: IncomingIngestChange = {
 				source: 'ingest',
 				rundownChanges: IncomingIngestRundownChange.Payload,
 			}
 
-			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
-			expect(defaultOptions.transformRundownPayload).toHaveBeenCalled()
 
-			expect(mockCalls).toHaveLength(2)
-			expect(mockCalls[0]).toEqual({ target: 'rundown', name: 'replacePayload', args: [nrcsRundown.payload] })
-			expect(mockCalls[1]).toEqual({ target: 'rundown', name: 'setName', args: [nrcsRundown.name] })
+			expect(mockCalls).toHaveLength(3)
+			expect(mockCalls[0]).toEqual({ target: 'options', name: 'transformRundownPayload', args: [true] })
+			expect(mockCalls[1]).toEqual({ target: 'rundown', name: 'replacePayload', args: [nrcsRundown.payload] })
+			expect(mockCalls[2]).toEqual({ target: 'rundown', name: 'setName', args: [nrcsRundown.name] })
 		})
 		it('rundown regenerate', async () => {
 			const nrcsRundown = createBasicIngestRundown()
-			const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
+			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: IncomingIngestChange = {
 				source: 'ingest',
@@ -333,17 +327,18 @@ describe('defaultApplyIngestChanges', () => {
 				segmentChanges: {}, // will be ignored
 			}
 
-			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
-			expect(defaultOptions.transformRundownPayload).toHaveBeenCalled()
 
 			// Ensure the segments were regenerated
-			expect(mockCalls).toHaveLength(5)
-			expect(mockCalls[0]).toEqual({ target: 'rundown', name: 'replacePayload', args: [nrcsRundown.payload] })
-			expect(mockCalls[1]).toEqual({ target: 'rundown', name: 'setName', args: [nrcsRundown.name] })
-			expect(mockCalls[2]).toEqual({ target: 'rundown', name: 'removeAllSegments', args: [] })
-			expect(mockCalls[3]).toEqual({ target: 'rundown', name: 'forceFullRegenerate', args: [] })
-			expect(mockCalls[4]).toMatchObject({ target: 'rundown', name: 'replaceSegment' })
+			expect(mockCalls).toHaveLength(8)
+			expect(mockCalls[0]).toEqual({ target: 'options', name: 'transformRundownPayload', args: [true] })
+			expect(mockCalls[1]).toEqual({ target: 'rundown', name: 'replacePayload', args: [nrcsRundown.payload] })
+			expect(mockCalls[2]).toEqual({ target: 'rundown', name: 'setName', args: [nrcsRundown.name] })
+			expect(mockCalls[3]).toEqual({ target: 'rundown', name: 'removeAllSegments', args: [] })
+			expect(mockCalls[4]).toEqual({ target: 'rundown', name: 'forceFullRegenerate', args: [] })
+			expect(mockCalls[5]).toEqual({ target: 'options', name: 'transformSegmentPayload', args: [false] })
+			expect(mockCalls[6]).toEqual({ target: 'options', name: 'transformPartPayload', args: [false] })
+			expect(mockCalls[7]).toMatchObject({ target: 'rundown', name: 'replaceSegment' })
 			expect(mutableIngestRundown.segments).toHaveLength(1)
 		})
 	})
@@ -366,13 +361,11 @@ describe('defaultApplyIngestChanges', () => {
 
 		it('no changes', async () => {
 			const nrcsRundown = createIngestRundownWithManySegments()
-			const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(nrcsRundown)
+			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(nrcsRundown)
 
 			const changes: IncomingIngestChange = { source: 'ingest', segmentOrderChanged: true }
 
-			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
-			expect(defaultOptions.transformRundownPayload).not.toHaveBeenCalled()
 
 			// always ensures the order is sane
 			expect(mockCalls).toHaveLength(5)
@@ -384,7 +377,7 @@ describe('defaultApplyIngestChanges', () => {
 		})
 
 		it('good changes', async () => {
-			const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(
+			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
 				createIngestRundownWithManySegments()
 			)
 
@@ -405,7 +398,7 @@ describe('defaultApplyIngestChanges', () => {
 		})
 
 		it('missing segment in new order', async () => {
-			const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(
+			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
 				createIngestRundownWithManySegments()
 			)
 
@@ -427,7 +420,7 @@ describe('defaultApplyIngestChanges', () => {
 		})
 
 		it('extra segment in new order', async () => {
-			const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(
+			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
 				createIngestRundownWithManySegments()
 			)
 
@@ -459,7 +452,7 @@ describe('defaultApplyIngestChanges', () => {
 
 	describe('segment changes', () => {
 		it('mix of operations', async () => {
-			const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(
+			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
 				createIngestRundownWithManySegments()
 			)
 
@@ -486,24 +479,27 @@ describe('defaultApplyIngestChanges', () => {
 			defaultApplyIngestChanges(mutableIngestRundown, modifiedRundown, changes, defaultOptions)
 
 			// performs deletes and inserts
-			expect(mockCalls).toHaveLength(7)
+			expect(mockCalls).toHaveLength(10)
 
 			// Note: this happens in the order of the changes object, but that is not guaranteed in the future
 
 			// remove and update first
 			expect(mockCalls[0]).toEqual({ target: 'rundown', name: 'removeSegment', args: ['seg1'] })
-			expect(mockCalls[1]).toMatchObject({ target: 'segment seg3', name: 'replacePayload' })
-			expect(mockCalls[2]).toMatchObject({ target: 'segment seg3', name: 'setName' })
-			expect(mockCalls[3]).toEqual({ target: 'rundown', name: 'removeSegment', args: ['seg4'] })
-			expect(mockCalls[4]).toEqual({ target: 'rundown', name: 'removeSegment', args: ['seg2'] })
+			expect(mockCalls[1]).toEqual({ target: 'options', name: 'transformSegmentPayload', args: [true] })
+			expect(mockCalls[2]).toMatchObject({ target: 'segment seg3', name: 'replacePayload' })
+			expect(mockCalls[3]).toMatchObject({ target: 'segment seg3', name: 'setName' })
+			expect(mockCalls[4]).toEqual({ target: 'rundown', name: 'removeSegment', args: ['seg4'] })
+			expect(mockCalls[5]).toEqual({ target: 'rundown', name: 'removeSegment', args: ['seg2'] })
 
 			// insert new ones in order starting at the end
-			expect(mockCalls[5]).toMatchObject({
+			expect(mockCalls[6]).toEqual({ target: 'options', name: 'transformSegmentPayload', args: [false] })
+			expect(mockCalls[7]).toMatchObject({
 				target: 'rundown',
 				name: 'replaceSegment',
 				args: [{ externalId: 'segY' }, 'seg3'],
 			})
-			expect(mockCalls[6]).toMatchObject({
+			expect(mockCalls[8]).toEqual({ target: 'options', name: 'transformSegmentPayload', args: [false] })
+			expect(mockCalls[9]).toMatchObject({
 				target: 'rundown',
 				name: 'replaceSegment',
 				args: [{ externalId: 'segX' }, 'segY'],
@@ -512,7 +508,7 @@ describe('defaultApplyIngestChanges', () => {
 
 		it('insert missing', async () => {
 			const nrcsRundown = createIngestRundownWithManySegments()
-			const { mutableIngestRundown } = createMutableIngestRundown(clone(nrcsRundown))
+			const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: IncomingIngestChange = {
 				source: 'ingest',
@@ -528,7 +524,7 @@ describe('defaultApplyIngestChanges', () => {
 
 		it('delete missing', async () => {
 			const nrcsRundown = createIngestRundownWithManySegments()
-			const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
+			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: IncomingIngestChange = {
 				source: 'ingest',
@@ -546,7 +542,7 @@ describe('defaultApplyIngestChanges', () => {
 
 		it('update missing', async () => {
 			const nrcsRundown = createIngestRundownWithManySegments()
-			const { mutableIngestRundown } = createMutableIngestRundown(clone(nrcsRundown))
+			const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: IncomingIngestChange = {
 				source: 'ingest',
@@ -565,7 +561,7 @@ describe('defaultApplyIngestChanges', () => {
 
 		it('update without changes', async () => {
 			const nrcsRundown = createIngestRundownWithManySegments()
-			const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
+			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: IncomingIngestChange = {
 				source: 'ingest',
@@ -583,7 +579,9 @@ describe('defaultApplyIngestChanges', () => {
 		describe('partOrderChanged', () => {
 			it('with single part', async () => {
 				const nrcsRundown = createMediumIngestRundown()
-				const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
+				const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
+					clone(nrcsRundown)
+				)
 
 				const changes: IncomingIngestChange = {
 					source: 'ingest',
@@ -602,7 +600,9 @@ describe('defaultApplyIngestChanges', () => {
 			})
 			it('with multiple parts', async () => {
 				const nrcsRundown = createMediumIngestRundown()
-				const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
+				const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
+					clone(nrcsRundown)
+				)
 
 				// reorder parts
 				const origParts = nrcsRundown.segments[2].parts
@@ -636,7 +636,9 @@ describe('defaultApplyIngestChanges', () => {
 
 			it('missing part in new order', async () => {
 				const nrcsRundown = createMediumIngestRundown()
-				const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
+				const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
+					clone(nrcsRundown)
+				)
 
 				// remove a part
 				nrcsRundown.segments[2].parts.splice(1, 1)
@@ -669,7 +671,9 @@ describe('defaultApplyIngestChanges', () => {
 
 			it('extra segment in new order', async () => {
 				const nrcsRundown = createMediumIngestRundown()
-				const { mutableIngestRundown, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
+				const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
+					clone(nrcsRundown)
+				)
 
 				// add an extra nrcs part
 				nrcsRundown.segments[2].parts.splice(1, 0, {
@@ -709,8 +713,159 @@ describe('defaultApplyIngestChanges', () => {
 			})
 		})
 
-		// TODO - renames, removes, adds, updates
+		describe('partsChanges', () => {
+			it('mix of operations', async () => {
+				const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
+					createMediumIngestRundown()
+				)
+
+				// include some changes, which should be ignored
+				const modifiedRundown = createMediumIngestRundown()
+				const segment0 = modifiedRundown.segments[0]
+				segment0.parts[0].externalId = 'partX' // replace part0
+				const segment2 = modifiedRundown.segments[2]
+				segment2.parts[0].externalId = 'partY' // replace part3
+				segment2.parts.splice(1, 1) // remove part4
+
+				const changes: IncomingIngestChange = {
+					source: 'ingest',
+					segmentChanges: {
+						seg0: {
+							partsChanges: {
+								part0: IncomingIngestPartChange.Deleted,
+								partX: IncomingIngestPartChange.Inserted,
+								part1: IncomingIngestPartChange.Payload,
+							},
+						},
+						seg2: {
+							partsChanges: {
+								part3: IncomingIngestPartChange.Deleted,
+								partY: IncomingIngestPartChange.Inserted,
+								part4: IncomingIngestPartChange.Deleted,
+							},
+						},
+					},
+				}
+
+				defaultApplyIngestChanges(mutableIngestRundown, modifiedRundown, changes, defaultOptions)
+
+				// performs deletes and inserts
+				expect(mockCalls).toHaveLength(10)
+
+				// Note: this happens in the order of the changes object, but that is not guaranteed in the future
+
+				// first segment
+				expect(mockCalls[0]).toEqual({ target: 'segment seg0', name: 'removePart', args: ['part0'] })
+				expect(mockCalls[1]).toEqual({ target: 'options', name: 'transformPartPayload', args: [true] })
+				expect(mockCalls[2]).toMatchObject({ target: 'part part1', name: 'replacePayload' })
+				expect(mockCalls[3]).toMatchObject({ target: 'part part1', name: 'setName' })
+				expect(mockCalls[4]).toEqual({ target: 'options', name: 'transformPartPayload', args: [false] })
+				expect(mockCalls[5]).toMatchObject({
+					target: 'segment seg0',
+					name: 'replacePart',
+					args: [{ externalId: 'partX' }, 'part1'],
+				})
+
+				// second segment
+				expect(mockCalls[6]).toEqual({ target: 'segment seg2', name: 'removePart', args: ['part3'] })
+				expect(mockCalls[7]).toEqual({ target: 'segment seg2', name: 'removePart', args: ['part4'] })
+				expect(mockCalls[8]).toEqual({ target: 'options', name: 'transformPartPayload', args: [false] })
+				expect(mockCalls[9]).toMatchObject({
+					target: 'segment seg2',
+					name: 'replacePart',
+					args: [{ externalId: 'partY' }, 'part5'],
+				})
+			})
+
+			it('insert missing', async () => {
+				const nrcsRundown = createMediumIngestRundown()
+				const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
+
+				const changes: IncomingIngestChange = {
+					source: 'ingest',
+					segmentChanges: {
+						seg0: {
+							partsChanges: {
+								partX: IncomingIngestPartChange.Inserted,
+							},
+						},
+					},
+				}
+
+				expect(() =>
+					defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+				).toThrow(/Part(.*)not found/)
+			})
+
+			it('delete missing', async () => {
+				const nrcsRundown = createMediumIngestRundown()
+				const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
+					clone(nrcsRundown)
+				)
+
+				const changes: IncomingIngestChange = {
+					source: 'ingest',
+					segmentChanges: {
+						seg0: {
+							partsChanges: {
+								partX: IncomingIngestPartChange.Deleted,
+							},
+						},
+					},
+				}
+
+				// should run without error
+				defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+
+				expect(mockCalls).toHaveLength(1)
+				expect(mockCalls[0]).toEqual({ target: 'segment seg0', name: 'removePart', args: ['partX'] })
+			})
+
+			it('update missing', async () => {
+				const nrcsRundown = createMediumIngestRundown()
+				const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
+
+				const changes: IncomingIngestChange = {
+					source: 'ingest',
+					segmentChanges: {
+						seg0: {
+							partsChanges: {
+								partX: IncomingIngestPartChange.Payload,
+							},
+						},
+					},
+				}
+
+				// should run without error
+				expect(() =>
+					defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+				).toThrow(/Part(.*)not found/)
+			})
+
+			it('update without changes', async () => {
+				const nrcsRundown = createMediumIngestRundown()
+				const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(
+					clone(nrcsRundown)
+				)
+
+				const changes: IncomingIngestChange = {
+					source: 'ingest',
+					segmentChanges: {
+						seg0: {
+							partsChanges: {},
+						},
+					},
+				}
+
+				// should run without error
+				defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+
+				expect(mockCalls).toHaveLength(0)
+			})
+		})
 	})
 
-	// TODO - more scenarios
+	// TODO - rename segments
+
+	// TODO - more combinations of changes
 })
