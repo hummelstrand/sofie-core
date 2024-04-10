@@ -16,52 +16,41 @@ import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/I
 export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = unknown>
 	implements MutableIngestSegment<TSegmentPayload, TPartPayload>
 {
-	readonly ingestSegment: Omit<IngestSegment, 'parts'>
+	readonly #ingestSegment: Omit<IngestSegment, 'parts'>
 	originalExternalId: string
 	#segmentHasChanges = false
 	#partOrderHasChanged = false
 
 	readonly #parts: MutableIngestPartImpl<TPartPayload>[]
 
-	get hasChanges(): boolean {
-		return this.#segmentHasChanges
-	}
-
 	constructor(ingestSegment: IngestSegment, hasChanges = false) {
 		this.originalExternalId = ingestSegment.externalId
-		this.ingestSegment = omit(ingestSegment, 'parts')
-		this.#parts = [...ingestSegment.parts]
+		this.#ingestSegment = omit(ingestSegment, 'parts')
+		this.#parts = ingestSegment.parts
+			.slice() // shallow copy
 			.sort((a, b) => a.rank - b.rank)
 			.map((part) => new MutableIngestPartImpl<TPartPayload>(part, hasChanges))
 		this.#segmentHasChanges = hasChanges
 	}
 
 	get parts(): MutableIngestPart<TPartPayload>[] {
-		return [...this.#parts]
+		return this.#parts.slice() // shallow copy
 	}
 
 	get externalId(): string {
-		return this.ingestSegment.externalId
+		return this.#ingestSegment.externalId
 	}
 
 	get name(): string {
-		return this.ingestSegment.name
+		return this.#ingestSegment.name
 	}
 
-	// get rank(): number {
-	// 	return this.#ingestPart.rank
-	// }
-
 	get payload(): ReadonlyDeep<TSegmentPayload> | undefined {
-		// if (!this.ingestSegment.payload) {
-		//     throw new Error('Segment payload is not set')
-		// }
-
-		return this.ingestSegment.payload
+		return this.#ingestSegment.payload
 	}
 
 	getPart(id: string): MutableIngestPart<TPartPayload> | undefined {
-		return this.#parts.find((part) => part.ingestPart.externalId === id)
+		return this.#parts.find((part) => part.externalId === id)
 	}
 
 	movePartBefore(id: string, beforePartExternalId: string | null): void {
@@ -124,7 +113,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	 * Note: this is separate from the removePart method to allow for internal use when methods are overridden in tests
 	 */
 	#removePart(id: string): boolean {
-		const index = this.#parts.findIndex((part) => part.ingestPart.externalId === id)
+		const index = this.#parts.findIndex((part) => part.externalId === id)
 		if (index === -1) {
 			return false
 		}
@@ -140,30 +129,30 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	}
 
 	setExternalId(id: string): void {
-		this.ingestSegment.externalId = id
+		this.#ingestSegment.externalId = id
 	}
 
 	setName(name: string): void {
-		if (this.ingestSegment.name !== name) {
-			this.ingestSegment.name = name
+		if (this.#ingestSegment.name !== name) {
+			this.#ingestSegment.name = name
 			this.#segmentHasChanges = true
 		}
 	}
 
 	replacePayload(payload: ReadonlyDeep<TSegmentPayload> | TSegmentPayload): void {
-		if (!_.isEqual(this.ingestSegment.payload, payload)) {
-			this.ingestSegment.payload = clone(payload)
+		if (!_.isEqual(this.#ingestSegment.payload, payload)) {
+			this.#ingestSegment.payload = clone(payload)
 			this.#segmentHasChanges = true
 		}
 	}
 
 	setPayloadProperty<TKey extends keyof TSegmentPayload>(key: TKey, value: TSegmentPayload[TKey]): void {
-		if (!this.ingestSegment.payload) {
+		if (!this.#ingestSegment.payload) {
 			throw new Error('Segment payload is not set')
 		}
 
-		if (!_.isEqual(this.ingestSegment.payload[key], value)) {
-			this.ingestSegment.payload[key] = clone(value)
+		if (!_.isEqual(this.#ingestSegment.payload[key], value)) {
+			this.#ingestSegment.payload[key] = clone(value)
 			this.#segmentHasChanges = true
 		}
 	}
@@ -182,7 +171,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		const allCacheObjectIds: IngestDataCacheObjId[] = []
 		const partIdsWithChanges: string[] = []
 
-		const segmentId = getSegmentId(generator.rundownId, this.ingestSegment.externalId)
+		const segmentId = getSegmentId(generator.rundownId, this.#ingestSegment.externalId)
 
 		this.#parts.forEach((part, rank) => {
 			const ingestPart: Complete<LocalIngestPart> = {
@@ -196,7 +185,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 			allCacheObjectIds.push(generator.getPartObjectId(ingestPart.externalId))
 			ingestParts.push(ingestPart)
 
-			if (part.hasChanges) {
+			if (part.checkAndClearChangesFlags()) {
 				changedCacheObjects.push(generator.generatePartObject(segmentId, ingestPart))
 				partIdsWithChanges.push(ingestPart.externalId)
 			}

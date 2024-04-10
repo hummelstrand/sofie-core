@@ -86,7 +86,7 @@ export interface IncomingIngestChange {
 }
 
 export type DefaultUserOperations = {
-	type: '__sofie-move-segment'
+	type: '__sofie-move-segment' // TODO: define properly
 }
 
 export interface UserOperationChange<TCustomBlueprintOperations = never> {
@@ -165,8 +165,6 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	readonly externalId: string
 	/** Name of the segment */
 	readonly name: string
-	// /** Rank of the segment within the rundown */
-	// readonly rank: number
 
 	/** Payload of segment metadata. For use by other blueprints methods */
 	readonly payload: ReadonlyDeep<TSegmentPayload> | undefined
@@ -186,6 +184,7 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	// nocommit: implement this
 	// forceRegenerate(): void
 
+	/** Set the name of the Segment */
 	setName(name: string): void
 
 	replacePayload(payload: ReadonlyDeep<TSegmentPayload> | TSegmentPayload): void
@@ -198,12 +197,11 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 	readonly externalId: string
 	/** Name of the part */
 	readonly name: string
-	// /** Rank of the part within the segment */
-	// readonly rank: number
 
 	/** Payload of the part. For use by other blueprints methods */
 	readonly payload: ReadonlyDeep<TPartPayload> | undefined
 
+	/** Set the name of the Part */
 	setName(name: string): void
 
 	replacePayload(payload: ReadonlyDeep<TPartPayload> | TPartPayload): void

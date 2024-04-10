@@ -44,14 +44,15 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 	constructor(ingestRundown: IngestRundown, hasChanges = false) {
 		this.ingestRundown = omit(ingestRundown, 'segments')
-		this.#segments = [...ingestRundown.segments]
+		this.#segments = ingestRundown.segments
+			.slice() // shallow copy
 			.sort((a, b) => a.rank - b.rank)
 			.map((segment) => new MutableIngestSegmentImpl(segment))
 		this.#hasChangesToRundown = hasChanges
 	}
 
 	get segments(): MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>[] {
-		return [...this.#segments]
+		return this.#segments.slice() // shallow copy
 	}
 
 	get externalId(): string {
@@ -66,15 +67,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		return this.ingestRundown.name
 	}
 
-	// get rank(): number {
-	// 	return this.#ingestPart.rank
-	// }
-
 	get payload(): ReadonlyDeep<TRundownPayload> | undefined {
-		//if (!this.ingestRundown.payload) {
-		//	throw new Error('Rundown payload is not set')
-		//}
-
 		return this.ingestRundown.payload
 	}
 

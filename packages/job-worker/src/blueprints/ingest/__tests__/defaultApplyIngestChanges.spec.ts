@@ -873,8 +873,6 @@ describe('defaultApplyIngestChanges', () => {
 				const removed = nrcsRundown.segments[0].parts.splice(0, 1)
 				nrcsRundown.segments[1].parts.unshift(...removed)
 
-				console.log(JSON.stringify(nrcsRundown.segments, undefined, 4))
-
 				const changes: IncomingIngestChange = {
 					source: 'ingest',
 					segmentChanges: {
