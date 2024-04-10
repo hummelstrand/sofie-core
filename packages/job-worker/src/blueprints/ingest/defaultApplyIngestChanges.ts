@@ -63,34 +63,38 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 		}
 	} else {
 		// Propogate segment changes
-		applySegmentChanges(mutableIngestRundown, nrcsRundown, changes, options)
+		applyAllSegmentChanges(mutableIngestRundown, nrcsRundown, changes, options)
 
 		if (changes.segmentOrderChanged) {
-			// Figure out which segments don't have a new rank, and will need interpolating
-			const missingNewRank: Array<{ segmentId: string; afterId: string | null }> = []
-			const segmentIdRanksInRundown = normalizeArrayToMap(nrcsRundown.segments, 'externalId')
-			mutableIngestRundown.segments.forEach((segment, i) => {
-				if (!segmentIdRanksInRundown.has(segment.externalId)) {
-					missingNewRank.push({
-						segmentId: segment.externalId,
-						afterId: i > 0 ? mutableIngestRundown.segments[i - 1].externalId : null,
-					})
-				}
-			})
-
-			// Run through the segments in reverse order, so that we can insert them in the correct order
-			for (let i = nrcsRundown.segments.length - 1; i >= 0; i--) {
-				const nrcsSegment = nrcsRundown.segments[i]
-				const beforeNrcsSegment: IngestSegment | undefined = nrcsRundown.segments[i + 1]
-
-				mutableIngestRundown.moveSegmentBefore(nrcsSegment.externalId, beforeNrcsSegment?.externalId ?? null)
-			}
-
-			// Run through the segments without a defined rank, and ensure they are positioned after the same segment as before
-			for (const segmentInfo of missingNewRank) {
-				mutableIngestRundown.moveSegmentAfter(segmentInfo.segmentId, segmentInfo.afterId)
-			}
+			applySegmentOrder(mutableIngestRundown, nrcsRundown)
 		}
+	}
+}
+
+function applySegmentOrder(mutableIngestRundown: MutableIngestRundown, nrcsRundown: IngestRundown) {
+	// Figure out which segments don't have a new rank, and will need interpolating
+	const missingNewRank: Array<{ segmentId: string; afterId: string | null }> = []
+	const segmentIdRanksInRundown = normalizeArrayToMap(nrcsRundown.segments, 'externalId')
+	mutableIngestRundown.segments.forEach((segment, i) => {
+		if (!segmentIdRanksInRundown.has(segment.externalId)) {
+			missingNewRank.push({
+				segmentId: segment.externalId,
+				afterId: i > 0 ? mutableIngestRundown.segments[i - 1].externalId : null,
+			})
+		}
+	})
+
+	// Run through the segments in reverse order, so that we can insert them in the correct order
+	for (let i = nrcsRundown.segments.length - 1; i >= 0; i--) {
+		const nrcsSegment = nrcsRundown.segments[i]
+		const beforeNrcsSegment: IngestSegment | undefined = nrcsRundown.segments[i + 1]
+
+		mutableIngestRundown.moveSegmentBefore(nrcsSegment.externalId, beforeNrcsSegment?.externalId ?? null)
+	}
+
+	// Run through the segments without a defined rank, and ensure they are positioned after the same segment as before
+	for (const segmentInfo of missingNewRank) {
+		mutableIngestRundown.moveSegmentAfter(segmentInfo.segmentId, segmentInfo.afterId)
 	}
 }
 
@@ -108,7 +112,7 @@ function transformPartPayload(part: IngestPart, options: IngestDefaultChangesOpt
 	}
 }
 
-function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
+function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
 	nrcsRundown: IngestRundown,
 	changes: IncomingIngestChange,
@@ -123,46 +127,14 @@ function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	const segmentsToInsert: IngestSegment[] = []
 
 	// Perform any renames before any other changes
-	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes.segmentChanges)) {
-		if (!change) continue
-
-		if (change && typeof change === 'object' && change.oldExternalId) {
-			const mutableSegment = mutableIngestRundown.getSegment(change.oldExternalId)
-			if (!mutableSegment) throw new Error(`Segment ${change.oldExternalId} not found in rundown`)
-
-			mutableIngestRundown.renameSegment(change.oldExternalId, segmentId)
-		}
-	}
+	applySegmentRenames(mutableIngestRundown, changes.segmentChanges)
 
 	// Apply changes and delete segments
 	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes.segmentChanges)) {
 		if (!change) continue
 
 		const nrcsSegment = nrcsSegmentMap.get(segmentId)
-		const mutableSegment = mutableIngestRundown.getSegment(segmentId)
-
-		switch (change) {
-			case IncomingIngestSegmentChangeEnum.Inserted: {
-				if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
-
-				segmentsToInsert.push(nrcsSegment)
-
-				break
-			}
-			case IncomingIngestSegmentChangeEnum.Deleted: {
-				mutableIngestRundown.removeSegment(segmentId)
-
-				break
-			}
-			default: {
-				if (!mutableSegment) throw new Error(`Segment ${segmentId} not found in rundown`)
-				if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
-
-				applyChangesToSegment(mutableSegment, nrcsSegment, change, options)
-
-				break
-			}
-		}
+		applyChangesForSingleSegment(mutableIngestRundown, nrcsSegment, segmentsToInsert, segmentId, change, options)
 	}
 
 	// Now we can insert the new ones in descending order
@@ -175,7 +147,57 @@ function applySegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	}
 }
 
-function applyChangesToSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
+function applySegmentRenames(
+	mutableIngestRundown: MutableIngestRundown,
+	changes: Record<string, IncomingIngestSegmentChange>
+) {
+	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes)) {
+		if (!change) continue
+
+		if (change && typeof change === 'object' && change.oldExternalId) {
+			const mutableSegment = mutableIngestRundown.getSegment(change.oldExternalId)
+			if (!mutableSegment) throw new Error(`Segment ${change.oldExternalId} not found in rundown`)
+
+			mutableIngestRundown.renameSegment(change.oldExternalId, segmentId)
+		}
+	}
+}
+
+function applyChangesForSingleSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
+	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
+	nrcsSegment: IngestSegment | undefined,
+	segmentsToInsert: IngestSegment[],
+	segmentId: string,
+	change: IncomingIngestSegmentChange,
+	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+) {
+	const mutableSegment = mutableIngestRundown.getSegment(segmentId)
+
+	switch (change) {
+		case IncomingIngestSegmentChangeEnum.Inserted: {
+			if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
+
+			segmentsToInsert.push(nrcsSegment)
+
+			break
+		}
+		case IncomingIngestSegmentChangeEnum.Deleted: {
+			mutableIngestRundown.removeSegment(segmentId)
+
+			break
+		}
+		default: {
+			if (!mutableSegment) throw new Error(`Segment ${segmentId} not found in rundown`)
+			if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
+
+			applyChangesObjectForSingleSegment(mutableSegment, nrcsSegment, change, options)
+
+			break
+		}
+	}
+}
+
+function applyChangesObjectForSingleSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableSegment: MutableIngestSegment<TSegmentPayload, TPartPayload>,
 	nrcsSegment: IngestSegment,
 	segmentChange: IncomingIngestSegmentChangeObject,
@@ -199,33 +221,7 @@ function applyChangesToSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
 			if (!change) continue
 
 			const nrcsPart = nrcsPartMap.get(partId)
-			const mutablePart = mutableSegment.getPart(partId)
-
-			switch (change) {
-				case IncomingIngestPartChange.Inserted: {
-					if (!nrcsPart) throw new Error(`Segment ${partId} not found in nrcs rundown`)
-
-					partsToInsert.push(nrcsPart)
-					break
-				}
-				case IncomingIngestPartChange.Deleted: {
-					mutableSegment.removePart(partId)
-
-					break
-				}
-				case IncomingIngestPartChange.Payload: {
-					if (!mutablePart) throw new Error(`Part ${partId} not found in segment`)
-					if (!nrcsPart) throw new Error(`Part ${partId} not found in nrcs segment`)
-
-					mutablePart.replacePayload(options.transformPartPayload(nrcsPart.payload))
-					mutablePart.setName(nrcsPart.name)
-
-					break
-				}
-				default: {
-					assertNever(change)
-				}
-			}
+			applyChangesForPart(mutableSegment, nrcsPart, partsToInsert, partId, change, options)
 		}
 
 		// Now we can insert them in descending order
@@ -239,29 +235,71 @@ function applyChangesToSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
 	}
 
 	if (segmentChange.partOrderChanged) {
-		// Figure out which segments don't have a new rank, and will need interpolating
-		const missingNewRank: Array<{ partId: string; afterId: string | null }> = []
-		const partIdRanksInSegment = normalizeArrayToMap(nrcsSegment.parts, 'externalId')
-		mutableSegment.parts.forEach((part, i) => {
-			if (!partIdRanksInSegment.has(part.externalId)) {
-				missingNewRank.push({
-					partId: part.externalId,
-					afterId: i > 0 ? mutableSegment.parts[i - 1].externalId : null,
-				})
-			}
-		})
+		applyPartOrder(mutableSegment, nrcsSegment)
+	}
+}
 
-		// Run through the segments in reverse order, so that we can insert them in the correct order
-		for (let i = nrcsSegment.parts.length - 1; i >= 0; i--) {
-			const nrcsPart = nrcsSegment.parts[i]
-			const beforeNrcsPart: IngestPart | undefined = nrcsSegment.parts[i + 1]
+function applyChangesForPart<TRundownPayload, TSegmentPayload, TPartPayload>(
+	mutableSegment: MutableIngestSegment<TSegmentPayload, TPartPayload>,
+	nrcsPart: IngestPart | undefined,
+	partsToInsert: IngestPart[],
+	partId: string,
+	change: IncomingIngestPartChange,
+	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
+) {
+	const mutablePart = mutableSegment.getPart(partId)
 
-			mutableSegment.movePartBefore(nrcsPart.externalId, beforeNrcsPart?.externalId ?? null)
+	switch (change) {
+		case IncomingIngestPartChange.Inserted: {
+			if (!nrcsPart) throw new Error(`Segment ${partId} not found in nrcs rundown`)
+
+			// Batch the inserts to be performed last
+			partsToInsert.push(nrcsPart)
+			break
 		}
+		case IncomingIngestPartChange.Deleted: {
+			mutableSegment.removePart(partId)
 
-		// Run through the segments without a defined rank, and ensure they are positioned after the same segment as before
-		for (const segmentInfo of missingNewRank) {
-			mutableSegment.movePartAfter(segmentInfo.partId, segmentInfo.afterId)
+			break
 		}
+		case IncomingIngestPartChange.Payload: {
+			if (!mutablePart) throw new Error(`Part ${partId} not found in segment`)
+			if (!nrcsPart) throw new Error(`Part ${partId} not found in nrcs segment`)
+
+			mutablePart.replacePayload(options.transformPartPayload(nrcsPart.payload))
+			mutablePart.setName(nrcsPart.name)
+
+			break
+		}
+		default: {
+			assertNever(change)
+		}
+	}
+}
+
+function applyPartOrder(mutableSegment: MutableIngestSegment, nrcsSegment: IngestSegment) {
+	// Figure out which segments don't have a new rank, and will need interpolating
+	const missingNewRank: Array<{ partId: string; afterId: string | null }> = []
+	const partIdRanksInSegment = normalizeArrayToMap(nrcsSegment.parts, 'externalId')
+	mutableSegment.parts.forEach((part, i) => {
+		if (!partIdRanksInSegment.has(part.externalId)) {
+			missingNewRank.push({
+				partId: part.externalId,
+				afterId: i > 0 ? mutableSegment.parts[i - 1].externalId : null,
+			})
+		}
+	})
+
+	// Run through the segments in reverse order, so that we can insert them in the correct order
+	for (let i = nrcsSegment.parts.length - 1; i >= 0; i--) {
+		const nrcsPart = nrcsSegment.parts[i]
+		const beforeNrcsPart: IngestPart | undefined = nrcsSegment.parts[i + 1]
+
+		mutableSegment.movePartBefore(nrcsPart.externalId, beforeNrcsPart?.externalId ?? null)
+	}
+
+	// Run through the segments without a defined rank, and ensure they are positioned after the same segment as before
+	for (const segmentInfo of missingNewRank) {
+		mutableSegment.movePartAfter(segmentInfo.partId, segmentInfo.afterId)
 	}
 }
