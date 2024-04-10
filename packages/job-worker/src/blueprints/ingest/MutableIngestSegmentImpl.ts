@@ -68,7 +68,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		const part = this.#parts.find((p) => p.externalId === id)
 		if (!part) throw new Error(`Part "${id}" not found`)
 
-		this.removePart(id)
+		this.#removePart(id)
 
 		if (beforePartExternalId) {
 			const beforeIndex = this.#parts.findIndex((p) => p.externalId === beforePartExternalId)
@@ -86,7 +86,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		const part = this.#parts.find((p) => p.externalId === id)
 		if (!part) throw new Error(`Part "${id}" not found`)
 
-		this.removePart(id)
+		this.#removePart(id)
 
 		if (afterPartExternalId) {
 			const beforeIndex = this.#parts.findIndex((p) => p.externalId === afterPartExternalId)
@@ -101,7 +101,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	}
 
 	replacePart(part: IngestPart, beforePartExternalId: string | null): MutableIngestPart<TPartPayload> {
-		this.removePart(part.externalId)
+		this.#removePart(part.externalId)
 
 		const newPart = new MutableIngestPartImpl<TPartPayload>(part, true)
 
@@ -119,7 +119,11 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		return newPart
 	}
 
-	removePart(id: string): boolean {
+	/**
+	 * Remove a part
+	 * Note: this is separate from the removePart method to allow for internal use when methods are overridden in tests
+	 */
+	#removePart(id: string): boolean {
 		const index = this.#parts.findIndex((part) => part.ingestPart.externalId === id)
 		if (index === -1) {
 			return false
@@ -129,6 +133,10 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		this.#partOrderHasChanged = true
 
 		return true
+	}
+
+	removePart(id: string): boolean {
+		return this.#removePart(id)
 	}
 
 	setExternalId(id: string): void {

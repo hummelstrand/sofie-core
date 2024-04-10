@@ -279,7 +279,11 @@ function applyChangesObjectForSingleSegment<TRundownPayload, TSegmentPayload, TP
 			const beforePartId = partIndex !== -1 ? nrcsPartIds[partIndex + 1] ?? null : null
 
 			mutableSegment.replacePart(
-				transformPartPayload(nrcsPart, mutableSegment.getPart(nrcsPart.externalId), options),
+				transformPartPayload(
+					nrcsPart,
+					mutableSegment.getPart(nrcsPart.externalId), // TODO: should this search the entire rundown?
+					options
+				),
 				beforePartId
 			)
 		}
@@ -344,9 +348,21 @@ function applyPartOrder(mutableSegment: MutableIngestSegment, nrcsSegment: Inges
 	// Run through the segments in reverse order, so that we can insert them in the correct order
 	for (let i = nrcsSegment.parts.length - 1; i >= 0; i--) {
 		const nrcsPart = nrcsSegment.parts[i]
-		const beforeNrcsPart: IngestPart | undefined = nrcsSegment.parts[i + 1]
 
-		mutableSegment.movePartBefore(nrcsPart.externalId, beforeNrcsPart?.externalId ?? null)
+		// If the Part doesn't exist, ignore it
+		if (!mutableSegment.getPart(nrcsPart.externalId)) continue
+
+		// Find the first valid segment after this one
+		let beforeNrcsPartId: string | null = null
+		for (let o = i + 1; o < nrcsSegment.parts.length; o++) {
+			const otherPart = nrcsSegment.parts[o]
+			if (mutableSegment.getPart(otherPart.externalId)) {
+				beforeNrcsPartId = otherPart.externalId
+				break
+			}
+		}
+
+		mutableSegment.movePartBefore(nrcsPart.externalId, beforeNrcsPartId)
 	}
 
 	// Run through the segments without a defined rank, and ensure they are positioned after the same segment as before
