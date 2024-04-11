@@ -1,10 +1,10 @@
 import { MutableIngestRundownImpl } from '../MutableIngestRundownImpl'
 import { defaultApplyIngestChanges } from '../defaultApplyIngestChanges'
 import {
-	IncomingIngestChange,
-	IncomingIngestPartChange,
-	IncomingIngestRundownChange,
-	IncomingIngestSegmentChangeEnum,
+	NrcsIngestChangeDetails,
+	NrcsIngestPartChangeDetails,
+	NrcsIngestRundownChangeDetails,
+	NrcsIngestSegmentChangeDetailsEnum,
 	IngestDefaultChangesOptions,
 	IngestRundown,
 	MutableIngestPart,
@@ -294,7 +294,7 @@ describe('defaultApplyIngestChanges', () => {
 			const nrcsRundown = createBasicIngestRundown()
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
-			const changes: IncomingIngestChange = { source: 'ingest' }
+			const changes: NrcsIngestChangeDetails = { source: 'ingest' }
 
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
 
@@ -304,9 +304,9 @@ describe('defaultApplyIngestChanges', () => {
 			const nrcsRundown = createBasicIngestRundown()
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
-			const changes: IncomingIngestChange = {
+			const changes: NrcsIngestChangeDetails = {
 				source: 'ingest',
-				rundownChanges: IncomingIngestRundownChange.Payload,
+				rundownChanges: NrcsIngestRundownChangeDetails.Payload,
 			}
 
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
@@ -320,9 +320,9 @@ describe('defaultApplyIngestChanges', () => {
 			const nrcsRundown = createBasicIngestRundown()
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
-			const changes: IncomingIngestChange = {
+			const changes: NrcsIngestChangeDetails = {
 				source: 'ingest',
-				rundownChanges: IncomingIngestRundownChange.Regenerate,
+				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 				segmentOrderChanged: true, // will be ignored
 				segmentChanges: {}, // will be ignored
 			}
@@ -363,7 +363,7 @@ describe('defaultApplyIngestChanges', () => {
 			const nrcsRundown = createIngestRundownWithManySegments()
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(nrcsRundown)
 
-			const changes: IncomingIngestChange = { source: 'ingest', segmentOrderChanged: true }
+			const changes: NrcsIngestChangeDetails = { source: 'ingest', segmentOrderChanged: true }
 
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
 
@@ -384,7 +384,7 @@ describe('defaultApplyIngestChanges', () => {
 			// include some changes, which should be ignored
 			const modifiedRundown = createIngestRundownWithManySegmentsAlternateOrder()
 
-			const changes: IncomingIngestChange = { source: 'ingest', segmentOrderChanged: true }
+			const changes: NrcsIngestChangeDetails = { source: 'ingest', segmentOrderChanged: true }
 
 			defaultApplyIngestChanges(mutableIngestRundown, modifiedRundown, changes, defaultOptions)
 
@@ -406,7 +406,7 @@ describe('defaultApplyIngestChanges', () => {
 			const modifiedRundown = createIngestRundownWithManySegmentsAlternateOrder()
 			modifiedRundown.segments.splice(2, 1) // remove seg4
 
-			const changes: IncomingIngestChange = { source: 'ingest', segmentOrderChanged: true }
+			const changes: NrcsIngestChangeDetails = { source: 'ingest', segmentOrderChanged: true }
 
 			defaultApplyIngestChanges(mutableIngestRundown, modifiedRundown, changes, defaultOptions)
 
@@ -436,7 +436,7 @@ describe('defaultApplyIngestChanges', () => {
 				parts: [],
 			})
 
-			const changes: IncomingIngestChange = { source: 'ingest', segmentOrderChanged: true }
+			const changes: NrcsIngestChangeDetails = { source: 'ingest', segmentOrderChanged: true }
 
 			defaultApplyIngestChanges(mutableIngestRundown, modifiedRundown, changes, defaultOptions)
 
@@ -462,17 +462,17 @@ describe('defaultApplyIngestChanges', () => {
 			modifiedRundown.segments[2].externalId = 'segY' // repalce seg2
 			modifiedRundown.segments.splice(4, 1) // remove seg4
 
-			const changes: IncomingIngestChange = {
+			const changes: NrcsIngestChangeDetails = {
 				source: 'ingest',
 				segmentChanges: {
-					seg1: IncomingIngestSegmentChangeEnum.Deleted,
-					segX: IncomingIngestSegmentChangeEnum.Inserted,
+					seg1: NrcsIngestSegmentChangeDetailsEnum.Deleted,
+					segX: NrcsIngestSegmentChangeDetailsEnum.Inserted,
 					seg3: {
 						payloadChanged: true,
 					},
-					seg4: IncomingIngestSegmentChangeEnum.Deleted,
-					segY: IncomingIngestSegmentChangeEnum.Inserted,
-					seg2: IncomingIngestSegmentChangeEnum.Deleted,
+					seg4: NrcsIngestSegmentChangeDetailsEnum.Deleted,
+					segY: NrcsIngestSegmentChangeDetailsEnum.Inserted,
+					seg2: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 				},
 			}
 
@@ -510,10 +510,10 @@ describe('defaultApplyIngestChanges', () => {
 			const nrcsRundown = createIngestRundownWithManySegments()
 			const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
 
-			const changes: IncomingIngestChange = {
+			const changes: NrcsIngestChangeDetails = {
 				source: 'ingest',
 				segmentChanges: {
-					segX: IncomingIngestSegmentChangeEnum.Inserted,
+					segX: NrcsIngestSegmentChangeDetailsEnum.Inserted,
 				},
 			}
 
@@ -526,10 +526,10 @@ describe('defaultApplyIngestChanges', () => {
 			const nrcsRundown = createIngestRundownWithManySegments()
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
-			const changes: IncomingIngestChange = {
+			const changes: NrcsIngestChangeDetails = {
 				source: 'ingest',
 				segmentChanges: {
-					segX: IncomingIngestSegmentChangeEnum.Deleted,
+					segX: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 				},
 			}
 
@@ -544,7 +544,7 @@ describe('defaultApplyIngestChanges', () => {
 			const nrcsRundown = createIngestRundownWithManySegments()
 			const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
 
-			const changes: IncomingIngestChange = {
+			const changes: NrcsIngestChangeDetails = {
 				source: 'ingest',
 				segmentChanges: {
 					segX: {
@@ -563,7 +563,7 @@ describe('defaultApplyIngestChanges', () => {
 			const nrcsRundown = createIngestRundownWithManySegments()
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
-			const changes: IncomingIngestChange = {
+			const changes: NrcsIngestChangeDetails = {
 				source: 'ingest',
 				segmentChanges: {
 					seg1: {},
@@ -583,7 +583,7 @@ describe('defaultApplyIngestChanges', () => {
 					clone(nrcsRundown)
 				)
 
-				const changes: IncomingIngestChange = {
+				const changes: NrcsIngestChangeDetails = {
 					source: 'ingest',
 					segmentChanges: {
 						seg1: {
@@ -608,7 +608,7 @@ describe('defaultApplyIngestChanges', () => {
 				const origParts = nrcsRundown.segments[2].parts
 				nrcsRundown.segments[2].parts = [origParts[1], origParts[0], origParts[2]]
 
-				const changes: IncomingIngestChange = {
+				const changes: NrcsIngestChangeDetails = {
 					source: 'ingest',
 					segmentChanges: {
 						seg2: {
@@ -643,7 +643,7 @@ describe('defaultApplyIngestChanges', () => {
 				// remove a part
 				nrcsRundown.segments[2].parts.splice(1, 1)
 
-				const changes: IncomingIngestChange = {
+				const changes: NrcsIngestChangeDetails = {
 					source: 'ingest',
 					segmentChanges: {
 						seg2: {
@@ -685,7 +685,7 @@ describe('defaultApplyIngestChanges', () => {
 					},
 				})
 
-				const changes: IncomingIngestChange = {
+				const changes: NrcsIngestChangeDetails = {
 					source: 'ingest',
 					segmentChanges: {
 						seg2: {
@@ -727,21 +727,21 @@ describe('defaultApplyIngestChanges', () => {
 				segment2.parts[0].externalId = 'partY' // replace part3
 				segment2.parts.splice(1, 1) // remove part4
 
-				const changes: IncomingIngestChange = {
+				const changes: NrcsIngestChangeDetails = {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
 							partsChanges: {
-								part0: IncomingIngestPartChange.Deleted,
-								partX: IncomingIngestPartChange.Inserted,
-								part1: IncomingIngestPartChange.Payload,
+								part0: NrcsIngestPartChangeDetails.Deleted,
+								partX: NrcsIngestPartChangeDetails.Inserted,
+								part1: NrcsIngestPartChangeDetails.Payload,
 							},
 						},
 						seg2: {
 							partsChanges: {
-								part3: IncomingIngestPartChange.Deleted,
-								partY: IncomingIngestPartChange.Inserted,
-								part4: IncomingIngestPartChange.Deleted,
+								part3: NrcsIngestPartChangeDetails.Deleted,
+								partY: NrcsIngestPartChangeDetails.Inserted,
+								part4: NrcsIngestPartChangeDetails.Deleted,
 							},
 						},
 					},
@@ -781,12 +781,12 @@ describe('defaultApplyIngestChanges', () => {
 				const nrcsRundown = createMediumIngestRundown()
 				const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
 
-				const changes: IncomingIngestChange = {
+				const changes: NrcsIngestChangeDetails = {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
 							partsChanges: {
-								partX: IncomingIngestPartChange.Inserted,
+								partX: NrcsIngestPartChangeDetails.Inserted,
 							},
 						},
 					},
@@ -803,12 +803,12 @@ describe('defaultApplyIngestChanges', () => {
 					clone(nrcsRundown)
 				)
 
-				const changes: IncomingIngestChange = {
+				const changes: NrcsIngestChangeDetails = {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
 							partsChanges: {
-								partX: IncomingIngestPartChange.Deleted,
+								partX: NrcsIngestPartChangeDetails.Deleted,
 							},
 						},
 					},
@@ -825,12 +825,12 @@ describe('defaultApplyIngestChanges', () => {
 				const nrcsRundown = createMediumIngestRundown()
 				const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
 
-				const changes: IncomingIngestChange = {
+				const changes: NrcsIngestChangeDetails = {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
 							partsChanges: {
-								partX: IncomingIngestPartChange.Payload,
+								partX: NrcsIngestPartChangeDetails.Payload,
 							},
 						},
 					},
@@ -848,7 +848,7 @@ describe('defaultApplyIngestChanges', () => {
 					clone(nrcsRundown)
 				)
 
-				const changes: IncomingIngestChange = {
+				const changes: NrcsIngestChangeDetails = {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
@@ -873,17 +873,17 @@ describe('defaultApplyIngestChanges', () => {
 				const removed = nrcsRundown.segments[0].parts.splice(0, 1)
 				nrcsRundown.segments[1].parts.unshift(...removed)
 
-				const changes: IncomingIngestChange = {
+				const changes: NrcsIngestChangeDetails = {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
 							partsChanges: {
-								part0: IncomingIngestPartChange.Deleted,
+								part0: NrcsIngestPartChangeDetails.Deleted,
 							},
 						},
 						seg1: {
 							partsChanges: {
-								part0: IncomingIngestPartChange.Inserted,
+								part0: NrcsIngestPartChangeDetails.Inserted,
 							},
 						},
 					},

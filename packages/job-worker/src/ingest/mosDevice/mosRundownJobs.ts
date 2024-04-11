@@ -1,4 +1,4 @@
-import { IncomingIngestRundownChange, IngestPart } from '@sofie-automation/blueprints-integration'
+import { NrcsIngestRundownChangeDetails, IngestPart } from '@sofie-automation/blueprints-integration'
 import { PartId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import {
@@ -64,7 +64,7 @@ export async function handleMosRundownData(context: JobContext, data: MosRundown
 			}),
 			changes: {
 				source: 'ingest',
-				rundownChanges: IncomingIngestRundownChange.Regenerate, // nocommit this is too coarse
+				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate, // nocommit this is too coarse
 			},
 		}
 	})
@@ -84,7 +84,7 @@ export async function handleMosRundownMetadata(context: JobContext, data: MosRun
 				ingestRundown,
 				changes: {
 					source: 'ingest',
-					rundownChanges: IncomingIngestRundownChange.Payload,
+					rundownChanges: NrcsIngestRundownChangeDetails.Payload,
 				},
 			}
 		} else {

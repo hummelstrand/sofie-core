@@ -15,13 +15,13 @@ export interface ExtendedIngestRundown extends IngestRundown {
 	coreData: IBlueprintRundownDBData | undefined
 }
 
-export enum IncomingIngestPartChange {
+export enum NrcsIngestPartChangeDetails {
 	Inserted = 'inserted',
 	Deleted = 'deleted',
 	Payload = 'payload',
 	// Rank = 'rank',
 }
-export enum IncomingIngestSegmentChangeEnum {
+export enum NrcsIngestSegmentChangeDetailsEnum {
 	Inserted = 'inserted', // nocommit: or "replaced" / "upsert"?
 	Deleted = 'deleted',
 	// Contents = 'contents',
@@ -29,7 +29,7 @@ export enum IncomingIngestSegmentChangeEnum {
 	// Payload = 'payload',
 	// Rank = 'rank',
 }
-export enum IncomingIngestRundownChange {
+export enum NrcsIngestRundownChangeDetails {
 	// Deleted = 'deleted',
 	// nocommit: describe these
 	Payload = 'payload',
@@ -37,7 +37,7 @@ export enum IncomingIngestRundownChange {
 	Regenerate = 'regenerate',
 }
 
-export interface IncomingIngestSegmentChangeObject {
+export interface NrcsIngestSegmentChangeDetailsObject {
 	/**
 	 * If set, this Segment has been renamed from the specified id
 	 * @deprecated This is temporary for MOS compatibility
@@ -57,12 +57,12 @@ export interface IncomingIngestSegmentChangeObject {
 	/**
 	 * Descibes the changes to the parts in the rundown
 	 */
-	partsChanges?: Record<string, IncomingIngestPartChange>
+	partsChanges?: Record<string, NrcsIngestPartChangeDetails>
 }
 
-export type IncomingIngestSegmentChange = IncomingIngestSegmentChangeEnum | IncomingIngestSegmentChangeObject
+export type NrcsIngestSegmentChangeDetails = NrcsIngestSegmentChangeDetailsEnum | NrcsIngestSegmentChangeDetailsObject
 
-export interface IncomingIngestChange {
+export interface NrcsIngestChangeDetails {
 	/** Indicate that this change is from ingest operations */
 	source: 'ingest'
 
@@ -77,12 +77,12 @@ export interface IncomingIngestChange {
 	/**
 	 * Describes the changes to the rundown itself
 	 */
-	rundownChanges?: IncomingIngestRundownChange | null
+	rundownChanges?: NrcsIngestRundownChangeDetails | null
 
 	/**
 	 * Describes the changes to the segments in the rundown
 	 */
-	segmentChanges?: Record<string, IncomingIngestSegmentChange>
+	segmentChanges?: Record<string, NrcsIngestSegmentChangeDetails>
 }
 
 export type DefaultUserOperations = {
@@ -114,8 +114,17 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	/** Array of segments in this rundown */
 	readonly segments: ReadonlyArray<MutableIngestSegment<TSegmentPayload, TPartPayload>>
 
+	/**
+	 * Search for a Part through the whole IngestRundown
+	 * @param partExternalId externalId of the Part
+	 */
 	findPart(partExternalId: string): MutableIngestPart<TPartPayload> | undefined
 
+	/**
+	 * Search for a Part through the whole IngestRundown
+	 * @param partExternalId externalId of the Part
+	 * @returns The part and segment that the part belongs to
+	 */
 	findPartAndSegment(partExternalId: string):
 		| {
 				part: MutableIngestPart<TPartPayload>
@@ -125,9 +134,27 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 
 	getSegment(segmentExternalId: string): MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined
 
+	/**
+	 * Move a segment to a new position in the rundown
+	 * @param segmentExternalId externalId of the Segment to move
+	 * @param beforeSegmentExternalId externalId of the Segment to position before. If null, position at the end
+	 */
 	moveSegmentBefore(segmentExternalId: string, beforeSegmentExternalId: string | null): void
+
+	/**
+	 * Move a segment to a new position in the rundown
+	 * @param segmentExternalId externalId of the Segment to move
+	 * @param afterSegmentExternalId externalId of the Segment to position after. If null, position at the beginning
+	 */
 	moveSegmentAfter(segmentExternalId: string, afterSegmentExternalId: string | null): void
 
+	/**
+	 * Replace a Segment in the Rundown with a new one. If the Segment does not already exist, it will be inserted.
+	 * This will replace all of the Parts in the Segment as well, along with the payload and other properties of the Segment.
+	 * @param segment the new IngestSegment to insert
+	 * @param beforeSegmentExternalId externalId of the Segment to position before. If null, position at the end
+	 * @returns the new MutableIngestSegment
+	 */
 	replaceSegment(
 		segment: Omit<IngestSegment, 'rank'>,
 		beforeSegmentExternalId: string | null
@@ -139,13 +166,26 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 		newSegmentExternalId: string
 	): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
+	/**
+	 * Remove a Segment from the Rundown
+	 * @param segmentExternalId externalId of the Segment to remove
+	 * @returns true if the segment was removed, false if it was not found
+	 */
 	removeSegment(segmentExternalId: string): boolean
 
+	/**
+	 * Remove all Segments from the Rundown
+	 */
 	removeAllSegments(): void
 
+	/**
+	 * Force the whole Rundown to be re-run through the ingest blueprints, even if there are no changes
+	 */
 	forceFullRegenerate(): void
 
-	/** Set name of the Rundown */
+	/**
+	 * Set name of the Rundown
+	 */
 	setName(name: string): void
 
 	replacePayload(payload: ReadonlyDeep<TRundownPayload> | TRundownPayload): void
@@ -155,10 +195,17 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	// getPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
 	// clearPayload<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
 
-	// :eyes:
+	/**
+	 * Perform the default syncing of changes from the ingest data to the rundown.
+	 * This may be overly agressive at removing any changes made by user operations.
+	 * If you are using user operations, you may need to perform some pre and post fixups to ensure changes aren't wiped unnecessarily.
+	 * @param ingestRundown NRCS version of the IngestRundown to copy from
+	 * @param changes A description of the changes that have been made to the rundown and should be propogated
+	 * @param options Options for how to apply the changes
+	 */
 	defaultApplyIngestChanges(
 		ingestRundown: IngestRundown,
-		changes: IncomingIngestChange,
+		changes: NrcsIngestChangeDetails,
 		options?: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
 	): void
 }
@@ -175,22 +222,53 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	/** Array of parts in this segment */
 	readonly parts: ReadonlyArray<MutableIngestPart<TPartPayload>>
 
+	/**
+	 * Get a Part from the Segment
+	 * @param partExternalId externalId of the Part
+	 */
 	getPart(partExternalId: string): MutableIngestPart<TPartPayload> | undefined
 
+	/**
+	 * Move a part to a new position in the segment
+	 * @param partExternalId externalId of the Part to move
+	 * @param beforePartExternalId externalId of the Part to position before. If null, position at the end
+	 */
 	movePartBefore(partExternalId: string, beforePartExternalId: string | null): void
+
+	/**
+	 * Move a part to a new position in the segment
+	 * @param partExternalId externalId of the Part to move
+	 * @param afterPartExternalId externalId of the Part to position after. If null, position at the beginning
+	 */
 	movePartAfter(partExternalId: string, afterPartExternalId: string | null): void
 
+	/**
+	 * Replace a Part in the Segment with a new one. If the Part does not already exist, it will be inserted.
+	 * This will replace the payload and other properties of the Part.
+	 * @param ingestPart the new IngestPart to insert
+	 * @param beforePartExternalId externalId of the Part to position before. If null, position at the end
+	 * @returns the new MutableIngestPart
+	 */
 	replacePart(
 		ingestPart: Omit<IngestPart, 'rank'>,
 		beforePartExternalId: string | null
 	): MutableIngestPart<TPartPayload>
 
+	/**
+	 * Remove a Part from the Segment
+	 * @param partExternalId externalId of the Part to remove
+	 * @returns true if the part was removed, false if it was not found
+	 */
 	removePart(partExternalId: string): boolean
 
-	/** Force this segment to be regenerated, even if there are no changes */
+	/**
+	 * Force this segment to be regenerated, even if there are no changes
+	 */
 	forceRegenerate(): void
 
-	/** Set the name of the Segment */
+	/**
+	 * Set the name of the Segment
+	 */
 	setName(name: string): void
 
 	replacePayload(payload: ReadonlyDeep<TSegmentPayload> | TSegmentPayload): void
@@ -207,7 +285,9 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 	/** Payload of the part. For use by other blueprints methods */
 	readonly payload: ReadonlyDeep<TPartPayload> | undefined
 
-	/** Set the name of the Part */
+	/**
+	 * Set the name of the Part
+	 */
 	setName(name: string): void
 
 	replacePayload(payload: ReadonlyDeep<TPartPayload> | TPartPayload): void
@@ -222,7 +302,19 @@ export interface IngestDefaultChangesOptions<
 	TSegmentPayload = unknown,
 	TPartPayload = unknown
 > {
+	/**
+	 * A custom transform for the payload of a Rundown.
+	 * Typically this will translate from a NRCS native structure to a javascript friendly structure.
+	 */
 	transformRundownPayload: TransformPayloadFunction<TRundownPayload>
+	/**
+	 * A custom transform for the payload of a Segment.
+	 * Typically this will translate from a NRCS native structure to a javascript friendly structure.
+	 */
 	transformSegmentPayload: TransformPayloadFunction<TSegmentPayload>
+	/**
+	 * A custom transform for the payload of a Part.
+	 * Typically this will translate from a NRCS native structure to a javascript friendly structure.
+	 */
 	transformPartPayload: TransformPayloadFunction<TPartPayload>
 }

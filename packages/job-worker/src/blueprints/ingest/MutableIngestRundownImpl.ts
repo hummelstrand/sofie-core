@@ -1,6 +1,6 @@
 import type {
 	IngestSegment,
-	IncomingIngestChange,
+	NrcsIngestChangeDetails,
 	IngestDefaultChangesOptions,
 	IngestRundown,
 	MutableIngestRundown,
@@ -241,7 +241,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 	defaultApplyIngestChanges(
 		nrcsRundown: IngestRundown,
-		changes: IncomingIngestChange,
+		changes: NrcsIngestChangeDetails,
 		options?: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
 	): void {
 		defaultApplyIngestChanges(this, nrcsRundown, changes, {

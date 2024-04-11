@@ -3,10 +3,10 @@ import { LocalIngestSegment } from '../ingestCache'
 import _ = require('underscore')
 import { clone, deleteAllUndefinedProperties, normalizeArrayFunc } from '@sofie-automation/corelib/dist/lib'
 import {
-	IncomingIngestChange,
-	IncomingIngestPartChange,
-	IncomingIngestSegmentChange,
-	IncomingIngestSegmentChangeEnum,
+	NrcsIngestChangeDetails,
+	NrcsIngestPartChangeDetails,
+	NrcsIngestSegmentChangeDetails,
+	NrcsIngestSegmentChangeDetailsEnum,
 	IngestSegment,
 } from '@sofie-automation/blueprints-integration'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
@@ -14,7 +14,7 @@ import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 export function generateMosIngestDiffTemp(
 	oldIngestSegments: LocalIngestSegment[] | undefined,
 	newIngestSegments: LocalIngestSegment[]
-): IncomingIngestChange {
+): NrcsIngestChangeDetails {
 	// Fetch all existing segments:
 	const miniSegments: SegmentMini[] | null =
 		oldIngestSegments?.map((segment) => ({
@@ -29,42 +29,42 @@ export function generateMosIngestDiffTemp(
 
 	const onlyRankChangedSet = new Set(Object.keys(segmentDiff.onlyRankChanged))
 
-	const segmentChanges: Record<string, IncomingIngestSegmentChange> = {}
+	const segmentChanges: Record<string, NrcsIngestSegmentChangeDetails> = {}
 
 	for (const id of Object.keys(segmentDiff.removed)) {
-		segmentChanges[id] = IncomingIngestSegmentChangeEnum.Deleted
+		segmentChanges[id] = NrcsIngestSegmentChangeDetailsEnum.Deleted
 	}
 	for (const id of Object.keys(segmentDiff.changed)) {
 		if (!onlyRankChangedSet.has(id)) {
 			// TODO - should this be more granular?
-			segmentChanges[id] = IncomingIngestSegmentChangeEnum.Inserted
+			segmentChanges[id] = NrcsIngestSegmentChangeDetailsEnum.Inserted
 		}
 	}
 	for (const id of Object.keys(segmentDiff.added)) {
-		segmentChanges[id] = IncomingIngestSegmentChangeEnum.Inserted
+		segmentChanges[id] = NrcsIngestSegmentChangeDetailsEnum.Inserted
 	}
 
 	for (const [oldId, newId] of Object.entries<string>(segmentDiff.externalIdChanged)) {
 		if (
 			segmentChanges[newId] &&
-			segmentChanges[newId] !== IncomingIngestSegmentChangeEnum.Inserted &&
-			segmentChanges[newId] !== IncomingIngestSegmentChangeEnum.Deleted
+			segmentChanges[newId] !== NrcsIngestSegmentChangeDetailsEnum.Inserted &&
+			segmentChanges[newId] !== NrcsIngestSegmentChangeDetailsEnum.Deleted
 		)
 			continue // Not supported for now
 
-		if (segmentChanges[oldId] === IncomingIngestSegmentChangeEnum.Deleted) delete segmentChanges[oldId]
+		if (segmentChanges[oldId] === NrcsIngestSegmentChangeDetailsEnum.Deleted) delete segmentChanges[oldId]
 
-		const partsChanges: Record<string, IncomingIngestPartChange> = {}
+		const partsChanges: Record<string, NrcsIngestPartChangeDetails> = {}
 		const oldIngestSegment = oldIngestSegments?.find((s) => s.externalId === oldId)
 		if (oldIngestSegment) {
 			for (const oldPart of oldIngestSegment.parts) {
-				partsChanges[oldPart.externalId] = IncomingIngestPartChange.Deleted
+				partsChanges[oldPart.externalId] = NrcsIngestPartChangeDetails.Deleted
 			}
 		}
 		const newIngestSegment = newIngestSegments.find((s) => s.externalId === newId)
 		if (newIngestSegment) {
 			for (const newPart of newIngestSegment.parts) {
-				partsChanges[newPart.externalId] = IncomingIngestPartChange.Inserted
+				partsChanges[newPart.externalId] = NrcsIngestPartChangeDetails.Inserted
 			}
 		}
 

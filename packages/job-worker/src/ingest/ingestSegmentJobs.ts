@@ -13,7 +13,7 @@ import {
 	RemoveOrphanedSegmentsProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
 import { runCustomIngestUpdateOperation, runIngestUpdateOperation } from './runOperation'
-import { IncomingIngestSegmentChangeEnum } from '@sofie-automation/blueprints-integration'
+import { NrcsIngestSegmentChangeDetailsEnum } from '@sofie-automation/blueprints-integration'
 
 /**
  * Regnerate a Segment from the cached IngestSegment
@@ -69,7 +69,7 @@ export async function handleRemovedSegment(context: JobContext, data: IngestRemo
 				changes: {
 					source: 'ingest',
 					segmentChanges: {
-						[data.segmentExternalId]: IncomingIngestSegmentChangeEnum.Deleted,
+						[data.segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 					},
 				},
 			}
@@ -102,7 +102,7 @@ export async function handleUpdatedSegment(context: JobContext, data: IngestUpda
 				changes: {
 					source: 'ingest',
 					segmentChanges: {
-						[segmentExternalId]: IncomingIngestSegmentChangeEnum.Inserted, // This forces downstream to do a full diff themselves
+						[segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.Inserted, // This forces downstream to do a full diff themselves
 					},
 				},
 			}

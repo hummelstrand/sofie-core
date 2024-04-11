@@ -14,7 +14,7 @@ import { getRundownId } from '../lib'
 import { WrappedMosIngestJobFunction, fixIllegalObject, parseMosString } from './lib'
 import { AnnotatedIngestPart, makeChangeToIngestParts, storiesToIngestParts } from './mosToIngest'
 import { generateMosIngestDiffTemp } from './diff'
-import { IncomingIngestPartChange } from '@sofie-automation/blueprints-integration'
+import { NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
 
 function getAnnotatedIngestParts(context: JobContext, ingestRundown: LocalIngestRundown): AnnotatedIngestPart[] {
 	const span = context.startSpan('mosDevice.ingest.getAnnotatedIngestParts')
@@ -64,7 +64,7 @@ export function handleMosFullStory(_context: JobContext, data: MosFullStoryProps
 							segmentChanges: {
 								[ingestSegment.externalId]: {
 									partsChanges: {
-										[ingestPart.externalId]: IncomingIngestPartChange.Payload,
+										[ingestPart.externalId]: NrcsIngestPartChangeDetails.Payload,
 									},
 								},
 							},

@@ -9,7 +9,7 @@ import { loadIngestModelFromRundownExternalId } from './model/implementation/Loa
 import { Complete, clone } from '@sofie-automation/corelib/dist/lib'
 import { CommitIngestData, runWithRundownLockWithoutFetchingRundown } from './lock'
 import { DatabasePersistedModel } from '../modelBase'
-import { IncomingIngestChange, IngestRundown, UserOperationChange } from '@sofie-automation/blueprints-integration'
+import { NrcsIngestChangeDetails, IngestRundown, UserOperationChange } from '@sofie-automation/blueprints-integration'
 import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
 import { CommonContext } from '../blueprints/context'
 import { PartId, PeripheralDeviceId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
@@ -25,7 +25,7 @@ export enum UpdateIngestRundownAction {
 
 export interface UpdateIngestRundownChange {
 	ingestRundown: LocalIngestRundown
-	changes: IncomingIngestChange | UserOperationChange
+	changes: NrcsIngestChangeDetails | UserOperationChange
 }
 
 export type UpdateIngestRundownResult = UpdateIngestRundownChange | UpdateIngestRundownAction

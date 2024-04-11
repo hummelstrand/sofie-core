@@ -1,15 +1,15 @@
 import {
 	IngestRundown,
-	IncomingIngestChange,
+	NrcsIngestChangeDetails,
 	IngestDefaultChangesOptions,
-	IncomingIngestRundownChange,
+	NrcsIngestRundownChangeDetails,
 	MutableIngestRundown,
-	IncomingIngestSegmentChange,
+	NrcsIngestSegmentChangeDetails,
 	IngestSegment,
-	IncomingIngestSegmentChangeEnum,
+	NrcsIngestSegmentChangeDetailsEnum,
 	MutableIngestSegment,
-	IncomingIngestSegmentChangeObject,
-	IncomingIngestPartChange,
+	NrcsIngestSegmentChangeDetailsObject,
+	NrcsIngestPartChangeDetails,
 	IngestPart,
 	MutableIngestPart,
 } from '@sofie-automation/blueprints-integration'
@@ -19,7 +19,7 @@ import { ReadonlyDeep } from 'type-fest'
 export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
 	nrcsRundown: IngestRundown,
-	changes: IncomingIngestChange,
+	changes: NrcsIngestChangeDetails,
 	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
 ): void {
 	if (changes.source !== 'ingest')
@@ -30,7 +30,7 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 	let regenerateAllContents = false
 
 	switch (changes.rundownChanges) {
-		case IncomingIngestRundownChange.Regenerate: {
+		case NrcsIngestRundownChangeDetails.Regenerate: {
 			mutableIngestRundown.replacePayload(
 				payloadTransformers.transformRundownPayload(nrcsRundown, mutableIngestRundown)
 			)
@@ -44,7 +44,7 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 
 			break
 		}
-		case IncomingIngestRundownChange.Payload: {
+		case NrcsIngestRundownChangeDetails.Payload: {
 			mutableIngestRundown.replacePayload(
 				payloadTransformers.transformRundownPayload(nrcsRundown, mutableIngestRundown)
 			)
@@ -130,7 +130,7 @@ function applySegmentOrder<TRundownPayload, TSegmentPayload, TPartPayload>(
 function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
 	nrcsRundown: IngestRundown,
-	changes: Record<string, IncomingIngestSegmentChange>,
+	changes: Record<string, NrcsIngestSegmentChangeDetails>,
 	payloadTransformers: PayloadTransformers<TRundownPayload, TSegmentPayload, TPartPayload>
 ) {
 	const nrcsSegmentMap = normalizeArrayToMap(nrcsRundown.segments, 'externalId')
@@ -143,7 +143,7 @@ function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	applySegmentRenames(mutableIngestRundown, changes)
 
 	// Apply changes and delete segments
-	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes)) {
+	for (const [segmentId, change] of Object.entries<NrcsIngestSegmentChangeDetails | undefined>(changes)) {
 		if (!change) continue
 
 		const nrcsSegment = nrcsSegmentMap.get(segmentId)
@@ -175,9 +175,9 @@ function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 
 function applySegmentRenames<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
-	changes: Record<string, IncomingIngestSegmentChange>
+	changes: Record<string, NrcsIngestSegmentChangeDetails>
 ) {
-	for (const [segmentId, change] of Object.entries<IncomingIngestSegmentChange | undefined>(changes)) {
+	for (const [segmentId, change] of Object.entries<NrcsIngestSegmentChangeDetails | undefined>(changes)) {
 		if (!change) continue
 
 		if (change && typeof change === 'object' && change.oldExternalId) {
@@ -194,20 +194,20 @@ function applyChangesForSingleSegment<TRundownPayload, TSegmentPayload, TPartPay
 	nrcsSegment: IngestSegment | undefined,
 	segmentsToInsert: IngestSegment[],
 	segmentId: string,
-	change: IncomingIngestSegmentChange,
+	change: NrcsIngestSegmentChangeDetails,
 	payloadTransformers: PayloadTransformers<TRundownPayload, TSegmentPayload, TPartPayload>
 ) {
 	const mutableSegment = mutableIngestRundown.getSegment(segmentId)
 
 	switch (change) {
-		case IncomingIngestSegmentChangeEnum.Inserted: {
+		case NrcsIngestSegmentChangeDetailsEnum.Inserted: {
 			if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
 
 			segmentsToInsert.push(nrcsSegment)
 
 			break
 		}
-		case IncomingIngestSegmentChangeEnum.Deleted: {
+		case NrcsIngestSegmentChangeDetailsEnum.Deleted: {
 			mutableIngestRundown.removeSegment(segmentId)
 
 			break
@@ -226,7 +226,7 @@ function applyChangesForSingleSegment<TRundownPayload, TSegmentPayload, TPartPay
 function applyChangesObjectForSingleSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableSegment: MutableIngestSegment<TSegmentPayload, TPartPayload>,
 	nrcsSegment: IngestSegment,
-	segmentChange: IncomingIngestSegmentChangeObject,
+	segmentChange: NrcsIngestSegmentChangeDetailsObject,
 	payloadTransformers: PayloadTransformers<TRundownPayload, TSegmentPayload, TPartPayload>
 ) {
 	if (segmentChange.payloadChanged) {
@@ -241,7 +241,7 @@ function applyChangesObjectForSingleSegment<TRundownPayload, TSegmentPayload, TP
 		// Perform the inserts last, so that we can ensure they happen in a sensible order
 		const partsToInsert: IngestPart[] = []
 
-		for (const [partId, change] of Object.entries<IncomingIngestPartChange | undefined>(
+		for (const [partId, change] of Object.entries<NrcsIngestPartChangeDetails | undefined>(
 			segmentChange.partsChanges
 		)) {
 			if (!change) continue
@@ -273,25 +273,25 @@ function applyChangesForPart<TRundownPayload, TSegmentPayload, TPartPayload>(
 	nrcsPart: IngestPart | undefined,
 	partsToInsert: IngestPart[],
 	partId: string,
-	change: IncomingIngestPartChange,
+	change: NrcsIngestPartChangeDetails,
 	payloadTransformers: PayloadTransformers<TRundownPayload, TSegmentPayload, TPartPayload>
 ) {
 	const mutablePart = mutableSegment.getPart(partId)
 
 	switch (change) {
-		case IncomingIngestPartChange.Inserted: {
+		case NrcsIngestPartChangeDetails.Inserted: {
 			if (!nrcsPart) throw new Error(`Part ${partId} not found in nrcs rundown`)
 
 			// Batch the inserts to be performed last
 			partsToInsert.push(nrcsPart)
 			break
 		}
-		case IncomingIngestPartChange.Deleted: {
+		case NrcsIngestPartChangeDetails.Deleted: {
 			mutableSegment.removePart(partId)
 
 			break
 		}
-		case IncomingIngestPartChange.Payload: {
+		case NrcsIngestPartChangeDetails.Payload: {
 			if (!mutablePart) throw new Error(`Part ${partId} not found in segment`)
 			if (!nrcsPart) throw new Error(`Part ${partId} not found in nrcs segment`)
 

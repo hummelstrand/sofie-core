@@ -13,7 +13,7 @@ import {
 	UserUnsyncRundownProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UpdateIngestRundownAction, UpdateIngestRundownResult, runIngestUpdateOperation } from './runOperation'
-import { IncomingIngestRundownChange } from '@sofie-automation/blueprints-integration'
+import { NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
 import { getCurrentTime } from '../lib'
 
 /**
@@ -79,7 +79,7 @@ export async function handleUpdatedRundown(context: JobContext, data: IngestUpda
 				ingestRundown: makeNewIngestRundown(data.ingestRundown),
 				changes: {
 					source: 'ingest',
-					rundownChanges: IncomingIngestRundownChange.Regenerate,
+					rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 				},
 			} satisfies UpdateIngestRundownResult
 		} else {
@@ -105,7 +105,7 @@ export async function handleUpdatedRundownMetaData(
 				},
 				changes: {
 					source: 'ingest',
-					rundownChanges: IncomingIngestRundownChange.Payload,
+					rundownChanges: NrcsIngestRundownChangeDetails.Payload,
 				},
 			} satisfies UpdateIngestRundownResult
 		} else {
@@ -125,7 +125,7 @@ export async function handleRegenerateRundown(context: JobContext, data: IngestR
 				ingestRundown,
 				changes: {
 					source: 'ingest',
-					rundownChanges: IncomingIngestRundownChange.Regenerate,
+					rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 				},
 			} satisfies UpdateIngestRundownResult
 		} else {

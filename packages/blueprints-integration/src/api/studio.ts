@@ -8,7 +8,7 @@ import type { ICommonContext, IFixUpConfigContext, IStudioBaselineContext, IStud
 import type { IBlueprintShowStyleBase } from '../showStyle'
 import type {
 	ExtendedIngestRundown,
-	IncomingIngestChange,
+	NrcsIngestChangeDetails,
 	IngestRundown,
 	MutableIngestRundown,
 	UserOperationChange,
@@ -89,7 +89,7 @@ export interface StudioBlueprintManifest<TRawConfig = IBlueprintConfig, TProcess
 		context: ICommonContext,
 		mutableIngestRundown: MutableIngestRundown,
 		nrcsIngestRundown: IngestRundown,
-		changes: IncomingIngestChange | UserOperationChange
+		changes: NrcsIngestChangeDetails | UserOperationChange
 	) => Promise<void>
 }
 

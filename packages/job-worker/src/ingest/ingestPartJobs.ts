@@ -3,7 +3,7 @@ import { JobContext } from '../jobs'
 import { makeNewIngestPart } from './ingestCache'
 import { IngestRemovePartProps, IngestUpdatePartProps } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UpdateIngestRundownChange, runIngestUpdateOperation } from './runOperation'
-import { IncomingIngestPartChange } from '@sofie-automation/blueprints-integration'
+import { NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
 
 /**
  * Remove a Part from a Segment
@@ -39,7 +39,7 @@ export async function handleRemovedPart(context: JobContext, data: IngestRemoveP
 					segmentChanges: {
 						[data.segmentExternalId]: {
 							partsChanges: {
-								[data.partExternalId]: IncomingIngestPartChange.Deleted,
+								[data.partExternalId]: NrcsIngestPartChangeDetails.Deleted,
 							},
 						},
 					},
@@ -79,8 +79,8 @@ export async function handleUpdatedPart(context: JobContext, data: IngestUpdateP
 						[data.segmentExternalId]: {
 							partsChanges: {
 								[data.ingestPart.externalId]: isUpdate
-									? IncomingIngestPartChange.Payload
-									: IncomingIngestPartChange.Inserted,
+									? NrcsIngestPartChangeDetails.Payload
+									: NrcsIngestPartChangeDetails.Inserted,
 							},
 						},
 					},
