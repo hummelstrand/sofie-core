@@ -114,7 +114,7 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	/** Array of segments in this rundown */
 	readonly segments: ReadonlyArray<MutableIngestSegment<TSegmentPayload, TPartPayload>>
 
-	findPart(id: string): MutableIngestPart<TPartPayload> | undefined
+	findPart(partExternalId: string): MutableIngestPart<TPartPayload> | undefined
 
 	findPartAndSegment(partExternalId: string):
 		| {
@@ -123,10 +123,10 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 		  }
 		| undefined
 
-	getSegment(id: string): MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined
+	getSegment(segmentExternalId: string): MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined
 
-	moveSegmentBefore(id: string, beforeSegmentExternalId: string | null): void
-	moveSegmentAfter(id: string, afterSegmentExternalId: string | null): void
+	moveSegmentBefore(segmentExternalId: string, beforeSegmentExternalId: string | null): void
+	moveSegmentAfter(segmentExternalId: string, afterSegmentExternalId: string | null): void
 
 	replaceSegment(
 		segment: Omit<IngestSegment, 'rank'>,
@@ -134,9 +134,12 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
 	// nocommit - better naming of this method?
-	renameSegment(oldExternalId: string, newExternalId: string): MutableIngestSegment<TSegmentPayload, TPartPayload>
+	renameSegment(
+		oldSegmentExternalId: string,
+		newSegmentExternalId: string
+	): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
-	removeSegment(id: string): boolean
+	removeSegment(segmentExternalId: string): boolean
 
 	removeAllSegments(): void
 
@@ -172,17 +175,20 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	/** Array of parts in this segment */
 	readonly parts: ReadonlyArray<MutableIngestPart<TPartPayload>>
 
-	getPart(id: string): MutableIngestPart<TPartPayload> | undefined
+	getPart(partExternalId: string): MutableIngestPart<TPartPayload> | undefined
 
-	movePartBefore(id: string, beforePartExternalId: string | null): void
-	movePartAfter(id: string, afterPartExternalId: string | null): void
+	movePartBefore(partExternalId: string, beforePartExternalId: string | null): void
+	movePartAfter(partExternalId: string, afterPartExternalId: string | null): void
 
-	replacePart(part: IngestPart, beforePartExternalId: string | null): MutableIngestPart<TPartPayload>
+	replacePart(
+		ingestPart: Omit<IngestPart, 'rank'>,
+		beforePartExternalId: string | null
+	): MutableIngestPart<TPartPayload>
 
-	removePart(id: string): boolean
+	removePart(partExternalId: string): boolean
 
-	// nocommit: implement this
-	// forceRegenerate(): void
+	/** Force this segment to be regenerated, even if there are no changes */
+	forceRegenerate(): void
 
 	/** Set the name of the Segment */
 	setName(name: string): void

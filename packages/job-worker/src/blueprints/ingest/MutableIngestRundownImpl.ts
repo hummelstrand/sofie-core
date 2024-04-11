@@ -1,9 +1,9 @@
-import {
+import type {
 	IngestSegment,
-	type IncomingIngestChange,
-	type IngestDefaultChangesOptions,
-	type IngestRundown,
-	type MutableIngestRundown,
+	IncomingIngestChange,
+	IngestDefaultChangesOptions,
+	IngestRundown,
+	MutableIngestRundown,
 	MutableIngestSegment,
 	MutableIngestPart,
 } from '@sofie-automation/blueprints-integration'
@@ -102,9 +102,9 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		}
 	}
 
-	findPart(id: string): MutableIngestPart<TPartPayload> | undefined {
+	findPart(partExternalId: string): MutableIngestPart<TPartPayload> | undefined {
 		for (const segment of this.#segments) {
-			const part = segment.getPart(id)
+			const part = segment.getPart(partExternalId)
 			if (part) return part
 		}
 
@@ -124,15 +124,15 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		return undefined
 	}
 
-	getSegment(id: string): MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined {
-		return this.#segments.find((s) => s.externalId === id)
+	getSegment(segmentExternalId: string): MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined {
+		return this.#segments.find((s) => s.externalId === segmentExternalId)
 	}
 
-	moveSegmentBefore(id: string, beforeSegmentExternalId: string | null): void {
-		const segment = this.#segments.find((s) => s.externalId === id)
-		if (!segment) throw new Error(`Segment "${id}" not found`)
+	moveSegmentBefore(segmentExternalId: string, beforeSegmentExternalId: string | null): void {
+		const segment = this.#segments.find((s) => s.externalId === segmentExternalId)
+		if (!segment) throw new Error(`Segment "${segmentExternalId}" not found`)
 
-		this.#removeSegment(id)
+		this.#removeSegment(segmentExternalId)
 
 		if (beforeSegmentExternalId) {
 			const beforeIndex = this.#segments.findIndex((s) => s.externalId === beforeSegmentExternalId)
@@ -146,11 +146,11 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		this.#segmentOrderChanged = true
 	}
 
-	moveSegmentAfter(id: string, afterSegmentExternalId: string | null): void {
-		const segment = this.#segments.find((s) => s.externalId === id)
-		if (!segment) throw new Error(`Segment "${id}" not found`)
+	moveSegmentAfter(segmentExternalId: string, afterSegmentExternalId: string | null): void {
+		const segment = this.#segments.find((s) => s.externalId === segmentExternalId)
+		if (!segment) throw new Error(`Segment "${segmentExternalId}" not found`)
 
-		this.#removeSegment(id)
+		this.#removeSegment(segmentExternalId)
 
 		if (afterSegmentExternalId) {
 			const beforeIndex = this.#segments.findIndex((s) => s.externalId === afterSegmentExternalId)
@@ -165,7 +165,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	replaceSegment(
-		segment: IngestSegment,
+		segment: Omit<IngestSegment, 'rank'>,
 		beforeSegmentExternalId: string | null
 	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
 		const newSegment = new MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>(segment, true)
@@ -191,19 +191,22 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		return newSegment
 	}
 
-	renameSegment(oldId: string, newId: string): MutableIngestSegment<TSegmentPayload, TPartPayload> {
-		const segment = this.#segments.find((s) => s.externalId === oldId)
-		if (!segment) throw new Error(`Segment "${oldId}" not found`)
+	renameSegment(
+		oldSegmentExternalId: string,
+		newSegmentExternalId: string
+	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
+		const segment = this.#segments.find((s) => s.externalId === oldSegmentExternalId)
+		if (!segment) throw new Error(`Segment "${oldSegmentExternalId}" not found`)
 
-		const targetSegment = this.#segments.find((s) => s.externalId === newId)
+		const targetSegment = this.#segments.find((s) => s.externalId === newSegmentExternalId)
 		if (targetSegment) {
-			throw new Error(`Segment "${newId}" already exists`)
+			throw new Error(`Segment "${newSegmentExternalId}" already exists`)
 			// // Segment id is already in use, ensure it is regenerated and remove the old segment
 			// targetSegment.forceRegenerate()
 			// this.#removeSegment(oldId)
 			// return targetSegment
 		} else {
-			segment.setExternalId(newId)
+			segment.setExternalId(newSegmentExternalId)
 
 			return segment
 		}
@@ -213,8 +216,8 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	 * Remove a segment
 	 * Note: this is separate from the removeSegment method to allow for internal use when methods are overridden in tests
 	 */
-	#removeSegment(id: string): boolean {
-		const existingIndex = this.#segments.findIndex((s) => s.externalId === id)
+	#removeSegment(segmentExternalId: string): boolean {
+		const existingIndex = this.#segments.findIndex((s) => s.externalId === segmentExternalId)
 		if (existingIndex !== -1) {
 			this.#segments.splice(existingIndex, 1)
 
@@ -226,8 +229,8 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		}
 	}
 
-	removeSegment(id: string): boolean {
-		return this.#removeSegment(id)
+	removeSegment(segmentExternalId: string): boolean {
+		return this.#removeSegment(segmentExternalId)
 	}
 
 	removeAllSegments(): void {

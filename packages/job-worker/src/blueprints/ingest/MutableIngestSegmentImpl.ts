@@ -13,17 +13,27 @@ import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/Ing
 import { getSegmentId } from '../../ingest/lib'
 import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 
+export interface MutableIngestSegmentChanges {
+	ingestParts: LocalIngestPart[]
+	changedCacheObjects: IngestDataCacheObj[]
+	allCacheObjectIds: IngestDataCacheObjId[]
+	segmentHasChanges: boolean
+	partIdsWithChanges: string[]
+	partOrderHasChanged: boolean
+	originalExternalId: string
+}
+
 export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = unknown>
 	implements MutableIngestSegment<TSegmentPayload, TPartPayload>
 {
-	readonly #ingestSegment: Omit<IngestSegment, 'parts'>
+	readonly #ingestSegment: Omit<IngestSegment, 'rank' | 'parts'>
 	originalExternalId: string
 	#segmentHasChanges = false
 	#partOrderHasChanged = false
 
 	readonly #parts: MutableIngestPartImpl<TPartPayload>[]
 
-	constructor(ingestSegment: IngestSegment, hasChanges = false) {
+	constructor(ingestSegment: Omit<IngestSegment, 'rank'>, hasChanges = false) {
 		this.originalExternalId = ingestSegment.externalId
 		this.#ingestSegment = omit(ingestSegment, 'parts')
 		this.#parts = ingestSegment.parts
@@ -49,15 +59,17 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		return this.#ingestSegment.payload
 	}
 
-	getPart(id: string): MutableIngestPart<TPartPayload> | undefined {
-		return this.#parts.find((part) => part.externalId === id)
+	getPart(partExternalId: string): MutableIngestPart<TPartPayload> | undefined {
+		return this.#parts.find((part) => part.externalId === partExternalId)
 	}
 
-	movePartBefore(id: string, beforePartExternalId: string | null): void {
-		const part = this.#parts.find((p) => p.externalId === id)
-		if (!part) throw new Error(`Part "${id}" not found`)
+	movePartBefore(partExternalId: string, beforePartExternalId: string | null): void {
+		if (partExternalId === beforePartExternalId) throw new Error('Cannot move Part before itself')
 
-		this.#removePart(id)
+		const part = this.#parts.find((p) => p.externalId === partExternalId)
+		if (!part) throw new Error(`Part "${partExternalId}" not found`)
+
+		this.#removePart(partExternalId)
 
 		if (beforePartExternalId) {
 			const beforeIndex = this.#parts.findIndex((p) => p.externalId === beforePartExternalId)
@@ -71,11 +83,13 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		this.#partOrderHasChanged = true
 	}
 
-	movePartAfter(id: string, afterPartExternalId: string | null): void {
-		const part = this.#parts.find((p) => p.externalId === id)
-		if (!part) throw new Error(`Part "${id}" not found`)
+	movePartAfter(partExternalId: string, afterPartExternalId: string | null): void {
+		if (partExternalId === afterPartExternalId) throw new Error('Cannot move Part after itself')
 
-		this.#removePart(id)
+		const part = this.#parts.find((p) => p.externalId === partExternalId)
+		if (!part) throw new Error(`Part "${partExternalId}" not found`)
+
+		this.#removePart(partExternalId)
 
 		if (afterPartExternalId) {
 			const beforeIndex = this.#parts.findIndex((p) => p.externalId === afterPartExternalId)
@@ -89,10 +103,15 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		this.#partOrderHasChanged = true
 	}
 
-	replacePart(part: IngestPart, beforePartExternalId: string | null): MutableIngestPart<TPartPayload> {
-		this.#removePart(part.externalId)
+	replacePart(
+		ingestPart: Omit<IngestPart, 'rank'>,
+		beforePartExternalId: string | null
+	): MutableIngestPart<TPartPayload> {
+		if (ingestPart.externalId === beforePartExternalId) throw new Error('Cannot insert Part before itself')
 
-		const newPart = new MutableIngestPartImpl<TPartPayload>(part, true)
+		this.#removePart(ingestPart.externalId)
+
+		const newPart = new MutableIngestPartImpl<TPartPayload>(ingestPart, true)
 
 		if (beforePartExternalId) {
 			const beforeIndex = this.#parts.findIndex((s) => s.externalId === beforePartExternalId)
@@ -112,8 +131,8 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	 * Remove a part
 	 * Note: this is separate from the removePart method to allow for internal use when methods are overridden in tests
 	 */
-	#removePart(id: string): boolean {
-		const index = this.#parts.findIndex((part) => part.externalId === id)
+	#removePart(partExternalId: string): boolean {
+		const index = this.#parts.findIndex((part) => part.externalId === partExternalId)
 		if (index === -1) {
 			return false
 		}
@@ -124,12 +143,19 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		return true
 	}
 
-	removePart(id: string): boolean {
-		return this.#removePart(id)
+	removePart(partExternalId: string): boolean {
+		return this.#removePart(partExternalId)
 	}
 
-	setExternalId(id: string): void {
-		this.#ingestSegment.externalId = id
+	forceRegenerate(): void {
+		this.#segmentHasChanges = true
+	}
+
+	/**
+	 * Note: This is not exposed to blueprints
+	 */
+	setExternalId(newSegmentExternalId: string): void {
+		this.#ingestSegment.externalId = newSegmentExternalId
 	}
 
 	setName(name: string): void {
@@ -157,15 +183,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		}
 	}
 
-	intoChangesInfo(generator: RundownIngestDataCacheGenerator): {
-		ingestParts: LocalIngestPart[]
-		changedCacheObjects: IngestDataCacheObj[]
-		allCacheObjectIds: IngestDataCacheObjId[]
-		segmentHasChanges: boolean
-		partIdsWithChanges: string[]
-		partOrderHasChanged: boolean
-		originalExternalId: string
-	} {
+	intoChangesInfo(generator: RundownIngestDataCacheGenerator): MutableIngestSegmentChanges {
 		const ingestParts: LocalIngestPart[] = []
 		const changedCacheObjects: IngestDataCacheObj[] = []
 		const allCacheObjectIds: IngestDataCacheObjId[] = []
@@ -191,14 +209,23 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 			}
 		})
 
+		const segmentHasChanges = this.#segmentHasChanges
+		const partOrderHasChanged = this.#partOrderHasChanged
+		const originalExternalId = this.originalExternalId
+
+		// clear flags
+		this.#segmentHasChanges = false
+		this.#partOrderHasChanged = false
+		this.originalExternalId = this.#ingestSegment.externalId
+
 		return {
 			ingestParts,
 			changedCacheObjects,
 			allCacheObjectIds,
-			segmentHasChanges: this.#segmentHasChanges,
+			segmentHasChanges,
 			partIdsWithChanges,
-			partOrderHasChanged: this.#partOrderHasChanged,
-			originalExternalId: this.originalExternalId,
+			partOrderHasChanged,
+			originalExternalId,
 		}
 	}
 }

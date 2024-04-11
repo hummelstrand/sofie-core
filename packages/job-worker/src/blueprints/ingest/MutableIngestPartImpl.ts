@@ -4,10 +4,10 @@ import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 
 export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIngestPart<TPartPayload> {
-	readonly #ingestPart: IngestPart
+	readonly #ingestPart: Omit<IngestPart, 'rank'>
 	#hasChanges = false
 
-	constructor(ingestPart: IngestPart, hasChanges = false) {
+	constructor(ingestPart: Omit<IngestPart, 'rank'>, hasChanges = false) {
 		this.#ingestPart = ingestPart
 		this.#hasChanges = hasChanges
 	}

@@ -13,7 +13,7 @@ import { IngestRundown, IngestSegment, IngestPart } from '@sofie-automation/blue
 import { JobContext } from '../jobs'
 import { getPartId, getSegmentId } from './lib'
 import { SetOptional } from 'type-fest'
-import { groupByToMap, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
+import { groupByToMap, normalizeArrayToMap, omit } from '@sofie-automation/corelib/dist/lib'
 import { AnyBulkWriteOperation } from 'mongodb'
 import { diffAndReturnLatestObjects } from './model/implementation/utils'
 import { ICollection } from '../db'
@@ -218,7 +218,11 @@ export class RundownIngestDataCacheGenerator {
 		return protectString<IngestDataCacheObjId>(unprotectString(this.rundownId))
 	}
 
-	generatePartObject(segmentId: SegmentId, part: IngestPart, modified = 0): IngestDataCacheObjPart {
+	generatePartObject(
+		segmentId: SegmentId,
+		part: SetOptional<LocalIngestPart, 'modified'>,
+		modified = 0
+	): IngestDataCacheObjPart {
 		return {
 			_id: this.getPartObjectId(part.externalId),
 			type: IngestCacheType.PART,
@@ -226,11 +230,14 @@ export class RundownIngestDataCacheGenerator {
 			segmentId: segmentId,
 			partId: getPartId(this.rundownId, part.externalId),
 			modified,
-			data: part,
+			data: omit(part, 'modified'),
 		}
 	}
 
-	generateSegmentObject(ingestSegment: SetOptional<IngestSegment, 'parts'>, modified = 0): IngestDataCacheObjSegment {
+	generateSegmentObject(
+		ingestSegment: SetOptional<LocalIngestSegment, 'parts' | 'modified'>,
+		modified = 0
+	): IngestDataCacheObjSegment {
 		return {
 			_id: this.getSegmentObjectId(ingestSegment.externalId),
 			type: IngestCacheType.SEGMENT,
@@ -238,14 +245,14 @@ export class RundownIngestDataCacheGenerator {
 			segmentId: getSegmentId(this.rundownId, ingestSegment.externalId),
 			modified,
 			data: {
-				...ingestSegment,
+				...omit(ingestSegment, 'modified'),
 				parts: [], // omit the parts, they come as separate objects
 			},
 		}
 	}
 
 	generateRundownObject(
-		ingestRundown: SetOptional<IngestRundown, 'segments'>,
+		ingestRundown: SetOptional<LocalIngestRundown, 'segments' | 'modified'>,
 		modified = 0
 	): IngestDataCacheObjRundown {
 		return {
@@ -254,7 +261,7 @@ export class RundownIngestDataCacheGenerator {
 			rundownId: this.rundownId,
 			modified,
 			data: {
-				...ingestRundown,
+				...omit(ingestRundown, 'modified'),
 				segments: [], // omit the segments, they come as separate objects
 			},
 		}
