@@ -97,8 +97,8 @@ export async function handleBlueprintUpgradeForStudio(context: JobContext, _data
 			'peripheralDeviceSettings.playoutDevices.defaults': playoutDevices,
 			'peripheralDeviceSettings.ingestDevices.defaults': ingestDevices,
 			'peripheralDeviceSettings.inputDevices.defaults': inputDevices,
-			'settings.routeSets': routeSets,
-			'settings.routeSetExclusivityGroups': routeSetExclusivityGroups,
+			'routeSets.defaults': routeSets,
+			'routeSetExclusivityGroups.defaults': routeSetExclusivityGroups,
 			lastBlueprintConfig: {
 				blueprintHash: blueprint.blueprintDoc.blueprintHash,
 				blueprintId: blueprint.blueprintId,
