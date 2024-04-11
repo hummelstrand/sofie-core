@@ -12,7 +12,7 @@ import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { MutableIngestSegmentImpl } from './MutableIngestSegmentImpl'
 import { defaultApplyIngestChanges } from './defaultApplyIngestChanges'
-import { IngestDataCacheObjId, RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { LocalIngestSegment, RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
 import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import type { ComputedIngestChanges } from '../../ingest/runOperation'
@@ -31,24 +31,23 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 {
 	readonly ingestRundown: Omit<IngestRundown, 'segments'>
 	#hasChangesToRundown = false
-	#segmentOrderChanged = false
+	// #segmentOrderChanged = false
 
 	readonly #segments: MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>[]
 
-	get hasChangesToRundown(): boolean {
-		return this.#hasChangesToRundown
-	}
-	get hasChangesToSegmentOrder(): boolean {
-		return this.#segmentOrderChanged
-	}
+	readonly #originalSegmentRanks = new Map<string, number>()
 
-	constructor(ingestRundown: IngestRundown, hasChanges = false) {
+	constructor(ingestRundown: IngestRundown, isExistingRundown: boolean) {
 		this.ingestRundown = omit(ingestRundown, 'segments')
 		this.#segments = ingestRundown.segments
 			.slice() // shallow copy
 			.sort((a, b) => a.rank - b.rank)
-			.map((segment) => new MutableIngestSegmentImpl(segment))
-		this.#hasChangesToRundown = hasChanges
+			.map((segment) => new MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>(segment, !isExistingRundown))
+		this.#hasChangesToRundown = !isExistingRundown
+
+		for (const segment of ingestRundown.segments) {
+			this.#originalSegmentRanks.set(segment.externalId, segment.rank)
+		}
 	}
 
 	get segments(): MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>[] {
@@ -143,7 +142,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			this.#segments.push(segment)
 		}
 
-		this.#segmentOrderChanged = true
+		// this.#segmentOrderChanged = true
 	}
 
 	moveSegmentAfter(segmentExternalId: string, afterSegmentExternalId: string | null): void {
@@ -161,7 +160,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			this.#segments.unshift(segment)
 		}
 
-		this.#segmentOrderChanged = true
+		// this.#segmentOrderChanged = true
 	}
 
 	replaceSegment(
@@ -186,7 +185,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			this.#segments.push(newSegment)
 		}
 
-		this.#segmentOrderChanged = true
+		// this.#segmentOrderChanged = true
 
 		return newSegment
 	}
@@ -221,7 +220,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		if (existingIndex !== -1) {
 			this.#segments.splice(existingIndex, 1)
 
-			this.#segmentOrderChanged = true
+			// this.#segmentOrderChanged = true
 
 			return true
 		} else {
@@ -236,7 +235,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	removeAllSegments(): void {
 		this.#segments.length = 0
 
-		this.#segmentOrderChanged = true
+		// this.#segmentOrderChanged = true
 	}
 
 	defaultApplyIngestChanges(
@@ -253,12 +252,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	/** Note: This is NOT exposed to blueprints */
-	intoIngestRundown(
-		rundownId: RundownId,
-		originalSofieIngestRundown: IngestRundown | undefined
-	): MutableIngestRundownChanges {
-		const generator = new RundownIngestDataCacheGenerator(rundownId)
-
+	intoIngestRundown(ingestObjectGenerator: RundownIngestDataCacheGenerator): MutableIngestRundownChanges {
 		const ingestSegments: LocalIngestSegment[] = []
 		const changedCacheObjects: IngestDataCacheObj[] = []
 		const allCacheObjectIds: IngestDataCacheObjId[] = []
@@ -275,7 +269,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			}
 			usedSegmentIds.add(segment.externalId)
 
-			const segmentInfo = segment.intoChangesInfo(generator)
+			const segmentInfo = segment.intoChangesInfo(ingestObjectGenerator)
 
 			for (const part of segmentInfo.ingestParts) {
 				if (usedPartIds.has(part.externalId)) {
@@ -294,13 +288,13 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			}
 
 			ingestSegments.push(ingestSegment)
-			allCacheObjectIds.push(generator.getSegmentObjectId(ingestSegment.externalId))
+			allCacheObjectIds.push(ingestObjectGenerator.getSegmentObjectId(ingestSegment.externalId))
 
 			changedCacheObjects.push(...segmentInfo.changedCacheObjects)
 			allCacheObjectIds.push(...segmentInfo.allCacheObjectIds)
 
 			if (segmentInfo.segmentHasChanges) {
-				changedCacheObjects.push(generator.generateSegmentObject(ingestSegment))
+				changedCacheObjects.push(ingestObjectGenerator.generateSegmentObject(ingestSegment))
 			}
 
 			if (
@@ -319,29 +313,33 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 		// Find any removed segments
 		const newSegmentIds = new Set(ingestSegments.map((s) => s.externalId))
-		const removedSegmentIds = originalSofieIngestRundown
-			? originalSofieIngestRundown.segments
-					.filter((s) => !newSegmentIds.has(s.externalId))
-					.map((s) => s.externalId)
-			: []
+		const removedSegmentIds = Array.from(this.#originalSegmentRanks.keys()).filter((id) => !newSegmentIds.has(id))
 
 		// Find any with updated ranks
 		const segmentsUpdatedRanks: Record<string, number> = {}
-		if (originalSofieIngestRundown) {
-			const oldSegmentMap = normalizeArrayToMap(originalSofieIngestRundown.segments, 'externalId')
-			ingestSegments.forEach((segment) => {
-				const oldRank = oldSegmentMap.get(segment.externalId)
-				if (oldRank?.rank !== segment.rank) {
-					segmentsUpdatedRanks[segment.externalId] = segment.rank
-				}
-			})
-		}
+		ingestSegments.forEach((segment) => {
+			const oldRank = this.#originalSegmentRanks.get(segment.externalId)
+			if (oldRank !== segment.rank) {
+				segmentsUpdatedRanks[segment.externalId] = segment.rank
+			}
+		})
 
 		// Check if this rundown object has changed
 		if (this.#hasChangesToRundown) {
-			changedCacheObjects.push(generator.generateRundownObject(this.ingestRundown))
+			changedCacheObjects.push(ingestObjectGenerator.generateRundownObject(this.ingestRundown))
 		}
-		allCacheObjectIds.push(generator.getRundownObjectId())
+		allCacheObjectIds.push(ingestObjectGenerator.getRundownObjectId())
+
+		const regenerateRundown = this.#hasChangesToRundown
+
+		this.#hasChangesToRundown = false
+		// this.#segmentOrderChanged = false
+
+		// Reset this.#originalSegmentRanks
+		this.#originalSegmentRanks.clear()
+		this.#segments.forEach((segment, rank) => {
+			this.#originalSegmentRanks.set(segment.externalId, rank)
+		})
 
 		const result: MutableIngestRundownChanges = {
 			computedChanges: {
@@ -354,7 +352,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 				segmentsToRemove: removedSegmentIds,
 				segmentsUpdatedRanks,
 				segmentsToRegenerate,
-				regenerateRundown: this.#hasChangesToRundown,
+				regenerateRundown,
 				segmentRenames,
 			},
 

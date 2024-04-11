@@ -196,7 +196,7 @@ describe('defaultApplyIngestChanges', () => {
 	 * This creates a MutableIngestRundownImpl from an IngestRundown, and wraps all methods to record the mutation calls made to the rundown and its contents
 	 */
 	function createMutableIngestRundown(nrcsRundown: IngestRundown) {
-		const mutableIngestRundown = new MutableIngestRundownImpl(clone(nrcsRundown))
+		const mutableIngestRundown = new MutableIngestRundownImpl(clone(nrcsRundown), true)
 
 		const mockCalls: Array<{ target: string; name: string; args: any[] }> = []
 

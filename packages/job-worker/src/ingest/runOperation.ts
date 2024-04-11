@@ -1,6 +1,11 @@
 import { IngestModel, IngestModelReadonly } from './model/IngestModel'
 import { BeforeIngestOperationPartMap, CommitIngestOperation } from './commit'
-import { LocalIngestRundown, LocalIngestSegment, RundownIngestDataCache } from './ingestCache'
+import {
+	LocalIngestRundown,
+	LocalIngestSegment,
+	RundownIngestDataCache,
+	RundownIngestDataCacheGenerator,
+} from './ingestCache'
 import { canRundownBeUpdated, getRundownId, getSegmentId } from './lib'
 import { JobContext } from '../jobs'
 import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
@@ -265,7 +270,7 @@ async function updateSofieIngestRundown(
 		sortIngestRundown(nrcsIngestRundown)
 
 		const mutableIngestRundown = sofieIngestRundown
-			? new MutableIngestRundownImpl(clone(sofieIngestRundown))
+			? new MutableIngestRundownImpl(clone(sofieIngestRundown), true)
 			: new MutableIngestRundownImpl(
 					{
 						externalId: nrcsIngestRundown.externalId,
@@ -274,7 +279,7 @@ async function updateSofieIngestRundown(
 						segments: [],
 						payload: undefined,
 					} satisfies Complete<IngestRundown>,
-					true
+					false
 			  )
 
 		// Let blueprints apply changes to the Sofie ingest data
@@ -297,7 +302,8 @@ async function updateSofieIngestRundown(
 			throw new Error(`Blueprint missing processIngestData function`)
 		}
 
-		const resultChanges = mutableIngestRundown.intoIngestRundown(rundownId, sofieIngestRundown)
+		const ingestObjectGenerator = new RundownIngestDataCacheGenerator(rundownId)
+		const resultChanges = mutableIngestRundown.intoIngestRundown(ingestObjectGenerator)
 		//  const newSofieIngestRundown = resultChanges.ingestRundown
 
 		// Sync changes to the cache

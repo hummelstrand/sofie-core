@@ -1,6 +1,6 @@
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import { MutableIngestSegmentChanges, MutableIngestSegmentImpl } from '../MutableIngestSegmentImpl'
-import { LocalIngestPart, LocalIngestSegment, RundownIngestDataCacheGenerator } from '../../../ingest/ingestCache'
+import { LocalIngestSegment, RundownIngestDataCacheGenerator } from '../../../ingest/ingestCache'
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { getSegmentId } from '../../../ingest/lib'
 import { MutableIngestPartImpl } from '../MutableIngestPartImpl'
@@ -71,18 +71,6 @@ describe('MutableIngestSegmentImpl', () => {
 			originalExternalId: ingestSegment.externalId,
 		}
 	}
-	function addChangedParts(
-		changes: MutableIngestSegmentChanges,
-		ingestSegment: LocalIngestSegment,
-		...ingestParts: LocalIngestPart[]
-	): void {
-		const segmentId = getSegmentId(ingestObjectGenerator.rundownId, ingestSegment.externalId)
-
-		for (const ingestPart of ingestParts) {
-			changes.partIdsWithChanges.push(ingestPart.externalId)
-			changes.changedCacheObjects.push(ingestObjectGenerator.generatePartObject(segmentId, ingestPart))
-		}
-	}
 	function removePartFromIngestSegment(ingestSegment: LocalIngestSegment, partId: string): void {
 		const ingestPart = ingestSegment.parts.find((p) => p.externalId === partId)
 		ingestSegment.parts = ingestSegment.parts.filter((p) => p.externalId !== partId)
@@ -123,7 +111,11 @@ describe('MutableIngestSegmentImpl', () => {
 		// check it has no changes
 		const expectedChanges = createNoChangesObject(ingestSegment)
 		expectedChanges.segmentHasChanges = true
-		ingestSegment.parts.forEach((p) => addChangedParts(expectedChanges, ingestSegment, p))
+		const segmentId = getSegmentId(ingestObjectGenerator.rundownId, ingestSegment.externalId)
+		for (const ingestPart of ingestSegment.parts) {
+			expectedChanges.partIdsWithChanges.push(ingestPart.externalId)
+			expectedChanges.changedCacheObjects.push(ingestObjectGenerator.generatePartObject(segmentId, ingestPart))
+		}
 		expect(mutableSegment.intoChangesInfo(ingestObjectGenerator)).toEqual(expectedChanges)
 
 		// check changes have been cleared
