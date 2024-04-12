@@ -44,14 +44,12 @@ import {
 import { TextInputControl } from '../../../lib/Components/TextInput'
 import { CheckboxControl } from '../../../lib/Components/Checkbox'
 
-interface IStudioRoutingsProps {
-	translationNamespaces: string[]
-	studio: DBStudio
-	studioMappings: ReadonlyDeep<MappingsExt>
+export function StudioRoutings(
+	translationNamespaces: string[],
+	studio: DBStudio,
+	studioMappings: ReadonlyDeep<MappingsExt>,
 	manifest: MappingsSettingsManifests | undefined
-}
-
-export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
+): React.JSX.Element {
 	const { t } = useTranslation()
 
 	const editedItems: Array<string> = []
@@ -59,12 +57,12 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 	// These must be handled in component, right now it's rerendered:
 	// Taken from a functional componen using hooks
 	const getRouteSetsFromOverrides = React.useMemo(
-		() => getAllCurrentAndDeletedItemsFromOverrides(props.studio.routeSets, null),
-		[props.studio.routeSets]
+		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSets, null),
+		[studio.routeSets]
 	)
 
 	/*	const saveOverrides = (newOps: SomeObjectOverrideOp[]) => {
-		Studios.update(props.studio._id, {
+		Studios.update(studio._id, {
 			$set: {
 				routeSet: newOps,
 			},
@@ -74,16 +72,16 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 
 	const saveOverrides = React.useCallback(
 		(newOps: SomeObjectOverrideOp[]) => {
-			Studios.update(props.studio._id, {
+			Studios.update(studio._id, {
 				$set: {
 					routeSet: newOps,
 				},
 			})
 		},
-		[props.studio.routeSets]
+		[studio.routeSets]
 	)
 
-	const overrideHelper = useOverrideOpHelper(saveOverrides, props.studio.routeSets)
+	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSets)
 
 	const isItemEdited = (routeSetId: string) => {
 		return editedItems.indexOf(routeSetId) >= 0
@@ -179,7 +177,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 	}
 */
 	const addNewRouteSet = React.useCallback(() => {
-		const resolvedRouteSets = applyAndValidateOverrides(props.studio.routeSets).obj
+		const resolvedRouteSets = applyAndValidateOverrides(studio.routeSets).obj
 
 		// find free key name
 		const newRouteKeyName = 'newLayer'
@@ -202,12 +200,12 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 			value: newRoute,
 		})
 
-		Studios.update(props.studio._id, {
+		Studios.update(studio._id, {
 			$push: {
 				routeSet: addOp,
 			},
 		})
-	}, [props.studio._id, props.studio.routeSets])
+	}, [studio._id, studio.routeSets])
 
 	const addNewRouteInSet = (routeId: string) => {
 		console.log(routeId)
@@ -227,7 +225,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 			const setObject: Record<string, any> = {}
 			setObject['routeSets.' + routeId + '.routes'] = newRoute
 
-			Studios.update(props.studio._id, {
+			Studios.update(studio._id, {
 				$push: setObject,
 			})
 			*/
@@ -236,7 +234,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 	const addNewExclusivityGroup = () => {
 		const newEGroupKeyName = 'exclusivityGroup'
 		let iter = 0
-		while ((props.studio.routeSetExclusivityGroups || {})[newEGroupKeyName + iter]) {
+		while ((studio.routeSetExclusivityGroups || {})[newEGroupKeyName + iter]) {
 			iter++
 		}
 
@@ -246,7 +244,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 		const setObject: Record<string, any> = {}
 		setObject['routeSetExclusivityGroups.' + newEGroupKeyName + iter] = newGroup
 
-		Studios.update(props.studio._id, {
+		Studios.update(studio._id, {
 			$set: setObject,
 		})
 	}
@@ -259,7 +257,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 			}
 		})
 		unsetObject['routeSetExclusivityGroups.' + eGroupId] = 1
-		Studios.update(props.studio._id, {
+		Studios.update(studio._id, {
 			$unset: unsetObject,
 		})
 	}
@@ -267,9 +265,9 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 	const updateExclusivityGroupId = (edit: EditAttributeBase, newValue: string) => {
 		const oldRouteId = edit.props.overrideDisplayValue
 		const newRouteId = newValue + ''
-		const route = props.studio.routeSetExclusivityGroups[oldRouteId]
+		const route = studio.routeSetExclusivityGroups[oldRouteId]
 
-		if (props.studio.routeSetExclusivityGroups[newRouteId]) {
+		if (studio.routeSetExclusivityGroups[newRouteId]) {
 			throw new Meteor.Error(400, 'Exclusivity Group "' + newRouteId + '" already exists')
 		}
 
@@ -279,7 +277,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 		mUnset['routeSetExclusivityGroups.' + oldRouteId] = 1
 
 		if (edit.props.collection) {
-			edit.props.collection.update(props.studio._id, {
+			edit.props.collection.update(studio._id, {
 				$set: mSet,
 				$unset: mUnset,
 			})
@@ -301,7 +299,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 					<p className="text-s dimmed field-hint mhs">{t('There are no routes set up yet')}</p>
 				) : null}
 				{routeSet.computed?.routes.map((route, index) => {
-					const mappedLayer = route.mappedLayer ? props.studioMappings[route.mappedLayer] : undefined
+					const mappedLayer = route.mappedLayer ? studioMappings[route.mappedLayer] : undefined
 					const deviceTypeFromMappedLayer: TSR.DeviceType | undefined = mappedLayer?.device
 
 					const routeDeviceType: TSR.DeviceType | undefined =
@@ -333,9 +331,9 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 									<EditAttribute
 										modifiedClassName="bghl"
 										attribute={`routeSets.${routeSetId}.routes.${index}.mappedLayer`}
-										obj={props.studio}
+										obj={studio}
 										type="dropdowntext"
-										options={Object.keys(props.studioMappings)}
+										options={Object.keys(studioMappings)}
 										label={t('None')}
 										collection={Studios}
 										className="input text-input input-l"
@@ -346,7 +344,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 									<EditAttribute
 										modifiedClassName="bghl"
 										attribute={`routeSets.${routeSetId}.routes.${index}.outputMappedLayer`}
-										obj={props.studio}
+										obj={studio}
 										type="text"
 										collection={Studios}
 										className="input text-input input-l"
@@ -361,7 +359,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 										<EditAttribute
 											modifiedClassName="bghl"
 											attribute={`routeSets.${routeSetId}.routes.${index}.routeType`}
-											obj={props.studio}
+											obj={studio}
 											type="dropdown"
 											options={StudioRouteType}
 											optionsAreNumbers={true}
@@ -383,7 +381,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 										<EditAttribute
 											modifiedClassName="bghl"
 											attribute={`routeSets.${routeSetId}.routes.${index}.deviceType`}
-											obj={props.studio}
+											obj={studio}
 											type="dropdown"
 											options={TSR.DeviceType}
 											optionsAreNumbers={true}
@@ -399,7 +397,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 										<EditAttribute
 											modifiedClassName="bghl"
 											attribute={`routeSets.${routeSetId}.routes.${index}.remapping.options.mappingType`}
-											obj={props.studio}
+											obj={studio}
 											type="dropdown"
 											options={mappingTypeOptions}
 											collection={Studios}
@@ -416,7 +414,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 												<EditAttribute
 													modifiedClassName="bghl"
 													attribute={`routeSets.${routeSetId}.routes.${index}.remapping.deviceId`}
-													obj={props.studio}
+													obj={studio}
 													type="checkbox"
 													collection={Studios}
 													className="mrs mvxs"
@@ -426,7 +424,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 												<EditAttribute
 													modifiedClassName="bghl"
 													attribute={`routeSets.${routeSetId}.routes.${index}.remapping.deviceId`}
-													obj={props.studio}
+													obj={studio}
 													type="text"
 													collection={Studios}
 													className="input text-input input-l"
@@ -435,8 +433,8 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 										</label>
 
 										<DeviceMappingSettings
-											translationNamespaces={props.translationNamespaces}
-											studio={props.studio}
+											translationNamespaces={translationNamespaces}
+											studio={studio}
 											attribute={`routeSets.${routeSetId}.routes.${index}.remapping.options`}
 											mappedLayer={mappedLayer}
 											manifest={routeMappingSchema}
@@ -452,7 +450,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 	}
 
 	function renderExclusivityGroups() {
-		if (Object.keys(props.studio.routeSetExclusivityGroups).length === 0) {
+		if (Object.keys(studio.routeSetExclusivityGroups).length === 0) {
 			return (
 				<tr>
 					<td className="mhn dimmed">{t('There are no exclusivity groups set up.')}</td>
@@ -461,7 +459,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 		}
 
 		return _.map(
-			props.studio.routeSetExclusivityGroups,
+			studio.routeSetExclusivityGroups,
 			(exclusivityGroup: StudioRouteSetExclusivityGroup, exclusivityGroupId: string) => {
 				return (
 					<React.Fragment key={exclusivityGroupId}>
@@ -503,7 +501,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 												modifiedClassName="bghl"
 												attribute={'routeSetExclusivityGroups'}
 												overrideDisplayValue={exclusivityGroupId}
-												obj={props.studio}
+												obj={studio}
 												type="text"
 												collection={Studios}
 												updateFunction={updateExclusivityGroupId}
@@ -515,7 +513,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 											<EditAttribute
 												modifiedClassName="bghl"
 												attribute={'routeSetExclusivityGroups.' + exclusivityGroupId + '.name'}
-												obj={props.studio}
+												obj={studio}
 												type="text"
 												collection={Studios}
 												className="input text-input input-l"
@@ -544,7 +542,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 			[t('Not defined')]: undefined,
 		}
 
-		if (Object.keys(props.studio.routeSets).length === 0) {
+		if (Object.keys(studio.routeSets).length === 0) {
 			return (
 				<tr>
 					<td className="mhn dimmed">{t('There are no Route Sets set up.')}</td>
@@ -586,7 +584,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 											modifiedClassName="bghl"
 											attribute={'routeSets'}
 											overrideDisplayValue={routeSet.id}
-											obj={props.studio}
+											obj={studio}
 											type="text"
 											collection={Studios}
 											updateFunction={updateRouteSetId}
@@ -664,7 +662,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 											<EditAttribute
 												modifiedClassName="bghl"
 												attribute={`routeSets.${routeSet.id}.exclusivityGroup`}
-												obj={props.studio}
+												obj={studio}
 												type="checkbox"
 												className="mrs mvxs"
 												collection={Studios}
@@ -674,9 +672,9 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 											<EditAttribute
 												modifiedClassName="bghl"
 												attribute={`routeSets.${routeSet.id}.exclusivityGroup`}
-												obj={props.studio}
+												obj={studio}
 												type="dropdown"
-												options={Object.keys(props.studio.routeSetExclusivityGroups)}
+												options={Object.keys(studio.routeSetExclusivityGroups)}
 												mutateDisplayValue={(v) => (v === undefined ? 'None' : v)}
 												collection={Studios}
 												className="input text-input input-l"
@@ -707,8 +705,8 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 	return (
 		<div>
 			<h2 className="mhn mbs">{t('Route Sets')}</h2>
-			{!props.manifest && <span>{t('Add a playout device to the studio in order to configure the route sets')}</span>}
-			{props.manifest && (
+			{!manifest && <span>{t('Add a playout device to the studio in order to configure the route sets')}</span>}
+			{manifest && (
 				<React.Fragment>
 					<p className="mhn mvs text-s dimmed field-hint">
 						{t(
@@ -726,7 +724,7 @@ export function StudioRoutings(props: IStudioRoutingsProps): React.JSX.Element {
 					</div>
 					<h3 className="mhn">{t('Route Sets')}</h3>
 					<table className="expando settings-studio-mappings-table">
-						<tbody>{renderRouteSets(props.manifest)}</tbody>
+						<tbody>{renderRouteSets(manifest)}</tbody>
 					</table>
 					<div className="mod mhs">
 						<button className="btn btn-primary" onClick={() => addNewRouteSet()}>
