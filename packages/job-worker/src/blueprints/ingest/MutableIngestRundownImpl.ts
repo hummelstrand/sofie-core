@@ -7,7 +7,7 @@ import type {
 	MutableIngestSegment,
 	MutableIngestPart,
 } from '@sofie-automation/blueprints-integration'
-import { Complete, clone, normalizeArrayToMap, omit } from '@sofie-automation/corelib/dist/lib'
+import { Complete, clone, omit } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { MutableIngestSegmentImpl } from './MutableIngestSegmentImpl'
@@ -83,7 +83,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 	replacePayload(payload: ReadonlyDeep<TRundownPayload> | TRundownPayload): void {
 		// nocommit: track the changes so the diffing can be done at the end
-		if (!_.isEqual(this.ingestRundown.payload, payload)) {
+		if (this.#hasChangesToRundown || !_.isEqual(this.ingestRundown.payload, payload)) {
 			this.ingestRundown.payload = clone(payload)
 			this.#hasChangesToRundown = true
 		}
@@ -95,7 +95,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		}
 
 		// nocommit: track the changes so the diffing can be done at the end
-		if (!_.isEqual(this.ingestRundown.payload[key], value)) {
+		if (this.#hasChangesToRundown || !_.isEqual(this.ingestRundown.payload[key], value)) {
 			this.ingestRundown.payload[key] = clone(value)
 			this.#hasChangesToRundown = true
 		}
@@ -128,6 +128,8 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	moveSegmentBefore(segmentExternalId: string, beforeSegmentExternalId: string | null): void {
+		if (segmentExternalId === beforeSegmentExternalId) throw new Error('Cannot move Segment before itself')
+
 		const segment = this.#segments.find((s) => s.externalId === segmentExternalId)
 		if (!segment) throw new Error(`Segment "${segmentExternalId}" not found`)
 
@@ -146,6 +148,8 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	moveSegmentAfter(segmentExternalId: string, afterSegmentExternalId: string | null): void {
+		if (segmentExternalId === afterSegmentExternalId) throw new Error('Cannot move Segment after itself')
+
 		const segment = this.#segments.find((s) => s.externalId === segmentExternalId)
 		if (!segment) throw new Error(`Segment "${segmentExternalId}" not found`)
 
@@ -167,6 +171,8 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		segment: Omit<IngestSegment, 'rank'>,
 		beforeSegmentExternalId: string | null
 	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
+		if (segment.externalId === beforeSegmentExternalId) throw new Error('Cannot insert Segment before itself')
+
 		const newSegment = new MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>(segment, true)
 
 		const oldSegment = this.#segments.find((s) => s.externalId === segment.externalId)

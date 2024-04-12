@@ -166,7 +166,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	}
 
 	replacePayload(payload: ReadonlyDeep<TSegmentPayload> | TSegmentPayload): void {
-		if (!_.isEqual(this.#ingestSegment.payload, payload)) {
+		if (this.#segmentHasChanges || !_.isEqual(this.#ingestSegment.payload, payload)) {
 			this.#ingestSegment.payload = clone(payload)
 			this.#segmentHasChanges = true
 		}
@@ -177,7 +177,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 			throw new Error('Segment payload is not set')
 		}
 
-		if (!_.isEqual(this.#ingestSegment.payload[key], value)) {
+		if (this.#segmentHasChanges || !_.isEqual(this.#ingestSegment.payload[key], value)) {
 			this.#ingestSegment.payload[key] = clone(value)
 			this.#segmentHasChanges = true
 		}

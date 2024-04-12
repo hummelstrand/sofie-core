@@ -1,16 +1,8 @@
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import { MutableIngestRundownChanges, MutableIngestRundownImpl } from '../MutableIngestRundownImpl'
-import {
-	LocalIngestPart,
-	LocalIngestRundown,
-	LocalIngestSegment,
-	RundownIngestDataCacheGenerator,
-} from '../../../ingest/ingestCache'
+import { LocalIngestRundown, LocalIngestSegment, RundownIngestDataCacheGenerator } from '../../../ingest/ingestCache'
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { getSegmentId } from '../../../ingest/lib'
-import { MutableIngestPartImpl } from '../MutableIngestPartImpl'
-import { IngestPart } from '@sofie-automation/blueprints-integration'
-import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { MutableIngestSegmentImpl } from '../MutableIngestSegmentImpl'
 
@@ -142,17 +134,17 @@ describe('MutableIngestRundownImpl', () => {
 		)
 	}
 	function removeSegmentFromIngestRundown(ingestRundown: LocalIngestRundown, segmentId: string): void {
-		const ingestPart = ingestRundown.segments.find((p) => p.externalId === segmentId)
+		const ingestSegment = ingestRundown.segments.find((p) => p.externalId === segmentId)
 		ingestRundown.segments = ingestRundown.segments.filter((p) => p.externalId !== segmentId)
-		if (ingestPart) {
+		if (ingestSegment) {
 			for (const part of ingestRundown.segments) {
-				if (part.rank > ingestPart.rank) part.rank--
+				if (part.rank > ingestSegment.rank) part.rank--
 			}
 		}
 	}
-	// function getSegmentIdOrder(mutableRundown: MutableIngestRundownImpl): string[] {
-	// 	return mutableRundown.segments.map((p) => p.externalId)
-	// }
+	function getSegmentIdOrder(mutableRundown: MutableIngestRundownImpl): string[] {
+		return mutableRundown.segments.map((p) => p.externalId)
+	}
 
 	test('create basic', () => {
 		const ingestRundown = getBasicIngestRundown()
@@ -293,6 +285,19 @@ describe('MutableIngestRundownImpl', () => {
 		expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(createNoChangesObject(ingestRundown))
 	})
 
+	test('findPart & findPartAndSegment', () => {
+		const ingestRundown = getBasicIngestRundown()
+		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+
+		// compare properties
+		expect(mutableRundown.segments.length).toBe(ingestRundown.segments.length)
+		expect(mutableRundown.findPart('part1')).toStrictEqual(mutableRundown.segments[1].parts[0])
+		expect(mutableRundown.findPart('part1')).toStrictEqual(mutableRundown.findPartAndSegment('part1')?.part)
+		expect(mutableRundown.getSegment('seg1')).toStrictEqual(mutableRundown.findPartAndSegment('part1')?.segment)
+
+		expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(createNoChangesObject(ingestRundown))
+	})
+
 	describe('removeSegment', () => {
 		test('good', () => {
 			const ingestRundown = getBasicIngestRundown()
@@ -335,7 +340,26 @@ describe('MutableIngestRundownImpl', () => {
 		})
 	})
 
-	test('forceRegenerate', () => {
+	test('removeAllSegments', () => {
+		const ingestRundown = getBasicIngestRundown()
+		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+
+		mutableRundown.removeAllSegments()
+
+		// compare properties
+		expect(mutableRundown.segments.length).toBe(0)
+
+		// ensure no changes
+		const expectedIngestRundown = clone(ingestRundown)
+		expectedIngestRundown.segments = []
+		const expectedChanges = createNoChangesObject(expectedIngestRundown)
+		for (const segment of ingestRundown.segments) {
+			expectedChanges.computedChanges.segmentsToRemove.push(segment.externalId)
+		}
+		expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
+	})
+
+	test('forceFullRegenerate', () => {
 		const ingestRundown = getBasicIngestRundown()
 		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
 
@@ -350,209 +374,370 @@ describe('MutableIngestRundownImpl', () => {
 		expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 	})
 
-	// describe('replacePart', () => {
-	// 	test('replace existing with a move', () => {
-	// 		const ingestRundown = getBasicIngestRundown()
-	// 		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown))
+	describe('replaceSegment', () => {
+		test('replace existing with a move', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
 
-	// 		expect(mutableRundown.getSegment('part1')).toBeDefined()
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3'])
+			const segmentBefore = mutableRundown.getSegment('seg1')
+			expect(segmentBefore).toBeDefined()
+			for (const part of segmentBefore?.parts || []) {
+				expect(mutableRundown.findPart(part.externalId)).toStrictEqual(part)
+			}
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-	// 		const newPart: Omit<IngestPart, 'rank'> = {
-	// 			externalId: 'part1',
-	// 			name: 'new name',
-	// 			payload: {
-	// 				val: 'new-val',
-	// 			},
-	// 		}
-	// 		const replacedPart = mutableRundown.replacePart(newPart, null)
-	// 		expect(replacedPart).toBeDefined()
-	// 		// ensure the inserted part looks correct
-	// 		expect(replacedPart?.externalId).toBe(newPart.externalId)
-	// 		expect(replacedPart?.name).toBe(newPart.name)
-	// 		expect(replacedPart?.payload).toEqual(newPart.payload)
+			const newSegment: Omit<LocalIngestSegment, 'rank' | 'modified'> = {
+				externalId: 'seg1',
+				name: 'new name',
+				payload: {
+					val: 'new-val',
+				},
+				parts: [
+					{
+						externalId: 'part1',
+						name: 'new part name',
+						rank: 0,
+						modified: 0,
+						payload: {
+							val: 'new-part-val',
+						},
+					},
+				],
+			}
+			const replacedPart = mutableRundown.replaceSegment(newSegment, null)
+			expect(replacedPart).toBeDefined()
+			// ensure the inserted part looks correct
+			expect(replacedPart?.externalId).toBe(newSegment.externalId)
+			expect(replacedPart?.name).toBe(newSegment.name)
+			expect(replacedPart?.payload).toEqual(newSegment.payload)
 
-	// 		// check it has changes
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part2', 'part3', 'part1'])
-	// 		const expectedIngestRundown = clone(ingestRundown)
-	// 		removePartFromIngestRundown(expectedIngestRundown, 'part1')
-	// 		expectedIngestRundown.segments.push({ ...newPart, rank: 3, modified: 0 })
+			// check it has changes
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg2', 'seg1'])
+			const expectedIngestRundown = clone(ingestRundown)
+			removeSegmentFromIngestRundown(expectedIngestRundown, 'seg1')
+			expectedIngestRundown.segments.push({ ...newSegment, rank: 2, modified: 0 })
 
-	// 		const expectedChanges = createNoChangesObject(expectedIngestRundown)
-	// 		expectedChanges.partOrderHasChanged = true
-	// 		expectedChanges.partIdsWithChanges.push('part1')
-	// 		expectedChanges.changedCacheObjects.push(
-	// 			ingestObjectGenerator.generatePartObject(
-	// 				getSegmentId(ingestObjectGenerator.rundownId, ingestRundown.externalId),
-	// 				{ ...newPart, rank: 3 }
-	// 			)
-	// 		)
+			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			addChangedSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[2])
+			expectedChanges.computedChanges.segmentsUpdatedRanks = { seg2: 1, seg1: 2 }
 
-	// 		expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
-	// 	})
+			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 
-	// 	test('insert new', () => {
-	// 		const ingestRundown = getBasicIngestRundown()
-	// 		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown))
+			// ensure the MutableSegment is a new object
+			expect(mutableRundown.getSegment('seg1')).not.toBe(segmentBefore)
+			for (const part of segmentBefore?.parts || []) {
+				expect(mutableRundown.findPart(part.externalId)).not.toBe(part)
+			}
+		})
 
-	// 		expect(mutableRundown.getSegment('partX')).toBeUndefined()
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3'])
+		test('insert new', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
 
-	// 		const newPart: Omit<IngestPart, 'rank'> = {
-	// 			externalId: 'partX',
-	// 			name: 'new name',
-	// 			payload: {
-	// 				val: 'new-val',
-	// 			},
-	// 		}
-	// 		const replacedPart = mutableRundown.replacePart(newPart, null)
-	// 		expect(replacedPart).toBeDefined()
-	// 		// ensure the inserted part looks correct
-	// 		expect(replacedPart?.externalId).toBe(newPart.externalId)
-	// 		expect(replacedPart?.name).toBe(newPart.name)
-	// 		expect(replacedPart?.payload).toEqual(newPart.payload)
+			expect(mutableRundown.getSegment('partX')).toBeUndefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-	// 		// check it has changes
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3', 'partX'])
-	// 		const expectedIngestRundown = clone(ingestRundown)
-	// 		expectedIngestRundown.segments.push({ ...newPart, rank: 4, modified: 0 })
+			const newSegment: Omit<LocalIngestSegment, 'rank' | 'modified'> = {
+				externalId: 'segX',
+				name: 'new name',
+				payload: {
+					val: 'new-val',
+				},
+				parts: [
+					{
+						externalId: 'partX',
+						name: 'new part name',
+						rank: 0,
+						modified: 0,
+						payload: {
+							val: 'new-part-val',
+						},
+					},
+				],
+			}
+			const replacedPart = mutableRundown.replaceSegment(newSegment, null)
+			expect(replacedPart).toBeDefined()
+			// ensure the inserted part looks correct
+			expect(replacedPart?.externalId).toBe(newSegment.externalId)
+			expect(replacedPart?.name).toBe(newSegment.name)
+			expect(replacedPart?.payload).toEqual(newSegment.payload)
 
-	// 		const expectedChanges = createNoChangesObject(expectedIngestRundown)
-	// 		expectedChanges.partOrderHasChanged = true
-	// 		expectedChanges.partIdsWithChanges.push('partX')
-	// 		expectedChanges.changedCacheObjects.push(
-	// 			ingestObjectGenerator.generatePartObject(
-	// 				getSegmentId(ingestObjectGenerator.rundownId, ingestRundown.externalId),
-	// 				{ ...newPart, rank: 4 }
-	// 			)
-	// 		)
+			// check it has changes
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2', 'segX'])
+			const expectedIngestRundown = clone(ingestRundown)
+			expectedIngestRundown.segments.push({ ...newSegment, rank: 3, modified: 0 })
 
-	// 		expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
-	// 	})
+			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			addChangedSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[3])
+			expectedChanges.computedChanges.segmentsUpdatedRanks = { segX: 3 }
 
-	// 	test('insert at position', () => {
-	// 		const ingestRundown = getBasicIngestRundown()
-	// 		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown))
+			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
+		})
 
-	// 		expect(mutableRundown.getSegment('partX')).toBeUndefined()
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3'])
+		test('insert at position', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
 
-	// 		const newPart: Omit<IngestPart, 'rank'> = {
-	// 			externalId: 'partX',
-	// 			name: 'new name',
-	// 			payload: {
-	// 				val: 'new-val',
-	// 			},
-	// 		}
+			expect(mutableRundown.getSegment('partX')).toBeUndefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-	// 		// insert at the end
-	// 		expect(mutableRundown.replacePart(newPart, null)).toBeDefined()
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3', 'partX'])
+			const newSegment: Omit<LocalIngestSegment, 'rank' | 'modified'> = {
+				externalId: 'segX',
+				name: 'new name',
+				payload: {
+					val: 'new-val',
+				},
+				parts: [
+					{
+						externalId: 'partX',
+						name: 'new part name',
+						rank: 0,
+						modified: 0,
+						payload: {
+							val: 'new-part-val',
+						},
+					},
+				],
+			}
 
-	// 		// insert at the beginning
-	// 		expect(mutableRundown.replacePart(newPart, 'part0')).toBeDefined()
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['partX', 'part0', 'part1', 'part2', 'part3'])
+			// insert at the end
+			expect(mutableRundown.replaceSegment(newSegment, null)).toBeDefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2', 'segX'])
 
-	// 		// insert in the middle
-	// 		expect(mutableRundown.replacePart(newPart, 'part2')).toBeDefined()
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'partX', 'part2', 'part3'])
+			// insert at the beginning
+			expect(mutableRundown.replaceSegment(newSegment, 'seg0')).toBeDefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['segX', 'seg0', 'seg1', 'seg2'])
 
-	// 		// Only the one should have changes
-	// 		expect(mutableRundown.intoIngestRundown(ingestObjectGenerator).partIdsWithChanges).toEqual(['partX'])
+			// insert in the middle
+			expect(mutableRundown.replaceSegment(newSegment, 'seg2')).toBeDefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'segX', 'seg2'])
 
-	// 		// Try inserting before itself
-	// 		expect(() => mutableRundown.replacePart(newPart, newPart.externalId)).toThrow(
-	// 			/Cannot insert Part before itself/
-	// 		)
+			// Only the one should have changes
+			expect(
+				mutableRundown
+					.intoIngestRundown(ingestObjectGenerator)
+					.computedChanges.segmentsToRegenerate.map((s) => s.externalId)
+			).toEqual(['segX'])
 
-	// 		// Try inserting before an unknown part
-	// 		expect(() => mutableRundown.replacePart(newPart, 'partY')).toThrow(/Part(.*)not found/)
-	// 	})
-	// })
+			// Try inserting before itself
+			expect(() => mutableRundown.replaceSegment(newSegment, newSegment.externalId)).toThrow(
+				/Cannot insert Segment before itself/
+			)
 
-	// describe('movePartBefore', () => {
-	// 	test('move unknown', () => {
-	// 		const ingestRundown = getBasicIngestRundown()
-	// 		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown))
+			// Try inserting before an unknown part
+			expect(() => mutableRundown.replaceSegment(newSegment, 'segY')).toThrow(/Segment(.*)not found/)
+		})
+	})
 
-	// 		expect(mutableRundown.getSegment('partX')).toBeUndefined()
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3'])
+	describe('moveSegmentBefore', () => {
+		test('move unknown', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
 
-	// 		expect(() => mutableRundown.movePartBefore('partX', null)).toThrow(/Part(.*)not found/)
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3'])
-	// 	})
+			expect(mutableRundown.getSegment('segX')).toBeUndefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-	// 	test('move to position', () => {
-	// 		const ingestRundown = getBasicIngestRundown()
-	// 		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown))
+			expect(() => mutableRundown.moveSegmentBefore('segX', null)).toThrow(/Segment(.*)not found/)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
+		})
 
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3'])
+		test('move to position', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
 
-	// 		// insert at the end
-	// 		mutableRundown.movePartBefore('part1', null)
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part2', 'part3', 'part1'])
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-	// 		// insert at the beginning
-	// 		mutableRundown.movePartBefore('part1', 'part0')
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part1', 'part0', 'part2', 'part3'])
+			// insert at the end
+			mutableRundown.moveSegmentBefore('seg1', null)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg2', 'seg1'])
 
-	// 		// insert in the middle
-	// 		mutableRundown.movePartBefore('part1', 'part2')
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3'])
+			// insert in the middle
+			mutableRundown.moveSegmentBefore('seg1', 'seg2')
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-	// 		// Only the one should have changes
-	// 		const expectedChanges = createNoChangesObject(ingestRundown)
-	// 		expectedChanges.partOrderHasChanged = true
-	// 		expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
+			// insert at the beginning
+			mutableRundown.moveSegmentBefore('seg1', 'seg0')
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg1', 'seg0', 'seg2'])
 
-	// 		// Try inserting before itself
-	// 		expect(() => mutableRundown.movePartBefore('part1', 'part1')).toThrow(/Cannot move Part before itself/)
+			// Check the reported changes
+			const expectedIngestRundown = clone(ingestRundown)
+			expectedIngestRundown.segments.splice(0, 0, expectedIngestRundown.segments.splice(1, 1)[0])
+			expectedIngestRundown.segments[0].rank = 0
+			expectedIngestRundown.segments[1].rank = 1
+			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			expectedChanges.computedChanges.segmentsUpdatedRanks = { seg1: 0, seg0: 1 }
+			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 
-	// 		// Try inserting before an unknown part
-	// 		expect(() => mutableRundown.movePartBefore('part1', 'partY')).toThrow(/Part(.*)not found/)
-	// 	})
-	// })
+			// Try inserting before itself
+			expect(() => mutableRundown.moveSegmentBefore('seg1', 'seg1')).toThrow(/Cannot move Segment before itself/)
 
-	// describe('movePartAfter', () => {
-	// 	test('move unknown', () => {
-	// 		const ingestRundown = getBasicIngestRundown()
-	// 		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown))
+			// Try inserting before an unknown part
+			expect(() => mutableRundown.moveSegmentBefore('seg1', 'segY')).toThrow(/Segment(.*)not found/)
+		})
+	})
 
-	// 		expect(mutableRundown.getSegment('partX')).toBeUndefined()
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3'])
+	describe('moveSegmentAfter', () => {
+		test('move unknown', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
 
-	// 		expect(() => mutableRundown.movePartAfter('partX', null)).toThrow(/Part(.*)not found/)
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3'])
-	// 	})
+			expect(mutableRundown.getSegment('segX')).toBeUndefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-	// 	test('move to position', () => {
-	// 		const ingestRundown = getBasicIngestRundown()
-	// 		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown))
+			expect(() => mutableRundown.moveSegmentAfter('segX', null)).toThrow(/Segment(.*)not found/)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
+		})
 
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3'])
+		test('move to position', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
 
-	// 		// insert at the beginning
-	// 		mutableRundown.movePartAfter('part1', null)
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part1', 'part0', 'part2', 'part3'])
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-	// 		// insert at the end
-	// 		mutableRundown.movePartAfter('part1', 'part3')
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part2', 'part3', 'part1'])
+			// insert at the beginning
+			mutableRundown.moveSegmentAfter('seg1', null)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg1', 'seg0', 'seg2'])
 
-	// 		// insert in the middle
-	// 		mutableRundown.movePartAfter('part1', 'part0')
-	// 		expect(getSegmentIdOrder(mutableRundown)).toEqual(['part0', 'part1', 'part2', 'part3'])
+			// insert in the middle
+			mutableRundown.moveSegmentAfter('seg1', 'seg0')
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-	// 		// Only the one should have changes
-	// 		const expectedChanges = createNoChangesObject(ingestRundown)
-	// 		expectedChanges.partOrderHasChanged = true
-	// 		expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
+			// insert at the end
+			mutableRundown.moveSegmentAfter('seg1', 'seg2')
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg2', 'seg1'])
 
-	// 		// Try inserting before itself
-	// 		expect(() => mutableRundown.movePartAfter('part1', 'part1')).toThrow(/Cannot move Part after itself/)
+			// Check the reported changes
+			const expectedIngestRundown = clone(ingestRundown)
+			expectedIngestRundown.segments.splice(1, 0, expectedIngestRundown.segments.splice(2, 1)[0])
+			expectedIngestRundown.segments[1].rank = 1
+			expectedIngestRundown.segments[2].rank = 2
+			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			expectedChanges.computedChanges.segmentsUpdatedRanks = { seg2: 1, seg1: 2 }
+			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 
-	// 		// Try inserting before an unknown part
-	// 		expect(() => mutableRundown.movePartAfter('part1', 'partY')).toThrow(/Part(.*)not found/)
-	// 	})
-	// })
+			// Try inserting before itself
+			expect(() => mutableRundown.moveSegmentAfter('seg1', 'seg1')).toThrow(/Cannot move Segment after itself/)
+
+			// Try inserting before an unknown part
+			expect(() => mutableRundown.moveSegmentAfter('seg1', 'segY')).toThrow(/Segment(.*)not found/)
+		})
+	})
+
+	describe('renameSegment', () => {
+		test('rename unknown', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+
+			expect(mutableRundown.getSegment('segX')).toBeUndefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
+
+			expect(() => mutableRundown.renameSegment('segX', 'segY')).toThrow(/Segment(.*)not found/)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
+		})
+
+		test('rename to duplicate', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+
+			expect(mutableRundown.getSegment('seg1')).toBeDefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
+
+			expect(() => mutableRundown.renameSegment('seg1', 'seg2')).toThrow(/Segment(.*)already exists/)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
+		})
+
+		test('good', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+
+			const beforeSegment = mutableRundown.getSegment('seg1') as MutableIngestSegmentImpl
+			expect(beforeSegment).toBeDefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
+
+			// rename and check
+			expect(mutableRundown.renameSegment('seg1', 'segX')).toStrictEqual(beforeSegment)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg2'])
+			expect(beforeSegment.originalExternalId).toBe('seg1')
+			expect(beforeSegment.externalId).toBe('segX')
+
+			// Check the reported changes
+			const expectedIngestRundown = clone(ingestRundown)
+			expectedIngestRundown.segments[1].externalId = 'segX'
+			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			expectedChanges.computedChanges.segmentsUpdatedRanks = { segX: 1 }
+			expectedChanges.computedChanges.segmentsToRemove.push('seg1') // nocommit: Should this be here?
+			expectedChanges.computedChanges.segmentRenames = { seg1: 'segX' }
+			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
+		})
+
+		test('rename twice', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+
+			const beforeSegment = mutableRundown.getSegment('seg1') as MutableIngestSegmentImpl
+			expect(beforeSegment).toBeDefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
+
+			// rename and check
+			expect(mutableRundown.renameSegment('seg1', 'segX')).toStrictEqual(beforeSegment)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg2'])
+			expect(beforeSegment.originalExternalId).toBe('seg1')
+			expect(beforeSegment.externalId).toBe('segX')
+
+			// rename again
+			expect(mutableRundown.renameSegment('segX', 'segY')).toStrictEqual(beforeSegment)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segY', 'seg2'])
+			expect(beforeSegment.originalExternalId).toBe('seg1')
+			expect(beforeSegment.externalId).toBe('segY')
+
+			// Check the reported changes
+			const expectedIngestRundown = clone(ingestRundown)
+			expectedIngestRundown.segments[1].externalId = 'segY'
+			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			expectedChanges.computedChanges.segmentsUpdatedRanks = { segY: 1 }
+			expectedChanges.computedChanges.segmentsToRemove.push('seg1') // nocommit: Should this be here?
+			expectedChanges.computedChanges.segmentRenames = { seg1: 'segY' }
+			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
+		})
+
+		test('rename circle', () => {
+			const ingestRundown = getBasicIngestRundown()
+			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+
+			const beforeSegment1 = mutableRundown.getSegment('seg1') as MutableIngestSegmentImpl
+			expect(beforeSegment1).toBeDefined()
+			const beforeSegment2 = mutableRundown.getSegment('seg2') as MutableIngestSegmentImpl
+			expect(beforeSegment2).toBeDefined()
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
+
+			// rename seg1 to segX
+			expect(mutableRundown.renameSegment('seg1', 'segX')).toStrictEqual(beforeSegment1)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg2'])
+			expect(beforeSegment1.originalExternalId).toBe('seg1')
+			expect(beforeSegment1.externalId).toBe('segX')
+
+			// rename seg2 to seg1
+			expect(mutableRundown.renameSegment('seg2', 'seg1')).toStrictEqual(beforeSegment2)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg1'])
+			expect(beforeSegment2.originalExternalId).toBe('seg2')
+			expect(beforeSegment2.externalId).toBe('seg1')
+
+			// rename segX to seg2
+			expect(mutableRundown.renameSegment('segX', 'seg2')).toStrictEqual(beforeSegment1)
+			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg2', 'seg1'])
+			expect(beforeSegment1.originalExternalId).toBe('seg1')
+			expect(beforeSegment1.externalId).toBe('seg2')
+
+			// Check the reported changes
+			const expectedIngestRundown = clone(ingestRundown)
+			expectedIngestRundown.segments[1].externalId = 'seg2'
+			expectedIngestRundown.segments[2].externalId = 'seg1'
+			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			expectedChanges.computedChanges.segmentsUpdatedRanks = { seg2: 1, seg1: 2 }
+			expectedChanges.computedChanges.segmentRenames = { seg1: 'seg2', seg2: 'seg1' } // nocommit: will this trip up other logic?
+			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
+		})
+	})
+
+	// nocommit: Add tests for other internal cases of intoIngestRundown
 })
