@@ -12,19 +12,24 @@ import {
 	UserRemoveRundownProps,
 	UserUnsyncRundownProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
-import { UpdateIngestRundownAction, UpdateIngestRundownResult, runIngestUpdateOperation } from './runOperation'
+import { IngestUpdateOperationFunction, UpdateIngestRundownAction, UpdateIngestRundownResult } from './runOperation'
 import { NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
 import { getCurrentTime } from '../lib'
+import { wrapGenericIngestJob } from './jobWrappers'
 
 /**
  * Attempt to remove a rundown, or orphan it
  */
-export async function handleRemovedRundown(context: JobContext, data: IngestRemoveRundownProps): Promise<void> {
-	return runIngestUpdateOperation(context, data, () => {
+export function handleRemovedRundown(
+	_context: JobContext,
+	data: IngestRemoveRundownProps
+): IngestUpdateOperationFunction | null {
+	return () => {
 		// Remove it
 		return data.forceDelete ? UpdateIngestRundownAction.FORCE_DELETE : UpdateIngestRundownAction.DELETE
-	})
+	}
 }
+const handleRemovedRundownWrapped = wrapGenericIngestJob(handleRemovedRundown)
 
 /**
  * User requested removing a rundown
@@ -61,7 +66,7 @@ export async function handleUserRemoveRundown(context: JobContext, data: UserRem
 		})
 	} else {
 		// Its a real rundown, so defer to the proper route for deletion
-		return handleRemovedRundown(context, {
+		return handleRemovedRundownWrapped(context, {
 			rundownExternalId: tmpRundown.externalId,
 			peripheralDeviceId: null,
 			forceDelete: data.force,
@@ -72,66 +77,66 @@ export async function handleUserRemoveRundown(context: JobContext, data: UserRem
 /**
  * Insert or update a rundown with a new IngestRundown
  */
-export async function handleUpdatedRundown(context: JobContext, data: IngestUpdateRundownProps): Promise<void> {
-	return runIngestUpdateOperation(context, data, (ingestRundown) => {
-		if (ingestRundown || data.isCreateAction) {
-			return {
-				ingestRundown: makeNewIngestRundown(data.ingestRundown),
-				changes: {
-					source: 'ingest',
-					rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
-				},
-			} satisfies UpdateIngestRundownResult
-		} else {
-			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
-		}
-	})
+export function handleUpdatedRundown(
+	_context: JobContext,
+	data: IngestUpdateRundownProps
+): IngestUpdateOperationFunction | null {
+	return (ingestRundown) => {
+		if (!ingestRundown && !data.isCreateAction) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+
+		return {
+			ingestRundown: makeNewIngestRundown(data.ingestRundown),
+			changes: {
+				source: 'ingest',
+				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
+			},
+		} satisfies UpdateIngestRundownResult
+	}
 }
 
 /**
  * Update a rundown from a new IngestRundown (ingoring IngestSegments)
  */
-export async function handleUpdatedRundownMetaData(
-	context: JobContext,
+export function handleUpdatedRundownMetaData(
+	_context: JobContext,
 	data: IngestUpdateRundownMetaDataProps
-): Promise<void> {
-	return runIngestUpdateOperation(context, data, (ingestRundown) => {
-		if (ingestRundown) {
-			return {
-				ingestRundown: {
-					...data.ingestRundown,
-					modified: getCurrentTime(),
-					segments: ingestRundown.segments,
-				},
-				changes: {
-					source: 'ingest',
-					rundownChanges: NrcsIngestRundownChangeDetails.Payload,
-				},
-			} satisfies UpdateIngestRundownResult
-		} else {
-			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
-		}
-	})
+): IngestUpdateOperationFunction | null {
+	return (ingestRundown) => {
+		if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+
+		return {
+			ingestRundown: {
+				...data.ingestRundown,
+				modified: getCurrentTime(),
+				segments: ingestRundown.segments,
+			},
+			changes: {
+				source: 'ingest',
+				rundownChanges: NrcsIngestRundownChangeDetails.Payload,
+			},
+		} satisfies UpdateIngestRundownResult
+	}
 }
 
 /**
  * Regnerate a Rundown from the cached IngestRundown
  */
-export async function handleRegenerateRundown(context: JobContext, data: IngestRegenerateRundownProps): Promise<void> {
-	return runIngestUpdateOperation(context, data, (ingestRundown) => {
-		if (ingestRundown) {
-			return {
-				// We want to regenerate unmodified
-				ingestRundown,
-				changes: {
-					source: 'ingest',
-					rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
-				},
-			} satisfies UpdateIngestRundownResult
-		} else {
-			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
-		}
-	})
+export function handleRegenerateRundown(
+	_context: JobContext,
+	data: IngestRegenerateRundownProps
+): IngestUpdateOperationFunction | null {
+	return (ingestRundown) => {
+		if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+
+		return {
+			// We want to regenerate unmodified
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
+			},
+		} satisfies UpdateIngestRundownResult
+	}
 }
 
 /**

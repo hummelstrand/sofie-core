@@ -12,138 +12,139 @@ import {
 	IngestUpdateSegmentRanksProps,
 	RemoveOrphanedSegmentsProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
-import { runCustomIngestUpdateOperation, runIngestUpdateOperation } from './runOperation'
+import { IngestUpdateOperationFunction, runCustomIngestUpdateOperation } from './runOperation'
 import { NrcsIngestSegmentChangeDetailsEnum } from '@sofie-automation/blueprints-integration'
 
 /**
  * Regnerate a Segment from the cached IngestSegment
  */
-export async function handleRegenerateSegment(context: JobContext, data: IngestRegenerateSegmentProps): Promise<void> {
-	return runIngestUpdateOperation(context, data, (ingestRundown) => {
-		if (ingestRundown) {
-			// Ensure the target segment exists in the cache
-			const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
-			if (!ingestSegment) {
-				throw new Error(
-					`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to update`
-				)
-			}
+export function handleRegenerateSegment(
+	_context: JobContext,
+	data: IngestRegenerateSegmentProps
+): IngestUpdateOperationFunction | null {
+	return (ingestRundown) => {
+		if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-			return {
-				// We modify in-place
-				ingestRundown,
-				changes: {
-					source: 'ingest',
-					segmentChanges: {
-						[data.segmentExternalId]: {
-							payloadChanged: true,
-						},
+		// Ensure the target segment exists in the cache
+		const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
+		if (!ingestSegment) {
+			throw new Error(
+				`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to update`
+			)
+		}
+
+		return {
+			// We modify in-place
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentChanges: {
+					[data.segmentExternalId]: {
+						payloadChanged: true,
 					},
 				},
-			}
-		} else {
-			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+			},
 		}
-	})
+	}
 }
 
 /**
  * Attempt to remove a segment, or orphan it
  */
-export async function handleRemovedSegment(context: JobContext, data: IngestRemoveSegmentProps): Promise<void> {
-	return runIngestUpdateOperation(context, data, (ingestRundown) => {
-		if (ingestRundown) {
-			const oldSegmentsLength = ingestRundown.segments.length
-			ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== data.segmentExternalId)
-			ingestRundown.modified = getCurrentTime()
+export function handleRemovedSegment(
+	_context: JobContext,
+	data: IngestRemoveSegmentProps
+): IngestUpdateOperationFunction | null {
+	return (ingestRundown) => {
+		if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-			if (ingestRundown.segments.length === oldSegmentsLength) {
-				throw new Error(
-					`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to remove`
-				)
-			}
+		const oldSegmentsLength = ingestRundown.segments.length
+		ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== data.segmentExternalId)
+		ingestRundown.modified = getCurrentTime()
 
-			return {
-				// We modify in-place
-				ingestRundown,
-				changes: {
-					source: 'ingest',
-					segmentChanges: {
-						[data.segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.Deleted,
-					},
-				},
-			}
-		} else {
-			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+		if (ingestRundown.segments.length === oldSegmentsLength) {
+			throw new Error(
+				`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to remove`
+			)
 		}
-	})
+
+		return {
+			// We modify in-place
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentChanges: {
+					[data.segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.Deleted,
+				},
+			},
+		}
+	}
 }
 
 /**
  * Insert or update a segment from a new IngestSegment
  */
-export async function handleUpdatedSegment(context: JobContext, data: IngestUpdateSegmentProps): Promise<void> {
+export function handleUpdatedSegment(
+	_context: JobContext,
+	data: IngestUpdateSegmentProps
+): IngestUpdateOperationFunction | null {
 	const segmentExternalId = data.ingestSegment.externalId
 	if (!segmentExternalId) throw new Error('Segment externalId must be set!')
 
-	return runIngestUpdateOperation(context, data, (ingestRundown) => {
-		if (ingestRundown) {
-			const countBefore = ingestRundown.segments.length
-			ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== segmentExternalId)
-			if (countBefore === ingestRundown.segments.length && !data.isCreateAction)
-				throw new Error(`Segment "${data.ingestSegment.externalId}" not found`)
+	return (ingestRundown) => {
+		if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-			ingestRundown.segments.push(makeNewIngestSegment(data.ingestSegment))
-			ingestRundown.modified = getCurrentTime()
+		const countBefore = ingestRundown.segments.length
+		ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== segmentExternalId)
+		if (countBefore === ingestRundown.segments.length && !data.isCreateAction)
+			throw new Error(`Segment "${data.ingestSegment.externalId}" not found`)
 
-			return {
-				// We modify in-place
-				ingestRundown,
-				changes: {
-					source: 'ingest',
-					segmentChanges: {
-						[segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.Inserted, // This forces downstream to do a full diff themselves
-					},
+		ingestRundown.segments.push(makeNewIngestSegment(data.ingestSegment))
+		ingestRundown.modified = getCurrentTime()
+
+		return {
+			// We modify in-place
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentChanges: {
+					[segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.Inserted, // This forces downstream to do a full diff themselves
 				},
-			}
-		} else {
-			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+			},
 		}
-	})
+	}
 }
 
 /**
  * Update the ranks of the Segments in a Rundown
  */
-export async function handleUpdatedSegmentRanks(
-	context: JobContext,
+export function handleUpdatedSegmentRanks(
+	_context: JobContext,
 	data: IngestUpdateSegmentRanksProps
-): Promise<void> {
-	return runIngestUpdateOperation(context, data, (ingestRundown) => {
-		if (ingestRundown) {
-			let hasChange = false
+): IngestUpdateOperationFunction | null {
+	return (ingestRundown) => {
+		if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-			// Update ranks on ingest data
-			for (const segment of ingestRundown.segments) {
-				const newRank = Number(data.newRanks[segment.externalId])
-				if (!isNaN(newRank)) {
-					segment.rank = newRank
-					hasChange = true
-				}
-			}
+		let hasChange = false
 
-			return {
-				// We modify in-place
-				ingestRundown,
-				changes: {
-					source: 'ingest',
-					segmentOrderChanged: hasChange,
-				},
+		// Update ranks on ingest data
+		for (const segment of ingestRundown.segments) {
+			const newRank = Number(data.newRanks[segment.externalId])
+			if (!isNaN(newRank)) {
+				segment.rank = newRank
+				hasChange = true
 			}
-		} else {
-			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
-	})
+
+		return {
+			// We modify in-place
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentOrderChanged: hasChange,
+			},
+		}
+	}
 }
 
 /**

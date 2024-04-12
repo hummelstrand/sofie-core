@@ -3,10 +3,6 @@ import { IngestPart } from '@sofie-automation/blueprints-integration'
 import { getPartId } from '../lib'
 import { PartId, RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import _ = require('underscore')
-import { JobContext } from '../../jobs'
-import { LocalIngestRundown } from '../ingestCache'
-import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
-import { UpdateIngestRundownResult, runIngestUpdateOperation } from '../runOperation'
 
 export function getPartIdFromMosStory(rundownId: RundownId, partMosId: MOS.IMOSString128 | string): PartId {
 	if (!partMosId) throw new Error('parameter partMosId missing!')
@@ -41,22 +37,4 @@ export function parseMosString(str: MOS.IMOSString128): string {
 	if (!str) throw new Error('parseMosString: str parameter missing!')
 	if (mosTypes.mosString128.is(str)) return mosTypes.mosString128.stringify(str)
 	return (str as any).toString()
-}
-
-export type WrappedMosIngestJobFunction = (ingestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult
-export function wrapMosIngestJob<TData extends IngestPropsBase>(
-	fcn: (context: JobContext, data: TData) => WrappedMosIngestJobFunction | null
-): (context: JobContext, data: TData) => Promise<void> {
-	return async (context, data) => {
-		const executeFcn = fcn(context, data)
-		if (!executeFcn) return
-
-		return runIngestUpdateOperation(context, data, (ingestRundown) => {
-			if (ingestRundown && ingestRundown.type !== 'mos') {
-				throw new Error(`Rundown "${data.rundownExternalId}" is not a MOS rundown`)
-			}
-
-			return executeFcn(ingestRundown)
-		})
-	}
 }

@@ -16,18 +16,18 @@ import { runWithRundownLock } from '../lock'
 import { parseMosString } from './lib'
 import { groupedPartsToSegments, groupIngestParts, storiesToIngestParts } from './mosToIngest'
 import { GenerateRundownMode, updateRundownFromIngestData } from '../generationRundown'
-import { runCustomIngestUpdateOperation, runIngestUpdateOperation } from '../runOperation'
+import { IngestUpdateOperationFunction, runCustomIngestUpdateOperation } from '../runOperation'
 
 /**
  * Insert or update a mos rundown
  */
-export async function handleMosRundownData(context: JobContext, data: MosRundownProps): Promise<void> {
+export function handleMosRundownData(context: JobContext, data: MosRundownProps): IngestUpdateOperationFunction | null {
 	// Create or update a rundown (ie from rundownCreate or rundownList)
 
 	if (parseMosString(data.mosRunningOrder.ID) !== data.rundownExternalId)
 		throw new Error('mosRunningOrder.ID and rundownExternalId mismatch!')
 
-	return runIngestUpdateOperation(context, data, (ingestRundown) => {
+	return (ingestRundown) => {
 		const rundownId = getRundownId(context.studioId, data.rundownExternalId)
 		const parts = _.compact(
 			storiesToIngestParts(context, rundownId, data.mosRunningOrder.Stories || [], data.isUpdateOperation, [])
@@ -67,14 +67,17 @@ export async function handleMosRundownData(context: JobContext, data: MosRundown
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate, // nocommit this is too coarse
 			},
 		}
-	})
+	}
 }
 
 /**
  * Update the payload of a mos rundown, without changing any parts or segments
  */
-export async function handleMosRundownMetadata(context: JobContext, data: MosRundownMetadataProps): Promise<void> {
-	return runIngestUpdateOperation(context, data, (ingestRundown) => {
+export function handleMosRundownMetadata(
+	_context: JobContext,
+	data: MosRundownMetadataProps
+): IngestUpdateOperationFunction | null {
+	return (ingestRundown) => {
 		if (ingestRundown) {
 			ingestRundown.payload = _.extend(ingestRundown.payload, data.mosRunningOrderBase)
 			ingestRundown.modified = getCurrentTime()
@@ -90,7 +93,7 @@ export async function handleMosRundownMetadata(context: JobContext, data: MosRun
 		} else {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
-	})
+	}
 }
 
 /**

@@ -39,8 +39,8 @@ import {
 	handleBucketRemoveAdlibPiece,
 } from '../../ingest/bucket/bucketAdlibs'
 import { handleBucketItemImport, handleBucketItemRegenerate } from '../../ingest/bucket/import'
-import { wrapMosIngestJob } from '../../ingest/mosDevice/lib'
 import { handleUserExecuteChangeOperation } from '../../ingest/userOperation'
+import { wrapGenericIngestJob, wrapMosIngestJob } from '../../ingest/jobWrappers'
 
 type ExecutableFunction<T extends keyof IngestJobFunc> = (
 	context: JobContext,
@@ -52,21 +52,21 @@ export type IngestJobHandlers = {
 }
 
 export const ingestJobHandlers: IngestJobHandlers = {
-	[IngestJobs.RemoveRundown]: handleRemovedRundown,
-	[IngestJobs.UpdateRundown]: handleUpdatedRundown,
-	[IngestJobs.UpdateRundownMetaData]: handleUpdatedRundownMetaData,
-	[IngestJobs.RemoveSegment]: handleRemovedSegment,
-	[IngestJobs.UpdateSegment]: handleUpdatedSegment,
-	[IngestJobs.UpdateSegmentRanks]: handleUpdatedSegmentRanks,
-	[IngestJobs.RemovePart]: handleRemovedPart,
-	[IngestJobs.UpdatePart]: handleUpdatedPart,
-	[IngestJobs.RegenerateRundown]: handleRegenerateRundown,
-	[IngestJobs.RegenerateSegment]: handleRegenerateSegment,
+	[IngestJobs.RemoveRundown]: wrapGenericIngestJob(handleRemovedRundown),
+	[IngestJobs.UpdateRundown]: wrapGenericIngestJob(handleUpdatedRundown),
+	[IngestJobs.UpdateRundownMetaData]: wrapGenericIngestJob(handleUpdatedRundownMetaData),
+	[IngestJobs.RemoveSegment]: wrapGenericIngestJob(handleRemovedSegment),
+	[IngestJobs.UpdateSegment]: wrapGenericIngestJob(handleUpdatedSegment),
+	[IngestJobs.UpdateSegmentRanks]: wrapGenericIngestJob(handleUpdatedSegmentRanks),
+	[IngestJobs.RemovePart]: wrapGenericIngestJob(handleRemovedPart),
+	[IngestJobs.UpdatePart]: wrapGenericIngestJob(handleUpdatedPart),
+	[IngestJobs.RegenerateRundown]: wrapGenericIngestJob(handleRegenerateRundown),
+	[IngestJobs.RegenerateSegment]: wrapGenericIngestJob(handleRegenerateSegment),
 
 	[IngestJobs.RemoveOrphanedSegments]: handleRemoveOrphanedSegemnts,
 
-	[IngestJobs.MosRundown]: handleMosRundownData,
-	[IngestJobs.MosRundownMetadata]: handleMosRundownMetadata,
+	[IngestJobs.MosRundown]: wrapMosIngestJob(handleMosRundownData),
+	[IngestJobs.MosRundownMetadata]: wrapMosIngestJob(handleMosRundownMetadata),
 	[IngestJobs.MosRundownStatus]: handleMosRundownStatus,
 	[IngestJobs.MosRundownReadyToAir]: handleMosRundownReadyToAir,
 	[IngestJobs.MosFullStory]: wrapMosIngestJob(handleMosFullStory),

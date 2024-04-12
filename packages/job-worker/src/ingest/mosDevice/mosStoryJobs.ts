@@ -11,10 +11,11 @@ import _ = require('underscore')
 import { JobContext } from '../../jobs'
 import { LocalIngestRundown } from '../ingestCache'
 import { getRundownId } from '../lib'
-import { WrappedMosIngestJobFunction, fixIllegalObject, parseMosString } from './lib'
+import { fixIllegalObject, parseMosString } from './lib'
 import { AnnotatedIngestPart, makeChangeToIngestParts, storiesToIngestParts } from './mosToIngest'
 import { generateMosIngestDiffTemp } from './diff'
 import { NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
+import { IngestUpdateOperationFunction } from '../runOperation'
 
 function getAnnotatedIngestParts(context: JobContext, ingestRundown: LocalIngestRundown): AnnotatedIngestPart[] {
 	const span = context.startSpan('mosDevice.ingest.getAnnotatedIngestParts')
@@ -37,7 +38,10 @@ function getAnnotatedIngestParts(context: JobContext, ingestRundown: LocalIngest
 /**
  * Update the payload of a mos story
  */
-export function handleMosFullStory(_context: JobContext, data: MosFullStoryProps): WrappedMosIngestJobFunction | null {
+export function handleMosFullStory(
+	_context: JobContext,
+	data: MosFullStoryProps
+): IngestUpdateOperationFunction | null {
 	fixIllegalObject(data.story)
 
 	const partExternalId = parseMosString(data.story.ID)
@@ -87,7 +91,7 @@ export function handleMosFullStory(_context: JobContext, data: MosFullStoryProps
 export function handleMosDeleteStory(
 	context: JobContext,
 	data: MosDeleteStoryProps
-): WrappedMosIngestJobFunction | null {
+): IngestUpdateOperationFunction | null {
 	if (data.stories.length === 0) return null
 
 	return (ingestRundown: LocalIngestRundown | undefined) => {
@@ -133,7 +137,7 @@ export function handleMosDeleteStory(
 export function handleMosInsertStories(
 	context: JobContext,
 	data: MosInsertStoryProps
-): WrappedMosIngestJobFunction | null {
+): IngestUpdateOperationFunction | null {
 	return (ingestRundown: LocalIngestRundown | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
@@ -193,7 +197,10 @@ export function handleMosInsertStories(
 /**
  * Swap positions of two mos stories
  */
-export function handleMosSwapStories(context: JobContext, data: MosSwapStoryProps): WrappedMosIngestJobFunction | null {
+export function handleMosSwapStories(
+	context: JobContext,
+	data: MosSwapStoryProps
+): IngestUpdateOperationFunction | null {
 	const story0Str = parseMosString(data.story0)
 	const story1Str = parseMosString(data.story1)
 	if (story0Str === story1Str) {
@@ -237,7 +244,10 @@ export function handleMosSwapStories(context: JobContext, data: MosSwapStoryProp
 /**
  * Move a list of mos stories
  */
-export function handleMosMoveStories(context: JobContext, data: MosMoveStoryProps): WrappedMosIngestJobFunction | null {
+export function handleMosMoveStories(
+	context: JobContext,
+	data: MosMoveStoryProps
+): IngestUpdateOperationFunction | null {
 	return (ingestRundown: LocalIngestRundown | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)

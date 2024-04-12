@@ -14,7 +14,7 @@ import {
 	handleMosSwapStories,
 } from '../mosStoryJobs'
 import { handleMosRundownData, handleMosRundownReadyToAir, handleMosRundownStatus } from '../mosRundownJobs'
-import { parseMosString, wrapMosIngestJob } from '../lib'
+import { parseMosString } from '../lib'
 import { MockJobContext, setupDefaultJobEnvironment } from '../../../__mocks__/context'
 import { setupMockIngestDevice, setupMockShowStyleCompound } from '../../../__mocks__/presetCollections'
 import { fixSnapshot } from '../../../__mocks__/helpers/snapshot'
@@ -31,10 +31,11 @@ import { handleSetNextPart } from '../../../playout/setNextJobs'
 import { handleTakeNextPart } from '../../../playout/take'
 import { handleActivateRundownPlaylist, handleDeactivateRundownPlaylist } from '../../../playout/activePlaylistJobs'
 import { removeRundownPlaylistFromDb } from '../../__tests__/lib'
+import { UserErrorMessage } from '@sofie-automation/corelib/dist/error'
+import { wrapMosIngestJob } from '../../jobWrappers'
 
 jest.mock('../../updateNext')
 import { ensureNextPartIsValid } from '../../updateNext'
-import { UserErrorMessage } from '@sofie-automation/corelib/dist/error'
 type TensureNextPartIsValid = jest.MockedFunction<typeof ensureNextPartIsValid>
 const ensureNextPartIsValidMock = ensureNextPartIsValid as TensureNextPartIsValid
 
@@ -63,6 +64,8 @@ const handleMosFullStoryWrapped = wrapMosIngestJob(handleMosFullStory)
 const handleMosInsertStoriesWrapped = wrapMosIngestJob(handleMosInsertStories)
 const handleMosMoveStoriesWrapped = wrapMosIngestJob(handleMosMoveStories)
 const handleMosSwapStoriesWrapped = wrapMosIngestJob(handleMosSwapStories)
+const handleMosRundownDataWrapped = wrapMosIngestJob(handleMosRundownData)
+const handleRemovedRundownWrapped = wrapMosIngestJob(handleRemovedRundown)
 
 describe('Test recieved mos ingest payloads', () => {
 	let context: MockJobContext
@@ -88,7 +91,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		// Reset RO
 		const roData = mockRO.roCreate()
-		await handleMosRundownData(context, {
+		await handleMosRundownDataWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: parseMosString(roData.ID),
 			mosRunningOrder: roData,
@@ -151,7 +154,7 @@ describe('Test recieved mos ingest payloads', () => {
 		await expect(context.mockCollections.Rundowns.findOne()).resolves.toBeFalsy()
 
 		const roData = mockRO.roCreate()
-		await handleMosRundownData(context, {
+		await handleMosRundownDataWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: parseMosString(roData.ID),
 			mosRunningOrder: roData,
@@ -185,7 +188,7 @@ describe('Test recieved mos ingest payloads', () => {
 			await context.mockCollections.Rundowns.findOne({ externalId: mosTypes.mosString128.stringify(roData.ID) })
 		).toBeTruthy()
 
-		await handleMosRundownData(context, {
+		await handleMosRundownDataWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: parseMosString(roData.ID),
 			mosRunningOrder: roData,
@@ -222,7 +225,7 @@ describe('Test recieved mos ingest payloads', () => {
 			await context.mockCollections.Rundowns.findOne({ externalId: mosTypes.mosString128.stringify(roData.ID) })
 		).toBeTruthy()
 
-		await handleMosRundownData(context, {
+		await handleMosRundownDataWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: parseMosString(roData.ID),
 			mosRunningOrder: roData,
@@ -256,7 +259,7 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(await context.mockCollections.RundownPlaylists.findOne(rundown.playlistId)).toBeTruthy()
 
 		await expect(
-			handleRemovedRundown(context, {
+			handleRemovedRundownWrapped(context, {
 				peripheralDeviceId: device._id,
 				rundownExternalId: parseMosString(roData.ID),
 			})
@@ -279,7 +282,7 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(rundown.orphaned).toBeFalsy()
 		expect(await context.mockCollections.RundownPlaylists.findOne(rundown.playlistId)).toBeTruthy()
 
-		await handleRemovedRundown(context, {
+		await handleRemovedRundownWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: parseMosString(roData.ID),
 		})
@@ -295,7 +298,7 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(await context.mockCollections.RundownPlaylists.findOne()).toBeFalsy()
 
 		await expect(
-			handleRemovedRundown(context, {
+			handleRemovedRundownWrapped(context, {
 				peripheralDeviceId: device._id,
 				rundownExternalId: parseMosString(roData.ID),
 			})
@@ -1309,7 +1312,7 @@ describe('Test recieved mos ingest payloads', () => {
 			}
 
 			// regenerate the rundown
-			await handleMosRundownData(context, {
+			await handleMosRundownDataWrapped(context, {
 				peripheralDeviceId: device._id,
 				rundownExternalId: rundown.externalId,
 				mosRunningOrder: mosRO,
@@ -1363,7 +1366,7 @@ describe('Test recieved mos ingest payloads', () => {
 		roData1.ID = mosTypes.mosString128.create('Rundown1')
 		roData1.Slug = mosTypes.mosString128.create('Test Rundown 1')
 		;(roData1 as any).ForcePlaylistExternalId = 'playlist1'
-		await handleMosRundownData(context, {
+		await handleMosRundownDataWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: mosTypes.mosString128.stringify(roData1.ID),
 			mosRunningOrder: roData1,
@@ -1374,7 +1377,7 @@ describe('Test recieved mos ingest payloads', () => {
 		roData2.ID = mosTypes.mosString128.create('Rundown2')
 		roData2.Slug = mosTypes.mosString128.create('Test Rundown 2')
 		;(roData2 as any).ForcePlaylistExternalId = 'playlist1'
-		await handleMosRundownData(context, {
+		await handleMosRundownDataWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: mosTypes.mosString128.stringify(roData2.ID),
 			mosRunningOrder: roData2,
@@ -1400,7 +1403,7 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(playlist.name).not.toEqual(rundown2.name)
 
 		// Remove the first rundown in the playlist
-		await handleRemovedRundown(context, {
+		await handleRemovedRundownWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: mosTypes.mosString128.stringify(roData1.ID),
 		})
@@ -1421,7 +1424,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const mosRO = mockRO.roCreate()
 		// regenerate the rundown
-		await handleMosRundownData(context, {
+		await handleMosRundownDataWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: mosTypes.mosString128.stringify(mosRO.ID),
 			mosRunningOrder: mosRO,

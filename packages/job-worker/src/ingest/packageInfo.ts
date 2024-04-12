@@ -19,7 +19,7 @@ export async function handleExpectedPackagesRegenerate(
 	context: JobContext,
 	data: ExpectedPackagesRegenerateProps
 ): Promise<void> {
-	await runWithRundownLock(context, data.rundownId, async (rundown, rundownLock) => {
+	return runWithRundownLock(context, data.rundownId, async (rundown, rundownLock) => {
 		if (!rundown) throw new Error(`Rundown "${data.rundownId}" not found`)
 
 		const ingestModel = await loadIngestModelFromRundown(context, rundownLock, rundown)

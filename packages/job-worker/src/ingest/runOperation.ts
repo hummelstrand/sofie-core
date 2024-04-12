@@ -121,6 +121,10 @@ export async function runCustomIngestUpdateOperation(
 	})
 }
 
+export type IngestUpdateOperationFunction = (
+	oldIngestRundown: LocalIngestRundown | undefined
+) => UpdateIngestRundownResult
+
 /**
  * Perform an ingest update operation on a rundown
  * This will automatically do some post-update data changes, to ensure the playout side (partinstances etc) is updated with the changes
@@ -131,7 +135,7 @@ export async function runCustomIngestUpdateOperation(
 export async function runIngestUpdateOperation(
 	context: JobContext,
 	data: IngestPropsBase,
-	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult
+	updateNrcsIngestModelFcn: IngestUpdateOperationFunction
 ): Promise<void> {
 	return runIngestUpdateOperationBase(context, data, async (nrcsIngestObjectCache) =>
 		updateNrcsIngestObjects(context, nrcsIngestObjectCache, updateNrcsIngestModelFcn)
