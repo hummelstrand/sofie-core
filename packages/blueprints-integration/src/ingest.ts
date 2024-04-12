@@ -18,7 +18,7 @@ export interface ExtendedIngestRundown extends IngestRundown {
 export enum NrcsIngestPartChangeDetails {
 	Inserted = 'inserted',
 	Deleted = 'deleted',
-	Payload = 'payload',
+	Updated = 'updated',
 	// Rank = 'rank',
 }
 export enum NrcsIngestSegmentChangeDetailsEnum {

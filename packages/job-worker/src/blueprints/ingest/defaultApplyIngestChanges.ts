@@ -291,7 +291,7 @@ function applyChangesForPart<TRundownPayload, TSegmentPayload, TPartPayload>(
 
 			break
 		}
-		case NrcsIngestPartChangeDetails.Payload: {
+		case NrcsIngestPartChangeDetails.Updated: {
 			if (!mutablePart) throw new Error(`Part ${partId} not found in segment`)
 			if (!nrcsPart) throw new Error(`Part ${partId} not found in nrcs segment`)
 

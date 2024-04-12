@@ -41,13 +41,13 @@ import { insertQueuedPartWithPieces } from '../../playout/adlibUtils'
 import { UserErrorMessage } from '@sofie-automation/corelib/dist/error'
 import { PlayoutPartInstanceModel } from '../../playout/model/PlayoutPartInstanceModel'
 import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
-import { wrapGenericIngestJob } from '../jobWrappers'
+import { wrapGenericIngestJob, wrapGenericIngestJobWithPrecheck } from '../jobWrappers'
 
 const handleRemovedRundownWrapped = wrapGenericIngestJob(handleRemovedRundown)
 const handleUpdatedRundownWrapped = wrapGenericIngestJob(handleUpdatedRundown)
 const handleUpdatedRundownMetaDataWrapped = wrapGenericIngestJob(handleUpdatedRundownMetaData)
 const handleRemovedSegmentWrapped = wrapGenericIngestJob(handleRemovedSegment)
-const handleUpdatedSegmentWrapped = wrapGenericIngestJob(handleUpdatedSegment)
+const handleUpdatedSegmentWrapped = wrapGenericIngestJobWithPrecheck(handleUpdatedSegment)
 const handleUpdatedSegmentRanksWrapped = wrapGenericIngestJob(handleUpdatedSegmentRanks)
 const handleRemovedPartWrapped = wrapGenericIngestJob(handleRemovedPart)
 const handleUpdatedPartWrapped = wrapGenericIngestJob(handleUpdatedPart)

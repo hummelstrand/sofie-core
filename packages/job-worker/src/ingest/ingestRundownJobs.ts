@@ -1,6 +1,6 @@
 import { JobContext } from '../jobs'
 import { logger } from '../logging'
-import { makeNewIngestRundown } from './ingestCache'
+import { LocalIngestRundown, makeNewIngestRundown } from './ingestCache'
 import { runWithRundownLock } from './lock'
 import { removeRundownFromDb } from '../rundownPlaylists'
 import { DBRundown, RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
@@ -12,7 +12,7 @@ import {
 	UserRemoveRundownProps,
 	UserUnsyncRundownProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
-import { IngestUpdateOperationFunction, UpdateIngestRundownAction, UpdateIngestRundownResult } from './runOperation'
+import { UpdateIngestRundownAction, UpdateIngestRundownResult } from './runOperation'
 import { NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
 import { getCurrentTime } from '../lib'
 import { wrapGenericIngestJob } from './jobWrappers'
@@ -22,12 +22,11 @@ import { wrapGenericIngestJob } from './jobWrappers'
  */
 export function handleRemovedRundown(
 	_context: JobContext,
-	data: IngestRemoveRundownProps
-): IngestUpdateOperationFunction | null {
-	return () => {
-		// Remove it
-		return data.forceDelete ? UpdateIngestRundownAction.FORCE_DELETE : UpdateIngestRundownAction.DELETE
-	}
+	data: IngestRemoveRundownProps,
+	_ingestRundown: LocalIngestRundown | undefined
+): UpdateIngestRundownResult {
+	// Remove it
+	return data.forceDelete ? UpdateIngestRundownAction.FORCE_DELETE : UpdateIngestRundownAction.DELETE
 }
 const handleRemovedRundownWrapped = wrapGenericIngestJob(handleRemovedRundown)
 
@@ -79,19 +78,18 @@ export async function handleUserRemoveRundown(context: JobContext, data: UserRem
  */
 export function handleUpdatedRundown(
 	_context: JobContext,
-	data: IngestUpdateRundownProps
-): IngestUpdateOperationFunction | null {
-	return (ingestRundown) => {
-		if (!ingestRundown && !data.isCreateAction) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+	data: IngestUpdateRundownProps,
+	ingestRundown: LocalIngestRundown | undefined
+): UpdateIngestRundownResult {
+	if (!ingestRundown && !data.isCreateAction) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-		return {
-			ingestRundown: makeNewIngestRundown(data.ingestRundown),
-			changes: {
-				source: 'ingest',
-				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
-			},
-		} satisfies UpdateIngestRundownResult
-	}
+	return {
+		ingestRundown: makeNewIngestRundown(data.ingestRundown),
+		changes: {
+			source: 'ingest',
+			rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
+		},
+	} satisfies UpdateIngestRundownResult
 }
 
 /**
@@ -99,23 +97,22 @@ export function handleUpdatedRundown(
  */
 export function handleUpdatedRundownMetaData(
 	_context: JobContext,
-	data: IngestUpdateRundownMetaDataProps
-): IngestUpdateOperationFunction | null {
-	return (ingestRundown) => {
-		if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+	data: IngestUpdateRundownMetaDataProps,
+	ingestRundown: LocalIngestRundown | undefined
+): UpdateIngestRundownResult {
+	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-		return {
-			ingestRundown: {
-				...data.ingestRundown,
-				modified: getCurrentTime(),
-				segments: ingestRundown.segments,
-			},
-			changes: {
-				source: 'ingest',
-				rundownChanges: NrcsIngestRundownChangeDetails.Payload,
-			},
-		} satisfies UpdateIngestRundownResult
-	}
+	return {
+		ingestRundown: {
+			...data.ingestRundown,
+			modified: getCurrentTime(),
+			segments: ingestRundown.segments,
+		},
+		changes: {
+			source: 'ingest',
+			rundownChanges: NrcsIngestRundownChangeDetails.Payload,
+		},
+	} satisfies UpdateIngestRundownResult
 }
 
 /**
@@ -123,20 +120,19 @@ export function handleUpdatedRundownMetaData(
  */
 export function handleRegenerateRundown(
 	_context: JobContext,
-	data: IngestRegenerateRundownProps
-): IngestUpdateOperationFunction | null {
-	return (ingestRundown) => {
-		if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+	data: IngestRegenerateRundownProps,
+	ingestRundown: LocalIngestRundown | undefined
+): UpdateIngestRundownResult {
+	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-		return {
-			// We want to regenerate unmodified
-			ingestRundown,
-			changes: {
-				source: 'ingest',
-				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
-			},
-		} satisfies UpdateIngestRundownResult
-	}
+	return {
+		// We want to regenerate unmodified
+		ingestRundown,
+		changes: {
+			source: 'ingest',
+			rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
+		},
+	} satisfies UpdateIngestRundownResult
 }
 
 /**

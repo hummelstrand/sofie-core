@@ -1,0 +1,434 @@
+import { setupDefaultJobEnvironment } from '../../__mocks__/context'
+import {
+	handleRegenerateSegment,
+	handleRemovedSegment,
+	handleUpdatedSegment,
+	handleUpdatedSegmentRanks,
+} from '../ingestSegmentJobs'
+import { LocalIngestRundown } from '../ingestCache'
+import { clone } from '@sofie-automation/corelib/dist/lib'
+import { IngestSegment, NrcsIngestSegmentChangeDetailsEnum } from '@sofie-automation/blueprints-integration'
+import { stripModifiedTimestamps } from './lib'
+import { UpdateIngestRundownChange } from '../runOperation'
+
+function getDefaultIngestRundown(): LocalIngestRundown {
+	return {
+		externalId: 'rundown0',
+		type: 'mos',
+		name: 'Rundown',
+		modified: 0,
+		segments: [
+			{
+				externalId: 'segment0',
+				name: 'Segment 0',
+				rank: 0,
+				modified: 0,
+				parts: [
+					{
+						externalId: 'part0',
+						name: 'Part 0',
+						rank: 0,
+						modified: 0,
+					},
+					{
+						externalId: 'part1',
+						name: 'Part 1',
+						rank: 1,
+						modified: 0,
+					},
+				],
+			},
+			{
+				externalId: 'segment1',
+				name: 'Segment 1',
+				rank: 1,
+				modified: 0,
+				parts: [
+					{
+						externalId: 'part2',
+						name: 'Part 2',
+						rank: 0,
+						modified: 0,
+					},
+					{
+						externalId: 'part3',
+						name: 'Part 3',
+						rank: 1,
+						modified: 0,
+					},
+				],
+			},
+		],
+	}
+}
+
+describe('handleRegenerateSegment', () => {
+	it('no rundown', () => {
+		const context = setupDefaultJobEnvironment()
+
+		expect(() =>
+			handleRegenerateSegment(
+				context,
+				{
+					peripheralDeviceId: null,
+					rundownExternalId: 'rundown0',
+					segmentExternalId: 'segment0',
+				},
+				undefined
+			)
+		).toThrow(/Rundown(.*)not found/)
+	})
+
+	it('missing segment', () => {
+		const context = setupDefaultJobEnvironment()
+
+		const ingestRundown = getDefaultIngestRundown()
+
+		expect(() =>
+			handleRegenerateSegment(
+				context,
+				{
+					peripheralDeviceId: null,
+					rundownExternalId: 'rundown0',
+					segmentExternalId: 'segmentX',
+				},
+				clone(ingestRundown)
+			)
+		).toThrow(/Rundown(.*)does not have a Segment/)
+	})
+
+	it('good', () => {
+		const context = setupDefaultJobEnvironment()
+
+		const ingestRundown = getDefaultIngestRundown()
+
+		const changes = handleRegenerateSegment(
+			context,
+			{
+				peripheralDeviceId: null,
+				rundownExternalId: 'rundown0',
+				segmentExternalId: 'segment1',
+			},
+			clone(ingestRundown)
+		)
+		stripModifiedTimestamps(changes.ingestRundown)
+
+		// update the expected ingestRundown
+		// ingestRundown.modified = 1
+		// ingestRundown.segments.splice(1, 1)
+
+		expect(changes).toEqual({
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentChanges: {
+					segment1: {
+						payloadChanged: true,
+					},
+				},
+			},
+		} satisfies UpdateIngestRundownChange)
+	})
+})
+
+describe('handleRemovedSegment', () => {
+	it('no rundown', () => {
+		const context = setupDefaultJobEnvironment()
+
+		expect(() =>
+			handleRemovedSegment(
+				context,
+				{
+					peripheralDeviceId: null,
+					rundownExternalId: 'rundown0',
+					segmentExternalId: 'segment0',
+				},
+				undefined
+			)
+		).toThrow(/Rundown(.*)not found/)
+	})
+
+	it('missing segment', () => {
+		const context = setupDefaultJobEnvironment()
+
+		const ingestRundown = getDefaultIngestRundown()
+
+		expect(() =>
+			handleRemovedSegment(
+				context,
+				{
+					peripheralDeviceId: null,
+					rundownExternalId: 'rundown0',
+					segmentExternalId: 'segmentX',
+				},
+				clone(ingestRundown)
+			)
+		).toThrow(/Rundown(.*)does not have a Segment/)
+	})
+
+	it('good', () => {
+		const context = setupDefaultJobEnvironment()
+
+		const ingestRundown = getDefaultIngestRundown()
+
+		const changes = handleRemovedSegment(
+			context,
+			{
+				peripheralDeviceId: null,
+				rundownExternalId: 'rundown0',
+				segmentExternalId: 'segment1',
+			},
+			clone(ingestRundown)
+		)
+		stripModifiedTimestamps(changes.ingestRundown)
+
+		// update the expected ingestRundown
+		ingestRundown.modified = 1
+		ingestRundown.segments.splice(1, 1)
+
+		expect(changes).toEqual({
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentChanges: {
+					segment1: NrcsIngestSegmentChangeDetailsEnum.Deleted,
+				},
+			},
+		} satisfies UpdateIngestRundownChange)
+	})
+})
+
+describe('handleUpdatedSegment', () => {
+	const newIngestSegment: IngestSegment = {
+		externalId: 'segmentX',
+		name: 'New Segment',
+		rank: 66,
+		payload: {
+			val: 'my new segment',
+		},
+		parts: [
+			{
+				externalId: 'partX',
+				name: 'New Part',
+				rank: 0,
+			},
+		],
+	}
+
+	it('no rundown', () => {
+		const context = setupDefaultJobEnvironment()
+
+		expect(() =>
+			handleUpdatedSegment(context, {
+				peripheralDeviceId: null,
+				rundownExternalId: 'rundown0',
+				ingestSegment: clone(newIngestSegment),
+				isCreateAction: true,
+			})(undefined)
+		).toThrow(/Rundown(.*)not found/)
+	})
+
+	it('missing id', () => {
+		const context = setupDefaultJobEnvironment()
+
+		const ingestRundown = getDefaultIngestRundown()
+
+		const customIngestSegment = clone(newIngestSegment)
+		customIngestSegment.externalId = ''
+
+		expect(() =>
+			handleUpdatedSegment(context, {
+				peripheralDeviceId: null,
+				rundownExternalId: 'rundown0',
+				ingestSegment: customIngestSegment,
+				isCreateAction: true,
+			})(clone(ingestRundown))
+		).toThrow(/Segment externalId must be set!/)
+	})
+
+	it('insert segment', () => {
+		const context = setupDefaultJobEnvironment()
+
+		const ingestRundown = getDefaultIngestRundown()
+
+		const changes = handleUpdatedSegment(context, {
+			peripheralDeviceId: null,
+			rundownExternalId: 'rundown0',
+			ingestSegment: clone(newIngestSegment),
+			isCreateAction: true,
+		})(clone(ingestRundown)) as UpdateIngestRundownChange
+		stripModifiedTimestamps(changes.ingestRundown)
+
+		// update the expected ingestRundown
+		ingestRundown.modified = 1
+		ingestRundown.segments.push({
+			...newIngestSegment,
+			modified: 1,
+			parts: newIngestSegment.parts.map((p) => ({ ...p, modified: 1 })),
+		})
+
+		expect(changes).toEqual({
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentChanges: {
+					segmentX: NrcsIngestSegmentChangeDetailsEnum.Inserted,
+				},
+			},
+		} satisfies UpdateIngestRundownChange)
+	})
+
+	it('update missing segment', () => {
+		const context = setupDefaultJobEnvironment()
+
+		const ingestRundown = getDefaultIngestRundown()
+
+		expect(() =>
+			handleUpdatedSegment(context, {
+				peripheralDeviceId: null,
+				rundownExternalId: 'rundown0',
+				ingestSegment: clone(newIngestSegment),
+				isCreateAction: false,
+			})(clone(ingestRundown))
+		).toThrow(/Segment(.*)not found/)
+	})
+
+	it('update segment', () => {
+		const context = setupDefaultJobEnvironment()
+
+		const ingestRundown = getDefaultIngestRundown()
+
+		const customIngestSegment = clone(newIngestSegment)
+		customIngestSegment.externalId = 'segment1'
+
+		const changes = handleUpdatedSegment(context, {
+			peripheralDeviceId: null,
+			rundownExternalId: 'rundown0',
+			ingestSegment: clone(customIngestSegment),
+			isCreateAction: false, // has no impact
+		})(clone(ingestRundown)) as UpdateIngestRundownChange
+		stripModifiedTimestamps(changes.ingestRundown)
+
+		// update the expected ingestRundown
+		ingestRundown.modified = 1
+		ingestRundown.segments.splice(1, 1, {
+			...customIngestSegment,
+			modified: 1,
+			parts: customIngestSegment.parts.map((p) => ({ ...p, modified: 1 })),
+		})
+
+		expect(changes).toEqual({
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentChanges: {
+					segment1: NrcsIngestSegmentChangeDetailsEnum.Inserted,
+				},
+			},
+		} satisfies UpdateIngestRundownChange)
+	})
+})
+
+describe('handleUpdatedSegmentRanks', () => {
+	it('no rundown', () => {
+		const context = setupDefaultJobEnvironment()
+
+		expect(() =>
+			handleUpdatedSegmentRanks(
+				context,
+				{
+					peripheralDeviceId: null,
+					rundownExternalId: 'rundown0',
+					newRanks: {
+						segment0: 1,
+						segment1: 0,
+					},
+				},
+				undefined
+			)
+		).toThrow(/Rundown(.*)not found/)
+	})
+
+	it('no valid changes', () => {
+		const context = setupDefaultJobEnvironment()
+
+		const ingestRundown = getDefaultIngestRundown()
+
+		const changes = handleUpdatedSegmentRanks(
+			context,
+			{
+				peripheralDeviceId: null,
+				rundownExternalId: 'rundown0',
+				newRanks: {
+					segmentX: 2,
+				},
+			},
+			clone(ingestRundown)
+		)
+
+		expect(changes).toEqual({
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentOrderChanged: false,
+			},
+		} satisfies UpdateIngestRundownChange)
+	})
+
+	it('update some segments', () => {
+		const context = setupDefaultJobEnvironment()
+
+		const ingestRundown = getDefaultIngestRundown()
+
+		const changes = handleUpdatedSegmentRanks(
+			context,
+			{
+				peripheralDeviceId: null,
+				rundownExternalId: 'rundown0',
+				newRanks: {
+					segmentX: 2,
+					segment0: 5,
+				},
+			},
+			clone(ingestRundown)
+		)
+
+		ingestRundown.segments[0].rank = 5
+		expect(changes).toEqual({
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentOrderChanged: true,
+			},
+		} satisfies UpdateIngestRundownChange)
+	})
+
+	it('invalid rank value type', () => {
+		const context = setupDefaultJobEnvironment()
+
+		const ingestRundown = getDefaultIngestRundown()
+
+		const changes = handleUpdatedSegmentRanks(
+			context,
+			{
+				peripheralDeviceId: null,
+				rundownExternalId: 'rundown0',
+				newRanks: {
+					segmentX: 2,
+					segment0: 'a' as any,
+				},
+			},
+			clone(ingestRundown)
+		)
+
+		expect(changes).toEqual({
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentOrderChanged: false,
+			},
+		} satisfies UpdateIngestRundownChange)
+	})
+})
+
+// nocommit: handleRemoveOrphanedSegemnts

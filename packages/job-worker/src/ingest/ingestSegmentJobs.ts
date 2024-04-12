@@ -1,7 +1,7 @@
 import { getCurrentTime } from '../lib'
 import { JobContext } from '../jobs'
 import { regenerateSegmentsFromIngestData } from './generationSegment'
-import { makeNewIngestSegment } from './ingestCache'
+import { LocalIngestRundown, makeNewIngestSegment } from './ingestCache'
 import { CommitIngestData } from './lock'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { literal } from '@sofie-automation/corelib/dist/lib'
@@ -12,7 +12,12 @@ import {
 	IngestUpdateSegmentRanksProps,
 	RemoveOrphanedSegmentsProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
-import { IngestUpdateOperationFunction, runCustomIngestUpdateOperation } from './runOperation'
+import {
+	IngestUpdateOperationFunction,
+	UpdateIngestRundownChange,
+	UpdateIngestRundownResult,
+	runCustomIngestUpdateOperation,
+} from './runOperation'
 import { NrcsIngestSegmentChangeDetailsEnum } from '@sofie-automation/blueprints-integration'
 
 /**
@@ -20,31 +25,30 @@ import { NrcsIngestSegmentChangeDetailsEnum } from '@sofie-automation/blueprints
  */
 export function handleRegenerateSegment(
 	_context: JobContext,
-	data: IngestRegenerateSegmentProps
-): IngestUpdateOperationFunction | null {
-	return (ingestRundown) => {
-		if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+	data: IngestRegenerateSegmentProps,
+	ingestRundown: LocalIngestRundown | undefined
+): UpdateIngestRundownChange {
+	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-		// Ensure the target segment exists in the cache
-		const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
-		if (!ingestSegment) {
-			throw new Error(
-				`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to update`
-			)
-		}
+	// Ensure the target segment exists in the cache
+	const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
+	if (!ingestSegment) {
+		throw new Error(
+			`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to update`
+		)
+	}
 
-		return {
-			// We modify in-place
-			ingestRundown,
-			changes: {
-				source: 'ingest',
-				segmentChanges: {
-					[data.segmentExternalId]: {
-						payloadChanged: true,
-					},
+	return {
+		// We modify in-place
+		ingestRundown,
+		changes: {
+			source: 'ingest',
+			segmentChanges: {
+				[data.segmentExternalId]: {
+					payloadChanged: true,
 				},
 			},
-		}
+		},
 	}
 }
 
@@ -53,31 +57,30 @@ export function handleRegenerateSegment(
  */
 export function handleRemovedSegment(
 	_context: JobContext,
-	data: IngestRemoveSegmentProps
-): IngestUpdateOperationFunction | null {
-	return (ingestRundown) => {
-		if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+	data: IngestRemoveSegmentProps,
+	ingestRundown: LocalIngestRundown | undefined
+): UpdateIngestRundownChange {
+	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-		const oldSegmentsLength = ingestRundown.segments.length
-		ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== data.segmentExternalId)
-		ingestRundown.modified = getCurrentTime()
+	const oldSegmentsLength = ingestRundown.segments.length
+	ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== data.segmentExternalId)
+	ingestRundown.modified = getCurrentTime()
 
-		if (ingestRundown.segments.length === oldSegmentsLength) {
-			throw new Error(
-				`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to remove`
-			)
-		}
+	if (ingestRundown.segments.length === oldSegmentsLength) {
+		throw new Error(
+			`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to remove`
+		)
+	}
 
-		return {
-			// We modify in-place
-			ingestRundown,
-			changes: {
-				source: 'ingest',
-				segmentChanges: {
-					[data.segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.Deleted,
-				},
+	return {
+		// We modify in-place
+		ingestRundown,
+		changes: {
+			source: 'ingest',
+			segmentChanges: {
+				[data.segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 			},
-		}
+		},
 	}
 }
 
@@ -87,7 +90,7 @@ export function handleRemovedSegment(
 export function handleUpdatedSegment(
 	_context: JobContext,
 	data: IngestUpdateSegmentProps
-): IngestUpdateOperationFunction | null {
+): IngestUpdateOperationFunction {
 	const segmentExternalId = data.ingestSegment.externalId
 	if (!segmentExternalId) throw new Error('Segment externalId must be set!')
 
@@ -120,30 +123,29 @@ export function handleUpdatedSegment(
  */
 export function handleUpdatedSegmentRanks(
 	_context: JobContext,
-	data: IngestUpdateSegmentRanksProps
-): IngestUpdateOperationFunction | null {
-	return (ingestRundown) => {
-		if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
+	data: IngestUpdateSegmentRanksProps,
+	ingestRundown: LocalIngestRundown | undefined
+): UpdateIngestRundownResult {
+	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-		let hasChange = false
+	let hasChange = false
 
-		// Update ranks on ingest data
-		for (const segment of ingestRundown.segments) {
-			const newRank = Number(data.newRanks[segment.externalId])
-			if (!isNaN(newRank)) {
-				segment.rank = newRank
-				hasChange = true
-			}
+	// Update ranks on ingest data
+	for (const segment of ingestRundown.segments) {
+		const newRank = Number(data.newRanks[segment.externalId])
+		if (!isNaN(newRank)) {
+			segment.rank = newRank
+			hasChange = true
 		}
+	}
 
-		return {
-			// We modify in-place
-			ingestRundown,
-			changes: {
-				source: 'ingest',
-				segmentOrderChanged: hasChange,
-			},
-		}
+	return {
+		// We modify in-place
+		ingestRundown,
+		changes: {
+			source: 'ingest',
+			segmentOrderChanged: hasChange,
+		},
 	}
 }
 

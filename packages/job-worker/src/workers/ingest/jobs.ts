@@ -40,7 +40,7 @@ import {
 } from '../../ingest/bucket/bucketAdlibs'
 import { handleBucketItemImport, handleBucketItemRegenerate } from '../../ingest/bucket/import'
 import { handleUserExecuteChangeOperation } from '../../ingest/userOperation'
-import { wrapGenericIngestJob, wrapMosIngestJob } from '../../ingest/jobWrappers'
+import { wrapGenericIngestJob, wrapGenericIngestJobWithPrecheck, wrapMosIngestJob } from '../../ingest/jobWrappers'
 
 type ExecutableFunction<T extends keyof IngestJobFunc> = (
 	context: JobContext,
@@ -56,7 +56,7 @@ export const ingestJobHandlers: IngestJobHandlers = {
 	[IngestJobs.UpdateRundown]: wrapGenericIngestJob(handleUpdatedRundown),
 	[IngestJobs.UpdateRundownMetaData]: wrapGenericIngestJob(handleUpdatedRundownMetaData),
 	[IngestJobs.RemoveSegment]: wrapGenericIngestJob(handleRemovedSegment),
-	[IngestJobs.UpdateSegment]: wrapGenericIngestJob(handleUpdatedSegment),
+	[IngestJobs.UpdateSegment]: wrapGenericIngestJobWithPrecheck(handleUpdatedSegment),
 	[IngestJobs.UpdateSegmentRanks]: wrapGenericIngestJob(handleUpdatedSegmentRanks),
 	[IngestJobs.RemovePart]: wrapGenericIngestJob(handleRemovedPart),
 	[IngestJobs.UpdatePart]: wrapGenericIngestJob(handleUpdatedPart),

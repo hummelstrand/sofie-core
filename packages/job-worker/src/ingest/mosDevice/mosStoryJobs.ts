@@ -68,7 +68,7 @@ export function handleMosFullStory(
 							segmentChanges: {
 								[ingestSegment.externalId]: {
 									partsChanges: {
-										[ingestPart.externalId]: NrcsIngestPartChangeDetails.Payload,
+										[ingestPart.externalId]: NrcsIngestPartChangeDetails.Updated,
 									},
 								},
 							},

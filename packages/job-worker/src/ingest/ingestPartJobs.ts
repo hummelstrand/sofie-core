@@ -1,8 +1,8 @@
 import { getCurrentTime } from '../lib'
 import { JobContext } from '../jobs'
-import { makeNewIngestPart } from './ingestCache'
+import { LocalIngestRundown, makeNewIngestPart } from './ingestCache'
 import { IngestRemovePartProps, IngestUpdatePartProps } from '@sofie-automation/corelib/dist/worker/ingest'
-import { IngestUpdateOperationFunction, UpdateIngestRundownChange } from './runOperation'
+import { UpdateIngestRundownChange } from './runOperation'
 import { NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
 
 /**
@@ -10,48 +10,45 @@ import { NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integr
  */
 export function handleRemovedPart(
 	_context: JobContext,
-	data: IngestRemovePartProps
-): IngestUpdateOperationFunction | null {
-	return (ingestRundown) => {
-		if (ingestRundown) {
-			const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
-			if (!ingestSegment) {
-				throw new Error(
-					`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to update`
-				)
-			}
-			const partCountBefore = ingestSegment.parts.length
-			ingestSegment.parts = ingestSegment.parts.filter((p) => p.externalId !== data.partExternalId)
+	data: IngestRemovePartProps,
+	ingestRundown: LocalIngestRundown | undefined
+): UpdateIngestRundownChange {
+	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-			if (partCountBefore === ingestSegment.parts.length) {
-				return {
-					// No change
-					ingestRundown,
-					changes: {
-						source: 'ingest',
-					},
-				} satisfies UpdateIngestRundownChange
-			}
-			ingestSegment.modified = getCurrentTime()
+	const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
+	if (!ingestSegment) {
+		throw new Error(
+			`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to update`
+		)
+	}
+	const partCountBefore = ingestSegment.parts.length
+	ingestSegment.parts = ingestSegment.parts.filter((p) => p.externalId !== data.partExternalId)
 
-			return {
-				// We modify in-place
-				ingestRundown,
-				changes: {
-					source: 'ingest',
-					segmentChanges: {
-						[data.segmentExternalId]: {
-							partsChanges: {
-								[data.partExternalId]: NrcsIngestPartChangeDetails.Deleted,
-							},
-						},
+	if (partCountBefore === ingestSegment.parts.length) {
+		return {
+			// No change
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+			},
+		} satisfies UpdateIngestRundownChange
+	}
+	ingestSegment.modified = getCurrentTime()
+
+	return {
+		// We modify in-place
+		ingestRundown,
+		changes: {
+			source: 'ingest',
+			segmentChanges: {
+				[data.segmentExternalId]: {
+					partsChanges: {
+						[data.partExternalId]: NrcsIngestPartChangeDetails.Deleted,
 					},
 				},
-			} satisfies UpdateIngestRundownChange
-		} else {
-			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
-		}
-	}
+			},
+		},
+	} satisfies UpdateIngestRundownChange
 }
 
 /**
@@ -59,41 +56,38 @@ export function handleRemovedPart(
  */
 export function handleUpdatedPart(
 	_context: JobContext,
-	data: IngestUpdatePartProps
-): IngestUpdateOperationFunction | null {
-	return (ingestRundown) => {
-		if (ingestRundown) {
-			const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
-			if (!ingestSegment) {
-				throw new Error(
-					`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to update`
-				)
-			}
-			const partCountBefore = ingestSegment.parts.length
-			ingestSegment.parts = ingestSegment.parts.filter((p) => p.externalId !== data.ingestPart.externalId)
-			const isUpdate = partCountBefore !== ingestSegment.parts.length
+	data: IngestUpdatePartProps,
+	ingestRundown: LocalIngestRundown | undefined
+): UpdateIngestRundownChange {
+	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
-			ingestSegment.parts.push(makeNewIngestPart(data.ingestPart))
-			ingestSegment.modified = getCurrentTime()
+	const ingestSegment = ingestRundown.segments.find((s) => s.externalId === data.segmentExternalId)
+	if (!ingestSegment) {
+		throw new Error(
+			`Rundown "${data.rundownExternalId}" does not have a Segment "${data.segmentExternalId}" to update`
+		)
+	}
+	const partCountBefore = ingestSegment.parts.length
+	ingestSegment.parts = ingestSegment.parts.filter((p) => p.externalId !== data.ingestPart.externalId)
+	const isUpdate = partCountBefore !== ingestSegment.parts.length
 
-			return {
-				// We modify in-place
-				ingestRundown,
-				changes: {
-					source: 'ingest',
-					segmentChanges: {
-						[data.segmentExternalId]: {
-							partsChanges: {
-								[data.ingestPart.externalId]: isUpdate
-									? NrcsIngestPartChangeDetails.Payload
-									: NrcsIngestPartChangeDetails.Inserted,
-							},
-						},
+	ingestSegment.parts.push(makeNewIngestPart(data.ingestPart))
+	ingestSegment.modified = getCurrentTime()
+
+	return {
+		// We modify in-place
+		ingestRundown,
+		changes: {
+			source: 'ingest',
+			segmentChanges: {
+				[data.segmentExternalId]: {
+					partsChanges: {
+						[data.ingestPart.externalId]: isUpdate
+							? NrcsIngestPartChangeDetails.Updated
+							: NrcsIngestPartChangeDetails.Inserted,
 					},
 				},
-			} satisfies UpdateIngestRundownChange
-		} else {
-			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
-		}
-	}
+			},
+		},
+	} satisfies UpdateIngestRundownChange
 }
