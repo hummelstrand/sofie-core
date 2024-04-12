@@ -44,12 +44,19 @@ import {
 import { TextInputControl } from '../../../lib/Components/TextInput'
 import { CheckboxControl } from '../../../lib/Components/Checkbox'
 
-export function StudioRoutings(
-	translationNamespaces: string[],
-	studio: DBStudio,
-	studioMappings: ReadonlyDeep<MappingsExt>,
+interface IStudioRoutingsProps {
+	translationNamespaces: string[]
+	studio: DBStudio
+	studioMappings: ReadonlyDeep<MappingsExt>
 	manifest: MappingsSettingsManifests | undefined
-): React.JSX.Element {
+}
+
+export function StudioRoutings({
+	translationNamespaces,
+	studio,
+	studioMappings,
+	manifest,
+}: Readonly<IStudioRoutingsProps>): React.JSX.Element {
 	const { t } = useTranslation()
 
 	const editedItems: Array<string> = []
