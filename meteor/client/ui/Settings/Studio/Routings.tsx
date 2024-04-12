@@ -64,11 +64,11 @@ export function StudioRoutings({
 		(newOps: SomeObjectOverrideOp[]) => {
 			Studios.update(studio._id, {
 				$set: {
-					routeSet: newOps,
+					'routeSets.overrides': newOps,
 				},
 			})
 		},
-		[studio.routeSets]
+		[studio._id]
 	)
 
 	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSets)
@@ -176,7 +176,7 @@ export function StudioRoutings({
 
 		Studios.update(studio._id, {
 			$push: {
-				routeSet: addOp,
+				'routeSets.overrides': addOp,
 			},
 		})
 
