@@ -22,15 +22,10 @@ import { ReadonlyDeep } from 'type-fest'
 import { MappingsSettingsManifest, MappingsSettingsManifests } from './Mappings'
 import { SchemaFormForCollection } from '../../../lib/forms/SchemaFormForCollection'
 import { literal, objectPathGet } from '@sofie-automation/corelib/dist/lib'
-import { DropdownInputControl, DropdownInputOption } from '../../../lib/Components/DropdownInput'
+import { DropdownInputOption } from '../../../lib/Components/DropdownInput'
 import { JSONSchema } from '@sofie-automation/shared-lib/dist/lib/JSONSchemaTypes'
 import { Studios } from '../../../collections'
-import {
-	LabelActual,
-	LabelAndOverrides,
-	LabelAndOverridesForCheckbox,
-	LabelAndOverridesForDropdown,
-} from '../../../lib/Components/LabelAndOverrides'
+import { LabelActual } from '../../../lib/Components/LabelAndOverrides'
 import {
 	WrappedOverridableItem,
 	getAllCurrentAndDeletedItemsFromOverrides,
@@ -41,8 +36,6 @@ import {
 	SomeObjectOverrideOp,
 	applyAndValidateOverrides,
 } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
-import { TextInputControl } from '../../../lib/Components/TextInput'
-import { CheckboxControl } from '../../../lib/Components/Checkbox'
 import { useToggleExpandHelper } from '../../util/useToggleExpandHelper'
 
 interface IStudioRoutingsProps {
@@ -153,10 +146,10 @@ export function StudioRoutings({
 		toggleExpanded(oldRouteId)
 		toggleExpanded(newRouteId)
 	}
-	/*	const updateRouteSetActive = (routeSetId: string, value: boolean) => {
+	const updateRouteSetActive = (routeSetId: string, value: boolean) => {
 		overrideHelper.setItemValue(routeSetId, 'active', value)
 	}
-*/
+
 	const addNewRouteSet = React.useCallback(() => {
 		const resolvedRouteSets = applyAndValidateOverrides(studio.routeSets).obj
 
@@ -576,71 +569,49 @@ export function StudioRoutings({
 											className="input text-input input-l"
 										></EditAttribute>
 									</label>
-									{routeSet.type === 'normal' ? (
-										<div>
-											<LabelAndOverrides
-												label={t('Route Set Name')}
-												item={routeSet}
-												itemKey={'name'}
-												opPrefix={routeSet.id}
-												overrideHelper={overrideHelper}
-											>
-												{(value, handleUpdate) => (
-													<TextInputControl
-														modifiedClassName="bghl"
-														classNames="input text-input input-l"
-														value={value}
-														handleUpdate={handleUpdate}
-													/>
-												)}
-											</LabelAndOverrides>
-											<LabelAndOverridesForCheckbox
-												label={t('Active')}
-												item={routeSet}
-												itemKey={'active'}
-												opPrefix={routeSet.id}
-												overrideHelper={overrideHelper}
-											>
-												{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
-											</LabelAndOverridesForCheckbox>
-											<LabelAndOverridesForDropdown
-												label={t('Defualt State')}
-												item={routeSet}
-												itemKey={'defaultActive'}
-												opPrefix={routeSet.id}
-												overrideHelper={overrideHelper}
-												options={DEFAULT_ACTIVE_OPTIONS as any as DropdownInputOption<number>[]}
-												hint={t('The way this Route Set should behave towards the user')}
-											>
-												{(value, handleUpdate, options) => (
-													<DropdownInputControl
-														classNames="input text-input input-l"
-														options={options}
-														value={value as number}
-														handleUpdate={handleUpdate}
-													/>
-												)}
-											</LabelAndOverridesForDropdown>
-											<LabelAndOverridesForDropdown
-												label={t('Behavior')}
-												hint={t('The way this Route Set should behave towards the user')}
-												item={routeSet}
-												itemKey={'behavior'}
-												opPrefix={routeSet.id}
-												overrideHelper={overrideHelper}
-												options={StudioRouteBehavior as any as DropdownInputOption<number>[]}
-											>
-												{(value, handleUpdate, options) => (
-													<DropdownInputControl
-														classNames="input text-input input-l"
-														options={options}
-														value={value as number}
-														handleUpdate={handleUpdate}
-													/>
-												)}
-											</LabelAndOverridesForDropdown>
-										</div>
-									) : null}
+									<label className="field">
+										<LabelActual label={t('Active')} />
+										<EditAttribute
+											modifiedClassName="bghl"
+											attribute={`routeSets.${routeSet.id}.active`}
+											obj={studio}
+											type="checkbox"
+											collection={Studios}
+											updateFunction={(_ctx, value) => updateRouteSetActive(routeSet.id, value)}
+											disabled={
+												routeSet.computed?.behavior === StudioRouteBehavior.ACTIVATE_ONLY && routeSet.computed?.active
+											}
+											className=""
+										></EditAttribute>
+										<span className="mlm text-s dimmed field-hint">{t('Is this Route Set currently active')}</span>
+									</label>
+									<label className="field">
+										<LabelActual label={t('Default State')} />
+										<EditAttribute
+											modifiedClassName="bghl"
+											attribute={`routeSets.${routeSet.id}.defaultActive`}
+											obj={studio}
+											type="dropdown"
+											collection={Studios}
+											options={DEFAULT_ACTIVE_OPTIONS}
+											className="input text-input input-l"
+										></EditAttribute>
+										<span className="mlm text-s dimmed field-hint">{t('The default state of this Route Set')}</span>
+									</label>
+
+									<label className="field">
+										<LabelActual label={t('Route Set Name')} />
+										<EditAttribute
+											modifiedClassName="bghl"
+											attribute={`routeSets.${routeSet.id}.name`}
+											obj={studio}
+											type="text"
+											collection={Studios}
+											className="input text-input input-l"
+										></EditAttribute>
+										<span className="text-s dimmed field-hint">{t('Display name of the Route Set')}</span>
+									</label>
+
 									<label className="field">
 										<LabelActual label={t('Exclusivity group')} />
 										<div>
@@ -667,6 +638,22 @@ export function StudioRoutings({
 										</div>
 										<span className="text-s dimmed field-hint">
 											{t('If set, only one Route Set will be active per exclusivity group')}
+										</span>
+									</label>
+									<label className="field">
+										<LabelActual label={t('Behavior')} />
+										<EditAttribute
+											modifiedClassName="bghl"
+											attribute={`routeSets.${routeSet.id}.behavior`}
+											obj={studio}
+											type="dropdown"
+											options={StudioRouteBehavior}
+											optionsAreNumbers={true}
+											collection={Studios}
+											className="input text-input input-l"
+										></EditAttribute>
+										<span className="text-s dimmed field-hint">
+											{t('The way this Route Set should behave towards the user')}
 										</span>
 									</label>
 								</div>
