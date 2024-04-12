@@ -1,7 +1,14 @@
 import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
 import { JobContext } from '../jobs'
-import { IngestUpdateOperationFunction, UpdateIngestRundownResult, runIngestUpdateOperation } from './runOperation'
+import {
+	IngestUpdateOperationFunction,
+	UpdateIngestRundownResult,
+	runCustomIngestUpdateOperation,
+	runIngestUpdateOperation,
+} from './runOperation'
 import { LocalIngestRundown } from './ingestCache'
+import { CommitIngestData } from './lock'
+import { IngestModel } from './model/IngestModel'
 
 export function wrapMosIngestJob<TData extends IngestPropsBase>(
 	fcn: (context: JobContext, data: TData) => IngestUpdateOperationFunction | null
@@ -53,6 +60,21 @@ export function wrapGenericIngestJobWithPrecheck<TData extends IngestPropsBase>(
 			// }
 
 			return executeFcn(ingestRundown)
+		})
+	}
+}
+
+export function wrapCustomIngestJob<TData extends IngestPropsBase>(
+	fcn: (
+		context: JobContext,
+		data: TData,
+		ingestModel: IngestModel,
+		ingestRundown: LocalIngestRundown
+	) => Promise<CommitIngestData | null>
+): (context: JobContext, data: TData) => Promise<void> {
+	return async (context, data) => {
+		return runCustomIngestUpdateOperation(context, data, async (_context, ingestModel, ingestRundown) => {
+			return fcn(context, data, ingestModel, ingestRundown)
 		})
 	}
 }

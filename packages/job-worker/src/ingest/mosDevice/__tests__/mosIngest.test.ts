@@ -32,7 +32,7 @@ import { handleTakeNextPart } from '../../../playout/take'
 import { handleActivateRundownPlaylist, handleDeactivateRundownPlaylist } from '../../../playout/activePlaylistJobs'
 import { removeRundownPlaylistFromDb } from '../../__tests__/lib'
 import { UserErrorMessage } from '@sofie-automation/corelib/dist/error'
-import { wrapMosIngestJob } from '../../jobWrappers'
+import { wrapCustomIngestJob, wrapGenericIngestJob, wrapMosIngestJob } from '../../jobWrappers'
 
 jest.mock('../../updateNext')
 import { ensureNextPartIsValid } from '../../updateNext'
@@ -65,7 +65,8 @@ const handleMosInsertStoriesWrapped = wrapMosIngestJob(handleMosInsertStories)
 const handleMosMoveStoriesWrapped = wrapMosIngestJob(handleMosMoveStories)
 const handleMosSwapStoriesWrapped = wrapMosIngestJob(handleMosSwapStories)
 const handleMosRundownDataWrapped = wrapMosIngestJob(handleMosRundownData)
-const handleRemovedRundownWrapped = wrapMosIngestJob(handleRemovedRundown)
+const handleRemovedRundownWrapped = wrapGenericIngestJob(handleRemovedRundown)
+const handleMosRundownReadyToAirWrapped = wrapCustomIngestJob(handleMosRundownReadyToAir)
 
 describe('Test recieved mos ingest payloads', () => {
 	let context: MockJobContext
@@ -373,7 +374,7 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(rundown.status).not.toEqual(newStatus.toString())
 		expect((rundown.privateData as any)?.airStatus).not.toEqual(newStatus.toString())
 
-		await handleMosRundownReadyToAir(context, {
+		await handleMosRundownReadyToAirWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			status: newStatus,
@@ -397,7 +398,7 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(rundown).toBeTruthy()
 		expect(rundown.status).not.toEqual(newStatus.toString())
 
-		await handleMosRundownReadyToAir(context, {
+		await handleMosRundownReadyToAirWrapped(context, {
 			peripheralDeviceId: device._id,
 			rundownExternalId: rundown.externalId,
 			status: newStatus,
@@ -417,7 +418,7 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(await context.mockCollections.Rundowns.findOne({ externalId: externalId })).toBeFalsy()
 
 		await expect(
-			handleMosRundownReadyToAir(context, {
+			handleMosRundownReadyToAirWrapped(context, {
 				peripheralDeviceId: device._id,
 				rundownExternalId: externalId,
 				status: newStatus,

@@ -12,11 +12,12 @@ import { getCurrentTime } from '../../lib'
 import _ = require('underscore')
 import { LocalIngestRundown } from '../ingestCache'
 import { getRundownId, getPartId, canRundownBeUpdated } from '../lib'
-import { runWithRundownLock } from '../lock'
+import { CommitIngestData, runWithRundownLock } from '../lock'
 import { parseMosString } from './lib'
 import { groupedPartsToSegments, groupIngestParts, storiesToIngestParts } from './mosToIngest'
 import { GenerateRundownMode, updateRundownFromIngestData } from '../generationRundown'
-import { IngestUpdateOperationFunction, runCustomIngestUpdateOperation } from '../runOperation'
+import { IngestUpdateOperationFunction } from '../runOperation'
+import { IngestModel } from '../model/IngestModel'
 
 /**
  * Insert or update a mos rundown
@@ -118,22 +119,25 @@ export async function handleMosRundownStatus(context: JobContext, data: MosRundo
 /**
  * Update the ready to air state of a mos rundown
  */
-export async function handleMosRundownReadyToAir(context: JobContext, data: MosRundownReadyToAirProps): Promise<void> {
+export async function handleMosRundownReadyToAir(
+	context: JobContext,
+	data: MosRundownReadyToAirProps,
+	ingestModel: IngestModel,
+	ingestRundown: LocalIngestRundown
+): Promise<CommitIngestData | null> {
 	// nocommit, maybe this should be using the 'standard' flow instead of this custom one?
-	return runCustomIngestUpdateOperation(context, data, async (context, ingestModel, ingestRundown) => {
-		if (!ingestModel.rundown || ingestModel.rundown.airStatus === data.status) return null
+	if (!ingestModel.rundown || ingestModel.rundown.airStatus === data.status) return null
 
-		// If rundown is orphaned, then it should be ignored
-		if (ingestModel.rundown.orphaned) return null
+	// If rundown is orphaned, then it should be ignored
+	if (ingestModel.rundown.orphaned) return null
 
-		ingestModel.setRundownAirStatus(data.status)
+	ingestModel.setRundownAirStatus(data.status)
 
-		return updateRundownFromIngestData(
-			context,
-			ingestModel,
-			ingestRundown,
-			GenerateRundownMode.MetadataChange,
-			data.peripheralDeviceId
-		)
-	})
+	return updateRundownFromIngestData(
+		context,
+		ingestModel,
+		ingestRundown,
+		GenerateRundownMode.MetadataChange,
+		data.peripheralDeviceId
+	)
 }

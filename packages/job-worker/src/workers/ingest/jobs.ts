@@ -40,7 +40,12 @@ import {
 } from '../../ingest/bucket/bucketAdlibs'
 import { handleBucketItemImport, handleBucketItemRegenerate } from '../../ingest/bucket/import'
 import { handleUserExecuteChangeOperation } from '../../ingest/userOperation'
-import { wrapGenericIngestJob, wrapGenericIngestJobWithPrecheck, wrapMosIngestJob } from '../../ingest/jobWrappers'
+import {
+	wrapCustomIngestJob,
+	wrapGenericIngestJob,
+	wrapGenericIngestJobWithPrecheck,
+	wrapMosIngestJob,
+} from '../../ingest/jobWrappers'
 
 type ExecutableFunction<T extends keyof IngestJobFunc> = (
 	context: JobContext,
@@ -63,12 +68,12 @@ export const ingestJobHandlers: IngestJobHandlers = {
 	[IngestJobs.RegenerateRundown]: wrapGenericIngestJob(handleRegenerateRundown),
 	[IngestJobs.RegenerateSegment]: wrapGenericIngestJob(handleRegenerateSegment),
 
-	[IngestJobs.RemoveOrphanedSegments]: handleRemoveOrphanedSegemnts,
+	[IngestJobs.RemoveOrphanedSegments]: wrapCustomIngestJob(handleRemoveOrphanedSegemnts),
 
 	[IngestJobs.MosRundown]: wrapMosIngestJob(handleMosRundownData),
 	[IngestJobs.MosRundownMetadata]: wrapMosIngestJob(handleMosRundownMetadata),
 	[IngestJobs.MosRundownStatus]: handleMosRundownStatus,
-	[IngestJobs.MosRundownReadyToAir]: handleMosRundownReadyToAir,
+	[IngestJobs.MosRundownReadyToAir]: wrapCustomIngestJob(handleMosRundownReadyToAir),
 	[IngestJobs.MosFullStory]: wrapMosIngestJob(handleMosFullStory),
 	[IngestJobs.MosDeleteStory]: wrapMosIngestJob(handleMosDeleteStory),
 	[IngestJobs.MosInsertStory]: wrapMosIngestJob(handleMosInsertStories),
