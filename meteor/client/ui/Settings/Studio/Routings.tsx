@@ -43,6 +43,7 @@ import {
 } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 import { TextInputControl } from '../../../lib/Components/TextInput'
 import { CheckboxControl } from '../../../lib/Components/Checkbox'
+import { useToggleExpandHelper } from '../../util/useToggleExpandHelper'
 
 interface IStudioRoutingsProps {
 	translationNamespaces: string[]
@@ -59,23 +60,12 @@ export function StudioRoutings({
 }: Readonly<IStudioRoutingsProps>): React.JSX.Element {
 	const { t } = useTranslation()
 
-	const editedItems: Array<string> = []
+	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
 
-	// These must be handled in component, right now it's rerendered:
-	// Taken from a functional componen using hooks
 	const getRouteSetsFromOverrides = React.useMemo(
 		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSets, null),
 		[studio.routeSets]
 	)
-
-	/*	const saveOverrides = (newOps: SomeObjectOverrideOp[]) => {
-		Studios.update(studio._id, {
-			$set: {
-				routeSet: newOps,
-			},
-		})
-	}
-	*/
 
 	const saveOverrides = React.useCallback(
 		(newOps: SomeObjectOverrideOp[]) => {
@@ -90,22 +80,6 @@ export function StudioRoutings({
 
 	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSets)
 
-	const isItemEdited = (routeSetId: string) => {
-		return editedItems.indexOf(routeSetId) >= 0
-	}
-	const finishEditItem = (routeSetId: string) => {
-		const index = editedItems.indexOf(routeSetId)
-		if (index >= 0) {
-			editedItems.splice(index, 1)
-		}
-	}
-	const editItem = (routeSetId: string) => {
-		if (editedItems.indexOf(routeSetId) < 0) {
-			editedItems.push(routeSetId)
-		} else {
-			finishEditItem(routeSetId)
-		}
-	}
 	const confirmRemoveEGroup = (eGroupId: string, exclusivityGroup: StudioRouteSetExclusivityGroup) => {
 		doModalDialog({
 			title: t('Remove this Exclusivity Group?'),
@@ -176,8 +150,8 @@ export function StudioRoutings({
 		const oldRouteId = edit.props.overrideDisplayValue
 		overrideHelper.changeItemId(oldRouteId, newRouteId)
 
-		finishEditItem(oldRouteId)
-		editItem(newRouteId)
+		toggleExpanded(oldRouteId)
+		toggleExpanded(newRouteId)
 	}
 	/*	const updateRouteSetActive = (routeSetId: string, value: boolean) => {
 		overrideHelper.setItemValue(routeSetId, 'active', value)
@@ -212,6 +186,10 @@ export function StudioRoutings({
 				routeSet: addOp,
 			},
 		})
+
+		setTimeout(() => {
+			toggleExpanded(newId, true)
+		}, 1)
 	}, [studio._id, studio.routeSets])
 
 	const addNewRouteInSet = (routeId: string) => {
@@ -290,8 +268,8 @@ export function StudioRoutings({
 			})
 		}
 
-		finishEditItem(oldRouteId)
-		editItem(newRouteId)
+		toggleExpanded(oldRouteId)
+		toggleExpanded(newRouteId)
 	}
 
 	function renderRoutes(
@@ -472,7 +450,7 @@ export function StudioRoutings({
 					<React.Fragment key={exclusivityGroupId}>
 						<tr
 							className={ClassNames({
-								hl: isItemEdited(exclusivityGroupId),
+								hl: isExpanded(exclusivityGroupId),
 							})}
 						>
 							<th className="settings-studio-device__name c3">{exclusivityGroupId}</th>
@@ -487,7 +465,7 @@ export function StudioRoutings({
 							</td>
 
 							<td className="settings-studio-device__actions table-item-actions c3">
-								<button className="action-btn" onClick={() => editItem(exclusivityGroupId)}>
+								<button className="action-btn" onClick={() => toggleExpanded(exclusivityGroupId)}>
 									<FontAwesomeIcon icon={faPencilAlt} />
 								</button>
 								<button
@@ -498,7 +476,7 @@ export function StudioRoutings({
 								</button>
 							</td>
 						</tr>
-						{isItemEdited(exclusivityGroupId) && (
+						{isExpanded(exclusivityGroupId) && (
 							<tr className="expando-details hl">
 								<td colSpan={6}>
 									<div className="properties-grid">
@@ -529,7 +507,7 @@ export function StudioRoutings({
 										</label>
 									</div>
 									<div className="mod alright">
-										<button className="btn btn-primary" onClick={() => finishEditItem(exclusivityGroupId)}>
+										<button className="btn btn-primary" onClick={() => toggleExpanded(exclusivityGroupId)}>
 											<FontAwesomeIcon icon={faCheck} />
 										</button>
 									</div>
@@ -561,7 +539,7 @@ export function StudioRoutings({
 				<React.Fragment key={routeSet.id}>
 					<tr
 						className={ClassNames({
-							hl: isItemEdited(routeSet.id),
+							hl: isExpanded(routeSet.id),
 						})}
 					>
 						<th className="settings-studio-device__name c2">{routeSet.id}</th>
@@ -573,7 +551,7 @@ export function StudioRoutings({
 						</td>
 
 						<td className="settings-studio-device__actions table-item-actions c3">
-							<button className="action-btn" onClick={() => editItem(routeSet.id)}>
+							<button className="action-btn" onClick={() => toggleExpanded(routeSet.id)}>
 								<FontAwesomeIcon icon={faPencilAlt} />
 							</button>
 							<button className="action-btn" onClick={() => confirmRemove(routeSet.id)}>
@@ -581,7 +559,7 @@ export function StudioRoutings({
 							</button>
 						</td>
 					</tr>
-					{isItemEdited(routeSet.id) && (
+					{isExpanded(routeSet.id) && (
 						<tr className="expando-details hl">
 							<td colSpan={6}>
 								<div className="properties-grid">
@@ -694,7 +672,7 @@ export function StudioRoutings({
 								</div>
 								{renderRoutes(routeSet, routeSet.id, manifest)}
 								<div className="mod">
-									<button className="btn btn-primary right" onClick={() => finishEditItem(routeSet.id)}>
+									<button className="btn btn-primary right" onClick={() => toggleExpanded(routeSet.id)}>
 										<FontAwesomeIcon icon={faCheck} />
 									</button>
 									<button className="btn btn-secondary" onClick={() => addNewRouteInSet(routeSet.id)}>
