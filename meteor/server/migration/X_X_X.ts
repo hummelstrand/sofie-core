@@ -5,7 +5,7 @@ import {
 	convertObjectIntoOverrides,
 	isObjectWithOverrides,
 } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
-import { StudioRouteSet } from '@sofie-automation/corelib/dist/dataModel/Studio'
+import { StudioRouteSet, StudioRouteSetExclusivityGroup } from '@sofie-automation/corelib/dist/dataModel/Studio'
 
 /*
  * **************************************************************************************
@@ -48,6 +48,43 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 					await Studios.updateAsync(studio._id, {
 						$set: {
 							routeSets: newRouteSets,
+						},
+					})
+				}
+			}
+		},
+	},
+	{
+		id: `convert routeSetExclusivityGroups to ObjectWithOverrides`,
+		canBeRunAutomatically: true,
+		validate: async () => {
+			const studios = await Studios.findFetchAsync({ routeSetExclusivityGroups: { $exists: true } })
+
+			for (const studio of studios) {
+				// is an plain object
+				if (!isObjectWithOverrides(studio.routeSetExclusivityGroups)) {
+					return 'routesets must be converted to an ObjectWithOverrides'
+				}
+			}
+
+			return false
+		},
+		migrate: async () => {
+			const studios = await Studios.findFetchAsync({ routeSetExclusivityGroups: { $exists: true } })
+
+			for (const studio of studios) {
+				if (!isObjectWithOverrides(studio.routeSetExclusivityGroups)) {
+					// studio.routeSets is an plain object
+					const oldRouteSetExclusivityGroups = studio.routeSetExclusivityGroups as any as Record<
+						string,
+						StudioRouteSetExclusivityGroup
+					>
+
+					const newRouteSetExclusivityGroups = convertObjectIntoOverrides(oldRouteSetExclusivityGroups)
+
+					await Studios.updateAsync(studio._id, {
+						$set: {
+							routeSetExclusivityGroups: newRouteSetExclusivityGroups,
 						},
 					})
 				}
