@@ -130,6 +130,14 @@ export function StudioRoutings({
 		})
 	}
 
+	if (Object.keys(studio.routeSets).length === 0) {
+		return (
+			<tr>
+				<td className="mhn dimmed">{t('There are no Route Sets set up.')}</td>
+			</tr>
+		)
+	}
+
 	return (
 		<div>
 			<h2 className="mhn mbs">{t('Route Sets')}</h2>
@@ -163,18 +171,20 @@ export function StudioRoutings({
 							{_.map(getRouteSetsFromOverrides, (routeSet: WrappedOverridableItem<StudioRouteSet>) => {
 								return (
 									<React.Fragment key={routeSet.id}>
-										{routeSet.type === 'normal'
-											? RenderRouteSet({
-													routeSet: routeSet,
-													manifest: manifest,
-													studio: studio,
-													translationNamespaces: translationNamespaces,
-													studioMappings: studioMappings,
-													toggleExpanded: toggleExpanded,
-													isExpanded: isExpanded(routeSet.id),
-													overrideHelper: overrideHelper,
-											  })
-											: RenderRouteSetDeletedEntry({ routeSet: routeSet })}
+										{routeSet.type === 'normal' ? (
+											<RenderRouteSet
+												routeSet={routeSet}
+												manifest={manifest}
+												studio={studio}
+												translationNamespaces={translationNamespaces}
+												studioMappings={studioMappings}
+												toggleExpanded={toggleExpanded}
+												isExpanded={isExpanded(routeSet.id)}
+												overrideHelper={overrideHelper}
+											/>
+										) : (
+											<RenderRouteSetDeletedEntry routeSet={routeSet} />
+										)}
 									</React.Fragment>
 								)
 							})}
@@ -263,16 +273,8 @@ function RenderRouteSet({
 		[t('Not defined')]: undefined,
 	}
 
-	if (Object.keys(studio.routeSets).length === 0) {
-		return (
-			<tr>
-				<td className="mhn dimmed">{t('There are no Route Sets set up.')}</td>
-			</tr>
-		)
-	}
-
 	return (
-		<React.Fragment key={routeSet.id}>
+		<React.Fragment>
 			<tr
 				className={ClassNames({
 					hl: isExpanded,
@@ -445,6 +447,7 @@ function RenderRouteSetDeletedEntry({ routeSet }: Readonly<IRenderRouteSetDelete
 			<td className="settings-studio-device__id c2 deleted">{routeSet.defaults.name}</td>
 			<td className="settings-studio-device__id c2 deleted">{routeSet.id}</td>
 			<td className="settings-studio-output-table__actions table-item-actions c3">
+				unDelete is NOT IMPLEMENTED YET
 				<button className="action-btn" onClick={doUndeleteItem} title="Restore to defaults">
 					<FontAwesomeIcon icon={faSync} />
 				</button>
