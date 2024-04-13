@@ -276,6 +276,10 @@ function RenderRouteSet({
 		[overrideHelper, toggleExpanded, routeSet.id]
 	)
 
+	const exclusivityGroups = React.useMemo(() => {
+		return getDropdownInputOptions(Object.keys(studio.routeSetExclusivityGroups))
+	}, [studio.routeSetExclusivityGroups])
+
 	const DEFAULT_ACTIVE_OPTIONS = {
 		[t('Active')]: true,
 		[t('Not Active')]: false,
@@ -367,26 +371,32 @@ function RenderRouteSet({
 							<label className="field">
 								<LabelActual label={t('Exclusivity group')} />
 								<div>
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={`routeSets.${routeSet.id}.exclusivityGroup`}
-										obj={studio}
-										type="checkbox"
-										className="mrs mvxs"
-										collection={Studios}
-										mutateDisplayValue={(v) => (v === undefined ? false : true)}
-										mutateUpdateValue={() => undefined}
-									/>
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={`routeSets.${routeSet.id}.exclusivityGroup`}
-										obj={studio}
-										type="dropdown"
-										options={Object.keys(studio.routeSetExclusivityGroups)}
-										mutateDisplayValue={(v) => (v === undefined ? 'None' : v)}
-										collection={Studios}
-										className="input text-input input-l"
-									></EditAttribute>
+									<LabelAndOverridesForCheckbox
+										label={''}
+										item={routeSet}
+										itemKey={'exclusivityGroup'}
+										opPrefix={routeSet.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
+									</LabelAndOverridesForCheckbox>
+									<LabelAndOverridesForDropdown<any>
+										label={''}
+										item={routeSet}
+										itemKey={'exclusivityGroup'}
+										opPrefix={routeSet.id}
+										overrideHelper={overrideHelper}
+										options={exclusivityGroups}
+									>
+										{(value, handleUpdate, options) => (
+											<DropdownInputControl
+												classNames="input text-input input-l"
+												options={options}
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverridesForDropdown>
 								</div>
 								<span className="text-s dimmed field-hint">
 									{t('If set, only one Route Set will be active per exclusivity group')}
