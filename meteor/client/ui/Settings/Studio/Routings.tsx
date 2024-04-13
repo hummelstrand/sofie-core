@@ -1,6 +1,5 @@
 import ClassNames from 'classnames'
 import * as React from 'react'
-import { Meteor } from 'meteor/meteor'
 import * as _ from 'underscore'
 import {
 	DBStudio,
@@ -121,23 +120,35 @@ export function StudioRoutings({
 		}, 1)
 	}, [studio._id, studio.routeSets])
 
-	const addNewExclusivityGroup = () => {
-		const newEGroupKeyName = 'exclusivityGroup'
+	const addNewExclusivityGroup = React.useCallback(() => {
+		const newGroupKeyName = 'exclusivityGroup'
+		const resolvedGroups = applyAndValidateOverrides(studio.routeSetExclusivityGroups).obj
+
 		let iter = 0
-		while ((studio.routeSetExclusivityGroups || {})[newEGroupKeyName + iter]) {
+		while (resolvedGroups[newGroupKeyName + iter.toString()]) {
 			iter++
 		}
 
+		const newId = newGroupKeyName + iter.toString()
 		const newGroup: StudioRouteSetExclusivityGroup = {
-			name: 'New Exclusivity Group',
+			name: 'New Exclusivity Group' + iter.toString(),
 		}
-		const setObject: Record<string, any> = {}
-		setObject['routeSetExclusivityGroups.' + newEGroupKeyName + iter] = newGroup
+		const addOp = literal<ObjectOverrideSetOp>({
+			op: 'set',
+			path: newId,
+			value: newGroup,
+		})
 
 		Studios.update(studio._id, {
-			$set: setObject,
+			$push: {
+				'routeSetExclusivityGroups.overrides': addOp,
+			},
 		})
-	}
+
+		setTimeout(() => {
+			toggleExpanded(newId, true)
+		}, 1)
+	}, [studio._id, studio.routeSetExclusivityGroups])
 
 	if (Object.keys(studio.routeSets).length === 0) {
 		return (
@@ -161,12 +172,12 @@ export function StudioRoutings({
 					<h3 className="mhn">{t('Exclusivity Groups')}</h3>
 					<table className="expando settings-studio-mappings-table">
 						<tbody>
-							{RenderExclusivityGroups({
-								studio: studio,
-								toggleExpanded: toggleExpanded,
-								isExpanded: isExpanded('exclusivityGroup'),
-								getRouteSetsFromOverrides: getRouteSetsFromOverrides,
-							})}
+							<RenderExclusivityGroups
+								studio={studio}
+								getRouteSetsFromOverrides={getRouteSetsFromOverrides}
+								isExpanded={isExpanded}
+								toggleExpanded={toggleExpanded}
+							/>
 						</tbody>
 					</table>
 					<div className="mod mhs">
@@ -681,7 +692,7 @@ function RenderRoutes({
 interface IRenderExclusivityGroupsProps {
 	studio: DBStudio
 	toggleExpanded: (exclusivityGroupId: string, force?: boolean) => void
-	isExpanded: boolean
+	isExpanded: (exclusivityGroupId: string) => boolean
 	getRouteSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
 }
 
@@ -693,69 +704,25 @@ function RenderExclusivityGroups({
 }: Readonly<IRenderExclusivityGroupsProps>): React.JSX.Element {
 	const { t } = useTranslation()
 
-	const updateExclusivityGroupId = (edit: EditAttributeBase, newValue: string) => {
-		const oldRouteId = edit.props.overrideDisplayValue
-		const newRouteId = newValue + ''
-		const route = studio.routeSetExclusivityGroups[oldRouteId]
-
-		if (studio.routeSetExclusivityGroups[newRouteId]) {
-			throw new Meteor.Error(400, 'Exclusivity Group "' + newRouteId + '" already exists')
-		}
-
-		const mSet: Record<string, any> = {}
-		const mUnset: Record<string, 1> = {}
-		mSet['routeSetExclusivityGroups.' + newRouteId] = route
-		mUnset['routeSetExclusivityGroups.' + oldRouteId] = 1
-
-		if (edit.props.collection) {
-			edit.props.collection.update(studio._id, {
-				$set: mSet,
-				$unset: mUnset,
+	const saveOverrides = React.useCallback(
+		(newOps: SomeObjectOverrideOp[]) => {
+			Studios.update(studio._id, {
+				$set: {
+					'routeSetExclusivityGroups.overrides': newOps,
+				},
 			})
-		}
+		},
+		[studio._id]
+	)
 
-		toggleExpanded(oldRouteId)
-		toggleExpanded(newRouteId)
-	}
+	const exclusivityOverrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSetExclusivityGroups)
 
-	const removeExclusivityGroup = (eGroupId: string) => {
-		const unsetObject: Record<string, 1> = {}
-		_.forEach(getRouteSetsFromOverrides, (routeSet, routeSetId) => {
-			if (routeSet.computed?.exclusivityGroup === eGroupId) {
-				unsetObject['routeSets.' + routeSetId + '.exclusivityGroup'] = 1
-			}
-		})
-		unsetObject['routeSetExclusivityGroups.' + eGroupId] = 1
-		Studios.update(studio._id, {
-			$unset: unsetObject,
-		})
-	}
+	const getExclusivityGroupsFromOverrides = React.useMemo(
+		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetExclusivityGroups, null),
+		[studio.routeSetExclusivityGroups]
+	)
 
-	const confirmRemoveEGroup = (eGroupId: string, exclusivityGroup: StudioRouteSetExclusivityGroup) => {
-		doModalDialog({
-			title: t('Remove this Exclusivity Group?'),
-			yes: t('Remove'),
-			no: t('Cancel'),
-			onAccept: () => {
-				removeExclusivityGroup(eGroupId)
-			},
-			message: (
-				<React.Fragment>
-					<p>
-						{t(
-							'Are you sure you want to remove exclusivity group "{{eGroupName}}"?\nRoute Sets assigned to this group will be reset to no group.',
-							{
-								eGroupName: exclusivityGroup.name,
-							}
-						)}
-					</p>
-					<p>{t('Please note: This action is irreversible!')}</p>
-				</React.Fragment>
-			),
-		})
-	}
-
-	if (Object.keys(studio.routeSetExclusivityGroups).length === 0) {
+	if (getExclusivityGroupsFromOverrides.length === 0) {
 		return (
 			<tr>
 				<td className="mhn dimmed">{t('There are no exclusivity groups set up.')}</td>
@@ -765,75 +732,24 @@ function RenderExclusivityGroups({
 	return (
 		<React.Fragment>
 			{_.map(
-				studio.routeSetExclusivityGroups,
-				(exclusivityGroup: StudioRouteSetExclusivityGroup, exclusivityGroupId: string) => {
+				getExclusivityGroupsFromOverrides,
+				(exclusivityGroup: WrappedOverridableItem<StudioRouteSetExclusivityGroup>) => {
 					return (
-						<React.Fragment key={exclusivityGroupId}>
-							<tr
-								className={ClassNames({
-									hl: isExpanded,
-								})}
-							>
-								<th className="settings-studio-device__name c3">{exclusivityGroupId}</th>
-								<td className="settings-studio-device__id c5">{exclusivityGroup.name}</td>
-								<td className="settings-studio-device__id c3">
-									{
-										_.filter(
-											getRouteSetsFromOverrides,
-											(routeSet) => routeSet.computed?.exclusivityGroup === exclusivityGroupId
-										).length
-									}
-								</td>
-
-								<td className="settings-studio-device__actions table-item-actions c3">
-									<button className="action-btn" onClick={() => toggleExpanded(exclusivityGroupId)}>
-										<FontAwesomeIcon icon={faPencilAlt} />
-									</button>
-									<button
-										className="action-btn"
-										onClick={() => confirmRemoveEGroup(exclusivityGroupId, exclusivityGroup)}
-									>
-										<FontAwesomeIcon icon={faTrash} />
-									</button>
-								</td>
-							</tr>
-							{isExpanded && (
-								<tr className="expando-details hl">
-									<td colSpan={6}>
-										<div className="properties-grid">
-											<label className="field">
-												<LabelActual label={t('Exclusivity Group ID')} />
-												<EditAttribute
-													modifiedClassName="bghl"
-													attribute={'routeSetExclusivityGroups'}
-													overrideDisplayValue={exclusivityGroupId}
-													obj={studio}
-													type="text"
-													collection={Studios}
-													updateFunction={updateExclusivityGroupId}
-													className="input text-input input-l"
-												></EditAttribute>
-											</label>
-											<label className="field">
-												<LabelActual label={t('Exclusivity Group Name')} />
-												<EditAttribute
-													modifiedClassName="bghl"
-													attribute={'routeSetExclusivityGroups.' + exclusivityGroupId + '.name'}
-													obj={studio}
-													type="text"
-													collection={Studios}
-													className="input text-input input-l"
-												></EditAttribute>
-												<span className="text-s dimmed field-hint">{t('Display name of the Exclusivity Group')}</span>
-											</label>
-										</div>
-										<div className="mod alright">
-											<button className="btn btn-primary" onClick={() => toggleExpanded(exclusivityGroupId)}>
-												<FontAwesomeIcon icon={faCheck} />
-											</button>
-										</div>
-									</td>
-								</tr>
+						<React.Fragment key={exclusivityGroup.id}>
+							{exclusivityGroup.type === 'normal' ? (
+								<RenderExclusivityGroup
+									exclusivityGroup={exclusivityGroup}
+									studio={studio}
+									toggleExpanded={toggleExpanded}
+									isExpanded={isExpanded(exclusivityGroup.id)}
+									getRouteSetsFromOverrides={getRouteSetsFromOverrides}
+									exclusivityOverrideHelper={exclusivityOverrideHelper}
+								/>
+							) : (
+								<RenderExclusivityDeletedGroup
+									exclusivityGroup={exclusivityGroup}
+									exlusivityOverrideHelper={exclusivityOverrideHelper}
+								/>
 							)}
 						</React.Fragment>
 					)
@@ -842,6 +758,184 @@ function RenderExclusivityGroups({
 		</React.Fragment>
 	)
 }
+
+interface IRenderExclusivityGroupProps {
+	exclusivityGroup: WrappedOverridableItemNormal<StudioRouteSetExclusivityGroup>
+	studio: DBStudio
+	toggleExpanded: (exclusivityGroupId: string, force?: boolean) => void
+	isExpanded: boolean
+	getRouteSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
+	exclusivityOverrideHelper: OverrideOpHelper
+}
+
+function RenderExclusivityGroup({
+	exclusivityGroup,
+	studio,
+	toggleExpanded,
+	isExpanded,
+	getRouteSetsFromOverrides,
+	exclusivityOverrideHelper: overrideHelper,
+}: Readonly<IRenderExclusivityGroupProps>): React.JSX.Element {
+	const { t } = useTranslation()
+
+	const removeExclusivityGroup = (eGroupId: string) => {
+		overrideHelper.deleteItem(eGroupId)
+	}
+
+	const confirmRemoveEGroup = () => {
+		doModalDialog({
+			title: t('Remove this Exclusivity Group?'),
+			yes: t('Remove'),
+			no: t('Cancel'),
+			onAccept: () => {
+				removeExclusivityGroup(exclusivityGroup.id)
+			},
+			message: (
+				<React.Fragment>
+					<p>
+						{t(
+							'Are you sure you want to remove exclusivity group "{{eGroupName}}"?\nRoute Sets assigned to this group will be reset to no group.',
+							{
+								eGroupName: exclusivityGroup.computed?.name,
+							}
+						)}
+					</p>
+					<p>{t('Please note: This action is irreversible!')}</p>
+				</React.Fragment>
+			),
+		})
+	}
+	const updateExclusivityGroupId = (edit: EditAttributeBase, newValue: string) => {
+		const oldGroupId = edit.props.overrideDisplayValue
+		const newGroupId = newValue + ''
+		const group = exclusivityGroup.computed
+
+		// if (studio.routeSetExclusivityGroups[newRouteId]) {
+		// 	throw new Meteor.Error(400, 'Exclusivity Group "' + newRouteId + '" already exists')
+		// }
+
+		const mSet: Record<string, any> = {}
+		const mUnset: Record<string, 1> = {}
+		mSet['routeSetExclusivityGroups.' + newGroupId] = group
+		mUnset['routeSetExclusivityGroups.' + oldGroupId] = 1
+
+		if (edit.props.collection) {
+			edit.props.collection.update(studio._id, {
+				$set: mSet,
+				$unset: mUnset,
+			})
+		}
+
+		toggleExpanded(oldGroupId)
+		toggleExpanded(newGroupId)
+	}
+	return (
+		<React.Fragment>
+			<tr
+				className={ClassNames({
+					hl: isExpanded,
+				})}
+			>
+				<th className="settings-studio-device__name c3">{exclusivityGroup.id}</th>
+				<td className="settings-studio-device__id c5">{exclusivityGroup.computed?.name}</td>
+				<td className="settings-studio-device__id c3">
+					{
+						_.filter(
+							getRouteSetsFromOverrides,
+							(routeSet) => routeSet.computed?.exclusivityGroup === exclusivityGroup.id
+						).length
+					}
+				</td>
+
+				<td className="settings-studio-device__actions table-item-actions c3">
+					<button className="action-btn" onClick={() => toggleExpanded(exclusivityGroup.id)}>
+						<FontAwesomeIcon icon={faPencilAlt} />
+					</button>
+					<button className="action-btn" onClick={confirmRemoveEGroup}>
+						<FontAwesomeIcon icon={faTrash} />
+					</button>
+				</td>
+			</tr>
+			{isExpanded && (
+				<tr className="expando-details hl">
+					<td colSpan={6}>
+						<div className="properties-grid">
+							<label className="field">
+								<LabelActual label={t('Exclusivity Group ID')} />
+								<EditAttribute
+									modifiedClassName="bghl"
+									attribute={'routeSetExclusivityGroups'}
+									overrideDisplayValue={exclusivityGroup.id}
+									obj={studio}
+									type="text"
+									collection={Studios}
+									updateFunction={updateExclusivityGroupId}
+									className="input text-input input-l"
+								></EditAttribute>
+							</label>
+							<LabelAndOverrides
+								label={t('Exclusivity Group Name')}
+								item={exclusivityGroup}
+								itemKey={'name'}
+								opPrefix={exclusivityGroup.id}
+								overrideHelper={overrideHelper}
+							>
+								{(value, handleUpdate) => (
+									<TextInputControl
+										modifiedClassName="bghl"
+										classNames="input text-input input-l"
+										value={value}
+										handleUpdate={handleUpdate}
+									/>
+								)}
+							</LabelAndOverrides>
+						</div>
+						<div className="mod alright">
+							<button className="btn btn-primary" onClick={() => toggleExpanded(exclusivityGroup.id)}>
+								<FontAwesomeIcon icon={faCheck} />
+							</button>
+						</div>
+					</td>
+				</tr>
+			)}
+		</React.Fragment>
+	)
+}
+
+interface IRenderExclusivityDeletedGroupProps {
+	exclusivityGroup: WrappedOverridableItemDeleted<StudioRouteSetExclusivityGroup>
+	exlusivityOverrideHelper: OverrideOpHelper
+}
+
+function RenderExclusivityDeletedGroup({
+	exclusivityGroup,
+	exlusivityOverrideHelper: overrideHelper,
+}: Readonly<IRenderExclusivityDeletedGroupProps>): React.JSX.Element {
+	const { t } = useTranslation()
+
+	const doUndelete = (groupId: string) => {
+		console.log(t('doUndelete, not implemented yet :'), groupId)
+		overrideHelper.resetItem(groupId)
+	}
+
+	const doUndeleteItem = React.useCallback(() => doUndelete(exclusivityGroup.id), [doUndelete, exclusivityGroup.id])
+
+	return (
+		<tr>
+			<th className="settings-studio-device__name c3 notifications-s notifications-text">
+				{exclusivityGroup.defaults?.name}
+			</th>
+			<td className="settings-studio-device__id c2 deleted">{exclusivityGroup.defaults?.name}</td>
+			<td className="settings-studio-device__id c2 deleted">{exclusivityGroup.id}</td>
+			<td className="settings-studio-output-table__actions table-item-actions c3">
+				<button className="action-btn" onClick={doUndeleteItem} title="Restore to defaults">
+					<FontAwesomeIcon icon={faSync} />
+				</button>
+			</td>
+		</tr>
+	)
+}
+
 interface IDeviceMappingSettingsProps {
 	translationNamespaces: string[]
 	studio: DBStudio
