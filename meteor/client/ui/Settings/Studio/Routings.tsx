@@ -192,7 +192,7 @@ export function StudioRoutings({
 												overrideHelper={overrideHelper}
 											/>
 										) : (
-											<RenderRouteSetDeletedEntry routeSet={routeSet} />
+											<RenderRouteSetDeletedEntry routeSet={routeSet} overrideHelper={overrideHelper} />
 										)}
 									</React.Fragment>
 								)
@@ -447,20 +447,15 @@ function RenderRouteSet({
 
 interface IRenderRouteSetDeletedProps {
 	routeSet: WrappedOverridableItemDeleted<StudioRouteSet>
-	// manifest: MappingsSettingsManifests
-	// studio: DBStudio
-	// translationNamespaces: string[]
-	// studioMappings: ReadonlyDeep<MappingsExt>
-	// toggleExpanded: (layerId: string, force?: boolean) => void
-	// isExpanded: boolean
-	// overrideHelper: OverrideOpHelper
+	overrideHelper: OverrideOpHelper
 }
 
-function RenderRouteSetDeletedEntry({ routeSet }: Readonly<IRenderRouteSetDeletedProps>) {
+function RenderRouteSetDeletedEntry({ routeSet, overrideHelper }: Readonly<IRenderRouteSetDeletedProps>) {
 	const { t } = useTranslation()
 
 	const doUndelete = (routeSetId: string) => {
 		console.log(t('doUndelete, not implemented yet :'), routeSetId)
+		overrideHelper.resetItem(routeSetId)
 	}
 
 	const doUndeleteItem = React.useCallback(() => doUndelete(routeSet.id), [doUndelete, routeSet.id])
@@ -471,7 +466,6 @@ function RenderRouteSetDeletedEntry({ routeSet }: Readonly<IRenderRouteSetDelete
 			<td className="settings-studio-device__id c2 deleted">{routeSet.defaults.name}</td>
 			<td className="settings-studio-device__id c2 deleted">{routeSet.id}</td>
 			<td className="settings-studio-output-table__actions table-item-actions c3">
-				unDelete is NOT IMPLEMENTED YET
 				<button className="action-btn" onClick={doUndeleteItem} title="Restore to defaults">
 					<FontAwesomeIcon icon={faSync} />
 				</button>
