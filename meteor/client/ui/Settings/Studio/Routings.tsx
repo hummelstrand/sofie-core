@@ -81,7 +81,7 @@ export function StudioRoutings({
 		const resolvedRouteSets = applyAndValidateOverrides(studio.routeSets).obj
 
 		// find free key name
-		const newRouteKeyName = 'newLayer'
+		const newRouteKeyName = 'newRouteSet'
 		let iter = 0
 		while (resolvedRouteSets[newRouteKeyName + iter.toString()]) {
 			iter++
@@ -237,27 +237,16 @@ function RenderRouteSet({
 	}
 
 	const addNewRouteInSet = (routeId: string) => {
-		console.log(routeId)
-		/*			
-			const newRouteKeyName = 'newRouteSet'
-			let iter = 0
-			while ((getRouteSetsFromOverrides() || {})[newRouteKeyName + iter]) {
-				iter++
-			}
+		const newRoutes = routeSet.computed?.routes || []
 
-			const newRoute: RouteMapping = {
-				mappedLayer: '',
-				outputMappedLayer: '',
-				remapping: {},
-				routeType: StudioRouteType.REROUTE,
-			}
-			const setObject: Record<string, any> = {}
-			setObject['routeSets.' + routeId + '.routes'] = newRoute
+		newRoutes.push({
+			mappedLayer: '',
+			outputMappedLayer: '',
+			remapping: {},
+			routeType: StudioRouteType.REROUTE,
+		})
 
-			Studios.update(studio._id, {
-				$push: setObject,
-			})
-			*/
+		overrideHelper.setItemValue(routeId, 'routes', newRoutes)
 	}
 
 	const updateRouteSetId = React.useCallback(
