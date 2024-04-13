@@ -15,7 +15,7 @@ import {
 import { EditAttribute, EditAttributeBase } from '../../../lib/EditAttribute'
 import { doModalDialog } from '../../../lib/ModalDialog'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faPencilAlt, faCheck, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faTrash, faPencilAlt, faCheck, faPlus, faSync } from '@fortawesome/free-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
 import { TSR } from '@sofie-automation/blueprints-integration'
 import { ReadonlyDeep } from 'type-fest'
@@ -29,6 +29,8 @@ import { LabelActual, LabelAndOverrides, LabelAndOverridesForCheckbox } from '..
 import {
 	OverrideOpHelper,
 	WrappedOverridableItem,
+	WrappedOverridableItemDeleted,
+	WrappedOverridableItemNormal,
 	getAllCurrentAndDeletedItemsFromOverrides,
 	useOverrideOpHelper,
 } from '../util/OverrideOpHelper'
@@ -61,6 +63,19 @@ export function StudioRoutings({
 		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSets, null),
 		[studio.routeSets]
 	)
+
+	const saveOverrides = React.useCallback(
+		(newOps: SomeObjectOverrideOp[]) => {
+			Studios.update(studio._id, {
+				$set: {
+					'routeSets.overrides': newOps,
+				},
+			})
+		},
+		[studio._id]
+	)
+
+	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSets)
 
 	const addNewRouteSet = React.useCallback(() => {
 		const resolvedRouteSets = applyAndValidateOverrides(studio.routeSets).obj
@@ -129,7 +144,7 @@ export function StudioRoutings({
 					<h3 className="mhn">{t('Exclusivity Groups')}</h3>
 					<table className="expando settings-studio-mappings-table">
 						<tbody>
-							{renderExclusivityGroups({
+							{RenderExclusivityGroups({
 								studio: studio,
 								toggleExpanded: toggleExpanded,
 								isExpanded: isExpanded('exclusivityGroup'),
@@ -147,20 +162,20 @@ export function StudioRoutings({
 						<tbody>
 							{_.map(getRouteSetsFromOverrides, (routeSet: WrappedOverridableItem<StudioRouteSet>) => {
 								return (
-									<tr key={routeSet.id}>
-										<td className="mhn dimmed">
-											{t('There are no Route Sets set up.')}
-											{renderRouteSet({
-												routeSet: routeSet,
-												manifest: manifest,
-												studio: studio,
-												translationNamespaces: translationNamespaces,
-												studioMappings: studioMappings,
-												toggleExpanded: toggleExpanded,
-												isExpanded: isExpanded(routeSet.id),
-											})}
-										</td>
-									</tr>
+									<React.Fragment key={routeSet.id}>
+										{routeSet.type === 'normal'
+											? RenderRouteSet({
+													routeSet: routeSet,
+													manifest: manifest,
+													studio: studio,
+													translationNamespaces: translationNamespaces,
+													studioMappings: studioMappings,
+													toggleExpanded: toggleExpanded,
+													isExpanded: isExpanded(routeSet.id),
+													overrideHelper: overrideHelper,
+											  })
+											: RenderRouteSetDeletedEntry({ routeSet: routeSet })}
+									</React.Fragment>
 								)
 							})}
 						</tbody>
@@ -177,16 +192,17 @@ export function StudioRoutings({
 }
 
 interface IRenderRouteSetProps {
-	routeSet: WrappedOverridableItem<StudioRouteSet>
+	routeSet: WrappedOverridableItemNormal<StudioRouteSet>
 	manifest: MappingsSettingsManifests
 	studio: DBStudio
 	translationNamespaces: string[]
 	studioMappings: ReadonlyDeep<MappingsExt>
 	toggleExpanded: (layerId: string, force?: boolean) => void
 	isExpanded: boolean
+	overrideHelper: OverrideOpHelper
 }
 
-function renderRouteSet({
+function RenderRouteSet({
 	routeSet,
 	manifest,
 	studio,
@@ -194,22 +210,10 @@ function renderRouteSet({
 	toggleExpanded,
 	isExpanded,
 	studioMappings,
+	overrideHelper,
 }: Readonly<IRenderRouteSetProps>): React.JSX.Element {
 	const { t } = useTranslation()
-
-	const saveOverrides = React.useCallback(
-		(newOps: SomeObjectOverrideOp[]) => {
-			console.log('saveOverrides--------------------------', newOps)
-			Studios.update(studio._id, {
-				$set: {
-					'routeSets.overrides': newOps,
-				},
-			})
-		},
-		[studio._id]
-	)
-
-	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSets)
+	const toggleEditRouteSet = React.useCallback(() => toggleExpanded(routeSet.id), [toggleExpanded, routeSet.id])
 
 	const confirmRemove = (routeSetId: string) => {
 		doModalDialog({
@@ -294,7 +298,7 @@ function renderRouteSet({
 				</td>
 
 				<td className="settings-studio-device__actions table-item-actions c3">
-					<button className="action-btn" onClick={() => toggleExpanded(routeSet.id)}>
+					<button className="action-btn" onClick={toggleEditRouteSet}>
 						<FontAwesomeIcon icon={faPencilAlt} />
 					</button>
 					<button className="action-btn" onClick={() => confirmRemove(routeSet.id)}>
@@ -329,35 +333,34 @@ function renderRouteSet({
 								></EditAttribute>
 								<span className="mlm text-s dimmed field-hint">{t('The default state of this Route Set')}</span>
 							</label>
-							{routeSet.type === 'normal' ? (
-								<div>
-									<LabelAndOverridesForCheckbox
-										label={t('Active')}
-										item={routeSet}
-										itemKey={'active'}
-										opPrefix={routeSet.id}
-										overrideHelper={overrideHelper}
-									>
-										{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
-									</LabelAndOverridesForCheckbox>
-									<LabelAndOverrides
-										label={t('Route Set Name')}
-										item={routeSet}
-										itemKey={'name'}
-										opPrefix={routeSet.id}
-										overrideHelper={overrideHelper}
-									>
-										{(value, handleUpdate) => (
-											<TextInputControl
-												modifiedClassName="bghl"
-												classNames="input text-input input-l"
-												value={value}
-												handleUpdate={handleUpdate}
-											/>
-										)}
-									</LabelAndOverrides>
-								</div>
-							) : null}
+							<div>
+								<LabelAndOverridesForCheckbox
+									label={t('Active')}
+									item={routeSet}
+									itemKey={'active'}
+									opPrefix={routeSet.id}
+									overrideHelper={overrideHelper}
+								>
+									{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
+								</LabelAndOverridesForCheckbox>
+								<LabelAndOverrides
+									label={t('Route Set Name')}
+									item={routeSet}
+									itemKey={'name'}
+									opPrefix={routeSet.id}
+									overrideHelper={overrideHelper}
+								>
+									{(value, handleUpdate) => (
+										<TextInputControl
+											modifiedClassName="bghl"
+											classNames="input text-input input-l"
+											value={value}
+											handleUpdate={handleUpdate}
+										/>
+									)}
+								</LabelAndOverrides>
+							</div>
+
 							<label className="field">
 								<LabelActual label={t('Exclusivity group')} />
 								<div>
@@ -403,14 +406,15 @@ function renderRouteSet({
 								</span>
 							</label>
 						</div>
-						{renderRoutes({
-							routeSet: routeSet,
-							routeSetId: routeSet.id,
-							manifest: manifest,
-							translationNamespaces: translationNamespaces,
-							overrideHelper: overrideHelper,
-							studioMappings: studioMappings,
-						})}
+						<RenderRoutes
+							routeSet={routeSet}
+							routeSetId={routeSet.id}
+							studio={studio}
+							manifest={manifest}
+							translationNamespaces={translationNamespaces}
+							overrideHelper={overrideHelper}
+							studioMappings={studioMappings}
+						/>
 						<div className="mod">
 							<button className="btn btn-primary right" onClick={() => toggleExpanded(routeSet.id)}>
 								<FontAwesomeIcon icon={faCheck} />
@@ -426,8 +430,43 @@ function renderRouteSet({
 	)
 }
 
+interface IRenderRouteSetDeletedProps {
+	routeSet: WrappedOverridableItemDeleted<StudioRouteSet>
+	// manifest: MappingsSettingsManifests
+	// studio: DBStudio
+	// translationNamespaces: string[]
+	// studioMappings: ReadonlyDeep<MappingsExt>
+	// toggleExpanded: (layerId: string, force?: boolean) => void
+	// isExpanded: boolean
+	// overrideHelper: OverrideOpHelper
+}
+
+function RenderRouteSetDeletedEntry({ routeSet }: Readonly<IRenderRouteSetDeletedProps>) {
+	const { t } = useTranslation()
+
+	const doUndelete = (routeSetId: string) => {
+		console.log(t('doUndelete, not implemented yet :'), routeSetId)
+	}
+
+	const doUndeleteItem = React.useCallback(() => doUndelete(routeSet.id), [doUndelete, routeSet.id])
+
+	return (
+		<tr>
+			<th className="settings-studio-device__name c3 notifications-s notifications-text">{routeSet.defaults.name}</th>
+			<td className="settings-studio-device__id c2 deleted">{routeSet.defaults.name}</td>
+			<td className="settings-studio-device__id c2 deleted">{routeSet.id}</td>
+			<td className="settings-studio-output-table__actions table-item-actions c3">
+				<button className="action-btn" onClick={doUndeleteItem} title="Restore to defaults">
+					<FontAwesomeIcon icon={faSync} />
+				</button>
+			</td>
+		</tr>
+	)
+}
+
 interface IRenderRoutesProps {
 	routeSet: WrappedOverridableItem<StudioRouteSet>
+	studio: DBStudio
 	routeSetId: string
 	manifest: MappingsSettingsManifests
 	translationNamespaces: string[]
@@ -435,15 +474,17 @@ interface IRenderRoutesProps {
 	studioMappings: ReadonlyDeep<MappingsExt>
 }
 
-function renderRoutes({
+function RenderRoutes({
 	routeSet,
 	routeSetId,
+	studio,
 	manifest,
 	translationNamespaces,
 	overrideHelper,
 	studioMappings,
 }: Readonly<IRenderRoutesProps>): React.JSX.Element {
 	const { t } = useTranslation()
+
 	const confirmRemoveRoute = (routeSetId: string, route: RouteMapping) => {
 		doModalDialog({
 			title: t('Remove this Route from this Route Set?'),
@@ -634,13 +675,14 @@ interface IRenderExclusivityGroupsProps {
 	getRouteSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
 }
 
-function renderExclusivityGroups({
+function RenderExclusivityGroups({
 	studio,
 	toggleExpanded,
 	isExpanded,
 	getRouteSetsFromOverrides,
 }: Readonly<IRenderExclusivityGroupsProps>): React.JSX.Element {
 	const { t } = useTranslation()
+
 	const updateExclusivityGroupId = (edit: EditAttributeBase, newValue: string) => {
 		const oldRouteId = edit.props.overrideDisplayValue
 		const newRouteId = newValue + ''
