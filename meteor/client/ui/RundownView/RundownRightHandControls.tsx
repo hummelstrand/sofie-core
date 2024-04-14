@@ -29,7 +29,7 @@ import { MediaStatusIcon } from '../../lib/ui/icons/mediaStatus'
 import {
 	WrappedOverridableItemNormal,
 	getAllCurrentAndDeletedItemsFromOverrides,
-} from '../Settings/util/OverrideOpHelper'
+} from '../../../lib/collections/OverrideOpHelper'
 import { ObjectWithOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 
 interface IProps {

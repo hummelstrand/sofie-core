@@ -17,7 +17,7 @@ import {
 	getAllCurrentAndDeletedItemsFromOverrides,
 	OverrideOpHelper,
 	WrappedOverridableItemNormal,
-} from '../util/OverrideOpHelper'
+} from '../../../../lib/collections/OverrideOpHelper'
 import { TextInputControl } from '../../../lib/Components/TextInput'
 import { IntInputControl } from '../../../lib/Components/IntInput'
 import { useToggleExpandHelper } from '../../util/useToggleExpandHelper'

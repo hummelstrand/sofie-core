@@ -1,7 +1,10 @@
 import { joinObjectPathFragments, literal } from '@sofie-automation/corelib/dist/lib'
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { WrappedOverridableItemNormal, OverrideOpHelperForItemContents } from '../../ui/Settings/util/OverrideOpHelper'
+import {
+	WrappedOverridableItemNormal,
+	OverrideOpHelperForItemContents,
+} from '../../../lib/collections/OverrideOpHelper'
 import { CheckboxControl } from '../Components/Checkbox'
 import { DropdownInputOption, DropdownInputControl } from '../Components/DropdownInput'
 import { FloatInputControl } from '../Components/FloatInput'

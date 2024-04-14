@@ -3,7 +3,7 @@ import { MappingExt, MappingsExt, StudioRouteSet } from '@sofie-automation/corel
 import { ReadonlyDeep } from 'type-fest'
 import { getActiveRoutes, getRoutedMappings } from '../../../../lib/collections/Studios'
 import { ObjectWithOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
-import { getAllCurrentAndDeletedItemsFromOverrides } from '../../../../client/ui/Settings/util/OverrideOpHelper'
+import { getAllCurrentAndDeletedItemsFromOverrides } from '../../../../lib/collections/OverrideOpHelper'
 
 type MappingExtWithOriginalName = MappingExt & { originalLayerName: string }
 type MappingsExtWithOriginalName = {

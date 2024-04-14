@@ -36,7 +36,7 @@ import {
 	PeripheralDevicePubSub,
 	PeripheralDevicePubSubCollectionsNames,
 } from '@sofie-automation/shared-lib/dist/pubsub/peripheralDevice'
-import { getAllCurrentAndDeletedItemsFromOverrides } from '../../client/ui/Settings/util/OverrideOpHelper'
+import { getAllCurrentAndDeletedItemsFromOverrides } from '../../lib/collections/OverrideOpHelper'
 
 meteorPublish(CorelibPubSub.timelineDatastore, async function (studioId: StudioId, token: string | undefined) {
 	if (!studioId) throw new Meteor.Error(400, 'selector argument missing')

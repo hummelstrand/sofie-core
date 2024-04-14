@@ -8,7 +8,7 @@ import {
 	RouteMapping,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
 import { ReadonlyDeep } from 'type-fest'
-import { WrappedOverridableItem } from '../../client/ui/Settings/util/OverrideOpHelper'
+import { WrappedOverridableItem } from './OverrideOpHelper'
 
 export function getActiveRoutes(routeSets: WrappedOverridableItem<StudioRouteSet>[]): ResultingMappingRoutes {
 	const routes: ResultingMappingRoutes = {
