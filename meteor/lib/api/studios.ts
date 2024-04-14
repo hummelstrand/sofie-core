@@ -5,6 +5,7 @@ import {
 	StudioRouteSet,
 	StudioRouteSetExclusivityGroup,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
+import { ObjectWithOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 
 export interface NewStudiosAPI {
 	insertStudio(): Promise<StudioId>
@@ -32,6 +33,6 @@ export interface UIStudio {
 
 	settings: IStudioSettings
 
-	routeSets: Record<string, StudioRouteSet>
-	routeSetExclusivityGroups: Record<string, StudioRouteSetExclusivityGroup>
+	routeSets: ObjectWithOverrides<Record<string, StudioRouteSet>>
+	routeSetExclusivityGroups: ObjectWithOverrides<Record<string, StudioRouteSetExclusivityGroup>>
 }
