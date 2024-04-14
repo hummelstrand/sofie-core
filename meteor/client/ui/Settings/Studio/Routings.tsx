@@ -72,6 +72,11 @@ export function StudioRoutings({
 		[studio.routeSets]
 	)
 
+	const getExclusivityGroupsFromOverrides = React.useMemo(
+		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetExclusivityGroups, null),
+		[studio.routeSetExclusivityGroups]
+	)
+
 	const saveOverrides = React.useCallback(
 		(newOps: SomeObjectOverrideOp[]) => {
 			Studios.update(studio._id, {
@@ -177,6 +182,7 @@ export function StudioRoutings({
 								getRouteSetsFromOverrides={getRouteSetsFromOverrides}
 								isExpanded={isExpanded}
 								toggleExpanded={toggleExpanded}
+								getExclusivityGroupsFromOverrides={getExclusivityGroupsFromOverrides}
 							/>
 						</tbody>
 					</table>
@@ -201,6 +207,7 @@ export function StudioRoutings({
 												toggleExpanded={toggleExpanded}
 												isExpanded={isExpanded(routeSet.id)}
 												overrideHelper={overrideHelper}
+												getExclusivityGroupsFromOverrides={getExclusivityGroupsFromOverrides}
 											/>
 										) : (
 											<RenderRouteSetDeletedEntry routeSet={routeSet} overrideHelper={overrideHelper} />
@@ -230,6 +237,7 @@ interface IRenderRouteSetProps {
 	toggleExpanded: (layerId: string, force?: boolean) => void
 	isExpanded: boolean
 	overrideHelper: OverrideOpHelper
+	getExclusivityGroupsFromOverrides: WrappedOverridableItem<StudioRouteSetExclusivityGroup>[]
 }
 
 function RenderRouteSet({
@@ -241,6 +249,7 @@ function RenderRouteSet({
 	isExpanded,
 	studioMappings,
 	overrideHelper,
+	getExclusivityGroupsFromOverrides,
 }: Readonly<IRenderRouteSetProps>): React.JSX.Element {
 	const { t } = useTranslation()
 	const toggleEditRouteSet = React.useCallback(() => toggleExpanded(routeSet.id), [toggleExpanded, routeSet.id])
@@ -288,8 +297,8 @@ function RenderRouteSet({
 	)
 
 	const exclusivityGroups = React.useMemo(() => {
-		return getDropdownInputOptions(Object.keys(studio.routeSetExclusivityGroups))
-	}, [studio.routeSetExclusivityGroups])
+		return getDropdownInputOptions(getExclusivityGroupsFromOverrides.map((group) => group.computed?.name || group.id))
+	}, [studio.routeSetExclusivityGroups, studio.routeSetExclusivityGroups])
 
 	const DEFAULT_ACTIVE_OPTIONS = {
 		[t('Active')]: true,
@@ -694,6 +703,7 @@ interface IRenderExclusivityGroupsProps {
 	toggleExpanded: (exclusivityGroupId: string, force?: boolean) => void
 	isExpanded: (exclusivityGroupId: string) => boolean
 	getRouteSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
+	getExclusivityGroupsFromOverrides: WrappedOverridableItem<StudioRouteSetExclusivityGroup>[]
 }
 
 function RenderExclusivityGroups({
@@ -701,6 +711,7 @@ function RenderExclusivityGroups({
 	toggleExpanded,
 	isExpanded,
 	getRouteSetsFromOverrides,
+	getExclusivityGroupsFromOverrides,
 }: Readonly<IRenderExclusivityGroupsProps>): React.JSX.Element {
 	const { t } = useTranslation()
 
@@ -716,11 +727,6 @@ function RenderExclusivityGroups({
 	)
 
 	const exclusivityOverrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSetExclusivityGroups)
-
-	const getExclusivityGroupsFromOverrides = React.useMemo(
-		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetExclusivityGroups, null),
-		[studio.routeSetExclusivityGroups]
-	)
 
 	if (getExclusivityGroupsFromOverrides.length === 0) {
 		return (
