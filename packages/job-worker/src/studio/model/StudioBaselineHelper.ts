@@ -20,7 +20,7 @@ export class StudioBaselineHelper {
 
 	#pendingExpectedPackages: ExpectedPackageDBFromStudioBaselineObjects[] | undefined
 	#pendingExpectedPlayoutItems: ExpectedPlayoutItemStudio[] | undefined
-	#routeSetActive: Record<string, SomeObjectOverrideOp[]> = {}
+	#routeSetActive: Record<string, boolean> = {}
 
 	constructor(context: JobContext) {
 		this.#context = context
@@ -89,11 +89,23 @@ export class StudioBaselineHelper {
 		})
 
 		// This is not correct as it should use:
-		// this.#routeSetActive['routeSets.overrides'] =
-		// And save on the next saveAllToDatabase()
+		// this.#routeSetActive[] in some way.
+		// And save the Array with changes on the next saveAllToDatabase()
 		const saveOverrides = (newOps: SomeObjectOverrideOp[]) => {
 			logger.debug(`saveOverrides "${studio._id}" "${routeSetId}"=${isActive}`)
-			this.#routeSetActive['routeSets.overrides'] = newOps
+			logger.debug(`---------------------------------------------------------------`)
+			logger.alert(`NewOps: ${JSON.stringify(newOps)}`)
+			// this.#routeSetActive['routeSets.overrides'] = newOps
+			this.#context.directCollections.Studios.update(
+				{ _id: studio._id },
+				{
+					$set: {
+						'routeSets.overrides': newOps,
+					},
+				}
+			).catch((err) => {
+				logger.error(`Error updating studio "${studio._id}"`, err)
+			})
 		}
 
 		const overrideHelper = useOverrideOpHelperBackend(
