@@ -273,7 +273,8 @@ describe('defaultApplyIngestChanges', () => {
 			wrapSegment(segment)
 			return segment
 		})
-		wrapMethod('rundown', 'renameSegment', mutableIngestRundown)
+		wrapMethod('rundown', 'renameSegmentTo', mutableIngestRundown)
+		wrapMethod('rundown', 'renameSegmentFrom', mutableIngestRundown)
 		wrapMethod('rundown', 'removeSegment', mutableIngestRundown)
 		wrapMethod('rundown', 'forceFullRegenerate', mutableIngestRundown)
 		wrapMethod('rundown', 'setName', mutableIngestRundown)
@@ -734,7 +735,7 @@ describe('defaultApplyIngestChanges', () => {
 							partChanges: {
 								part0: NrcsIngestPartChangeDetails.Deleted,
 								partX: NrcsIngestPartChangeDetails.Inserted,
-								part1: NrcsIngestPartChangeDetails.Payload,
+								part1: NrcsIngestPartChangeDetails.Updated,
 							},
 						},
 						seg2: {
@@ -830,7 +831,7 @@ describe('defaultApplyIngestChanges', () => {
 					segmentChanges: {
 						seg0: {
 							partChanges: {
-								partX: NrcsIngestPartChangeDetails.Payload,
+								partX: NrcsIngestPartChangeDetails.Updated,
 							},
 						},
 					},
