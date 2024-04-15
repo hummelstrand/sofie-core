@@ -585,7 +585,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 	// TODO - check if this should be allowed
 	// eslint-disable-next-line jest/no-commented-out-tests
-	// test.skip('mosRoStoryInsert: Insert at end', async () => {
+	// test('mosRoStoryInsert: Insert at end', async () => {
 	// 	const rundown = Rundowns.findOne() as DBRundown
 	// 	expect(rundown).toBeTruthy()
 
@@ -698,7 +698,7 @@ describe('Test recieved mos ingest payloads', () => {
 		).toBeFalsy()
 	})
 
-	test.skip('mosRoStoryDelete: Remove segment', async () => {
+	test('mosRoStoryDelete: Remove segment', async () => {
 		await resetOrphanedRundown()
 
 		const playlist = (await context.mockCollections.RundownPlaylists.findOne()) as DBRundownPlaylist
@@ -746,7 +746,7 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(await context.mockCollections.Parts.findFetch({ externalId: { $in: partExternalIds } })).toHaveLength(1)
 	})
 
-	test.skip('mosRoFullStory: Valid data', async () => {
+	test('mosRoFullStory: Valid data', async () => {
 		await resetOrphanedRundown()
 
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as DBRundown
@@ -815,7 +815,7 @@ describe('Test recieved mos ingest payloads', () => {
 		).rejects.toThrow(`Rundown "${mosTypes.mosString128.stringify(story.RunningOrderId)}" not found`)
 	})
 
-	test.skip('mosRoStorySwap: Within same segment', async () => {
+	test('mosRoStorySwap: Within same segment', async () => {
 		await resetOrphanedRundown()
 
 		const playlist = (await context.mockCollections.RundownPlaylists.findOne()) as DBRundownPlaylist
@@ -846,7 +846,7 @@ describe('Test recieved mos ingest payloads', () => {
 		await expectRundownToMatchSnapshot(rundown._id, true, true)
 	})
 
-	test.skip('mosRoStorySwap: With first in same segment', async () => {
+	test('mosRoStorySwap: With first in same segment', async () => {
 		await resetOrphanedRundown()
 
 		const playlist = (await context.mockCollections.RundownPlaylists.findOne()) as DBRundownPlaylist
@@ -870,7 +870,7 @@ describe('Test recieved mos ingest payloads', () => {
 		const { segments, parts } = await getRundownData({ _id: rundown._id })
 
 		const partMap = mockRO.segmentIdMap()
-		partMap[0].segmentId = 'apDVfF5nk1_StK474hEUxLMZIag_'
+		partMap[0].segmentId = 'is9fJG4C1Q7i4JBj5ccMlCzk1zM_'
 		partMap[0].parts[0] = 'ro1;s1;p3'
 		partMap[0].parts[2] = 'ro1;s1;p1'
 		expect(getPartIdMap(segments, parts)).toEqual(partMap)
@@ -896,7 +896,7 @@ describe('Test recieved mos ingest payloads', () => {
 		)
 	})
 
-	test.skip('mosRoStorySwap: Story not found', async () => {
+	test('mosRoStorySwap: Story not found', async () => {
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as DBRundown
 		expect(rundown).toBeTruthy()
 
@@ -910,11 +910,7 @@ describe('Test recieved mos ingest payloads', () => {
 				story0,
 				story1,
 			})
-		).rejects.toThrow(
-			`Story ${getMosIngestSegmentId(mosTypes.mosString128.stringify(story1))} not found in rundown ${
-				rundown.externalId
-			}`
-		)
+		).rejects.toThrow(`Story ${mosTypes.mosString128.stringify(story1)} not found in rundown ${rundown.externalId}`)
 
 		await expect(
 			handleMosSwapStoriesWrapped(context, {
@@ -923,14 +919,10 @@ describe('Test recieved mos ingest payloads', () => {
 				story0: story1,
 				story1: story0,
 			})
-		).rejects.toThrow(
-			`Story ${getMosIngestSegmentId(mosTypes.mosString128.stringify(story1))} not found in rundown ${
-				rundown.externalId
-			}`
-		)
+		).rejects.toThrow(`Story ${mosTypes.mosString128.stringify(story1)} not found in rundown ${rundown.externalId}`)
 	})
 
-	test.skip('mosRoStorySwap: Swap across segments', async () => {
+	test('mosRoStorySwap: Swap across segments', async () => {
 		await resetOrphanedRundown()
 
 		const playlist = (await context.mockCollections.RundownPlaylists.findOne()) as DBRundownPlaylist
@@ -955,7 +947,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const partMap = mockRO.segmentIdMap()
 		partMap[1].parts.push('ro1;s4;p1')
-		partMap[2].segmentId = 'sLfUx9cadyquE07Vw9byoX35G9I_'
+		partMap[2].segmentId = 'RzYAlXBEVlAqzR8s38yjLxS41xU_'
 		partMap[2].parts.reverse()
 		partMap.splice(3, 1)
 		expect(getPartIdMap(segments, parts)).toEqual(partMap)
@@ -963,7 +955,7 @@ describe('Test recieved mos ingest payloads', () => {
 		await expectRundownToMatchSnapshot(rundown._id, true, true)
 	})
 
-	test.skip('mosRoStorySwap: Swap across segments2', async () => {
+	test('mosRoStorySwap: Swap across segments2', async () => {
 		await resetOrphanedRundown()
 
 		const playlist = (await context.mockCollections.RundownPlaylists.findOne()) as DBRundownPlaylist
@@ -984,12 +976,51 @@ describe('Test recieved mos ingest payloads', () => {
 
 		expect(ensureNextPartIsValid).toHaveBeenCalledTimes(1)
 
-		// Don't care about the result here, just making sure there isnt an exception while updating the db
+		const { segments, parts } = await getRundownData({ _id: rundown._id })
+
+		const partMap = [
+			{
+				parts: ['ro1;s1;p1'],
+				segmentName: 'SEGMENT1',
+				segmentId: 'aZYVvzVUYqFQBxY1iavRymzMiys_',
+			},
+			{
+				parts: ['ro1;s2;p2'],
+				segmentName: 'SEGMENT2',
+				segmentId: 'F5ID5_MkDHoJM5rV8VYhh7CFkWA_',
+			},
+			{
+				parts: ['ro1;s1;p3'],
+				segmentName: 'SEGMENT1',
+				segmentId: 'is9fJG4C1Q7i4JBj5ccMlCzk1zM_',
+			},
+			{
+				parts: ['ro1;s2;p1'],
+				segmentName: 'SEGMENT2',
+				segmentId: 'Kbs6joYlqXZr_QeVR7ssTHfJ4kI_',
+			},
+			{
+				parts: ['ro1;s1;p2'],
+				segmentName: 'SEGMENT1',
+				segmentId: 'KK1Zsy8wo_zZwZOhKln0BoXAIJI_',
+			},
+			{
+				parts: ['ro1;s3;p1', 'ro1;s3;p2'],
+				segmentName: 'SEGMENT3',
+				segmentId: 'SIuQJB7ZJNtRcxtqLGljE_qBGo8_',
+			},
+			{
+				parts: ['ro1;s4;p1'],
+				segmentName: 'SEGMENT2',
+				segmentId: 'ddtMj3S9nDPeQ3tkyHTCOYrU414_',
+			},
+		]
+		expect(getPartIdMap(segments, parts)).toEqual(partMap)
 
 		await expectRundownToMatchSnapshot(rundown._id, true, true)
 	})
 
-	test.skip('mosRoStoryMove: Within segment', async () => {
+	test('mosRoStoryMove: Within segment', async () => {
 		await resetOrphanedRundown()
 
 		const playlist = (await context.mockCollections.RundownPlaylists.findOne()) as DBRundownPlaylist
@@ -1018,7 +1049,7 @@ describe('Test recieved mos ingest payloads', () => {
 		await expectRundownToMatchSnapshot(rundown._id, true, true)
 	})
 
-	test.skip('mosRoStoryMove: Move whole segment to end', async () => {
+	test('mosRoStoryMove: Move whole segment to end', async () => {
 		await resetOrphanedRundown()
 
 		const playlist = (await context.mockCollections.RundownPlaylists.findOne()) as DBRundownPlaylist
@@ -1051,7 +1082,7 @@ describe('Test recieved mos ingest payloads', () => {
 		await expectRundownToMatchSnapshot(rundown._id, true, true)
 	})
 
-	test.skip('mosRoStoryMove: Invalid before ID', async () => {
+	test('mosRoStoryMove: Invalid before ID', async () => {
 		await resetOrphanedRundown()
 
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as DBRundown
@@ -1072,13 +1103,13 @@ describe('Test recieved mos ingest payloads', () => {
 				stories,
 			})
 		).rejects.toThrow(
-			`Part ${getMosIngestSegmentId(mosTypes.mosString128.stringify(beforeStoryId))} was not found in rundown ${
+			`Part ${getMosIngestSegmentId(mosTypes.mosString128.stringify(beforeStoryId))} in rundown ${
 				rundown.externalId
-			}`
+			} not found`
 		)
 	})
 
-	test.skip('mosRoStoryMove: Invalid before self', async () => {
+	test('mosRoStoryMove: Invalid before self', async () => {
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as DBRundown
 		expect(rundown).toBeTruthy()
 
@@ -1097,13 +1128,13 @@ describe('Test recieved mos ingest payloads', () => {
 				stories,
 			})
 		).rejects.toThrow(
-			`Part ${getMosIngestSegmentId(mosTypes.mosString128.stringify(beforeStoryId))} was not found in rundown ${
+			`Part ${getMosIngestSegmentId(mosTypes.mosString128.stringify(beforeStoryId))} in rundown ${
 				rundown.externalId
-			}`
+			} not found`
 		)
 	})
 
-	test.skip('mosRoStoryMove: Bad ID', async () => {
+	test('mosRoStoryMove: Bad ID', async () => {
 		await resetOrphanedRundown()
 
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as DBRundown
@@ -1128,7 +1159,7 @@ describe('Test recieved mos ingest payloads', () => {
 		)
 	})
 
-	test.skip('mosRoStoryDelete: Remove first story in segment', async () => {
+	test('mosRoStoryDelete: Remove first story in segment', async () => {
 		await resetOrphanedRundown()
 
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as DBRundown
@@ -1371,7 +1402,7 @@ describe('Test recieved mos ingest payloads', () => {
 		}
 	})
 
-	test.skip('Playlist updates when removing one (of multiple) rundowns', async () => {
+	test('Playlist updates when removing one (of multiple) rundowns', async () => {
 		// Cleanup any existing playlists
 		await context.mockCollections.RundownPlaylists.update({}, { $unset: { activationId: 1 } })
 		await context.mockCollections.RundownPlaylists.findFetch().then(async (playlists) =>

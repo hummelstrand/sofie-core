@@ -1633,18 +1633,18 @@ exports[`Test recieved mos ingest payloads mosRoStoryDelete: Remove segment 2`] 
 exports[`Test recieved mos ingest payloads mosRoStoryDelete: Remove segment 3`] = `
 [
   {
-    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
-    "_rank": 1,
-    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
-    "name": "SEGMENT2",
-    "notes": [],
-    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-  },
-  {
     "_id": "aZYVvzVUYqFQBxY1iavRymzMiys_",
     "_rank": 0,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT1_ro1;s1;p1",
     "name": "SEGMENT1",
+    "notes": [],
+    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
+  },
+  {
+    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
+    "_rank": 1,
+    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
+    "name": "SEGMENT2",
     "notes": [],
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },
@@ -2516,14 +2516,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Move whole segment to
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },
   {
-    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
-    "_rank": 0,
-    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
-    "name": "SEGMENT2",
-    "notes": [],
-    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-  },
-  {
     "_id": "aZYVvzVUYqFQBxY1iavRymzMiys_",
     "_rank": 3,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT1_ro1;s1;p1",
@@ -2536,6 +2528,14 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Move whole segment to
     "_rank": 1,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT3_ro1;s3;p1",
     "name": "SEGMENT3",
+    "notes": [],
+    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
+  },
+  {
+    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
+    "_rank": 0,
+    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
+    "name": "SEGMENT2",
     "notes": [],
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },
@@ -2811,14 +2811,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Within segment 3`] = 
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },
   {
-    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
-    "_rank": 1,
-    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
-    "name": "SEGMENT2",
-    "notes": [],
-    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-  },
-  {
     "_id": "aZYVvzVUYqFQBxY1iavRymzMiys_",
     "_rank": 0,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT1_ro1;s1;p1",
@@ -2831,6 +2823,14 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Within segment 3`] = 
     "_rank": 2,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT3_ro1;s3;p1",
     "name": "SEGMENT3",
+    "notes": [],
+    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
+  },
+  {
+    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
+    "_rank": 1,
+    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
+    "name": "SEGMENT2",
     "notes": [],
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },
@@ -3392,7 +3392,15 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments 
 exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments 3`] = `
 [
   {
-    "_id": "sLfUx9cadyquE07Vw9byoX35G9I_",
+    "_id": "aZYVvzVUYqFQBxY1iavRymzMiys_",
+    "_rank": 0,
+    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT1_ro1;s1;p1",
+    "name": "SEGMENT1",
+    "notes": [],
+    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
+  },
+  {
+    "_id": "RzYAlXBEVlAqzR8s38yjLxS41xU_",
     "_rank": 2,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT3_ro1;s3;p2",
     "name": "SEGMENT3",
@@ -3404,14 +3412,6 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments 
     "_rank": 1,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
     "name": "SEGMENT2",
-    "notes": [],
-    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-  },
-  {
-    "_id": "aZYVvzVUYqFQBxY1iavRymzMiys_",
-    "_rank": 0,
-    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT1_ro1;s1;p1",
-    "name": "SEGMENT1",
     "notes": [],
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },
@@ -3427,7 +3427,7 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments 
     "notes": [],
     "privateData": {},
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-    "segmentId": "sLfUx9cadyquE07Vw9byoX35G9I_",
+    "segmentId": "RzYAlXBEVlAqzR8s38yjLxS41xU_",
     "title": "SEGMENT3;PART2",
   },
   {
@@ -3467,7 +3467,7 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments 
     "notes": [],
     "privateData": {},
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-    "segmentId": "sLfUx9cadyquE07Vw9byoX35G9I_",
+    "segmentId": "RzYAlXBEVlAqzR8s38yjLxS41xU_",
     "title": "SEGMENT3;PART1",
   },
   {
@@ -3679,15 +3679,7 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments2
 exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments2 3`] = `
 [
   {
-    "_id": "oLlO42uuh1jzxrJrFmnAqDH5_Do_",
-    "_rank": 1,
-    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p2",
-    "name": "SEGMENT2",
-    "notes": [],
-    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-  },
-  {
-    "_id": "apDVfF5nk1_StK474hEUxLMZIag_",
+    "_id": "is9fJG4C1Q7i4JBj5ccMlCzk1zM_",
     "_rank": 2,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT1_ro1;s1;p3",
     "name": "SEGMENT1",
@@ -3698,14 +3690,6 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments2
     "_id": "ddtMj3S9nDPeQ3tkyHTCOYrU414_",
     "_rank": 6,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s4;p1",
-    "name": "SEGMENT2",
-    "notes": [],
-    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-  },
-  {
-    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
-    "_rank": 3,
-    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
     "name": "SEGMENT2",
     "notes": [],
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
@@ -3727,10 +3711,26 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments2
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },
   {
-    "_id": "6tE1R4qyvS2U8gUoAc23Y8R50UI_",
+    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
+    "_rank": 3,
+    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
+    "name": "SEGMENT2",
+    "notes": [],
+    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
+  },
+  {
+    "_id": "KK1Zsy8wo_zZwZOhKln0BoXAIJI_",
     "_rank": 4,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT1_ro1;s1;p2",
     "name": "SEGMENT1",
+    "notes": [],
+    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
+  },
+  {
+    "_id": "F5ID5_MkDHoJM5rV8VYhh7CFkWA_",
+    "_rank": 1,
+    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p2",
+    "name": "SEGMENT2",
     "notes": [],
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },
@@ -3766,7 +3766,7 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments2
     "notes": [],
     "privateData": {},
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-    "segmentId": "oLlO42uuh1jzxrJrFmnAqDH5_Do_",
+    "segmentId": "F5ID5_MkDHoJM5rV8VYhh7CFkWA_",
     "title": "SEGMENT2;PART2",
   },
   {
@@ -3776,7 +3776,7 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments2
     "notes": [],
     "privateData": {},
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-    "segmentId": "apDVfF5nk1_StK474hEUxLMZIag_",
+    "segmentId": "is9fJG4C1Q7i4JBj5ccMlCzk1zM_",
     "title": "SEGMENT1;PART3",
   },
   {
@@ -3806,7 +3806,7 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments2
     "notes": [],
     "privateData": {},
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-    "segmentId": "6tE1R4qyvS2U8gUoAc23Y8R50UI_",
+    "segmentId": "KK1Zsy8wo_zZwZOhKln0BoXAIJI_",
     "title": "SEGMENT1;PART2",
   },
   {
@@ -3998,7 +3998,7 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: With first in same se
 exports[`Test recieved mos ingest payloads mosRoStorySwap: With first in same segment 3`] = `
 [
   {
-    "_id": "apDVfF5nk1_StK474hEUxLMZIag_",
+    "_id": "is9fJG4C1Q7i4JBj5ccMlCzk1zM_",
     "_rank": 0,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT1_ro1;s1;p3",
     "name": "SEGMENT1",
@@ -4014,18 +4014,18 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: With first in same se
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },
   {
-    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
-    "_rank": 1,
-    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
-    "name": "SEGMENT2",
-    "notes": [],
-    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-  },
-  {
     "_id": "SIuQJB7ZJNtRcxtqLGljE_qBGo8_",
     "_rank": 2,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT3_ro1;s3;p1",
     "name": "SEGMENT3",
+    "notes": [],
+    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
+  },
+  {
+    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
+    "_rank": 1,
+    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
+    "name": "SEGMENT2",
     "notes": [],
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },
@@ -4071,7 +4071,7 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: With first in same se
     "notes": [],
     "privateData": {},
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-    "segmentId": "apDVfF5nk1_StK474hEUxLMZIag_",
+    "segmentId": "is9fJG4C1Q7i4JBj5ccMlCzk1zM_",
     "title": "SEGMENT1;PART3",
   },
   {
@@ -4091,7 +4091,7 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: With first in same se
     "notes": [],
     "privateData": {},
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-    "segmentId": "apDVfF5nk1_StK474hEUxLMZIag_",
+    "segmentId": "is9fJG4C1Q7i4JBj5ccMlCzk1zM_",
     "title": "SEGMENT1;PART1",
   },
   {
@@ -4101,7 +4101,7 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: With first in same se
     "notes": [],
     "privateData": {},
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-    "segmentId": "apDVfF5nk1_StK474hEUxLMZIag_",
+    "segmentId": "is9fJG4C1Q7i4JBj5ccMlCzk1zM_",
     "title": "SEGMENT1;PART2",
   },
   {
@@ -4301,14 +4301,6 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Within same segment 3
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },
   {
-    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
-    "_rank": 1,
-    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
-    "name": "SEGMENT2",
-    "notes": [],
-    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
-  },
-  {
     "_id": "aZYVvzVUYqFQBxY1iavRymzMiys_",
     "_rank": 0,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT1_ro1;s1;p1",
@@ -4321,6 +4313,14 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Within same segment 3
     "_rank": 2,
     "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT3_ro1;s3;p1",
     "name": "SEGMENT3",
+    "notes": [],
+    "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
+  },
+  {
+    "_id": "Kbs6joYlqXZr_QeVR7ssTHfJ4kI_",
+    "_rank": 1,
+    "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa_SEGMENT2_ro1;s2;p1",
+    "name": "SEGMENT2",
     "notes": [],
     "rundownId": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   },

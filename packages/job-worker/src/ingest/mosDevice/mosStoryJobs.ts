@@ -12,6 +12,7 @@ import { mosStoryToIngestSegment } from './mosToIngest'
 import {
 	IngestRundown,
 	IngestSegment,
+	MOS,
 	NrcsIngestPartChangeDetails,
 	NrcsIngestSegmentChangeDetails,
 	NrcsIngestSegmentChangeDetailsEnum,
@@ -51,6 +52,7 @@ export function handleMosFullStory(
 
 		// We modify in-place
 		ingestPart.payload = data.story
+		console.log('set payload', data.story)
 
 		return {
 			// We modify in-place
@@ -133,12 +135,10 @@ export function handleMosInsertStories(
 		const newIngestSegments = data.newStories.map((story) => mosStoryToIngestSegment(story, true))
 
 		// The part of which we are about to insert stories after
-		const insertBeforeSegmentExternalId = data.insertBeforeStoryId
-			? getMosIngestSegmentId(parseMosString(data.insertBeforeStoryId))
-			: undefined
-		const insertIndex = !insertBeforeSegmentExternalId // insert last
-			? ingestRundown.segments.length
-			: ingestRundown.segments.findIndex((p) => p.externalId === insertBeforeSegmentExternalId)
+		const insertBeforeSegmentExternalId = storyIdToSegmentExternalId(data.insertBeforeStoryId)
+		const insertIndex = insertBeforeSegmentExternalId // insert last
+			? ingestRundown.segments.findIndex((p) => p.externalId === insertBeforeSegmentExternalId)
+			: ingestRundown.segments.length
 		if (insertIndex === -1) {
 			throw new Error(`Part ${insertBeforeSegmentExternalId} in rundown ${data.rundownExternalId} not found`)
 		}
@@ -201,7 +201,7 @@ export function handleMosSwapStories(
 			throw new Error(`Story ${story0Str} not found in rundown ${data.rundownExternalId}`)
 		}
 
-		const segment1Id = getMosIngestSegmentId(parseMosString(data.story0))
+		const segment1Id = getMosIngestSegmentId(parseMosString(data.story1))
 		const story1Index = ingestRundown.segments.findIndex((s) => s.externalId === segment1Id)
 		if (story1Index === -1) {
 			throw new Error(`Story ${story1Str} not found in rundown ${data.rundownExternalId}`)
@@ -252,20 +252,22 @@ export function handleMosMoveStories(
 			else missingIds.push(storyId)
 		}
 
-		if (missingIds.length > 0)
-			if (missingIds.length > 0) {
-				throw new Error(`Parts ${missingIds.join(', ')} were not found in rundown ${data.rundownExternalId}`)
-			}
+		if (missingIds.length > 0) {
+			throw new Error(`Parts ${missingIds.join(', ')} were not found in rundown ${data.rundownExternalId}`)
+		}
+
+		// remove existing items
+		const moveIngestSegmentIds = moveIngestSegments.map((s) => s.externalId)
+		ingestRundown.segments = ingestRundown.segments.filter((s) => !moveIngestSegmentIds.includes(s.externalId))
 
 		// The part of which we are about to insert stories after
-		const insertBeforeSegmentExternalId = data.insertBeforeStoryId
-			? getMosIngestSegmentId(parseMosString(data.insertBeforeStoryId))
-			: undefined
-		const insertIndex = !insertBeforeSegmentExternalId // insert last
-			? ingestRundown.segments.length
-			: ingestRundown.segments.findIndex((p) => p.externalId === insertBeforeSegmentExternalId)
+		const insertBeforeSegmentExternalId = storyIdToSegmentExternalId(data.insertBeforeStoryId)
+		const insertIndex = insertBeforeSegmentExternalId // insert last
+			? ingestRundown.segments.findIndex((p) => p.externalId === insertBeforeSegmentExternalId)
+			: ingestRundown.segments.length
+		console.log('check', insertBeforeSegmentExternalId, insertIndex, data.insertBeforeStoryId)
 		if (insertIndex === -1) {
-			throw new Error(`Segment ${insertBeforeSegmentExternalId} in rundown ${data.rundownExternalId} not found`)
+			throw new Error(`Part ${insertBeforeSegmentExternalId} in rundown ${data.rundownExternalId} not found`)
 		}
 
 		// Perform the change
@@ -281,4 +283,11 @@ export function handleMosMoveStories(
 			},
 		}
 	}
+}
+
+function storyIdToSegmentExternalId(storyId: MOS.IMOSString128 | null | undefined): string | undefined {
+	if (!storyId) return undefined
+	const partExternalId = parseMosString(storyId)
+	if (!partExternalId) return undefined
+	return getMosIngestSegmentId(partExternalId)
 }

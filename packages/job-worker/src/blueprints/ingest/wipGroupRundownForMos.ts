@@ -36,22 +36,24 @@ export function wipGroupRundownForMos(
 			const segmentChanges = sourceChanges.segmentChanges[segment.externalId]
 			if (!segmentChanges) continue
 
-			switch (segmentChanges) {
-				case NrcsIngestSegmentChangeDetailsEnum.Inserted:
-					partChanges.set(segment.externalId, NrcsIngestPartChangeDetails.Inserted)
-					break
-				case NrcsIngestSegmentChangeDetailsEnum.Deleted:
-					partChanges.set(segment.externalId, NrcsIngestPartChangeDetails.Deleted)
-					break
-				default:
-					if (typeof segmentChanges !== 'object')
-						throw new Error(`Unexpected segment change for "${segment.externalId}": ${segmentChanges}`)
+			for (const part of segment.parts) {
+				switch (segmentChanges) {
+					case NrcsIngestSegmentChangeDetailsEnum.Inserted:
+						partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Inserted)
+						break
+					case NrcsIngestSegmentChangeDetailsEnum.Deleted:
+						partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Deleted)
+						break
+					default:
+						if (typeof segmentChanges !== 'object')
+							throw new Error(`Unexpected segment change for "${segment.externalId}": ${segmentChanges}`)
 
-					// Note: this is not a perfect representation of the possible changes,
-					// but it should handle everything that our mos implementation does
-					partChanges.set(segment.externalId, NrcsIngestPartChangeDetails.Updated)
+						// Note: this is not a perfect representation of the possible changes,
+						// but it should handle everything that our mos implementation does
+						partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Updated)
 
-					break
+						break
+				}
 			}
 		}
 	}
@@ -80,6 +82,7 @@ export function wipGroupRundownForMos(
 					if (partChange !== undefined) {
 						segmentPartChanges[part.externalId] = partChange
 					}
+					// console.log('part', part.externalId, partChange)
 				}
 			}
 			for (const oldPart of oldIngestSegment.parts) {
@@ -89,9 +92,19 @@ export function wipGroupRundownForMos(
 			}
 			// TODO
 
-			segmentChanges[segment.externalId] = {
-				partChanges: segmentPartChanges,
-				partOrderChanged: comparePartOrder(segment.parts, oldIngestSegment.parts),
+			// console.log(
+			// 	'check order',
+			// 	segment.parts.map((p) => ({ id: p.externalId, rank: p.rank })),
+			// 	oldIngestSegment.parts.map((p) => ({ id: p.externalId, rank: p.rank })),
+			// 	comparePartOrder(segment.parts, oldIngestSegment.parts)
+			// )
+
+			const partOrderChanged = comparePartOrder(segment.parts, oldIngestSegment.parts)
+			if (partOrderChanged || Object.keys(segmentPartChanges).length > 0) {
+				segmentChanges[segment.externalId] = {
+					partChanges: segmentPartChanges,
+					partOrderChanged,
+				}
 			}
 		}
 	}
@@ -114,6 +127,14 @@ export function wipGroupRundownForMos(
 	 * not sure how 'renames' will fit into this though
 	 */
 
+	// console.log('res rundown', JSON.stringify(combinedIngestRundown, undefined, 4))
+	// console.log(
+	// 	'check changes',
+	// 	JSON.stringify(segmentChanges, undefined, 4),
+	// 	'from,',
+	// 	JSON.stringify(sourceChanges.segmentChanges, undefined, 4)
+	// )
+
 	return {
 		nrcsIngestRundown: combinedIngestRundown,
 		changes: {
@@ -126,13 +147,13 @@ export function wipGroupRundownForMos(
 }
 
 function comparePartOrder(ingestParts: IngestPart[], oldIngestParts: IngestPart[]): boolean {
-	if (ingestParts.length !== oldIngestParts.length) return false
+	if (ingestParts.length !== oldIngestParts.length) return true
 
 	for (let i = 0; i < ingestParts.length; i++) {
-		if (ingestParts[i].externalId !== oldIngestParts[i].externalId) return false
+		if (ingestParts[i].externalId !== oldIngestParts[i].externalId) return true
 	}
 
-	return true
+	return false
 }
 
 function groupIngestRundown(ingestRundown: IngestRundown): IngestRundown {
@@ -147,7 +168,6 @@ function groupIngestRundown(ingestRundown: IngestRundown): IngestRundown {
 
 interface AnnotatedIngestPart {
 	externalId: string
-	// partId: PartId
 	segmentName: string
 	ingest: IngestPart
 }
@@ -191,48 +211,6 @@ function groupedPartsToSegments(
 			} satisfies IngestSegment)
 	)
 }
-
-// /** Takes a list of ingestParts, modify it, then output them grouped together into ingestSegments, keeping track of the modified property */
-// export function makeChangeToIngestParts(
-// 	context: JobContext,
-// 	rundownId: RundownId,
-// 	ingestParts: AnnotatedIngestPart[],
-// 	modifyFunction: (ingestParts: AnnotatedIngestPart[]) => AnnotatedIngestPart[]
-// ): LocalIngestSegment[] {
-// 	const span = context.startSpan('mosDevice.ingest.makeChangeToIngestParts')
-
-// 	// Before making the modification to ingestParts, create a list of segments from the original data, to use for calculating the
-// 	// .modified property below.
-// 	const referenceIngestSegments = groupPartsIntoIngestSegments(rundownId, ingestParts)
-
-// 	const modifiedParts = modifyFunction(ingestParts)
-
-// 	// Compare to reference, to make sure that ingestSegment.modified is updated in case of a change
-// 	const newIngestSegments = groupPartsIntoIngestSegments(rundownId, modifiedParts)
-
-// 	_.each(newIngestSegments, (ingestSegment) => {
-// 		if (!ingestSegment.modified) {
-// 			ingestSegment.modified = getCurrentTime()
-// 		} else {
-// 			const ref = referenceIngestSegments.find((s) => s.externalId === ingestSegment.externalId)
-// 			if (ref) {
-// 				if (ref.parts.length !== ingestSegment.parts.length) {
-// 					// A part has been added, or removed
-// 					ingestSegment.modified = getCurrentTime()
-// 				} else {
-// 					// No obvious change.
-// 					// (If an individual part has been updated, the segment.modified property has already been updated anyway)
-// 				}
-// 			} else {
-// 				// The reference doesn't exist (can happen for example if a segment has been merged, or split into two)
-// 				ingestSegment.modified = getCurrentTime()
-// 			}
-// 		}
-// 	})
-
-// 	span?.end()
-// 	return newIngestSegments
-// }
 
 function groupPartsIntoIngestSegments(
 	rundownExternalId: string,

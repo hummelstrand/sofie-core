@@ -302,6 +302,9 @@ async function updateSofieIngestRundown(
 				ingestRundownChanges.changes
 			)
 		} else if (ingestRundownChanges.changes.source === 'ingest') {
+			sortIngestRundown(nrcsIngestRundown)
+			if (oldNrcsIngestRundown) sortIngestRundown(oldNrcsIngestRundown)
+
 			// nocommit - temporary hack for development
 			const { nrcsIngestRundown: nrcsIngestRundown2, changes } = wipGroupRundownForMos(
 				nrcsIngestRundown,
