@@ -16,50 +16,89 @@ export function wipGroupRundownForMos(
 	oldNrcsIngestRundown: IngestRundown | undefined
 ): {
 	nrcsIngestRundown: IngestRundown
-	changes: NrcsIngestChangeDetails
+	ingestChanges: NrcsIngestChangeDetails
 	changedSegmentExternalIds: Record<string, string>
 } {
-	// Only valid for mos for now..
+	// Only valid for mos rundowns
 	if (nrcsIngestRundown.type !== 'mos') {
 		return {
 			nrcsIngestRundown,
-			changes: sourceChanges,
+			ingestChanges: sourceChanges,
 			changedSegmentExternalIds: {},
 		}
 	}
 
-	const oldCombinedIngestRundown = oldNrcsIngestRundown ? groupIngestRundown(oldNrcsIngestRundown) : undefined
-	const oldIngestSegments = normalizeArrayToMap(oldCombinedIngestRundown?.segments || [], 'externalId')
+	const oldCombinedIngestRundown = oldNrcsIngestRundown
+		? groupPartsIntoNewIngestRundown(oldNrcsIngestRundown)
+		: undefined
 
-	const partChanges = new Map<string, NrcsIngestPartChangeDetails>()
-	if (sourceChanges.segmentChanges) {
-		for (const segment of nrcsIngestRundown.segments) {
-			const segmentChanges = sourceChanges.segmentChanges[segment.externalId]
-			if (!segmentChanges) continue
+	const allPartChanges = findAllPartsWithChanges(nrcsIngestRundown, sourceChanges)
 
-			for (const part of segment.parts) {
-				switch (segmentChanges) {
-					case NrcsIngestSegmentChangeDetailsEnum.Inserted:
-						partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Inserted)
-						break
-					case NrcsIngestSegmentChangeDetailsEnum.Deleted:
-						partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Deleted)
-						break
-					default:
-						if (typeof segmentChanges !== 'object')
-							throw new Error(`Unexpected segment change for "${segment.externalId}": ${segmentChanges}`)
+	const combinedIngestRundown = groupPartsIntoNewIngestRundown(nrcsIngestRundown)
 
-						// Note: this is not a perfect representation of the possible changes,
-						// but it should handle everything that our mos implementation does
-						partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Updated)
+	const segmentChanges = calculateSegmentChanges(oldCombinedIngestRundown, combinedIngestRundown, allPartChanges)
 
-						break
-				}
+	const changedSegmentExternalIds = oldCombinedIngestRundown
+		? calculateSegmentExternalIdChanges(oldCombinedIngestRundown, combinedIngestRundown)
+		: {}
+	const segmentOrderChanged = oldCombinedIngestRundown
+		? compareSegmentOrder(combinedIngestRundown.segments, oldCombinedIngestRundown.segments)
+		: true
+
+	return {
+		nrcsIngestRundown: combinedIngestRundown,
+		ingestChanges: {
+			source: 'ingest',
+			rundownChanges: sourceChanges.rundownChanges,
+			segmentOrderChanged,
+			segmentChanges,
+		} satisfies Complete<NrcsIngestChangeDetails>,
+		changedSegmentExternalIds,
+	}
+}
+
+function findAllPartsWithChanges(
+	nrcsIngestRundown: IngestRundown,
+	sourceChanges: NrcsIngestChangeDetails
+): Map<string, NrcsIngestPartChangeDetails> {
+	if (!sourceChanges.segmentChanges) return new Map()
+
+	const partChanges = new Map<string, NrcsIngestPartChangeDetails>() // nocommit, should this be changed to a simple set?
+
+	for (const segment of nrcsIngestRundown.segments) {
+		const segmentChanges = sourceChanges.segmentChanges[segment.externalId]
+		if (!segmentChanges) continue
+
+		for (const part of segment.parts) {
+			switch (segmentChanges) {
+				case NrcsIngestSegmentChangeDetailsEnum.Inserted:
+					// partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Inserted)
+					break
+				case NrcsIngestSegmentChangeDetailsEnum.Deleted:
+					// partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Deleted)
+					break
+				default:
+					if (typeof segmentChanges !== 'object')
+						throw new Error(`Unexpected segment change for "${segment.externalId}": ${segmentChanges}`)
+
+					// Note: this is not a perfect representation of the possible changes,
+					// but it should handle everything that our mos implementation does
+					partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Updated)
+
+					break
 			}
 		}
 	}
 
-	const combinedIngestRundown = groupIngestRundown(nrcsIngestRundown)
+	return partChanges
+}
+
+function calculateSegmentChanges(
+	oldCombinedIngestRundown: IngestRundown | undefined,
+	combinedIngestRundown: IngestRundown,
+	allPartChanges: Map<string, NrcsIngestPartChangeDetails>
+): Record<string, NrcsIngestSegmentChangeDetails> {
+	const oldIngestSegments = normalizeArrayToMap(oldCombinedIngestRundown?.segments || [], 'externalId')
 
 	const segmentChanges: Record<string, NrcsIngestSegmentChangeDetails> = {}
 
@@ -79,7 +118,7 @@ export function wipGroupRundownForMos(
 				if (!oldPart) {
 					segmentPartChanges[part.externalId] = NrcsIngestPartChangeDetails.Inserted
 				} else {
-					const partChange = partChanges.get(part.externalId)
+					const partChange = allPartChanges.get(part.externalId)
 					if (partChange !== undefined) {
 						segmentPartChanges[part.externalId] = partChange
 					}
@@ -111,23 +150,7 @@ export function wipGroupRundownForMos(
 		}
 	}
 
-	const changedSegmentExternalIds = oldCombinedIngestRundown
-		? calculateSegmentExternalIdChanges(oldCombinedIngestRundown, combinedIngestRundown, segmentChanges)
-		: {}
-	const segmentOrderChanged = oldCombinedIngestRundown
-		? compareSegmentOrder(combinedIngestRundown.segments, oldCombinedIngestRundown.segments)
-		: true
-
-	return {
-		nrcsIngestRundown: combinedIngestRundown,
-		changes: {
-			source: 'ingest',
-			rundownChanges: sourceChanges.rundownChanges,
-			segmentOrderChanged,
-			segmentChanges,
-		} satisfies Complete<NrcsIngestChangeDetails>,
-		changedSegmentExternalIds,
-	}
+	return segmentChanges
 }
 
 function compareSegmentOrder(ingestSegments: IngestSegment[], oldIngestSegments: IngestSegment[]): boolean {
@@ -150,7 +173,7 @@ function comparePartOrder(ingestParts: IngestPart[], oldIngestParts: IngestPart[
 	return false
 }
 
-function groupIngestRundown(ingestRundown: IngestRundown): IngestRundown {
+function groupPartsIntoNewIngestRundown(ingestRundown: IngestRundown): IngestRundown {
 	const groupedParts: { name: string; parts: IngestPart[] }[] = []
 
 	for (const ingestSegment of ingestRundown.segments) {
@@ -196,8 +219,7 @@ function getSegmentExternalId(rundownExternalId: string, ingestPart: IngestPart)
 
 function calculateSegmentExternalIdChanges(
 	oldIngestRundown: IngestRundown,
-	newIngestRundown: IngestRundown,
-	_segmentChanges: Record<string, NrcsIngestSegmentChangeDetails>
+	newIngestRundown: IngestRundown
 ): Record<string, string> {
 	const segmentExternalIdChanges: Record<string, string> = {}
 
