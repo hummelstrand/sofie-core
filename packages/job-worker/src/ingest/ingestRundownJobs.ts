@@ -12,7 +12,7 @@ import {
 	UserRemoveRundownProps,
 	UserUnsyncRundownProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
-import { UpdateIngestRundownAction, UpdateIngestRundownResult } from './runOperation'
+import { UpdateIngestRundownAction, UpdateIngestRundownChange, UpdateIngestRundownResult } from './runOperation'
 import { NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
 import { getCurrentTime } from '../lib'
 import { wrapGenericIngestJob } from './jobWrappers'
@@ -80,7 +80,7 @@ export function handleUpdatedRundown(
 	_context: JobContext,
 	data: IngestUpdateRundownProps,
 	ingestRundown: LocalIngestRundown | undefined
-): UpdateIngestRundownResult {
+): UpdateIngestRundownChange {
 	if (!ingestRundown && !data.isCreateAction) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
 	return {
@@ -89,7 +89,7 @@ export function handleUpdatedRundown(
 			source: 'ingest',
 			rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 		},
-	} satisfies UpdateIngestRundownResult
+	} satisfies UpdateIngestRundownChange
 }
 
 /**
@@ -99,7 +99,7 @@ export function handleUpdatedRundownMetaData(
 	_context: JobContext,
 	data: IngestUpdateRundownMetaDataProps,
 	ingestRundown: LocalIngestRundown | undefined
-): UpdateIngestRundownResult {
+): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
 	return {
@@ -112,7 +112,7 @@ export function handleUpdatedRundownMetaData(
 			source: 'ingest',
 			rundownChanges: NrcsIngestRundownChangeDetails.Payload,
 		},
-	} satisfies UpdateIngestRundownResult
+	} satisfies UpdateIngestRundownChange
 }
 
 /**
@@ -122,7 +122,7 @@ export function handleRegenerateRundown(
 	_context: JobContext,
 	data: IngestRegenerateRundownProps,
 	ingestRundown: LocalIngestRundown | undefined
-): UpdateIngestRundownResult {
+): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
 	return {
@@ -132,7 +132,7 @@ export function handleRegenerateRundown(
 			source: 'ingest',
 			rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 		},
-	} satisfies UpdateIngestRundownResult
+	} satisfies UpdateIngestRundownChange
 }
 
 /**
@@ -140,16 +140,16 @@ export function handleRegenerateRundown(
  */
 export async function handleUserUnsyncRundown(context: JobContext, data: UserUnsyncRundownProps): Promise<void> {
 	return runWithRundownLock(context, data.rundownId, async (rundown) => {
-		if (rundown) {
-			if (!rundown.orphaned) {
-				await context.directCollections.Rundowns.update(rundown._id, {
-					$set: {
-						orphaned: RundownOrphanedReason.MANUAL,
-					},
-				})
-			} else {
-				logger.info(`Rundown "${rundown._id}" was already unsynced`)
-			}
+		if (!rundown) return // Ignore if rundown is not found
+
+		if (!rundown.orphaned) {
+			await context.directCollections.Rundowns.update(rundown._id, {
+				$set: {
+					orphaned: RundownOrphanedReason.MANUAL,
+				},
+			})
+		} else {
+			logger.info(`Rundown "${rundown._id}" was already unsynced`)
 		}
 	})
 }
