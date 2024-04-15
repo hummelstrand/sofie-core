@@ -1,18 +1,18 @@
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import { MutableIngestRundownChanges, MutableIngestRundownImpl } from '../MutableIngestRundownImpl'
-import { LocalIngestRundown, LocalIngestSegment, RundownIngestDataCacheGenerator } from '../../../ingest/ingestCache'
+import { RundownIngestDataCacheGenerator } from '../../../ingest/ingestCache'
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { getSegmentId } from '../../../ingest/lib'
 import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { MutableIngestSegmentImpl } from '../MutableIngestSegmentImpl'
+import { IngestRundown, IngestSegment } from '@sofie-automation/blueprints-integration'
 
 describe('MutableIngestRundownImpl', () => {
-	function getBasicIngestRundown(): LocalIngestRundown {
+	function getBasicIngestRundown(): IngestRundown {
 		return {
 			externalId: 'rundown0',
 			type: 'mock',
 			name: 'rundown-name',
-			modified: 0,
 			payload: {
 				val: 'some-val',
 				second: 5,
@@ -22,7 +22,6 @@ describe('MutableIngestRundownImpl', () => {
 					externalId: 'seg0',
 					name: 'name',
 					rank: 0,
-					modified: 0,
 					payload: {
 						val: 'first-val',
 						second: 5,
@@ -32,7 +31,6 @@ describe('MutableIngestRundownImpl', () => {
 							externalId: 'part0',
 							name: 'my first part',
 							rank: 0,
-							modified: 0,
 							payload: {
 								val: 'some-val',
 							},
@@ -43,7 +41,6 @@ describe('MutableIngestRundownImpl', () => {
 					externalId: 'seg1',
 					name: 'name 2',
 					rank: 1,
-					modified: 0,
 					payload: {
 						val: 'next-val',
 					},
@@ -52,7 +49,6 @@ describe('MutableIngestRundownImpl', () => {
 							externalId: 'part1',
 							name: 'my second part',
 							rank: 0,
-							modified: 0,
 							payload: {
 								val: 'some-val',
 							},
@@ -63,7 +59,6 @@ describe('MutableIngestRundownImpl', () => {
 					externalId: 'seg2',
 					name: 'name 3',
 					rank: 2,
-					modified: 0,
 					payload: {
 						val: 'last-val',
 					},
@@ -72,7 +67,6 @@ describe('MutableIngestRundownImpl', () => {
 							externalId: 'part2',
 							name: 'my third part',
 							rank: 0,
-							modified: 0,
 							payload: {
 								val: 'some-val',
 							},
@@ -85,7 +79,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	const ingestObjectGenerator = new RundownIngestDataCacheGenerator(protectString('rundownId'))
 
-	function createNoChangesObject(ingestRundown: LocalIngestRundown): MutableIngestRundownChanges {
+	function createNoChangesObject(ingestRundown: IngestRundown): MutableIngestRundownChanges {
 		const allCacheObjectIds: IngestDataCacheObjId[] = []
 		for (const segment of ingestRundown.segments) {
 			allCacheObjectIds.push(ingestObjectGenerator.getSegmentObjectId(segment.externalId))
@@ -112,8 +106,8 @@ describe('MutableIngestRundownImpl', () => {
 	}
 	function addChangedSegments(
 		changes: MutableIngestRundownChanges,
-		_ingestRundown: LocalIngestRundown,
-		...ingestSegments: LocalIngestSegment[]
+		_ingestRundown: IngestRundown,
+		...ingestSegments: IngestSegment[]
 	): void {
 		for (const ingestSegment of ingestSegments) {
 			const segmentId = getSegmentId(ingestObjectGenerator.rundownId, ingestSegment.externalId)
@@ -133,7 +127,7 @@ describe('MutableIngestRundownImpl', () => {
 			ingestObjectGenerator.generateRundownObject(changes.computedChanges.ingestRundown)
 		)
 	}
-	function removeSegmentFromIngestRundown(ingestRundown: LocalIngestRundown, segmentId: string): void {
+	function removeSegmentFromIngestRundown(ingestRundown: IngestRundown, segmentId: string): void {
 		const ingestSegment = ingestRundown.segments.find((p) => p.externalId === segmentId)
 		ingestRundown.segments = ingestRundown.segments.filter((p) => p.externalId !== segmentId)
 		if (ingestSegment) {
@@ -386,7 +380,7 @@ describe('MutableIngestRundownImpl', () => {
 			}
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-			const newSegment: Omit<LocalIngestSegment, 'rank' | 'modified'> = {
+			const newSegment: Omit<IngestSegment, 'rank'> = {
 				externalId: 'seg1',
 				name: 'new name',
 				payload: {
@@ -397,7 +391,6 @@ describe('MutableIngestRundownImpl', () => {
 						externalId: 'part1',
 						name: 'new part name',
 						rank: 0,
-						modified: 0,
 						payload: {
 							val: 'new-part-val',
 						},
@@ -415,7 +408,7 @@ describe('MutableIngestRundownImpl', () => {
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg2', 'seg1'])
 			const expectedIngestRundown = clone(ingestRundown)
 			removeSegmentFromIngestRundown(expectedIngestRundown, 'seg1')
-			expectedIngestRundown.segments.push({ ...newSegment, rank: 2, modified: 0 })
+			expectedIngestRundown.segments.push({ ...newSegment, rank: 2 })
 
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
 			addChangedSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[2])
@@ -437,7 +430,7 @@ describe('MutableIngestRundownImpl', () => {
 			expect(mutableRundown.getSegment('partX')).toBeUndefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-			const newSegment: Omit<LocalIngestSegment, 'rank' | 'modified'> = {
+			const newSegment: Omit<IngestSegment, 'rank'> = {
 				externalId: 'segX',
 				name: 'new name',
 				payload: {
@@ -448,7 +441,6 @@ describe('MutableIngestRundownImpl', () => {
 						externalId: 'partX',
 						name: 'new part name',
 						rank: 0,
-						modified: 0,
 						payload: {
 							val: 'new-part-val',
 						},
@@ -465,7 +457,7 @@ describe('MutableIngestRundownImpl', () => {
 			// check it has changes
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2', 'segX'])
 			const expectedIngestRundown = clone(ingestRundown)
-			expectedIngestRundown.segments.push({ ...newSegment, rank: 3, modified: 0 })
+			expectedIngestRundown.segments.push({ ...newSegment, rank: 3 })
 
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
 			addChangedSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[3])
@@ -481,7 +473,7 @@ describe('MutableIngestRundownImpl', () => {
 			expect(mutableRundown.getSegment('partX')).toBeUndefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-			const newSegment: Omit<LocalIngestSegment, 'rank' | 'modified'> = {
+			const newSegment: Omit<IngestSegment, 'rank'> = {
 				externalId: 'segX',
 				name: 'new name',
 				payload: {
@@ -492,7 +484,6 @@ describe('MutableIngestRundownImpl', () => {
 						externalId: 'partX',
 						name: 'new part name',
 						rank: 0,
-						modified: 0,
 						payload: {
 							val: 'new-part-val',
 						},

@@ -140,7 +140,7 @@ function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	const segmentsToInsert: IngestSegment[] = []
 
 	// Perform any renames before any other changes
-	applySegmentRenames(mutableIngestRundown, changes)
+	// applySegmentRenames(mutableIngestRundown, changes)
 
 	// Apply changes and delete segments
 	for (const [segmentId, change] of Object.entries<NrcsIngestSegmentChangeDetails | undefined>(changes)) {
@@ -173,21 +173,21 @@ function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	}
 }
 
-function applySegmentRenames<TRundownPayload, TSegmentPayload, TPartPayload>(
-	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
-	changes: Record<string, NrcsIngestSegmentChangeDetails>
-) {
-	for (const [segmentId, change] of Object.entries<NrcsIngestSegmentChangeDetails | undefined>(changes)) {
-		if (!change) continue
+// function applySegmentRenames<TRundownPayload, TSegmentPayload, TPartPayload>(
+// 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
+// 	changes: Record<string, NrcsIngestSegmentChangeDetails>
+// ) {
+// 	for (const [segmentId, change] of Object.entries<NrcsIngestSegmentChangeDetails | undefined>(changes)) {
+// 		if (!change) continue
 
-		if (change && typeof change === 'object' && change.oldExternalId) {
-			const mutableSegment = mutableIngestRundown.getSegment(change.oldExternalId)
-			if (!mutableSegment) throw new Error(`Segment ${change.oldExternalId} not found in rundown`)
+// 		if (change && typeof change === 'object' && change.oldExternalId) {
+// 			const mutableSegment = mutableIngestRundown.getSegment(change.oldExternalId)
+// 			if (!mutableSegment) throw new Error(`Segment ${change.oldExternalId} not found in rundown`)
 
-			mutableIngestRundown.renameSegment(change.oldExternalId, segmentId)
-		}
-	}
-}
+// 			mutableIngestRundown.renameSegment(change.oldExternalId, segmentId)
+// 		}
+// 	}
+// }
 
 function applyChangesForSingleSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,

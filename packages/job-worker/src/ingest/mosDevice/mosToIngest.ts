@@ -1,8 +1,6 @@
 import { MOS } from '@sofie-automation/corelib'
-import { literal } from '@sofie-automation/corelib/dist/lib'
-import { getCurrentTime } from '../../lib'
-import { LocalIngestPart, LocalIngestSegment } from '../ingestCache'
 import { parseMosString, getMosIngestSegmentId } from './lib'
+import { IngestSegment } from '@sofie-automation/blueprints-integration'
 
 // export interface AnnotatedIngestPart {
 // 	externalId: string
@@ -46,30 +44,23 @@ import { parseMosString, getMosIngestSegmentId } from './lib'
 // 	return parts
 // }
 
-export function mosStoryToIngestSegment(
-	mosStory: MOS.IMOSStory,
-	undefinedPayload: boolean,
-	existingIngestPart: LocalIngestPart | undefined
-): LocalIngestSegment {
+export function mosStoryToIngestSegment(mosStory: MOS.IMOSStory, undefinedPayload: boolean): IngestSegment {
 	const externalId = parseMosString(mosStory.ID)
-	const modified = existingIngestPart ? existingIngestPart.modified : getCurrentTime()
 
 	const name = mosStory.Slug ? parseMosString(mosStory.Slug) : ''
-	return literal<LocalIngestSegment>({
+	return {
 		externalId: getMosIngestSegmentId(externalId),
 		name: name,
 		rank: 0, // Set later
-		modified,
 		parts: [
 			{
 				externalId: externalId,
 				name: name,
 				rank: 0,
 				payload: undefinedPayload ? undefined : {},
-				modified,
 			},
 		],
-	})
+	}
 }
 
 // /** Group IngestParts together into something that could be Segments */

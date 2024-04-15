@@ -1,9 +1,7 @@
-import { getCurrentTime } from '../lib'
 import { JobContext } from '../jobs'
-import { LocalIngestRundown, makeNewIngestPart } from './ingestCache'
 import { IngestRemovePartProps, IngestUpdatePartProps } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UpdateIngestRundownChange } from './runOperation'
-import { NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
+import { IngestRundown, NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
 
 /**
  * Remove a Part from a Segment
@@ -11,7 +9,7 @@ import { NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integr
 export function handleRemovedPart(
 	_context: JobContext,
 	data: IngestRemovePartProps,
-	ingestRundown: LocalIngestRundown | undefined
+	ingestRundown: IngestRundown | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
@@ -33,7 +31,6 @@ export function handleRemovedPart(
 			},
 		} satisfies UpdateIngestRundownChange
 	}
-	ingestSegment.modified = getCurrentTime()
 
 	return {
 		// We modify in-place
@@ -57,7 +54,7 @@ export function handleRemovedPart(
 export function handleUpdatedPart(
 	_context: JobContext,
 	data: IngestUpdatePartProps,
-	ingestRundown: LocalIngestRundown | undefined
+	ingestRundown: IngestRundown | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
@@ -71,8 +68,7 @@ export function handleUpdatedPart(
 	ingestSegment.parts = ingestSegment.parts.filter((p) => p.externalId !== data.ingestPart.externalId)
 	const isUpdate = partCountBefore !== ingestSegment.parts.length
 
-	ingestSegment.parts.push(makeNewIngestPart(data.ingestPart))
-	ingestSegment.modified = getCurrentTime()
+	ingestSegment.parts.push(data.ingestPart)
 
 	return {
 		// We modify in-place

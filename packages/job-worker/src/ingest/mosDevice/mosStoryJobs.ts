@@ -6,12 +6,12 @@ import {
 	MosSwapStoryProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
 import { logger } from '../../logging'
-import _ = require('underscore')
 import { JobContext } from '../../jobs'
-import { LocalIngestRundown, LocalIngestSegment } from '../ingestCache'
 import { fixIllegalObject, getMosIngestSegmentId, parseMosString, updateRanksBasedOnOrder } from './lib'
 import { mosStoryToIngestSegment } from './mosToIngest'
 import {
+	IngestRundown,
+	IngestSegment,
 	NrcsIngestPartChangeDetails,
 	NrcsIngestSegmentChangeDetails,
 	NrcsIngestSegmentChangeDetailsEnum,
@@ -30,7 +30,7 @@ export function handleMosFullStory(
 
 	const partExternalId = parseMosString(data.story.ID)
 
-	return (ingestRundown: LocalIngestRundown | undefined) => {
+	return (ingestRundown: IngestRundown | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
@@ -78,7 +78,7 @@ export function handleMosDeleteStory(
 ): IngestUpdateOperationFunction | null {
 	if (data.stories.length === 0) return null
 
-	return (ingestRundown: LocalIngestRundown | undefined) => {
+	return (ingestRundown: IngestRundown | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
@@ -125,18 +125,12 @@ export function handleMosInsertStories(
 	_context: JobContext,
 	data: MosInsertStoryProps
 ): IngestUpdateOperationFunction | null {
-	return (ingestRundown: LocalIngestRundown | undefined) => {
+	return (ingestRundown: IngestRundown | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
 
-		const newIngestSegments = data.newStories.map((story) =>
-			mosStoryToIngestSegment(
-				story,
-				true,
-				undefined // TODO - should have a value
-			)
-		)
+		const newIngestSegments = data.newStories.map((story) => mosStoryToIngestSegment(story, true))
 
 		// The part of which we are about to insert stories after
 		const insertBeforeSegmentExternalId = data.insertBeforeStoryId
@@ -192,7 +186,7 @@ export function handleMosSwapStories(
 		throw new Error(`Cannot swap part ${story0Str} with itself in rundown ${data.rundownExternalId}`)
 	}
 
-	return (ingestRundown: LocalIngestRundown | undefined) => {
+	return (ingestRundown: IngestRundown | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
@@ -237,7 +231,7 @@ export function handleMosMoveStories(
 	_context: JobContext,
 	data: MosMoveStoryProps
 ): IngestUpdateOperationFunction | null {
-	return (ingestRundown: LocalIngestRundown | undefined) => {
+	return (ingestRundown: IngestRundown | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
@@ -246,7 +240,7 @@ export function handleMosMoveStories(
 
 		const moveStoryIds = data.stories.map(parseMosString)
 
-		const moveIngestSegments: LocalIngestSegment[] = []
+		const moveIngestSegments: IngestSegment[] = []
 		const missingIds: string[] = []
 		for (const storyId of moveStoryIds) {
 			const segment = oldIngestSegmentMap.get(getMosIngestSegmentId(storyId))

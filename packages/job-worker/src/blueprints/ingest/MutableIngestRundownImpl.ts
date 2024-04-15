@@ -13,7 +13,7 @@ import _ = require('underscore')
 import { MutableIngestSegmentImpl } from './MutableIngestSegmentImpl'
 import { defaultApplyIngestChanges } from './defaultApplyIngestChanges'
 import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { LocalIngestSegment, RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
+import { RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
 import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import type { ComputedIngestChanges } from '../../ingest/runOperation'
 
@@ -259,11 +259,11 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 	/** Note: This is NOT exposed to blueprints */
 	intoIngestRundown(ingestObjectGenerator: RundownIngestDataCacheGenerator): MutableIngestRundownChanges {
-		const ingestSegments: LocalIngestSegment[] = []
+		const ingestSegments: IngestSegment[] = []
 		const changedCacheObjects: IngestDataCacheObj[] = []
 		const allCacheObjectIds: IngestDataCacheObjId[] = []
 
-		const segmentsToRegenerate: LocalIngestSegment[] = []
+		const segmentsToRegenerate: IngestSegment[] = []
 		const segmentRenames: Record<string, string> = {}
 
 		const usedSegmentIds = new Set<string>()
@@ -284,13 +284,12 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 				usedPartIds.add(part.externalId)
 			}
 
-			const ingestSegment: Complete<LocalIngestSegment> = {
+			const ingestSegment: Complete<IngestSegment> = {
 				externalId: segment.externalId,
 				rank,
 				name: segment.name,
 				payload: segment.payload,
 				parts: segmentInfo.ingestParts,
-				modified: 0,
 			}
 
 			ingestSegments.push(ingestSegment)
@@ -352,7 +351,6 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 				ingestRundown: {
 					...this.ingestRundown,
 					segments: ingestSegments,
-					modified: 0,
 				},
 
 				segmentsToRemove: removedSegmentIds,

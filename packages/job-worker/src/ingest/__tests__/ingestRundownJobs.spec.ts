@@ -1,8 +1,6 @@
 import { MockJobContext, setupDefaultJobEnvironment } from '../../__mocks__/context'
-import { LocalIngestRundown } from '../ingestCache'
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import { IngestRundown, NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
-import { stripModifiedTimestamps } from './lib'
 import { UpdateIngestRundownAction, UpdateIngestRundownChange } from '../runOperation'
 import {
 	handleRegenerateRundown,
@@ -15,30 +13,26 @@ import { RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { DBRundown, RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 
-function getDefaultIngestRundown(): LocalIngestRundown {
+function getDefaultIngestRundown(): IngestRundown {
 	return {
 		externalId: 'rundown0',
 		type: 'mos',
 		name: 'Rundown',
-		modified: 0,
 		segments: [
 			{
 				externalId: 'segment0',
 				name: 'Segment 0',
 				rank: 0,
-				modified: 0,
 				parts: [
 					{
 						externalId: 'part0',
 						name: 'Part 0',
 						rank: 0,
-						modified: 0,
 					},
 					{
 						externalId: 'part1',
 						name: 'Part 1',
 						rank: 1,
-						modified: 0,
 					},
 				],
 			},
@@ -46,19 +40,16 @@ function getDefaultIngestRundown(): LocalIngestRundown {
 				externalId: 'segment1',
 				name: 'Segment 1',
 				rank: 1,
-				modified: 0,
 				parts: [
 					{
 						externalId: 'part2',
 						name: 'Part 2',
 						rank: 0,
-						modified: 0,
 					},
 					{
 						externalId: 'part3',
 						name: 'Part 3',
 						rank: 1,
-						modified: 0,
 					},
 				],
 			},
@@ -167,7 +158,6 @@ describe('handleRegenerateRundown', () => {
 			},
 			clone(ingestRundown)
 		)
-		stripModifiedTimestamps(changes.ingestRundown)
 
 		expect(changes).toEqual({
 			ingestRundown,
@@ -313,16 +303,13 @@ describe('handleUpdatedRundown', () => {
 			},
 			undefined
 		)
-		stripModifiedTimestamps(changes.ingestRundown)
 
 		// update the expected ingestRundown
-		const expectedIngestRundown: LocalIngestRundown = {
+		const expectedIngestRundown: IngestRundown = {
 			...ingestRundown,
-			modified: 1,
 			segments: ingestRundown.segments.map((s) => ({
 				...s,
-				modified: 1,
-				parts: s.parts.map((p) => ({ ...p, modified: 1 })),
+				parts: s.parts.map((p) => ({ ...p })),
 			})),
 		}
 
@@ -369,21 +356,18 @@ describe('handleUpdatedRundown', () => {
 			},
 			clone(ingestRundown)
 		)
-		stripModifiedTimestamps(changes.ingestRundown)
 
 		// update the expected ingestRundown
-		const expectedIngestRundown: LocalIngestRundown = {
+		const expectedIngestRundown: IngestRundown = {
 			...newIngestRundown,
-			modified: 1,
 			segments: newIngestRundown.segments.map((s) => ({
 				...s,
-				modified: 1,
 				parts: s.parts.map((p) => ({ ...p, modified: 1 })),
 			})),
 		}
 
 		expect(changes).toEqual({
-			ingestRundown: expectedIngestRundown,
+			ingestRundown: newIngestRundown,
 			changes: {
 				source: 'ingest',
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
@@ -433,12 +417,10 @@ describe('handleUpdatedRundownMetaData', () => {
 			},
 			clone(ingestRundown)
 		)
-		stripModifiedTimestamps(changes.ingestRundown)
 
 		// update the expected ingestRundown
-		const expectedIngestRundown: LocalIngestRundown = {
+		const expectedIngestRundown: IngestRundown = {
 			...newIngestRundown,
-			modified: 1,
 			segments: ingestRundown.segments,
 		}
 

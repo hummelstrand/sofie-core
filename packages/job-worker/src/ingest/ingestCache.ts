@@ -7,47 +7,16 @@ import {
 	IngestDataCacheObjPart,
 } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { protectString, unprotectString } from '@sofie-automation/corelib/dist/protectedString'
-import { getCurrentTime } from '../lib'
 import _ = require('underscore')
-import { IngestRundown, IngestSegment, IngestPart } from '@sofie-automation/blueprints-integration'
+import { IngestPart, IngestRundown, IngestSegment } from '@sofie-automation/blueprints-integration'
 import { JobContext } from '../jobs'
 import { getPartId, getSegmentId } from './lib'
 import { SetOptional } from 'type-fest'
-import { groupByToMap, normalizeArrayToMap, omit } from '@sofie-automation/corelib/dist/lib'
+import { groupByToMap, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 import { AnyBulkWriteOperation } from 'mongodb'
 import { diffAndReturnLatestObjects } from './model/implementation/utils'
 import { ICollection } from '../db'
-
-interface LocalIngestBase {
-	modified: number
-}
-export interface LocalIngestRundown extends IngestRundown, LocalIngestBase {
-	segments: LocalIngestSegment[]
-}
-export interface LocalIngestSegment extends IngestSegment, LocalIngestBase {
-	parts: LocalIngestPart[]
-}
-export interface LocalIngestPart extends IngestPart, LocalIngestBase {}
-export function isLocalIngestRundown(o: IngestRundown | LocalIngestRundown): o is LocalIngestRundown {
-	return 'modified' in o
-}
-export function makeNewIngestRundown(ingestRundown: SetOptional<IngestRundown, 'segments'>): LocalIngestRundown {
-	return {
-		...ingestRundown,
-		segments: ingestRundown.segments ? _.map(ingestRundown.segments, makeNewIngestSegment) : [],
-		modified: getCurrentTime(),
-	}
-}
-export function makeNewIngestSegment(ingestSegment: IngestSegment): LocalIngestSegment {
-	return {
-		...ingestSegment,
-		parts: _.map(ingestSegment.parts, makeNewIngestPart),
-		modified: getCurrentTime(),
-	}
-}
-export function makeNewIngestPart(ingestPart: IngestPart): LocalIngestPart {
-	return { ...ingestPart, modified: getCurrentTime() }
-}
+import { getCurrentTime } from '../lib'
 
 export class RundownIngestDataCache {
 	readonly #changedDocumentIds = new Set<IngestDataCacheObjId>()
@@ -78,7 +47,7 @@ export class RundownIngestDataCache {
 	 * Fetch the IngestRundown contained in the cache
 	 * Note: This does not deep clone the objects, so the returned object should not be modified
 	 */
-	fetchRundown(): LocalIngestRundown | undefined {
+	fetchRundown(): IngestRundown | undefined {
 		const span = this.context.startSpan('ingest.ingestCache.loadCachedRundownData')
 
 		const cachedRundown = this.documents.find(
@@ -89,9 +58,8 @@ export class RundownIngestDataCache {
 			return undefined
 		}
 
-		const ingestRundown: LocalIngestRundown = {
+		const ingestRundown: IngestRundown = {
 			...cachedRundown.data,
-			modified: cachedRundown.modified,
 			segments: [],
 		}
 
@@ -103,20 +71,14 @@ export class RundownIngestDataCache {
 		for (const objs of segmentMap.values()) {
 			const segmentEntry = objs.find((e): e is IngestDataCacheObjSegment => e.type === IngestCacheType.SEGMENT)
 			if (segmentEntry) {
-				const ingestSegment: LocalIngestSegment = {
+				const ingestSegment: IngestSegment = {
 					...segmentEntry.data,
-					modified: segmentEntry.modified,
 					parts: [],
 				}
 
 				for (const entry of objs) {
 					if (entry.type === IngestCacheType.PART) {
-						const ingestPart: LocalIngestPart = {
-							...entry.data,
-							modified: entry.modified,
-						}
-
-						ingestSegment.parts.push(ingestPart)
+						ingestSegment.parts.push(entry.data)
 					}
 				}
 
@@ -136,7 +98,7 @@ export class RundownIngestDataCache {
 	 * This will diff and replace the documents in the cache
 	 * @param ingestRundown The new IngestRundown to store in the cache
 	 */
-	replace(ingestRundown: LocalIngestRundown): void {
+	replace(ingestRundown: IngestRundown): void {
 		const generator = new RundownIngestDataCacheGenerator(this.rundownId)
 		const cacheEntries: IngestDataCacheObj[] = generator.generateCacheForRundown(ingestRundown)
 
@@ -198,6 +160,8 @@ export class RundownIngestDataCache {
 
 		const documentsMap = normalizeArrayToMap(this.documents, '_id')
 
+		const modifiedTime = getCurrentTime()
+
 		const updates: AnyBulkWriteOperation<IngestDataCacheObj>[] = []
 		const removedIds: IngestDataCacheObjId[] = []
 		for (const changedId of this.#changedDocumentIds) {
@@ -210,7 +174,10 @@ export class RundownIngestDataCache {
 						filter: {
 							_id: changedId,
 						},
-						replacement: newDoc,
+						replacement: {
+							...newDoc,
+							modified: modifiedTime,
+						},
 						upsert: true,
 					},
 				})
@@ -244,59 +211,49 @@ export class RundownIngestDataCacheGenerator {
 		return protectString<IngestDataCacheObjId>(unprotectString(this.rundownId))
 	}
 
-	generatePartObject(
-		segmentId: SegmentId,
-		part: SetOptional<LocalIngestPart, 'modified'>,
-		modified = 0
-	): IngestDataCacheObjPart {
+	generatePartObject(segmentId: SegmentId, part: IngestPart): IngestDataCacheObjPart {
 		return {
 			_id: this.getPartObjectId(part.externalId),
 			type: IngestCacheType.PART,
 			rundownId: this.rundownId,
 			segmentId: segmentId,
 			partId: getPartId(this.rundownId, part.externalId),
-			modified,
-			data: omit(part, 'modified'),
+			modified: 0, // Populated when saving
+			data: part,
 		}
 	}
 
-	generateSegmentObject(
-		ingestSegment: SetOptional<LocalIngestSegment, 'parts' | 'modified'>,
-		modified = 0
-	): IngestDataCacheObjSegment {
+	generateSegmentObject(ingestSegment: SetOptional<IngestSegment, 'parts'>): IngestDataCacheObjSegment {
 		return {
 			_id: this.getSegmentObjectId(ingestSegment.externalId),
 			type: IngestCacheType.SEGMENT,
 			rundownId: this.rundownId,
 			segmentId: getSegmentId(this.rundownId, ingestSegment.externalId),
-			modified,
+			modified: 0, // Populated when saving
 			data: {
-				...omit(ingestSegment, 'modified'),
+				...ingestSegment,
 				parts: [], // omit the parts, they come as separate objects
 			},
 		}
 	}
 
-	generateRundownObject(
-		ingestRundown: SetOptional<LocalIngestRundown, 'segments' | 'modified'>,
-		modified = 0
-	): IngestDataCacheObjRundown {
+	generateRundownObject(ingestRundown: SetOptional<IngestRundown, 'segments'>): IngestDataCacheObjRundown {
 		return {
 			_id: this.getRundownObjectId(),
 			type: IngestCacheType.RUNDOWN,
 			rundownId: this.rundownId,
-			modified,
+			modified: 0, // Populated when saving
 			data: {
-				...omit(ingestRundown, 'modified'),
+				...ingestRundown,
 				segments: [], // omit the segments, they come as separate objects
 			},
 		}
 	}
 
-	generateCacheForRundown(ingestRundown: LocalIngestRundown): IngestDataCacheObj[] {
+	generateCacheForRundown(ingestRundown: IngestRundown): IngestDataCacheObj[] {
 		const cacheEntries: IngestDataCacheObj[] = []
 
-		const rundown = this.generateRundownObject(ingestRundown, ingestRundown.modified)
+		const rundown = this.generateRundownObject(ingestRundown)
 		cacheEntries.push(rundown)
 
 		for (const segment of ingestRundown.segments) {
@@ -306,15 +263,15 @@ export class RundownIngestDataCacheGenerator {
 		return cacheEntries
 	}
 
-	private generateCacheForSegment(ingestSegment: LocalIngestSegment): IngestDataCacheObj[] {
+	private generateCacheForSegment(ingestSegment: IngestSegment): IngestDataCacheObj[] {
 		const cacheEntries: Array<IngestDataCacheObjSegment | IngestDataCacheObjPart> = []
 
-		const segment = this.generateSegmentObject(ingestSegment, ingestSegment.modified)
+		const segment = this.generateSegmentObject(ingestSegment)
 		cacheEntries.push(segment)
 
 		const segmentId = getSegmentId(this.rundownId, ingestSegment.externalId)
 		for (const part of ingestSegment.parts) {
-			cacheEntries.push(this.generatePartObject(segmentId, part, part.modified))
+			cacheEntries.push(this.generatePartObject(segmentId, part))
 		}
 
 		return cacheEntries

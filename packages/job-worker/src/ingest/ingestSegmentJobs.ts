@@ -1,7 +1,5 @@
-import { getCurrentTime } from '../lib'
 import { JobContext } from '../jobs'
 import { regenerateSegmentsFromIngestData } from './generationSegment'
-import { LocalIngestRundown, makeNewIngestSegment } from './ingestCache'
 import { CommitIngestData } from './lock'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { literal } from '@sofie-automation/corelib/dist/lib'
@@ -13,7 +11,7 @@ import {
 	RemoveOrphanedSegmentsProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
 import { IngestUpdateOperationFunction, UpdateIngestRundownChange, UpdateIngestRundownResult } from './runOperation'
-import { NrcsIngestSegmentChangeDetailsEnum } from '@sofie-automation/blueprints-integration'
+import { IngestRundown, NrcsIngestSegmentChangeDetailsEnum } from '@sofie-automation/blueprints-integration'
 import { IngestModel } from './model/IngestModel'
 
 /**
@@ -22,7 +20,7 @@ import { IngestModel } from './model/IngestModel'
 export function handleRegenerateSegment(
 	_context: JobContext,
 	data: IngestRegenerateSegmentProps,
-	ingestRundown: LocalIngestRundown | undefined
+	ingestRundown: IngestRundown | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
@@ -54,13 +52,12 @@ export function handleRegenerateSegment(
 export function handleRemovedSegment(
 	_context: JobContext,
 	data: IngestRemoveSegmentProps,
-	ingestRundown: LocalIngestRundown | undefined
+	ingestRundown: IngestRundown | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
 	const oldSegmentsLength = ingestRundown.segments.length
 	ingestRundown.segments = ingestRundown.segments.filter((s) => s.externalId !== data.segmentExternalId)
-	ingestRundown.modified = getCurrentTime()
 
 	if (ingestRundown.segments.length === oldSegmentsLength) {
 		throw new Error(
@@ -98,8 +95,7 @@ export function handleUpdatedSegment(
 		if (countBefore === ingestRundown.segments.length && !data.isCreateAction)
 			throw new Error(`Segment "${data.ingestSegment.externalId}" not found`)
 
-		ingestRundown.segments.push(makeNewIngestSegment(data.ingestSegment))
-		ingestRundown.modified = getCurrentTime()
+		ingestRundown.segments.push(data.ingestSegment)
 
 		return {
 			// We modify in-place
@@ -120,7 +116,7 @@ export function handleUpdatedSegment(
 export function handleUpdatedSegmentRanks(
 	_context: JobContext,
 	data: IngestUpdateSegmentRanksProps,
-	ingestRundown: LocalIngestRundown | undefined
+	ingestRundown: IngestRundown | undefined
 ): UpdateIngestRundownResult {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
@@ -152,7 +148,7 @@ export async function handleRemoveOrphanedSegemnts(
 	context: JobContext,
 	data: RemoveOrphanedSegmentsProps,
 	ingestModel: IngestModel,
-	ingestRundown: LocalIngestRundown
+	ingestRundown: IngestRundown
 ): Promise<CommitIngestData | null> {
 	// Find the segments that are still orphaned (in case they have resynced before this executes)
 	// We flag them for deletion again, and they will either be kept if they are somehow playing, or purged if they are not

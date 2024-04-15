@@ -16,7 +16,6 @@ import {
 import { logger } from '../logging'
 import _ = require('underscore')
 import { IngestModel } from './model/IngestModel'
-import { LocalIngestRundown } from './ingestCache'
 import { extendIngestRundownCore, canRundownBeUpdated } from './lib'
 import { JobContext } from '../jobs'
 import { CommitIngestData } from './lock'
@@ -24,7 +23,7 @@ import { SelectedShowStyleVariant, selectShowStyleVariant } from './selectShowSt
 import { PeripheralDevice } from '@sofie-automation/corelib/dist/dataModel/PeripheralDevice'
 import { updateExpectedPackagesForRundownBaseline } from './expectedPackages'
 import { ReadonlyDeep } from 'type-fest'
-import { BlueprintResultRundown, ExtendedIngestRundown } from '@sofie-automation/blueprints-integration'
+import { BlueprintResultRundown, ExtendedIngestRundown, IngestRundown } from '@sofie-automation/blueprints-integration'
 import { wrapTranslatableMessageFromBlueprints } from '@sofie-automation/corelib/dist/TranslatableMessage'
 import { convertRundownToBlueprintSegmentRundown } from '../blueprints/context/lib'
 import { calculateSegmentsAndRemovalsFromIngestData } from './generationSegment'
@@ -51,7 +50,7 @@ export interface CommitIngestDataExt extends CommitIngestData {
 export async function updateRundownFromIngestData(
 	context: JobContext,
 	ingestModel: IngestModel,
-	ingestRundown: LocalIngestRundown,
+	ingestRundown: IngestRundown,
 	generateMode: GenerateRundownMode,
 	peripheralDeviceId: PeripheralDeviceId | null
 ): Promise<CommitIngestDataExt | null> {
@@ -98,7 +97,7 @@ export interface UpdateRundownInnerResult {
 export async function updateRundownFromIngestDataInner(
 	context: JobContext,
 	ingestModel: IngestModel,
-	ingestRundown: LocalIngestRundown,
+	ingestRundown: IngestRundown,
 	generateMode: GenerateRundownMode,
 	peripheralDeviceId: PeripheralDeviceId | null
 ): Promise<UpdateRundownInnerResult | null> {

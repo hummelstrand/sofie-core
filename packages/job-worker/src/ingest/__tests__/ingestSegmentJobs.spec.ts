@@ -5,36 +5,34 @@ import {
 	handleUpdatedSegment,
 	handleUpdatedSegmentRanks,
 } from '../ingestSegmentJobs'
-import { LocalIngestRundown } from '../ingestCache'
 import { clone } from '@sofie-automation/corelib/dist/lib'
-import { IngestSegment, NrcsIngestSegmentChangeDetailsEnum } from '@sofie-automation/blueprints-integration'
-import { stripModifiedTimestamps } from './lib'
+import {
+	IngestRundown,
+	IngestSegment,
+	NrcsIngestSegmentChangeDetailsEnum,
+} from '@sofie-automation/blueprints-integration'
 import { UpdateIngestRundownChange } from '../runOperation'
 
-function getDefaultIngestRundown(): LocalIngestRundown {
+function getDefaultIngestRundown(): IngestRundown {
 	return {
 		externalId: 'rundown0',
 		type: 'mos',
 		name: 'Rundown',
-		modified: 0,
 		segments: [
 			{
 				externalId: 'segment0',
 				name: 'Segment 0',
 				rank: 0,
-				modified: 0,
 				parts: [
 					{
 						externalId: 'part0',
 						name: 'Part 0',
 						rank: 0,
-						modified: 0,
 					},
 					{
 						externalId: 'part1',
 						name: 'Part 1',
 						rank: 1,
-						modified: 0,
 					},
 				],
 			},
@@ -42,19 +40,16 @@ function getDefaultIngestRundown(): LocalIngestRundown {
 				externalId: 'segment1',
 				name: 'Segment 1',
 				rank: 1,
-				modified: 0,
 				parts: [
 					{
 						externalId: 'part2',
 						name: 'Part 2',
 						rank: 0,
-						modified: 0,
 					},
 					{
 						externalId: 'part3',
 						name: 'Part 3',
 						rank: 1,
-						modified: 0,
 					},
 				],
 			},
@@ -111,7 +106,6 @@ describe('handleRegenerateSegment', () => {
 			},
 			clone(ingestRundown)
 		)
-		stripModifiedTimestamps(changes.ingestRundown)
 
 		// update the expected ingestRundown
 		// ingestRundown.modified = 1
@@ -180,10 +174,8 @@ describe('handleRemovedSegment', () => {
 			},
 			clone(ingestRundown)
 		)
-		stripModifiedTimestamps(changes.ingestRundown)
 
 		// update the expected ingestRundown
-		ingestRundown.modified = 1
 		ingestRundown.segments.splice(1, 1)
 
 		expect(changes).toEqual({
@@ -257,15 +249,9 @@ describe('handleUpdatedSegment', () => {
 			ingestSegment: clone(newIngestSegment),
 			isCreateAction: true,
 		})(clone(ingestRundown)) as UpdateIngestRundownChange
-		stripModifiedTimestamps(changes.ingestRundown)
 
 		// update the expected ingestRundown
-		ingestRundown.modified = 1
-		ingestRundown.segments.push({
-			...newIngestSegment,
-			modified: 1,
-			parts: newIngestSegment.parts.map((p) => ({ ...p, modified: 1 })),
-		})
+		ingestRundown.segments.push(newIngestSegment)
 
 		expect(changes).toEqual({
 			ingestRundown,
@@ -307,15 +293,9 @@ describe('handleUpdatedSegment', () => {
 			ingestSegment: clone(customIngestSegment),
 			isCreateAction: false, // has no impact
 		})(clone(ingestRundown)) as UpdateIngestRundownChange
-		stripModifiedTimestamps(changes.ingestRundown)
 
 		// update the expected ingestRundown
-		ingestRundown.modified = 1
-		ingestRundown.segments.splice(1, 1, {
-			...customIngestSegment,
-			modified: 1,
-			parts: customIngestSegment.parts.map((p) => ({ ...p, modified: 1 })),
-		})
+		ingestRundown.segments.splice(1, 1, customIngestSegment)
 
 		expect(changes).toEqual({
 			ingestRundown,

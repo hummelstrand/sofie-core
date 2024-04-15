@@ -1,6 +1,5 @@
 import { JobContext } from '../jobs'
 import { logger } from '../logging'
-import { LocalIngestRundown, makeNewIngestRundown } from './ingestCache'
 import { runWithRundownLock } from './lock'
 import { removeRundownFromDb } from '../rundownPlaylists'
 import { DBRundown, RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
@@ -13,8 +12,7 @@ import {
 	UserUnsyncRundownProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UpdateIngestRundownAction, UpdateIngestRundownChange, UpdateIngestRundownResult } from './runOperation'
-import { NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
-import { getCurrentTime } from '../lib'
+import { IngestRundown, NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
 import { wrapGenericIngestJob } from './jobWrappers'
 
 /**
@@ -23,7 +21,7 @@ import { wrapGenericIngestJob } from './jobWrappers'
 export function handleRemovedRundown(
 	_context: JobContext,
 	data: IngestRemoveRundownProps,
-	_ingestRundown: LocalIngestRundown | undefined
+	_ingestRundown: IngestRundown | undefined
 ): UpdateIngestRundownResult {
 	// Remove it
 	return data.forceDelete ? UpdateIngestRundownAction.FORCE_DELETE : UpdateIngestRundownAction.DELETE
@@ -79,12 +77,12 @@ export async function handleUserRemoveRundown(context: JobContext, data: UserRem
 export function handleUpdatedRundown(
 	_context: JobContext,
 	data: IngestUpdateRundownProps,
-	ingestRundown: LocalIngestRundown | undefined
+	ingestRundown: IngestRundown | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown && !data.isCreateAction) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
 	return {
-		ingestRundown: makeNewIngestRundown(data.ingestRundown),
+		ingestRundown: data.ingestRundown,
 		changes: {
 			source: 'ingest',
 			rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
@@ -98,14 +96,13 @@ export function handleUpdatedRundown(
 export function handleUpdatedRundownMetaData(
 	_context: JobContext,
 	data: IngestUpdateRundownMetaDataProps,
-	ingestRundown: LocalIngestRundown | undefined
+	ingestRundown: IngestRundown | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
 	return {
 		ingestRundown: {
 			...data.ingestRundown,
-			modified: getCurrentTime(),
 			segments: ingestRundown.segments,
 		},
 		changes: {
@@ -121,7 +118,7 @@ export function handleUpdatedRundownMetaData(
 export function handleRegenerateRundown(
 	_context: JobContext,
 	data: IngestRegenerateRundownProps,
-	ingestRundown: LocalIngestRundown | undefined
+	ingestRundown: IngestRundown | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 

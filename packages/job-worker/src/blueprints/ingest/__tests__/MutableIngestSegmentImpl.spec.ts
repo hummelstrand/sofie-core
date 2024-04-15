@@ -1,18 +1,17 @@
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import { MutableIngestSegmentChanges, MutableIngestSegmentImpl } from '../MutableIngestSegmentImpl'
-import { LocalIngestSegment, RundownIngestDataCacheGenerator } from '../../../ingest/ingestCache'
+import { RundownIngestDataCacheGenerator } from '../../../ingest/ingestCache'
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { getSegmentId } from '../../../ingest/lib'
 import { MutableIngestPartImpl } from '../MutableIngestPartImpl'
-import { IngestPart } from '@sofie-automation/blueprints-integration'
+import { IngestPart, IngestSegment } from '@sofie-automation/blueprints-integration'
 
 describe('MutableIngestSegmentImpl', () => {
-	function getBasicIngestSegment(): LocalIngestSegment {
+	function getBasicIngestSegment(): IngestSegment {
 		return {
 			externalId: 'externalId',
 			name: 'name',
 			rank: 0,
-			modified: 0,
 			payload: {
 				val: 'some-val',
 				second: 5,
@@ -22,7 +21,6 @@ describe('MutableIngestSegmentImpl', () => {
 					externalId: 'part0',
 					name: 'my first part',
 					rank: 0,
-					modified: 0,
 					payload: {
 						val: 'some-val',
 					},
@@ -31,7 +29,6 @@ describe('MutableIngestSegmentImpl', () => {
 					externalId: 'part1',
 					name: 'another part',
 					rank: 1,
-					modified: 0,
 					payload: {
 						val: 'second-val',
 					},
@@ -40,7 +37,6 @@ describe('MutableIngestSegmentImpl', () => {
 					externalId: 'part2',
 					name: 'third part',
 					rank: 2,
-					modified: 0,
 					payload: {
 						val: 'third-val',
 					},
@@ -49,7 +45,6 @@ describe('MutableIngestSegmentImpl', () => {
 					externalId: 'part3',
 					name: 'last part',
 					rank: 3,
-					modified: 0,
 					payload: {
 						val: 'last-val',
 					},
@@ -60,7 +55,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 	const ingestObjectGenerator = new RundownIngestDataCacheGenerator(protectString('rundownId'))
 
-	function createNoChangesObject(ingestSegment: LocalIngestSegment): MutableIngestSegmentChanges {
+	function createNoChangesObject(ingestSegment: IngestSegment): MutableIngestSegmentChanges {
 		return {
 			ingestParts: ingestSegment.parts,
 			changedCacheObjects: [],
@@ -71,7 +66,7 @@ describe('MutableIngestSegmentImpl', () => {
 			originalExternalId: ingestSegment.externalId,
 		}
 	}
-	function removePartFromIngestSegment(ingestSegment: LocalIngestSegment, partId: string): void {
+	function removePartFromIngestSegment(ingestSegment: IngestSegment, partId: string): void {
 		const ingestPart = ingestSegment.parts.find((p) => p.externalId === partId)
 		ingestSegment.parts = ingestSegment.parts.filter((p) => p.externalId !== partId)
 		if (ingestPart) {
@@ -306,7 +301,7 @@ describe('MutableIngestSegmentImpl', () => {
 			expect(getPartIdOrder(mutableSegment)).toEqual(['part0', 'part2', 'part3', 'part1'])
 			const expectedIngestSegment = clone(ingestSegment)
 			removePartFromIngestSegment(expectedIngestSegment, 'part1')
-			expectedIngestSegment.parts.push({ ...newPart, rank: 3, modified: 0 })
+			expectedIngestSegment.parts.push({ ...newPart, rank: 3 })
 
 			const expectedChanges = createNoChangesObject(expectedIngestSegment)
 			expectedChanges.partOrderHasChanged = true
@@ -345,7 +340,7 @@ describe('MutableIngestSegmentImpl', () => {
 			// check it has changes
 			expect(getPartIdOrder(mutableSegment)).toEqual(['part0', 'part1', 'part2', 'part3', 'partX'])
 			const expectedIngestSegment = clone(ingestSegment)
-			expectedIngestSegment.parts.push({ ...newPart, rank: 4, modified: 0 })
+			expectedIngestSegment.parts.push({ ...newPart, rank: 4 })
 
 			const expectedChanges = createNoChangesObject(expectedIngestSegment)
 			expectedChanges.partOrderHasChanged = true

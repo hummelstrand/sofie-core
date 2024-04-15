@@ -6,9 +6,9 @@ import {
 	runCustomIngestUpdateOperation,
 	runIngestUpdateOperation,
 } from './runOperation'
-import { LocalIngestRundown } from './ingestCache'
 import { CommitIngestData } from './lock'
 import { IngestModel } from './model/IngestModel'
+import { IngestRundown } from '@sofie-automation/blueprints-integration'
 
 export function wrapMosIngestJob<TData extends IngestPropsBase>(
 	fcn: (context: JobContext, data: TData) => IngestUpdateOperationFunction | null
@@ -28,11 +28,7 @@ export function wrapMosIngestJob<TData extends IngestPropsBase>(
 }
 
 export function wrapGenericIngestJob<TData extends IngestPropsBase>(
-	fcn: (
-		context: JobContext,
-		data: TData,
-		oldIngestRundown: LocalIngestRundown | undefined
-	) => UpdateIngestRundownResult
+	fcn: (context: JobContext, data: TData, oldIngestRundown: IngestRundown | undefined) => UpdateIngestRundownResult
 ): (context: JobContext, data: TData) => Promise<void> {
 	return async (context, data) => {
 		return runIngestUpdateOperation(context, data, (ingestRundown) => {
@@ -69,7 +65,7 @@ export function wrapCustomIngestJob<TData extends IngestPropsBase>(
 		context: JobContext,
 		data: TData,
 		ingestModel: IngestModel,
-		ingestRundown: LocalIngestRundown
+		ingestRundown: IngestRundown
 	) => Promise<CommitIngestData | null>
 ): (context: JobContext, data: TData) => Promise<void> {
 	return async (context, data) => {

@@ -1,11 +1,6 @@
 import { IngestModel, IngestModelReadonly } from './model/IngestModel'
 import { BeforeIngestOperationPartMap, CommitIngestOperation } from './commit'
-import {
-	LocalIngestRundown,
-	LocalIngestSegment,
-	RundownIngestDataCache,
-	RundownIngestDataCacheGenerator,
-} from './ingestCache'
+import { RundownIngestDataCache, RundownIngestDataCacheGenerator } from './ingestCache'
 import { canRundownBeUpdated, getRundownId, getSegmentId } from './lib'
 import { JobContext } from '../jobs'
 import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
@@ -14,7 +9,12 @@ import { loadIngestModelFromRundownExternalId } from './model/implementation/Loa
 import { Complete, clone } from '@sofie-automation/corelib/dist/lib'
 import { CommitIngestData, runWithRundownLockWithoutFetchingRundown } from './lock'
 import { DatabasePersistedModel } from '../modelBase'
-import { NrcsIngestChangeDetails, IngestRundown, UserOperationChange } from '@sofie-automation/blueprints-integration'
+import {
+	NrcsIngestChangeDetails,
+	IngestRundown,
+	UserOperationChange,
+	IngestSegment,
+} from '@sofie-automation/blueprints-integration'
 import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
 import { CommonContext } from '../blueprints/context'
 import { PartId, PeripheralDeviceId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
@@ -29,7 +29,7 @@ export enum UpdateIngestRundownAction {
 }
 
 export interface UpdateIngestRundownChange {
-	ingestRundown: LocalIngestRundown
+	ingestRundown: IngestRundown
 	changes: NrcsIngestChangeDetails | UserOperationChange
 }
 
@@ -37,12 +37,12 @@ export type UpdateIngestRundownResult = UpdateIngestRundownChange | UpdateIngest
 
 // nocommit - this needs a better name
 export interface ComputedIngestChanges {
-	ingestRundown: LocalIngestRundown
+	ingestRundown: IngestRundown
 
 	// define what needs regenerating
 	segmentsToRemove: string[]
 	segmentsUpdatedRanks: Record<string, number> // contains the new rank
-	segmentsToRegenerate: LocalIngestSegment[]
+	segmentsToRegenerate: IngestSegment[]
 	regenerateRundown: boolean // TODO - full vs metadata?
 
 	segmentRenames: Record<string, string> // old -> new
@@ -64,7 +64,7 @@ export async function runCustomIngestUpdateOperation(
 	doWorkFcn: (
 		context: JobContext,
 		ingestModel: IngestModel,
-		ingestRundown: LocalIngestRundown
+		ingestRundown: IngestRundown
 	) => Promise<CommitIngestData | null>
 ): Promise<void> {
 	if (!data.rundownExternalId) {
@@ -121,9 +121,7 @@ export async function runCustomIngestUpdateOperation(
 	})
 }
 
-export type IngestUpdateOperationFunction = (
-	oldIngestRundown: LocalIngestRundown | undefined
-) => UpdateIngestRundownResult
+export type IngestUpdateOperationFunction = (oldIngestRundown: IngestRundown | undefined) => UpdateIngestRundownResult
 
 /**
  * Perform an ingest update operation on a rundown
@@ -227,7 +225,7 @@ export async function runIngestUpdateOperationBase(
 function updateNrcsIngestObjects(
 	context: JobContext,
 	nrcsIngestObjectCache: RundownIngestDataCache,
-	updateNrcsIngestModelFcn: (oldIngestRundown: LocalIngestRundown | undefined) => UpdateIngestRundownResult
+	updateNrcsIngestModelFcn: (oldIngestRundown: IngestRundown | undefined) => UpdateIngestRundownResult
 ): UpdateIngestRundownResult {
 	const updateNrcsIngestModelSpan = context.startSpan('ingest.calcFcn')
 	const oldNrcsIngestRundown = nrcsIngestObjectCache.fetchRundown()

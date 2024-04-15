@@ -1,4 +1,4 @@
-import { NrcsIngestRundownChangeDetails, IngestPart } from '@sofie-automation/blueprints-integration'
+import { NrcsIngestRundownChangeDetails, IngestPart, IngestRundown } from '@sofie-automation/blueprints-integration'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import {
 	MosRundownProps,
@@ -7,8 +7,6 @@ import {
 	MosRundownReadyToAirProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
 import { JobContext } from '../../jobs'
-import { getCurrentTime } from '../../lib'
-import { LocalIngestRundown } from '../ingestCache'
 import { getRundownId, canRundownBeUpdated } from '../lib'
 import { CommitIngestData, runWithRundownLock } from '../lock'
 import { parseMosString, updateRanksBasedOnOrder } from './lib'
@@ -31,7 +29,7 @@ export function handleMosRundownData(
 
 	return (ingestRundown) => {
 		const ingestSegments = (data.mosRunningOrder.Stories || []).map((story) =>
-			mosStoryToIngestSegment(story, data.isUpdateOperation, undefined)
+			mosStoryToIngestSegment(story, data.isUpdateOperation)
 		)
 
 		// If this is a reload of a RO, then use cached data to make the change more seamless
@@ -54,13 +52,12 @@ export function handleMosRundownData(
 			}
 		}
 
-		const newIngestRundown = literal<LocalIngestRundown>({
+		const newIngestRundown = literal<IngestRundown>({
 			externalId: data.rundownExternalId,
 			name: parseMosString(data.mosRunningOrder.Slug),
 			type: 'mos',
 			segments: ingestSegments,
 			payload: data.mosRunningOrder,
-			modified: getCurrentTime(),
 		})
 		updateRanksBasedOnOrder(newIngestRundown)
 
@@ -84,7 +81,6 @@ export function handleMosRundownMetadata(
 	return (ingestRundown) => {
 		if (ingestRundown) {
 			ingestRundown.payload = Object.assign(ingestRundown.payload, data.mosRunningOrderBase)
-			ingestRundown.modified = getCurrentTime()
 
 			return {
 				// We modify in-place
@@ -126,7 +122,7 @@ export async function handleMosRundownReadyToAir(
 	context: JobContext,
 	data: MosRundownReadyToAirProps,
 	ingestModel: IngestModel,
-	ingestRundown: LocalIngestRundown
+	ingestRundown: IngestRundown
 ): Promise<CommitIngestData | null> {
 	// nocommit, maybe this should be using the 'standard' flow instead of this custom one?
 	if (!ingestModel.rundown || ingestModel.rundown.airStatus === data.status) return null
