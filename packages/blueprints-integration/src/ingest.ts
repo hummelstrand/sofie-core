@@ -38,11 +38,11 @@ export enum NrcsIngestRundownChangeDetails {
 }
 
 export interface NrcsIngestSegmentChangeDetailsObject {
-	/**
-	 * If set, this Segment has been renamed from the specified id
-	 * @deprecated This is temporary for MOS compatibility
-	 */
-	oldExternalId?: string
+	// /**
+	//  * If set, this Segment has been renamed from the specified id
+	//  * @deprecated This is temporary for MOS compatibility
+	//  */
+	// oldExternalId?: string
 
 	/**
 	 * True when the payload of the segment has changed.

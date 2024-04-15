@@ -1,4 +1,3 @@
-import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import {
 	MosDeleteStoryProps,
 	MosFullStoryProps,
@@ -9,31 +8,16 @@ import {
 import { logger } from '../../logging'
 import _ = require('underscore')
 import { JobContext } from '../../jobs'
-import { LocalIngestRundown } from '../ingestCache'
-import { getRundownId } from '../lib'
-import { fixIllegalObject, parseMosString } from './lib'
-import { AnnotatedIngestPart, makeChangeToIngestParts, storiesToIngestParts } from './mosToIngest'
-import { generateMosIngestDiffTemp } from './diff'
-import { NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
+import { LocalIngestRundown, LocalIngestSegment } from '../ingestCache'
+import { fixIllegalObject, getMosIngestSegmentId, parseMosString, updateRanksBasedOnOrder } from './lib'
+import { mosStoryToIngestSegment } from './mosToIngest'
+import {
+	NrcsIngestPartChangeDetails,
+	NrcsIngestSegmentChangeDetails,
+	NrcsIngestSegmentChangeDetailsEnum,
+} from '@sofie-automation/blueprints-integration'
 import { IngestUpdateOperationFunction } from '../runOperation'
-
-function getAnnotatedIngestParts(context: JobContext, ingestRundown: LocalIngestRundown): AnnotatedIngestPart[] {
-	const span = context.startSpan('mosDevice.ingest.getAnnotatedIngestParts')
-	const ingestParts: AnnotatedIngestPart[] = []
-	for (const ingestSegment of ingestRundown.segments) {
-		for (const ingestPart of ingestSegment.parts) {
-			ingestParts.push({
-				externalId: ingestPart.externalId,
-				partId: protectString(''), // Not used
-				segmentName: ingestSegment.name,
-				ingest: ingestPart,
-			})
-		}
-	}
-
-	span?.end()
-	return ingestParts
-}
+import { normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 
 /**
  * Update the payload of a mos story
@@ -54,34 +38,34 @@ export function handleMosFullStory(
 		// It appears that the name can't change during a fullStory. (based on a few years of usage)
 		// If it can then we need to be sure to update the segment groupings too
 
-		for (const ingestSegment of ingestRundown.segments) {
-			for (const ingestPart of ingestSegment.parts) {
-				if (ingestPart.externalId === partExternalId) {
-					// We modify in-place
-					ingestPart.payload = data.story
+		const segmentExternalId = getMosIngestSegmentId(partExternalId)
 
-					return {
-						// We modify in-place
-						ingestRundown,
-						changes: {
-							source: 'ingest',
-							segmentChanges: {
-								[ingestSegment.externalId]: {
-									partsChanges: {
-										[ingestPart.externalId]: NrcsIngestPartChangeDetails.Updated,
-									},
-								},
-							},
+		const ingestSegment = ingestRundown.segments.find((s) => s.externalId === segmentExternalId)
+		const ingestPart = ingestSegment?.parts.find((p) => p.externalId === partExternalId)
+
+		if (!ingestPart)
+			// Part was not found
+			throw new Error(
+				`handleMosFullStory: Missing MOS Story "${partExternalId}" in Rundown ingest data for "${data.rundownExternalId}"`
+			)
+
+		// We modify in-place
+		ingestPart.payload = data.story
+
+		return {
+			// We modify in-place
+			ingestRundown,
+			changes: {
+				source: 'ingest',
+				segmentChanges: {
+					[segmentExternalId]: {
+						partsChanges: {
+							[ingestPart.externalId]: NrcsIngestPartChangeDetails.Updated,
 						},
-					}
-				}
-			}
+					},
+				},
+			},
 		}
-
-		// Part was not found
-		throw new Error(
-			`handleMosFullStory: Missing MOS Story "${partExternalId}" in Rundown ingest data for "${data.rundownExternalId}"`
-		)
 	}
 }
 
@@ -89,7 +73,7 @@ export function handleMosFullStory(
  * Delete a mos story
  */
 export function handleMosDeleteStory(
-	context: JobContext,
+	_context: JobContext,
 	data: MosDeleteStoryProps
 ): IngestUpdateOperationFunction | null {
 	if (data.stories.length === 0) return null
@@ -99,34 +83,37 @@ export function handleMosDeleteStory(
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
 
-		const oldIngestSegments = ingestRundown.segments
+		const storyIdsToDelete = data.stories.map(parseMosString)
+		const segmentIdsToDelete = storyIdsToDelete.map(getMosIngestSegmentId)
 
-		const ingestParts = getAnnotatedIngestParts(context, ingestRundown)
-		const ingestPartIds = new Set(ingestParts.map((part) => part.externalId))
+		logger.debug(`handleMosDeleteStory storyIds: [${storyIdsToDelete.join(',')}]`)
 
-		const storyIds = data.stories.map(parseMosString)
+		const ingestSegmentIds = new Set(ingestRundown.segments.map((segment) => segment.externalId))
 
-		logger.debug(`handleMosDeleteStory storyIds: [${storyIds.join(',')}]`)
-
-		const missingIds = storyIds.filter((id) => !ingestPartIds.has(id))
+		const missingIds = segmentIdsToDelete.filter((id) => !ingestSegmentIds.has(id))
 		if (missingIds.length > 0) {
-			throw new Error(`Parts ${missingIds.join(', ')} in rundown ${data.rundownExternalId} were not found`)
+			throw new Error(`Segments ${missingIds.join(', ')} in rundown ${data.rundownExternalId} were not found`)
 		}
 
-		const rundownId = getRundownId(context.studioId, data.rundownExternalId)
-		ingestRundown.segments = makeChangeToIngestParts(context, rundownId, ingestParts, (rundownParts) => {
-			const storyIdsSet = new Set(storyIds)
-			const filteredParts = rundownParts.filter((p) => !storyIdsSet.has(p.externalId))
+		// Remove any segments
+		const segmentIdsToDeleteSet = new Set(segmentIdsToDelete)
+		ingestRundown.segments = ingestRundown.segments.filter(
+			(segment) => !segmentIdsToDeleteSet.has(segment.externalId)
+		)
 
-			logger.debug(`handleMosDeleteStory, new part count ${filteredParts.length} (was ${rundownParts.length})`)
-
-			return filteredParts
-		})
+		// compute changes
+		const segmentChanges: Record<string, NrcsIngestSegmentChangeDetails> = {}
+		for (const segmentId of segmentIdsToDelete) {
+			segmentChanges[segmentId] = NrcsIngestSegmentChangeDetailsEnum.Deleted
+		}
 
 		return {
 			// We modify in-place
 			ingestRundown,
-			changes: generateMosIngestDiffTemp(oldIngestSegments, ingestRundown.segments),
+			changes: {
+				source: 'ingest',
+				segmentChanges,
+			},
 		}
 	}
 }
@@ -135,7 +122,7 @@ export function handleMosDeleteStory(
  * Insert a mos story before the referenced existing story
  */
 export function handleMosInsertStories(
-	context: JobContext,
+	_context: JobContext,
 	data: MosInsertStoryProps
 ): IngestUpdateOperationFunction | null {
 	return (ingestRundown: LocalIngestRundown | undefined) => {
@@ -143,53 +130,51 @@ export function handleMosInsertStories(
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
 
-		const oldIngestSegments = ingestRundown.segments
-
-		const ingestParts = getAnnotatedIngestParts(context, ingestRundown)
-
-		// The part of which we are about to insert stories after
-		const insertBeforePartExternalId = data.insertBeforeStoryId
-			? parseMosString(data.insertBeforeStoryId) || ''
-			: ''
-		const insertIndex = !insertBeforePartExternalId // insert last
-			? ingestParts.length
-			: ingestParts.findIndex((p) => p.externalId === insertBeforePartExternalId)
-		if (insertIndex === -1) {
-			throw new Error(`Part ${insertBeforePartExternalId} in rundown ${data.rundownExternalId} not found`)
-		}
-
-		const rundownId = getRundownId(context.studioId, data.rundownExternalId)
-		const newParts = storiesToIngestParts(context, rundownId, data.newStories || [], true, ingestParts).filter(
-			(p): p is AnnotatedIngestPart => !!p // remove falsy values from array
+		const newIngestSegments = data.newStories.map((story) =>
+			mosStoryToIngestSegment(
+				story,
+				true,
+				undefined // TODO - should have a value
+			)
 		)
 
-		ingestRundown.segments = makeChangeToIngestParts(context, rundownId, ingestParts, (ingestPartsToModify) => {
-			const modifiedIngestParts = [...ingestPartsToModify] // clone
+		// The part of which we are about to insert stories after
+		const insertBeforeSegmentExternalId = data.insertBeforeStoryId
+			? getMosIngestSegmentId(parseMosString(data.insertBeforeStoryId))
+			: undefined
+		const insertIndex = !insertBeforeSegmentExternalId // insert last
+			? ingestRundown.segments.length
+			: ingestRundown.segments.findIndex((p) => p.externalId === insertBeforeSegmentExternalId)
+		if (insertIndex === -1) {
+			throw new Error(`Segment ${insertBeforeSegmentExternalId} in rundown ${data.rundownExternalId} not found`)
+		}
 
-			if (data.replace) {
-				modifiedIngestParts.splice(insertIndex, 1) // Replace the previous part with new parts
-			}
+		const oldSegmentIds = new Set(ingestRundown.segments.map((s) => s.externalId))
+		const duplicateSegments = ingestRundown.segments.filter((segment) => oldSegmentIds.has(segment.externalId))
+		if (duplicateSegments.length > 0) {
+			throw new Error(`Parts ${duplicateSegments.join(', ')} already exist in rundown ${data.rundownExternalId}`)
+		}
 
-			const newPartExtenalIds = new Set(newParts.map((part) => part.externalId))
-			const collidingPartIds = modifiedIngestParts
-				.filter((part) => newPartExtenalIds.has(part.externalId))
-				.map((part) => part.externalId)
+		// Perform the change
+		ingestRundown.segments.splice(insertIndex, data.replace ? 1 : 0, ...newIngestSegments)
+		updateRanksBasedOnOrder(ingestRundown)
 
-			if (collidingPartIds.length > 0) {
-				throw new Error(
-					`Parts ${collidingPartIds.join(', ')} already exist in rundown ${data.rundownExternalId}`
-				)
-			}
-			// Update parts list
-			modifiedIngestParts.splice(insertIndex, 0, ...newParts)
-
-			return modifiedIngestParts
-		})
+		const segmentChanges: Record<string, NrcsIngestSegmentChangeDetails> = {}
+		for (const segment of newIngestSegments) {
+			segmentChanges[segment.externalId] = NrcsIngestSegmentChangeDetailsEnum.Inserted
+		}
+		if (data.replace && insertBeforeSegmentExternalId) {
+			segmentChanges[insertBeforeSegmentExternalId] = NrcsIngestSegmentChangeDetailsEnum.Deleted
+		}
 
 		return {
 			// We modify in-place
 			ingestRundown,
-			changes: generateMosIngestDiffTemp(oldIngestSegments, ingestRundown.segments),
+			changes: {
+				source: 'ingest',
+				segmentChanges: segmentChanges,
+				segmentOrderChanged: true,
+			},
 		}
 	}
 }
@@ -198,7 +183,7 @@ export function handleMosInsertStories(
  * Swap positions of two mos stories
  */
 export function handleMosSwapStories(
-	context: JobContext,
+	_context: JobContext,
 	data: MosSwapStoryProps
 ): IngestUpdateOperationFunction | null {
 	const story0Str = parseMosString(data.story0)
@@ -212,31 +197,35 @@ export function handleMosSwapStories(
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
 
-		const oldIngestSegments = ingestRundown.segments
+		const segment0Id = getMosIngestSegmentId(parseMosString(data.story0))
+		const story0Index = ingestRundown.segments.findIndex((s) => s.externalId === segment0Id)
+		if (story0Index === -1) {
+			throw new Error(`Story ${story0Str} not found in rundown ${data.rundownExternalId}`)
+		}
 
-		const ingestParts = getAnnotatedIngestParts(context, ingestRundown)
+		const segment1Id = getMosIngestSegmentId(parseMosString(data.story0))
+		const story1Index = ingestRundown.segments.findIndex((s) => s.externalId === segment1Id)
+		if (story1Index === -1) {
+			throw new Error(`Story ${story1Str} not found in rundown ${data.rundownExternalId}`)
+		}
 
-		const rundownId = getRundownId(context.studioId, data.rundownExternalId)
-		ingestRundown.segments = makeChangeToIngestParts(context, rundownId, ingestParts, (rundownParts) => {
-			const story0Index = rundownParts.findIndex((p) => p.externalId === story0Str)
-			if (story0Index === -1) {
-				throw new Error(`Story ${story0Str} not found in rundown ${data.rundownExternalId}`)
-			}
-			const story1Index = rundownParts.findIndex((p) => p.externalId === story1Str)
-			if (story1Index === -1) {
-				throw new Error(`Story ${story1Str} not found in rundown ${data.rundownExternalId}`)
-			}
-			const tmp = rundownParts[story0Index]
-			rundownParts[story0Index] = rundownParts[story1Index]
-			rundownParts[story1Index] = tmp
+		// Fetch the values
+		const story0Segment = ingestRundown.segments[story0Index]
+		const story1Segment = ingestRundown.segments[story1Index]
 
-			return rundownParts
-		})
+		// Store the values
+		ingestRundown.segments[story0Index] = story1Segment
+		ingestRundown.segments[story1Index] = story0Segment
+
+		updateRanksBasedOnOrder(ingestRundown)
 
 		return {
 			// We modify in-place
 			ingestRundown,
-			changes: generateMosIngestDiffTemp(oldIngestSegments, ingestRundown.segments),
+			changes: {
+				source: 'ingest',
+				segmentOrderChanged: true,
+			},
 		}
 	}
 }
@@ -245,7 +234,7 @@ export function handleMosSwapStories(
  * Move a list of mos stories
  */
 export function handleMosMoveStories(
-	context: JobContext,
+	_context: JobContext,
 	data: MosMoveStoryProps
 ): IngestUpdateOperationFunction | null {
 	return (ingestRundown: LocalIngestRundown | undefined) => {
@@ -253,50 +242,45 @@ export function handleMosMoveStories(
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
 
-		const oldIngestSegments = ingestRundown.segments
+		const oldIngestSegmentMap = normalizeArrayToMap(ingestRundown.segments, 'externalId')
 
-		const ingestParts = getAnnotatedIngestParts(context, ingestRundown)
+		const moveStoryIds = data.stories.map(parseMosString)
 
-		// Get story data
-		const storyIds = data.stories.map(parseMosString)
+		const moveIngestSegments: LocalIngestSegment[] = []
+		const missingIds: string[] = []
+		for (const storyId of moveStoryIds) {
+			const segment = oldIngestSegmentMap.get(getMosIngestSegmentId(storyId))
+			if (segment) moveIngestSegments.push(segment)
+			else missingIds.push(storyId)
+		}
 
-		const rundownId = getRundownId(context.studioId, data.rundownExternalId)
-		ingestRundown.segments = makeChangeToIngestParts(context, rundownId, ingestParts, (rundownParts) => {
-			// Extract the parts-to-be-moved:
-			const movingParts = _.sortBy(
-				rundownParts.filter((p) => storyIds.indexOf(p.externalId) !== -1),
-				(p) => storyIds.indexOf(p.externalId)
-			)
-			const filteredParts = rundownParts.filter((p) => storyIds.indexOf(p.externalId) === -1)
-
-			// Ensure all stories to move were found
-			const movingIds = movingParts.map((p) => p.externalId)
-			const missingIds = storyIds.filter((id) => movingIds.indexOf(id) === -1)
+		if (missingIds.length > 0)
 			if (missingIds.length > 0) {
 				throw new Error(`Parts ${missingIds.join(', ')} were not found in rundown ${data.rundownExternalId}`)
 			}
 
-			// Find insert point
-			const insertBeforePartExternalId = data.insertBeforeStoryId
-				? parseMosString(data.insertBeforeStoryId) || ''
-				: ''
-			const insertIndex = !insertBeforePartExternalId // insert last
-				? filteredParts.length
-				: filteredParts.findIndex((p) => p.externalId === insertBeforePartExternalId)
-			if (insertIndex === -1) {
-				throw new Error(`Part ${insertBeforePartExternalId} was not found in rundown ${data.rundownExternalId}`)
-			}
+		// The part of which we are about to insert stories after
+		const insertBeforeSegmentExternalId = data.insertBeforeStoryId
+			? getMosIngestSegmentId(parseMosString(data.insertBeforeStoryId))
+			: undefined
+		const insertIndex = !insertBeforeSegmentExternalId // insert last
+			? ingestRundown.segments.length
+			: ingestRundown.segments.findIndex((p) => p.externalId === insertBeforeSegmentExternalId)
+		if (insertIndex === -1) {
+			throw new Error(`Segment ${insertBeforeSegmentExternalId} in rundown ${data.rundownExternalId} not found`)
+		}
 
-			// Reinsert parts
-			filteredParts.splice(insertIndex, 0, ...movingParts)
-
-			return filteredParts
-		})
+		// Perform the change
+		ingestRundown.segments.splice(insertIndex, 0, ...moveIngestSegments)
+		updateRanksBasedOnOrder(ingestRundown)
 
 		return {
 			// We modify in-place
 			ingestRundown,
-			changes: generateMosIngestDiffTemp(oldIngestSegments, ingestRundown.segments),
+			changes: {
+				source: 'ingest',
+				segmentOrderChanged: true,
+			},
 		}
 	}
 }

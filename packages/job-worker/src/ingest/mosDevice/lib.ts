@@ -1,5 +1,5 @@
 import { MOS } from '@sofie-automation/corelib'
-import { IngestPart } from '@sofie-automation/blueprints-integration'
+import { IngestPart, IngestRundown } from '@sofie-automation/blueprints-integration'
 import { getPartId } from '../lib'
 import { PartId, RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import _ = require('underscore')
@@ -37,4 +37,18 @@ export function parseMosString(str: MOS.IMOSString128): string {
 	if (!str) throw new Error('parseMosString: str parameter missing!')
 	if (mosTypes.mosString128.is(str)) return mosTypes.mosString128.stringify(str)
 	return (str as any).toString()
+}
+
+export function getMosIngestSegmentId(partExternalId: string): string {
+	return `segment-${partExternalId}`
+}
+
+export function updateRanksBasedOnOrder(ingestRundown: IngestRundown): void {
+	ingestRundown.segments.forEach((segment, i) => {
+		segment.rank = i
+
+		segment.parts.forEach((part, j) => {
+			part.rank = j
+		})
+	})
 }
