@@ -257,7 +257,6 @@ describe('cronjobs', () => {
 				_id: getRandomId<SegmentId>(),
 				_rank: 0,
 				externalId: '',
-				externalModified: 0,
 				rundownId,
 				name: 'mock segment',
 			}

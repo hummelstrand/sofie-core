@@ -248,7 +248,6 @@ async function generateSegmentWithBlueprints(
 function createInternalErrorSegment(blueprintId: BlueprintId, ingestSegment: IngestSegment): IngestReplaceSegmentType {
 	return {
 		externalId: ingestSegment.externalId,
-		externalModified: 0, // nocommit remove this property
 		_rank: ingestSegment.rank,
 		notes: [
 			{
@@ -285,7 +284,6 @@ function updateModelWithGeneratedSegment(
 		literal<IngestReplaceSegmentType>({
 			...blueprintSegment.segment,
 			externalId: ingestSegment.externalId,
-			externalModified: 0, // nocommit remove this property
 			_rank: ingestSegment.rank,
 			notes: segmentNotes,
 		})

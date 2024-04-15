@@ -18,8 +18,6 @@ export interface DBSegment {
 	_rank: number
 	/** ID of the source object in the gateway */
 	externalId: string
-	/** Timestamp when the externalData was last modified */
-	externalModified: number
 	/** The rundown this segment belongs to */
 	rundownId: RundownId
 

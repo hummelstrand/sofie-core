@@ -304,17 +304,8 @@ describe('handleUpdatedRundown', () => {
 			undefined
 		)
 
-		// update the expected ingestRundown
-		const expectedIngestRundown: IngestRundown = {
-			...ingestRundown,
-			segments: ingestRundown.segments.map((s) => ({
-				...s,
-				parts: s.parts.map((p) => ({ ...p })),
-			})),
-		}
-
 		expect(changes).toEqual({
-			ingestRundown: expectedIngestRundown,
+			ingestRundown: ingestRundown,
 			changes: {
 				source: 'ingest',
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
@@ -356,15 +347,6 @@ describe('handleUpdatedRundown', () => {
 			},
 			clone(ingestRundown)
 		)
-
-		// update the expected ingestRundown
-		const expectedIngestRundown: IngestRundown = {
-			...newIngestRundown,
-			segments: newIngestRundown.segments.map((s) => ({
-				...s,
-				parts: s.parts.map((p) => ({ ...p, modified: 1 })),
-			})),
-		}
 
 		expect(changes).toEqual({
 			ingestRundown: newIngestRundown,
