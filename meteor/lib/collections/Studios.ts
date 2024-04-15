@@ -5,9 +5,7 @@ import {
 	MappingExt,
 	StudioRouteType,
 	StudioRouteSet,
-	RouteMapping,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import { ReadonlyDeep } from 'type-fest'
 import { WrappedOverridableItem } from './OverrideOpHelper'
 
 export function getActiveRoutes(routeSets: WrappedOverridableItem<StudioRouteSet>[]): ResultingMappingRoutes {
@@ -29,7 +27,7 @@ export function getActiveRoutes(routeSets: WrappedOverridableItem<StudioRouteSet
 				exclusivityGroups[routeSet.computed.exclusivityGroup] = true
 			}
 			if (useRoute) {
-				for (const routeMapping of Object.values<ReadonlyDeep<RouteMapping>>(routeSet.co.routes)) {
+				for (const routeMapping of routeSet.computed?.routes || []) {
 					if (routeMapping.outputMappedLayer) {
 						if (routeMapping.mappedLayer) {
 							// Route an existing layer
