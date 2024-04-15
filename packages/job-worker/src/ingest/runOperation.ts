@@ -21,7 +21,6 @@ import { PartId, PeripheralDeviceId, RundownId, SegmentId } from '@sofie-automat
 import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromIngestDataInner } from './generationRundown'
 import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
-import _ = require('underscore')
 import { wipGroupRundownForMos } from '../blueprints/ingest/wipGroupRundownForMos'
 
 export enum UpdateIngestRundownAction {
@@ -491,11 +490,10 @@ async function applyCalculatedIngestChangesToModel(
 		}
 
 		// Create/Update segments
-		const segmentsToRegenerate = _.sortBy([...computedIngestChanges.segmentsToRegenerate], (se) => se.rank) // nocommit: is this sort necessary?
 		const changedSegmentIds = await calculateSegmentsFromIngestData(
 			context,
 			ingestModel,
-			segmentsToRegenerate,
+			computedIngestChanges.segmentsToRegenerate,
 			null
 		)
 

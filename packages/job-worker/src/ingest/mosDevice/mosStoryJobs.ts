@@ -7,8 +7,13 @@ import {
 } from '@sofie-automation/corelib/dist/worker/ingest'
 import { logger } from '../../logging'
 import { JobContext } from '../../jobs'
-import { fixIllegalObject, getMosIngestSegmentId, parseMosString, updateRanksBasedOnOrder } from './lib'
-import { mosStoryToIngestSegment } from './mosToIngest'
+import {
+	fixIllegalObject,
+	getMosIngestSegmentId,
+	mosStoryToIngestSegment,
+	parseMosString,
+	updateRanksBasedOnOrder,
+} from './lib'
 import {
 	IngestRundown,
 	IngestSegment,

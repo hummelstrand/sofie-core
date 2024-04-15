@@ -9,8 +9,7 @@ import {
 import { JobContext } from '../../jobs'
 import { getRundownId, canRundownBeUpdated } from '../lib'
 import { CommitIngestData, runWithRundownLock } from '../lock'
-import { parseMosString, updateRanksBasedOnOrder } from './lib'
-import { mosStoryToIngestSegment } from './mosToIngest'
+import { mosStoryToIngestSegment, parseMosString, updateRanksBasedOnOrder } from './lib'
 import { GenerateRundownMode, updateRundownFromIngestData } from '../generationRundown'
 import { IngestUpdateOperationFunction } from '../runOperation'
 import { IngestModel } from '../model/IngestModel'
@@ -124,7 +123,6 @@ export async function handleMosRundownReadyToAir(
 	ingestModel: IngestModel,
 	ingestRundown: IngestRundown
 ): Promise<CommitIngestData | null> {
-	// nocommit, maybe this should be using the 'standard' flow instead of this custom one?
 	if (!ingestModel.rundown || ingestModel.rundown.airStatus === data.status) return null
 
 	// If rundown is orphaned, then it should be ignored

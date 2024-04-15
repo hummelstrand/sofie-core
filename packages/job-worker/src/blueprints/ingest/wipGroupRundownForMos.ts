@@ -151,34 +151,19 @@ function comparePartOrder(ingestParts: IngestPart[], oldIngestParts: IngestPart[
 }
 
 function groupIngestRundown(ingestRundown: IngestRundown): IngestRundown {
-	const annotatedIngestParts = getAnnotatedIngestParts(ingestRundown)
-	const segments = groupPartsIntoIngestSegments(ingestRundown.externalId, annotatedIngestParts)
-
-	return {
-		...ingestRundown,
-		segments,
-	}
-}
-
-interface AnnotatedIngestPart {
-	externalId: string
-	segmentName: string
-	ingest: IngestPart
-}
-
-function getSegmentExternalId(rundownExternalId: string, ingestPart: IngestPart): string {
-	return `${rundownExternalId}_${ingestPart.name.split(';')[0]}_${ingestPart.externalId}`
-}
-
-/** Group IngestParts together into something that could be Segments */
-function groupIngestParts(parts: AnnotatedIngestPart[]): { name: string; parts: IngestPart[] }[] {
 	const groupedParts: { name: string; parts: IngestPart[] }[] = []
-	for (const part of parts) {
-		const lastSegment = _.last(groupedParts)
-		if (lastSegment && lastSegment.name === part.segmentName) {
-			lastSegment.parts.push(part.ingest)
-		} else {
-			groupedParts.push({ name: part.segmentName, parts: [part.ingest] })
+
+	for (const ingestSegment of ingestRundown.segments) {
+		// nocommit: group these better
+		const segmentName = ingestSegment.name.split(';')[0] || ingestSegment.name
+
+		for (const ingestPart of ingestSegment.parts) {
+			const lastSegment = _.last(groupedParts)
+			if (lastSegment && lastSegment.name === segmentName) {
+				lastSegment.parts.push(ingestPart)
+			} else {
+				groupedParts.push({ name: segmentName, parts: [ingestPart] })
+			}
 		}
 	}
 
@@ -189,92 +174,52 @@ function groupIngestParts(parts: AnnotatedIngestPart[]): { name: string; parts: 
 		}
 	}
 
-	return groupedParts
-}
-function groupedPartsToSegments(
-	rundownExternalId: string,
-	groupedParts: { name: string; parts: IngestPart[] }[]
-): IngestSegment[] {
-	return groupedParts.map(
+	const segments = groupedParts.map(
 		(grp, i) =>
 			({
-				externalId: getSegmentExternalId(rundownExternalId, grp.parts[0]),
+				externalId: getSegmentExternalId(ingestRundown.externalId, grp.parts[0]),
 				name: grp.name,
 				rank: i,
 				parts: grp.parts,
 			} satisfies IngestSegment)
 	)
-}
 
-function groupPartsIntoIngestSegments(
-	rundownExternalId: string,
-	newIngestParts: AnnotatedIngestPart[]
-): IngestSegment[] {
-	// Group the parts and make them into Segments:
-	const newGroupedParts = groupIngestParts(newIngestParts)
-	return groupedPartsToSegments(rundownExternalId, newGroupedParts)
-}
-
-function getAnnotatedIngestParts(ingestRundown: IngestRundown): AnnotatedIngestPart[] {
-	const ingestParts: AnnotatedIngestPart[] = []
-	for (const ingestSegment of ingestRundown.segments) {
-		// nocommit: group these better
-		const segmentName = ingestSegment.name.split(';')[0] || ingestSegment.name
-
-		for (const ingestPart of ingestSegment.parts) {
-			ingestParts.push({
-				externalId: ingestPart.externalId,
-				segmentName: segmentName,
-				ingest: ingestPart,
-			})
-		}
+	return {
+		...ingestRundown,
+		segments,
 	}
+}
 
-	return ingestParts
+function getSegmentExternalId(rundownExternalId: string, ingestPart: IngestPart): string {
+	return `${rundownExternalId}_${ingestPart.name.split(';')[0]}_${ingestPart.externalId}`
 }
 
 function calculateSegmentExternalIdChanges(
 	oldIngestRundown: IngestRundown,
 	newIngestRundown: IngestRundown,
-	segmentChanges: Record<string, NrcsIngestSegmentChangeDetails>
-	// oldSegments: SegmentMini[] | null
+	_segmentChanges: Record<string, NrcsIngestSegmentChangeDetails>
 ): Record<string, string> {
 	const segmentExternalIdChanges: Record<string, string> = {}
-
-	// find the ids of the segments that have been added and removed
-	// nocommit, should this be rewritten to use just the rundowns?
-	const addedSegmentIds: string[] = []
-	const removedSegmentIds: string[] = []
-	for (const [segmentExternalId, change] of Object.entries<NrcsIngestSegmentChangeDetails | undefined>(
-		segmentChanges
-	)) {
-		if (change === NrcsIngestSegmentChangeDetailsEnum.Deleted) removedSegmentIds.push(segmentExternalId)
-		if (change === NrcsIngestSegmentChangeDetailsEnum.Inserted) addedSegmentIds.push(segmentExternalId)
-	}
-
-	if (removedSegmentIds.length === 0 || addedSegmentIds.length === 0) return {}
 
 	const oldIngestSegmentMap = normalizeArrayToMap(oldIngestRundown.segments, 'externalId')
 	const newIngestSegmentMap = normalizeArrayToMap(newIngestRundown.segments, 'externalId')
 
-	let addedSegments = addedSegmentIds // nocommit: eww
-		.map((id) => newIngestSegmentMap.get(id))
-		.filter((s): s is IngestSegment => !!s)
+	const removedSegments = oldIngestRundown.segments.filter((s) => !newIngestSegmentMap.has(s.externalId))
+	let addedSegments = newIngestRundown.segments.filter((s) => !oldIngestSegmentMap.has(s.externalId))
 
-	for (const segmentExternalId of removedSegmentIds) {
-		const oldSegmentEntry = oldIngestSegmentMap.get(segmentExternalId)
-		if (!oldSegmentEntry) continue // It didn't really exist?
+	if (removedSegments.length === 0 || addedSegments.length === 0) return {}
 
+	for (const removedSegment of removedSegments) {
 		let newSegmentExternalId: string | undefined
 
 		// try finding "it" in the added, using name
 		// Future: this may not be particularly accurate, as multiple could have been formed
-		newSegmentExternalId = addedSegments.find((se) => se.name === oldSegmentEntry.name)?.externalId
+		newSegmentExternalId = addedSegments.find((se) => se.name === removedSegment.name)?.externalId
 
 		if (!newSegmentExternalId) {
 			// second try, match with any parts:
 			newSegmentExternalId = addedSegments.find((se) => {
-				for (const part of oldSegmentEntry.parts) {
+				for (const part of removedSegment.parts) {
 					if (se.parts.find((p) => p.externalId === part.externalId)) {
 						return true
 					}
@@ -284,7 +229,7 @@ function calculateSegmentExternalIdChanges(
 			})?.externalId
 		}
 		if (newSegmentExternalId) {
-			segmentExternalIdChanges[segmentExternalId] = newSegmentExternalId
+			segmentExternalIdChanges[removedSegment.externalId] = newSegmentExternalId
 
 			// Ensure the same id doesn't get used multiple times
 			addedSegments = addedSegments.filter((s) => s.externalId !== newSegmentExternalId)

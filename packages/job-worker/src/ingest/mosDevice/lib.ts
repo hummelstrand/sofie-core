@@ -1,17 +1,6 @@
 import { MOS } from '@sofie-automation/corelib'
-import { IngestPart, IngestRundown } from '@sofie-automation/blueprints-integration'
-import { getPartId } from '../lib'
-import { PartId, RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { IngestRundown, IngestSegment } from '@sofie-automation/blueprints-integration'
 import _ = require('underscore')
-
-export function getPartIdFromMosStory(rundownId: RundownId, partMosId: MOS.IMOSString128 | string): PartId {
-	if (!partMosId) throw new Error('parameter partMosId missing!')
-	return getPartId(rundownId, typeof partMosId === 'string' ? partMosId : parseMosString(partMosId))
-}
-
-export function getSegmentExternalId(rundownId: RundownId, ingestPart: IngestPart): string {
-	return `${rundownId}_${ingestPart.name.split(';')[0]}_${ingestPart.externalId}`
-}
 
 export function fixIllegalObject(o: unknown): void {
 	if (_.isArray(o)) {
@@ -51,4 +40,23 @@ export function updateRanksBasedOnOrder(ingestRundown: IngestRundown): void {
 			part.rank = j
 		})
 	})
+}
+
+export function mosStoryToIngestSegment(mosStory: MOS.IMOSStory, undefinedPayload: boolean): IngestSegment {
+	const externalId = parseMosString(mosStory.ID)
+
+	const name = mosStory.Slug ? parseMosString(mosStory.Slug) : ''
+	return {
+		externalId: getMosIngestSegmentId(externalId),
+		name: name,
+		rank: 0, // Set later
+		parts: [
+			{
+				externalId: externalId,
+				name: name,
+				rank: 0,
+				payload: undefinedPayload ? undefined : {},
+			},
+		],
+	}
 }
