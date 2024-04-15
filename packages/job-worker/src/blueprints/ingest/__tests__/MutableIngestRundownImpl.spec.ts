@@ -622,7 +622,7 @@ describe('MutableIngestRundownImpl', () => {
 			expect(mutableRundown.getSegment('segX')).toBeUndefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-			expect(() => mutableRundown.renameSegmentTo('segX', 'segY')).toThrow(/Segment(.*)not found/)
+			expect(() => mutableRundown.changeSegmentExternalId('segX', 'segY')).toThrow(/Segment(.*)not found/)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 		})
 
@@ -633,7 +633,7 @@ describe('MutableIngestRundownImpl', () => {
 			expect(mutableRundown.getSegment('seg1')).toBeDefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-			expect(() => mutableRundown.renameSegmentTo('seg1', 'seg2')).toThrow(/Segment(.*)already exists/)
+			expect(() => mutableRundown.changeSegmentExternalId('seg1', 'seg2')).toThrow(/Segment(.*)already exists/)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 		})
 
@@ -646,7 +646,7 @@ describe('MutableIngestRundownImpl', () => {
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
 			// rename and check
-			expect(mutableRundown.renameSegmentTo('seg1', 'segX')).toStrictEqual(beforeSegment)
+			expect(mutableRundown.changeSegmentExternalId('seg1', 'segX')).toStrictEqual(beforeSegment)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg2'])
 			expect(beforeSegment.originalExternalId).toBe('seg1')
 			expect(beforeSegment.externalId).toBe('segX')
@@ -670,13 +670,13 @@ describe('MutableIngestRundownImpl', () => {
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
 			// rename and check
-			expect(mutableRundown.renameSegmentTo('seg1', 'segX')).toStrictEqual(beforeSegment)
+			expect(mutableRundown.changeSegmentExternalId('seg1', 'segX')).toStrictEqual(beforeSegment)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg2'])
 			expect(beforeSegment.originalExternalId).toBe('seg1')
 			expect(beforeSegment.externalId).toBe('segX')
 
 			// rename again
-			expect(mutableRundown.renameSegmentTo('segX', 'segY')).toStrictEqual(beforeSegment)
+			expect(mutableRundown.changeSegmentExternalId('segX', 'segY')).toStrictEqual(beforeSegment)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segY', 'seg2'])
 			expect(beforeSegment.originalExternalId).toBe('seg1')
 			expect(beforeSegment.externalId).toBe('segY')
@@ -702,19 +702,19 @@ describe('MutableIngestRundownImpl', () => {
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
 			// rename seg1 to segX
-			expect(mutableRundown.renameSegmentTo('seg1', 'segX')).toStrictEqual(beforeSegment1)
+			expect(mutableRundown.changeSegmentExternalId('seg1', 'segX')).toStrictEqual(beforeSegment1)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg2'])
 			expect(beforeSegment1.originalExternalId).toBe('seg1')
 			expect(beforeSegment1.externalId).toBe('segX')
 
 			// rename seg2 to seg1
-			expect(mutableRundown.renameSegmentTo('seg2', 'seg1')).toStrictEqual(beforeSegment2)
+			expect(mutableRundown.changeSegmentExternalId('seg2', 'seg1')).toStrictEqual(beforeSegment2)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg1'])
 			expect(beforeSegment2.originalExternalId).toBe('seg2')
 			expect(beforeSegment2.externalId).toBe('seg1')
 
 			// rename segX to seg2
-			expect(mutableRundown.renameSegmentTo('segX', 'seg2')).toStrictEqual(beforeSegment1)
+			expect(mutableRundown.changeSegmentExternalId('segX', 'seg2')).toStrictEqual(beforeSegment1)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg2', 'seg1'])
 			expect(beforeSegment1.originalExternalId).toBe('seg1')
 			expect(beforeSegment1.externalId).toBe('seg2')

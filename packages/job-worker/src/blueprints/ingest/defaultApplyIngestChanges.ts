@@ -86,7 +86,7 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 		for (const nrcsSegment of nrcsRundown.segments) {
 			const originalExternalId = existingSegmentExternalIdChanges.get(nrcsSegment.externalId)
 			if (originalExternalId) {
-				mutableIngestRundown.renameSegmentFrom(originalExternalId, nrcsSegment.externalId)
+				mutableIngestRundown.changeSegmentOriginalExternalId(nrcsSegment.externalId, originalExternalId)
 			}
 		}
 	} else {

@@ -160,16 +160,25 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 		beforeSegmentExternalId: string | null
 	): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
-	// nocommit - better naming of this method?
-	renameSegmentTo(
+	/**
+	 * Change the externalId of a Segment
+	 * @param oldSegmentExternalId Id of the segment to change
+	 * @param newSegmentExternalId New id for the segment
+	 */
+	changeSegmentExternalId(
 		oldSegmentExternalId: string,
 		newSegmentExternalId: string
 	): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
-	// nocommit - better naming of this method?
-	renameSegmentFrom(
-		oldSegmentExternalId: string,
-		newSegmentExternalId: string
+	/**
+	 * Change the originalExternalId of a Segment
+	 * This allows for tracking of segments that have been renamed, after a Segment has been added or replaced
+	 * @param segmentExternalId Id of the segment to update
+	 * @param originalSegmentExternalId Original id for the segment
+	 */
+	changeSegmentOriginalExternalId(
+		segmentExternalId: string,
+		originalSegmentExternalId: string
 	): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
 	/**

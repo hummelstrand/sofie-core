@@ -261,8 +261,7 @@ async function updateSofieIngestRundown(
 		ingestRundownChanges === UpdateIngestRundownAction.DELETE ||
 		ingestRundownChanges === UpdateIngestRundownAction.FORCE_DELETE
 	) {
-		// Also delete the Sofie view of the Rundown
-		// nocommit Is this correct? Or should we keep the Sofie view as-is until the rundown is deleted? Or perhaps even let the blueprints decide?
+		// Also delete the Sofie view of the Rundown, so that future ingest calls know it has been deleted
 		sofieIngestObjectCache.delete()
 
 		return ingestRundownChanges
@@ -313,7 +312,7 @@ async function updateSofieIngestRundown(
 			)) {
 				if (!oldExternalId || !newExternalId) continue
 
-				mutableIngestRundown.renameSegmentTo(oldExternalId, newExternalId)
+				mutableIngestRundown.changeSegmentExternalId(oldExternalId, newExternalId)
 			}
 
 			// Blueprints has not defined a processIngestData()

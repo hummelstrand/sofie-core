@@ -273,8 +273,8 @@ describe('defaultApplyIngestChanges', () => {
 			wrapSegment(segment)
 			return segment
 		})
-		wrapMethod('rundown', 'renameSegmentTo', mutableIngestRundown)
-		wrapMethod('rundown', 'renameSegmentFrom', mutableIngestRundown)
+		wrapMethod('rundown', 'changeSegmentExternalId', mutableIngestRundown)
+		wrapMethod('rundown', 'changeSegmentOriginalExternalId', mutableIngestRundown)
 		wrapMethod('rundown', 'removeSegment', mutableIngestRundown)
 		wrapMethod('rundown', 'forceFullRegenerate', mutableIngestRundown)
 		wrapMethod('rundown', 'setName', mutableIngestRundown)

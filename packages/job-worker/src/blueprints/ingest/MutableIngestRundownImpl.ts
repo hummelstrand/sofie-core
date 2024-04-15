@@ -196,7 +196,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		return newSegment
 	}
 
-	renameSegmentTo(
+	changeSegmentExternalId(
 		oldSegmentExternalId: string,
 		newSegmentExternalId: string
 	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
@@ -204,38 +204,26 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		if (!segment) throw new Error(`Segment "${oldSegmentExternalId}" not found`)
 
 		const targetSegment = this.#segments.find((s) => s.externalId === newSegmentExternalId)
-		if (targetSegment) {
-			throw new Error(`Segment "${newSegmentExternalId}" already exists`)
-			// // Segment id is already in use, ensure it is regenerated and remove the old segment
-			// targetSegment.forceRegenerate()
-			// this.#removeSegment(oldId)
-			// return targetSegment
-		} else {
-			segment.setExternalId(newSegmentExternalId)
+		if (targetSegment) throw new Error(`Segment "${newSegmentExternalId}" already exists`)
 
-			return segment
-		}
+		segment.setExternalId(newSegmentExternalId)
+
+		return segment
 	}
 
-	renameSegmentFrom(
-		oldSegmentExternalId: string,
-		newSegmentExternalId: string
+	changeSegmentOriginalExternalId(
+		segmentExternalId: string,
+		originalSegmentExternalId: string
 	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
-		const segment = this.#segments.find((s) => s.externalId === newSegmentExternalId)
-		if (!segment) throw new Error(`Segment "${newSegmentExternalId}" not found`)
+		const segment = this.#segments.find((s) => s.externalId === segmentExternalId)
+		if (!segment) throw new Error(`Segment "${segmentExternalId}" not found`)
 
-		const targetSegment = this.#segments.find((s) => s.externalId === oldSegmentExternalId)
-		if (targetSegment) {
-			throw new Error(`Segment "${oldSegmentExternalId}" exists`)
-			// // Segment id is already in use, ensure it is regenerated and remove the old segment
-			// targetSegment.forceRegenerate()
-			// this.#removeSegment(oldId)
-			// return targetSegment
-		} else {
-			segment.setOriginalExternalId(oldSegmentExternalId)
+		const targetSegment = this.#segments.find((s) => s.externalId === originalSegmentExternalId)
+		if (targetSegment) throw new Error(`Segment "${originalSegmentExternalId}" exists`)
 
-			return segment
-		}
+		segment.setOriginalExternalId(originalSegmentExternalId)
+
+		return segment
 	}
 
 	/**
