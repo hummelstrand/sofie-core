@@ -234,7 +234,7 @@ function applyChangesObjectForSingleSegment<TRundownPayload, TSegmentPayload, TP
 		mutableSegment.setName(nrcsSegment.name)
 	}
 
-	if (segmentChange.partsChanges) {
+	if (segmentChange.partChanges) {
 		const nrcsPartMap = normalizeArrayToMap(nrcsSegment.parts, 'externalId')
 		const nrcsPartIds = nrcsSegment.parts.map((s) => s.externalId)
 
@@ -242,7 +242,7 @@ function applyChangesObjectForSingleSegment<TRundownPayload, TSegmentPayload, TP
 		const partsToInsert: IngestPart[] = []
 
 		for (const [partId, change] of Object.entries<NrcsIngestPartChangeDetails | undefined>(
-			segmentChange.partsChanges
+			segmentChange.partChanges
 		)) {
 			if (!change) continue
 

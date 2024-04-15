@@ -22,6 +22,7 @@ import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromInge
 import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import _ = require('underscore')
+import { wipGroupRundownForMos } from '../blueprints/ingest/wipGroupRundownForMos'
 
 export enum UpdateIngestRundownAction {
 	DELETE = 'delete',
@@ -175,6 +176,7 @@ export async function runIngestUpdateOperationBase(
 			context.directCollections.NrcsIngestDataCache,
 			rundownId
 		)
+		const originalNrcsIngestRundown = clone(nrcsIngestObjectCache.fetchRundown())
 
 		const ingestRundownChanges = await executeFcn(nrcsIngestObjectCache)
 
@@ -194,7 +196,8 @@ export async function runIngestUpdateOperationBase(
 				context,
 				rundownId,
 				sofieIngestObjectCache,
-				ingestRundownChanges
+				ingestRundownChanges,
+				originalNrcsIngestRundown
 			)
 
 			// Start saving the Sofie ingest data
@@ -252,7 +255,8 @@ async function updateSofieIngestRundown(
 	context: JobContext,
 	rundownId: RundownId,
 	sofieIngestObjectCache: RundownIngestDataCache,
-	ingestRundownChanges: UpdateIngestRundownResult
+	ingestRundownChanges: UpdateIngestRundownResult,
+	oldNrcsIngestRundown: IngestRundown | undefined
 ): Promise<ComputedIngestChanges2 | null> {
 	if (
 		ingestRundownChanges === UpdateIngestRundownAction.DELETE ||
@@ -298,8 +302,15 @@ async function updateSofieIngestRundown(
 				ingestRundownChanges.changes
 			)
 		} else if (ingestRundownChanges.changes.source === 'ingest') {
+			// nocommit - temporary hack for development
+			const { nrcsIngestRundown: nrcsIngestRundown2, changes } = wipGroupRundownForMos(
+				nrcsIngestRundown,
+				ingestRundownChanges.changes,
+				oldNrcsIngestRundown
+			)
+
 			// Blueprints has not defined a processIngestData()
-			mutableIngestRundown.defaultApplyIngestChanges(nrcsIngestRundown, ingestRundownChanges.changes)
+			mutableIngestRundown.defaultApplyIngestChanges(nrcsIngestRundown2, changes)
 		} else {
 			throw new Error(`Blueprint missing processIngestData function`)
 		}

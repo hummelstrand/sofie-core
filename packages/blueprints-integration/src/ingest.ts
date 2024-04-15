@@ -57,7 +57,7 @@ export interface NrcsIngestSegmentChangeDetailsObject {
 	/**
 	 * Descibes the changes to the parts in the rundown
 	 */
-	partsChanges?: Record<string, NrcsIngestPartChangeDetails>
+	partChanges?: Record<string, NrcsIngestPartChangeDetails>
 }
 
 export type NrcsIngestSegmentChangeDetails = NrcsIngestSegmentChangeDetailsEnum | NrcsIngestSegmentChangeDetailsObject

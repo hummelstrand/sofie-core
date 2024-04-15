@@ -59,7 +59,7 @@ export function handleMosFullStory(
 				source: 'ingest',
 				segmentChanges: {
 					[segmentExternalId]: {
-						partsChanges: {
+						partChanges: {
 							[ingestPart.externalId]: NrcsIngestPartChangeDetails.Updated,
 						},
 					},
@@ -92,7 +92,7 @@ export function handleMosDeleteStory(
 
 		const missingIds = segmentIdsToDelete.filter((id) => !ingestSegmentIds.has(id))
 		if (missingIds.length > 0) {
-			throw new Error(`Segments ${missingIds.join(', ')} in rundown ${data.rundownExternalId} were not found`)
+			throw new Error(`Parts ${missingIds.join(', ')} in rundown ${data.rundownExternalId} were not found`)
 		}
 
 		// Remove any segments
@@ -140,13 +140,17 @@ export function handleMosInsertStories(
 			? ingestRundown.segments.length
 			: ingestRundown.segments.findIndex((p) => p.externalId === insertBeforeSegmentExternalId)
 		if (insertIndex === -1) {
-			throw new Error(`Segment ${insertBeforeSegmentExternalId} in rundown ${data.rundownExternalId} not found`)
+			throw new Error(`Part ${insertBeforeSegmentExternalId} in rundown ${data.rundownExternalId} not found`)
 		}
 
 		const oldSegmentIds = new Set(ingestRundown.segments.map((s) => s.externalId))
-		const duplicateSegments = ingestRundown.segments.filter((segment) => oldSegmentIds.has(segment.externalId))
+		const duplicateSegments = newIngestSegments.filter((segment) => oldSegmentIds.has(segment.externalId))
 		if (duplicateSegments.length > 0) {
-			throw new Error(`Parts ${duplicateSegments.join(', ')} already exist in rundown ${data.rundownExternalId}`)
+			throw new Error(
+				`Parts ${duplicateSegments.map((s) => s.externalId).join(', ')} already exist in rundown ${
+					data.rundownExternalId
+				}`
+			)
 		}
 
 		// Perform the change

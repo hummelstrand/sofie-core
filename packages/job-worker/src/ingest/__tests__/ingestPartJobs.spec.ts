@@ -158,7 +158,7 @@ describe('handleRemovedPart', () => {
 				source: 'ingest',
 				segmentChanges: {
 					segment1: {
-						partsChanges: {
+						partChanges: {
 							part2: NrcsIngestPartChangeDetails.Deleted,
 						},
 					},
@@ -242,7 +242,7 @@ describe('handleUpdatedPart', () => {
 				source: 'ingest',
 				segmentChanges: {
 					segment1: {
-						partsChanges: {
+						partChanges: {
 							partX: NrcsIngestPartChangeDetails.Inserted,
 						},
 					},
@@ -280,7 +280,7 @@ describe('handleUpdatedPart', () => {
 				source: 'ingest',
 				segmentChanges: {
 					segment1: {
-						partsChanges: {
+						partChanges: {
 							part2: NrcsIngestPartChangeDetails.Updated,
 						},
 					},

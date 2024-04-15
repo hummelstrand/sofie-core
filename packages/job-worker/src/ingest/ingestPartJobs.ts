@@ -39,7 +39,7 @@ export function handleRemovedPart(
 			source: 'ingest',
 			segmentChanges: {
 				[data.segmentExternalId]: {
-					partsChanges: {
+					partChanges: {
 						[data.partExternalId]: NrcsIngestPartChangeDetails.Deleted,
 					},
 				},
@@ -77,7 +77,7 @@ export function handleUpdatedPart(
 			source: 'ingest',
 			segmentChanges: {
 				[data.segmentExternalId]: {
-					partsChanges: {
+					partChanges: {
 						[data.ingestPart.externalId]: isUpdate
 							? NrcsIngestPartChangeDetails.Updated
 							: NrcsIngestPartChangeDetails.Inserted,

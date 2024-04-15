@@ -731,14 +731,14 @@ describe('defaultApplyIngestChanges', () => {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
-							partsChanges: {
+							partChanges: {
 								part0: NrcsIngestPartChangeDetails.Deleted,
 								partX: NrcsIngestPartChangeDetails.Inserted,
 								part1: NrcsIngestPartChangeDetails.Payload,
 							},
 						},
 						seg2: {
-							partsChanges: {
+							partChanges: {
 								part3: NrcsIngestPartChangeDetails.Deleted,
 								partY: NrcsIngestPartChangeDetails.Inserted,
 								part4: NrcsIngestPartChangeDetails.Deleted,
@@ -785,7 +785,7 @@ describe('defaultApplyIngestChanges', () => {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
-							partsChanges: {
+							partChanges: {
 								partX: NrcsIngestPartChangeDetails.Inserted,
 							},
 						},
@@ -807,7 +807,7 @@ describe('defaultApplyIngestChanges', () => {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
-							partsChanges: {
+							partChanges: {
 								partX: NrcsIngestPartChangeDetails.Deleted,
 							},
 						},
@@ -829,7 +829,7 @@ describe('defaultApplyIngestChanges', () => {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
-							partsChanges: {
+							partChanges: {
 								partX: NrcsIngestPartChangeDetails.Payload,
 							},
 						},
@@ -852,7 +852,7 @@ describe('defaultApplyIngestChanges', () => {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
-							partsChanges: {},
+							partChanges: {},
 						},
 					},
 				}
@@ -877,12 +877,12 @@ describe('defaultApplyIngestChanges', () => {
 					source: 'ingest',
 					segmentChanges: {
 						seg0: {
-							partsChanges: {
+							partChanges: {
 								part0: NrcsIngestPartChangeDetails.Deleted,
 							},
 						},
 						seg1: {
-							partsChanges: {
+							partChanges: {
 								part0: NrcsIngestPartChangeDetails.Inserted,
 							},
 						},
