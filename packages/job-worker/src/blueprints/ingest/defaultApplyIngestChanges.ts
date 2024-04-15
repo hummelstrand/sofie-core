@@ -36,11 +36,7 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 			)
 
 			mutableIngestRundown.setName(nrcsRundown.name)
-			mutableIngestRundown.removeAllSegments()
-			mutableIngestRundown.forceFullRegenerate()
 			regenerateAllContents = true
-
-			// TODO - segment renames need to be preserved through this route
 
 			break
 		}
@@ -61,6 +57,18 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 	}
 
 	if (regenerateAllContents) {
+		// Track any existing segment externalId changes
+		const existingSegmentExternalIdChanges = new Map<string, string>()
+		for (const segment of mutableIngestRundown.segments) {
+			const originalExternalId = segment.originalExternalId
+			if (originalExternalId) {
+				existingSegmentExternalIdChanges.set(segment.externalId, originalExternalId)
+			}
+		}
+
+		mutableIngestRundown.removeAllSegments()
+		mutableIngestRundown.forceFullRegenerate()
+
 		// Regenerate all the segments
 		for (const nrcsSegment of nrcsRundown.segments) {
 			mutableIngestRundown.replaceSegment(
@@ -70,8 +78,16 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 				),
 				null
 			)
+		}
 
-			// TODO - segment renames should be preserved?
+		// Preserve any segment externalIds changes that were performed before this
+		// This allows blueprints to do renames, and then trigger a full regeneration and remember the relationship
+		// this is important to avoid leaking adlibbed parts into segments that will get stuck until a reset
+		for (const nrcsSegment of nrcsRundown.segments) {
+			const originalExternalId = existingSegmentExternalIdChanges.get(nrcsSegment.externalId)
+			if (originalExternalId) {
+				mutableIngestRundown.renameSegmentFrom(originalExternalId, nrcsSegment.externalId)
+			}
 		}
 	} else {
 		// Propogate segment changes

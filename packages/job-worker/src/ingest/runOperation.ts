@@ -46,7 +46,7 @@ export interface ComputedIngestChanges {
 	segmentsToRegenerate: IngestSegment[]
 	regenerateRundown: boolean // TODO - full vs metadata?
 
-	segmentRenames: Record<string, string> // old -> new
+	segmentExternalIdChanges: Record<string, string> // old -> new
 }
 
 // nocommit - this needs a better name
@@ -312,14 +312,12 @@ async function updateSofieIngestRundown(
 				changedSegmentExternalIds,
 			} = wipGroupRundownForMos(nrcsIngestRundown, ingestRundownChanges.changes, oldNrcsIngestRundown)
 
-			// console.log('change', changedSegmentExternalIds)
-
 			for (const [oldExternalId, newExternalId] of Object.entries<string | undefined>(
 				changedSegmentExternalIds
 			)) {
 				if (!oldExternalId || !newExternalId) continue
 
-				mutableIngestRundown.renameSegment(oldExternalId, newExternalId)
+				mutableIngestRundown.renameSegmentTo(oldExternalId, newExternalId)
 			}
 
 			// Blueprints has not defined a processIngestData()
@@ -331,8 +329,6 @@ async function updateSofieIngestRundown(
 		const ingestObjectGenerator = new RundownIngestDataCacheGenerator(rundownId)
 		const resultChanges = mutableIngestRundown.intoIngestRundown(ingestObjectGenerator)
 		//  const newSofieIngestRundown = resultChanges.ingestRundown
-
-		// console.log(resultChanges.computedChanges.ingestRundown.segments.map((s) => s.rank))
 
 		// Sync changes to the cache
 		sofieIngestObjectCache.replaceDocuments(resultChanges.changedCacheObjects)
@@ -395,8 +391,6 @@ async function updateSofieRundownModel(
 		calcSpan?.end()
 	}
 
-	// console.log('commitData', commitData, computedIngestChanges)
-
 	let resultingError: UserError | void | undefined
 
 	if (commitData) {
@@ -430,6 +424,10 @@ async function applyCalculatedIngestChangesToModel(
 	if (!rundown || computedIngestChanges.regenerateRundown) {
 		// Do a full regeneration
 
+		// Perform any segment id changes, to ensure the contents remains correctly linked
+		const renamedSegments = applyExternalIdDiff(ingestModel, computedIngestChanges, true)
+
+		// perform the regeneration
 		const result = await updateRundownFromIngestData(
 			context,
 			ingestModel,
@@ -438,10 +436,20 @@ async function applyCalculatedIngestChangesToModel(
 			peripheralDeviceId
 		)
 
-		// nocommit any segment renames?
-
 		span?.end()
-		return result
+		if (result) {
+			return {
+				...result,
+				renamedSegments,
+			}
+		} else {
+			return {
+				changedSegmentIds: [],
+				removedSegmentIds: [],
+				removeRundown: false,
+				renamedSegments,
+			}
+		}
 	} else {
 		// Update segment ranks:
 		for (const [segmentExternalId, newRank] of Object.entries<number>(computedIngestChanges.segmentsUpdatedRanks)) {
@@ -450,18 +458,6 @@ async function applyCalculatedIngestChangesToModel(
 				segment.setRank(newRank)
 			}
 		}
-		// computedIngestChanges.ingestRundown.segments.forEach((ingestSegment, rank) => {
-		// 	const segment = ingestModel.getSegmentByExternalId(ingestSegment.externalId)
-		// 	if (segment) {
-		// 		segment.setRank(rank)
-		// 	}
-		// })
-
-		// console.log(
-		// 	'new ranks',
-		// 	computedIngestChanges,
-		// 	ingestModel.getAllSegments().map((s) => s.segment._rank)
-		// )
 
 		// Updated segments that has had their segment.externalId changed:
 		const renamedSegments = applyExternalIdDiff(ingestModel, computedIngestChanges, true)
@@ -525,11 +521,6 @@ async function applyCalculatedIngestChangesToModel(
 			}
 		}
 
-		// console.log(
-		// 	'final ranks',
-		// 	ingestModel.getAllSegments().map((s) => s.segment._rank)
-		// )
-
 		span?.end()
 		return {
 			changedSegmentIds: Array.from(changedSegmentIdsSet),
@@ -549,12 +540,14 @@ async function applyCalculatedIngestChangesToModel(
  */
 function applyExternalIdDiff(
 	ingestModel: IngestModel,
-	segmentDiff: Pick<ComputedIngestChanges, 'segmentRenames' | 'segmentsUpdatedRanks'>,
+	segmentDiff: Pick<ComputedIngestChanges, 'segmentExternalIdChanges' | 'segmentsUpdatedRanks'>,
 	canDiscardParts: boolean
 ): CommitIngestData['renamedSegments'] {
 	// Updated segments that has had their segment.externalId changed:
 	const renamedSegments = new Map<SegmentId, SegmentId>()
-	for (const [oldSegmentExternalId, newSegmentExternalId] of Object.entries<string>(segmentDiff.segmentRenames)) {
+	for (const [oldSegmentExternalId, newSegmentExternalId] of Object.entries<string>(
+		segmentDiff.segmentExternalIdChanges
+	)) {
 		const oldSegmentId = getSegmentId(ingestModel.rundownId, oldSegmentExternalId)
 		const newSegmentId = getSegmentId(ingestModel.rundownId, newSegmentExternalId)
 

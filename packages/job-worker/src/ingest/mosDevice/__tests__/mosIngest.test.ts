@@ -1332,11 +1332,11 @@ describe('Test recieved mos ingest payloads', () => {
 			// cleanup
 			await handleDeactivateRundownPlaylist(context, {
 				playlistId: rundown.playlistId,
-			})
+			}).catch(() => null)
 		}
 	})
 
-	test.skip('Rename segment during resync while on air', async () => {
+	test('Rename segment during resync while on air', async () => {
 		const mosRO = mockRO.roCreate()
 
 		await resetOrphanedRundown()
@@ -1410,7 +1410,7 @@ describe('Test recieved mos ingest payloads', () => {
 			// cleanup
 			await handleDeactivateRundownPlaylist(context, {
 				playlistId: rundown.playlistId,
-			})
+			}).catch(() => null)
 		}
 	})
 

@@ -177,7 +177,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 		const oldSegment = this.#segments.find((s) => s.externalId === segment.externalId)
 		if (oldSegment?.originalExternalId) {
-			newSegment.originalExternalId = oldSegment.originalExternalId
+			newSegment.setOriginalExternalId(oldSegment.originalExternalId)
 		}
 
 		this.#removeSegment(segment.externalId)
@@ -196,7 +196,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		return newSegment
 	}
 
-	renameSegment(
+	renameSegmentTo(
 		oldSegmentExternalId: string,
 		newSegmentExternalId: string
 	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
@@ -212,6 +212,27 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			// return targetSegment
 		} else {
 			segment.setExternalId(newSegmentExternalId)
+
+			return segment
+		}
+	}
+
+	renameSegmentFrom(
+		oldSegmentExternalId: string,
+		newSegmentExternalId: string
+	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
+		const segment = this.#segments.find((s) => s.externalId === newSegmentExternalId)
+		if (!segment) throw new Error(`Segment "${newSegmentExternalId}" not found`)
+
+		const targetSegment = this.#segments.find((s) => s.externalId === oldSegmentExternalId)
+		if (targetSegment) {
+			throw new Error(`Segment "${oldSegmentExternalId}" exists`)
+			// // Segment id is already in use, ensure it is regenerated and remove the old segment
+			// targetSegment.forceRegenerate()
+			// this.#removeSegment(oldId)
+			// return targetSegment
+		} else {
+			segment.setOriginalExternalId(oldSegmentExternalId)
 
 			return segment
 		}
@@ -264,7 +285,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		const allCacheObjectIds: IngestDataCacheObjId[] = []
 
 		const segmentsToRegenerate: IngestSegment[] = []
-		const segmentRenames: Record<string, string> = {}
+		const segmentExternalIdChanges: Record<string, string> = {}
 
 		const usedSegmentIds = new Set<string>()
 		const usedPartIds = new Set<string>()
@@ -311,7 +332,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			}
 
 			if (segmentInfo.originalExternalId !== segment.externalId) {
-				segmentRenames[segmentInfo.originalExternalId] = segment.externalId
+				segmentExternalIdChanges[segmentInfo.originalExternalId] = segment.externalId
 				// TODO - validation to ensure uniqueness, and avoid a loop
 			}
 		})
@@ -357,7 +378,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 				segmentsUpdatedRanks,
 				segmentsToRegenerate,
 				regenerateRundown,
-				segmentRenames,
+				segmentExternalIdChanges: segmentExternalIdChanges,
 			},
 
 			changedCacheObjects,

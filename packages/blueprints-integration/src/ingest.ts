@@ -161,7 +161,13 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
 	// nocommit - better naming of this method?
-	renameSegment(
+	renameSegmentTo(
+		oldSegmentExternalId: string,
+		newSegmentExternalId: string
+	): MutableIngestSegment<TSegmentPayload, TPartPayload>
+
+	// nocommit - better naming of this method?
+	renameSegmentFrom(
 		oldSegmentExternalId: string,
 		newSegmentExternalId: string
 	): MutableIngestSegment<TSegmentPayload, TPartPayload>
@@ -215,6 +221,9 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	readonly externalId: string
 	/** Name of the segment */
 	readonly name: string
+
+	/** If the segment has had it's externalId changed, the id before the change */
+	readonly originalExternalId: string | undefined
 
 	/** Payload of segment metadata. For use by other blueprints methods */
 	readonly payload: ReadonlyDeep<TSegmentPayload> | undefined

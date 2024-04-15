@@ -7,15 +7,7 @@ import {
 	NrcsIngestSegmentChangeDetails,
 	NrcsIngestSegmentChangeDetailsEnum,
 } from '@sofie-automation/blueprints-integration'
-import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
-import {
-	Complete,
-	clone,
-	deleteAllUndefinedProperties,
-	normalizeArrayFunc,
-	normalizeArrayToMap,
-} from '@sofie-automation/corelib/dist/lib'
-import { ReadonlyDeep } from 'type-fest'
+import { Complete, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 import _ = require('underscore')
 
 export function wipGroupRundownForMos(
@@ -38,7 +30,6 @@ export function wipGroupRundownForMos(
 
 	const oldCombinedIngestRundown = oldNrcsIngestRundown ? groupIngestRundown(oldNrcsIngestRundown) : undefined
 	const oldIngestSegments = normalizeArrayToMap(oldCombinedIngestRundown?.segments || [], 'externalId')
-	// const oldSegmentIds = new Set<string>(oldCombinedIngestRundown?.segments?.map((s) => s.externalId))
 
 	const partChanges = new Map<string, NrcsIngestPartChangeDetails>()
 	if (sourceChanges.segmentChanges) {
@@ -92,7 +83,6 @@ export function wipGroupRundownForMos(
 					if (partChange !== undefined) {
 						segmentPartChanges[part.externalId] = partChange
 					}
-					// console.log('part', part.externalId, partChange)
 				}
 			}
 			for (const oldPart of oldIngestSegment.parts) {
@@ -100,14 +90,6 @@ export function wipGroupRundownForMos(
 					segmentPartChanges[oldPart.externalId] = NrcsIngestPartChangeDetails.Deleted
 				}
 			}
-			// TODO
-
-			// console.log(
-			// 	'check order',
-			// 	segment.parts.map((p) => ({ id: p.externalId, rank: p.rank })),
-			// 	oldIngestSegment.parts.map((p) => ({ id: p.externalId, rank: p.rank })),
-			// 	comparePartOrder(segment.parts, oldIngestSegment.parts)
-			// )
 
 			const partOrderChanged = comparePartOrder(segment.parts, oldIngestSegment.parts)
 			if (partOrderChanged || Object.keys(segmentPartChanges).length > 0) {
@@ -129,44 +111,33 @@ export function wipGroupRundownForMos(
 		}
 	}
 
-	// TODO - populate segmentChanges
-
-	/**
-	 * What about creating a lookup where 'changes' for each part is stored
-	 * then we can iterate through everything and see if any part in the segment has changes
-	 * not sure how 'renames' will fit into this though
-	 */
-
-	// console.log('res rundown', JSON.stringify(combinedIngestRundown, undefined, 4))
-	// console.log(
-	// 	'check changes',
-	// 	JSON.stringify(segmentChanges, undefined, 4),
-	// 	'from,',
-	// 	JSON.stringify(sourceChanges.segmentChanges, undefined, 4)
-	// )
-
 	const changedSegmentExternalIds = oldCombinedIngestRundown
 		? calculateSegmentExternalIdChanges(oldCombinedIngestRundown, combinedIngestRundown, segmentChanges)
 		: {}
-	// if (oldCombinedIngestRundown) {
-	// 	const renames = calculateSegmentExternalIdChanges(
-	// 		oldCombinedIngestRundown,
-	// 		combinedIngestRundown,
-	// 		segmentChanges
-	// 	)
-	// 	console.log('segmentId changes', renames)
-	// }
+	const segmentOrderChanged = oldCombinedIngestRundown
+		? compareSegmentOrder(combinedIngestRundown.segments, oldCombinedIngestRundown.segments)
+		: true
 
 	return {
 		nrcsIngestRundown: combinedIngestRundown,
 		changes: {
 			source: 'ingest',
 			rundownChanges: sourceChanges.rundownChanges,
-			segmentOrderChanged: true, // Maybe this could be optimised, but that will be quite a bit of effort
+			segmentOrderChanged,
 			segmentChanges,
 		} satisfies Complete<NrcsIngestChangeDetails>,
 		changedSegmentExternalIds,
 	}
+}
+
+function compareSegmentOrder(ingestSegments: IngestSegment[], oldIngestSegments: IngestSegment[]): boolean {
+	if (ingestSegments.length !== oldIngestSegments.length) return true
+
+	for (let i = 0; i < ingestSegments.length; i++) {
+		if (ingestSegments[i].externalId !== oldIngestSegments[i].externalId) return true
+	}
+
+	return false
 }
 
 function comparePartOrder(ingestParts: IngestPart[], oldIngestParts: IngestPart[]): boolean {

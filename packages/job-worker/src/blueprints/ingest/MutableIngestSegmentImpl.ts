@@ -27,14 +27,22 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	implements MutableIngestSegment<TSegmentPayload, TPartPayload>
 {
 	readonly #ingestSegment: Omit<IngestSegment, 'rank' | 'parts'>
-	originalExternalId: string
+	#originalExternalId: string
 	#segmentHasChanges = false
 	#partOrderHasChanged = false
 
 	readonly #parts: MutableIngestPartImpl<TPartPayload>[]
 
+	get originalExternalId(): string | undefined {
+		if (this.#originalExternalId !== this.externalId) {
+			return this.#originalExternalId
+		} else {
+			return undefined
+		}
+	}
+
 	constructor(ingestSegment: Omit<IngestSegment, 'rank'>, hasChanges = false) {
-		this.originalExternalId = ingestSegment.externalId
+		this.#originalExternalId = ingestSegment.externalId
 		this.#ingestSegment = omit(ingestSegment, 'parts')
 		this.#parts = ingestSegment.parts
 			.slice() // shallow copy
@@ -157,6 +165,12 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	setExternalId(newSegmentExternalId: string): void {
 		this.#ingestSegment.externalId = newSegmentExternalId
 	}
+	/**
+	 * Note: This is not exposed to blueprints
+	 */
+	setOriginalExternalId(oldSegmentExternalId: string): void {
+		this.#originalExternalId = oldSegmentExternalId
+	}
 
 	setName(name: string): void {
 		if (this.#ingestSegment.name !== name) {
@@ -210,12 +224,12 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 
 		const segmentHasChanges = this.#segmentHasChanges
 		const partOrderHasChanged = this.#partOrderHasChanged
-		const originalExternalId = this.originalExternalId
+		const originalExternalId = this.#originalExternalId
 
 		// clear flags
 		this.#segmentHasChanges = false
 		this.#partOrderHasChanged = false
-		this.originalExternalId = this.#ingestSegment.externalId
+		this.#originalExternalId = this.#ingestSegment.externalId
 
 		return {
 			ingestParts,

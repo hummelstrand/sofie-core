@@ -98,7 +98,7 @@ describe('MutableIngestRundownImpl', () => {
 				segmentsToRegenerate: [],
 				regenerateRundown: false,
 
-				segmentRenames: {},
+				segmentExternalIdChanges: {},
 			},
 			changedCacheObjects: [],
 			allCacheObjectIds: allCacheObjectIds,
@@ -622,7 +622,7 @@ describe('MutableIngestRundownImpl', () => {
 			expect(mutableRundown.getSegment('segX')).toBeUndefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-			expect(() => mutableRundown.renameSegment('segX', 'segY')).toThrow(/Segment(.*)not found/)
+			expect(() => mutableRundown.renameSegmentTo('segX', 'segY')).toThrow(/Segment(.*)not found/)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 		})
 
@@ -633,7 +633,7 @@ describe('MutableIngestRundownImpl', () => {
 			expect(mutableRundown.getSegment('seg1')).toBeDefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
-			expect(() => mutableRundown.renameSegment('seg1', 'seg2')).toThrow(/Segment(.*)already exists/)
+			expect(() => mutableRundown.renameSegmentTo('seg1', 'seg2')).toThrow(/Segment(.*)already exists/)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 		})
 
@@ -646,9 +646,9 @@ describe('MutableIngestRundownImpl', () => {
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
 			// rename and check
-			expect(mutableRundown.renameSegment('seg1', 'segX')).toStrictEqual(beforeSegment)
+			expect(mutableRundown.renameSegmentTo('seg1', 'segX')).toStrictEqual(beforeSegment)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg2'])
-			expect(beforeSegment.originalExternalId).toBe('seg1')
+			expect(beforeSegment.#originalExternalId).toBe('seg1')
 			expect(beforeSegment.externalId).toBe('segX')
 
 			// Check the reported changes
@@ -657,7 +657,7 @@ describe('MutableIngestRundownImpl', () => {
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { segX: 1 }
 			expectedChanges.computedChanges.segmentsToRemove.push('seg1') // nocommit: Should this be here?
-			expectedChanges.computedChanges.segmentRenames = { seg1: 'segX' }
+			expectedChanges.computedChanges.segmentExternalIdChanges = { seg1: 'segX' }
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 		})
 
@@ -670,15 +670,15 @@ describe('MutableIngestRundownImpl', () => {
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
 			// rename and check
-			expect(mutableRundown.renameSegment('seg1', 'segX')).toStrictEqual(beforeSegment)
+			expect(mutableRundown.renameSegmentTo('seg1', 'segX')).toStrictEqual(beforeSegment)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg2'])
-			expect(beforeSegment.originalExternalId).toBe('seg1')
+			expect(beforeSegment.#originalExternalId).toBe('seg1')
 			expect(beforeSegment.externalId).toBe('segX')
 
 			// rename again
-			expect(mutableRundown.renameSegment('segX', 'segY')).toStrictEqual(beforeSegment)
+			expect(mutableRundown.renameSegmentTo('segX', 'segY')).toStrictEqual(beforeSegment)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segY', 'seg2'])
-			expect(beforeSegment.originalExternalId).toBe('seg1')
+			expect(beforeSegment.#originalExternalId).toBe('seg1')
 			expect(beforeSegment.externalId).toBe('segY')
 
 			// Check the reported changes
@@ -687,7 +687,7 @@ describe('MutableIngestRundownImpl', () => {
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { segY: 1 }
 			expectedChanges.computedChanges.segmentsToRemove.push('seg1') // nocommit: Should this be here?
-			expectedChanges.computedChanges.segmentRenames = { seg1: 'segY' }
+			expectedChanges.computedChanges.segmentExternalIdChanges = { seg1: 'segY' }
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 		})
 
@@ -702,21 +702,21 @@ describe('MutableIngestRundownImpl', () => {
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
 			// rename seg1 to segX
-			expect(mutableRundown.renameSegment('seg1', 'segX')).toStrictEqual(beforeSegment1)
+			expect(mutableRundown.renameSegmentTo('seg1', 'segX')).toStrictEqual(beforeSegment1)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg2'])
-			expect(beforeSegment1.originalExternalId).toBe('seg1')
+			expect(beforeSegment1.#originalExternalId).toBe('seg1')
 			expect(beforeSegment1.externalId).toBe('segX')
 
 			// rename seg2 to seg1
-			expect(mutableRundown.renameSegment('seg2', 'seg1')).toStrictEqual(beforeSegment2)
+			expect(mutableRundown.renameSegmentTo('seg2', 'seg1')).toStrictEqual(beforeSegment2)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'segX', 'seg1'])
-			expect(beforeSegment2.originalExternalId).toBe('seg2')
+			expect(beforeSegment2.#originalExternalId).toBe('seg2')
 			expect(beforeSegment2.externalId).toBe('seg1')
 
 			// rename segX to seg2
-			expect(mutableRundown.renameSegment('segX', 'seg2')).toStrictEqual(beforeSegment1)
+			expect(mutableRundown.renameSegmentTo('segX', 'seg2')).toStrictEqual(beforeSegment1)
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg2', 'seg1'])
-			expect(beforeSegment1.originalExternalId).toBe('seg1')
+			expect(beforeSegment1.#originalExternalId).toBe('seg1')
 			expect(beforeSegment1.externalId).toBe('seg2')
 
 			// Check the reported changes
@@ -725,7 +725,7 @@ describe('MutableIngestRundownImpl', () => {
 			expectedIngestRundown.segments[2].externalId = 'seg1'
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { seg2: 1, seg1: 2 }
-			expectedChanges.computedChanges.segmentRenames = { seg1: 'seg2', seg2: 'seg1' } // nocommit: will this trip up other logic?
+			expectedChanges.computedChanges.segmentExternalIdChanges = { seg1: 'seg2', seg2: 'seg1' } // nocommit: will this trip up other logic?
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 		})
 	})
