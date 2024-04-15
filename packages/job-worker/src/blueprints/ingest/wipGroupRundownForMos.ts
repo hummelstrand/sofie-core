@@ -7,7 +7,15 @@ import {
 	NrcsIngestSegmentChangeDetails,
 	NrcsIngestSegmentChangeDetailsEnum,
 } from '@sofie-automation/blueprints-integration'
-import { Complete, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
+import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
+import {
+	Complete,
+	clone,
+	deleteAllUndefinedProperties,
+	normalizeArrayFunc,
+	normalizeArrayToMap,
+} from '@sofie-automation/corelib/dist/lib'
+import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 
 export function wipGroupRundownForMos(
@@ -17,12 +25,14 @@ export function wipGroupRundownForMos(
 ): {
 	nrcsIngestRundown: IngestRundown
 	changes: NrcsIngestChangeDetails
+	changedSegmentExternalIds: Record<string, string>
 } {
 	// Only valid for mos for now..
 	if (nrcsIngestRundown.type !== 'mos') {
 		return {
 			nrcsIngestRundown,
 			changes: sourceChanges,
+			changedSegmentExternalIds: {},
 		}
 	}
 
@@ -135,6 +145,18 @@ export function wipGroupRundownForMos(
 	// 	JSON.stringify(sourceChanges.segmentChanges, undefined, 4)
 	// )
 
+	const changedSegmentExternalIds = oldCombinedIngestRundown
+		? calculateSegmentExternalIdChanges(oldCombinedIngestRundown, combinedIngestRundown, segmentChanges)
+		: {}
+	// if (oldCombinedIngestRundown) {
+	// 	const renames = calculateSegmentExternalIdChanges(
+	// 		oldCombinedIngestRundown,
+	// 		combinedIngestRundown,
+	// 		segmentChanges
+	// 	)
+	// 	console.log('segmentId changes', renames)
+	// }
+
 	return {
 		nrcsIngestRundown: combinedIngestRundown,
 		changes: {
@@ -143,6 +165,7 @@ export function wipGroupRundownForMos(
 			segmentOrderChanged: true, // Maybe this could be optimised, but that will be quite a bit of effort
 			segmentChanges,
 		} satisfies Complete<NrcsIngestChangeDetails>,
+		changedSegmentExternalIds,
 	}
 }
 
@@ -237,4 +260,65 @@ function getAnnotatedIngestParts(ingestRundown: IngestRundown): AnnotatedIngestP
 	}
 
 	return ingestParts
+}
+
+function calculateSegmentExternalIdChanges(
+	oldIngestRundown: IngestRundown,
+	newIngestRundown: IngestRundown,
+	segmentChanges: Record<string, NrcsIngestSegmentChangeDetails>
+	// oldSegments: SegmentMini[] | null
+): Record<string, string> {
+	const segmentExternalIdChanges: Record<string, string> = {}
+
+	// find the ids of the segments that have been added and removed
+	// nocommit, should this be rewritten to use just the rundowns?
+	const addedSegmentIds: string[] = []
+	const removedSegmentIds: string[] = []
+	for (const [segmentExternalId, change] of Object.entries<NrcsIngestSegmentChangeDetails | undefined>(
+		segmentChanges
+	)) {
+		if (change === NrcsIngestSegmentChangeDetailsEnum.Deleted) removedSegmentIds.push(segmentExternalId)
+		if (change === NrcsIngestSegmentChangeDetailsEnum.Inserted) addedSegmentIds.push(segmentExternalId)
+	}
+
+	if (removedSegmentIds.length === 0 || addedSegmentIds.length === 0) return {}
+
+	const oldIngestSegmentMap = normalizeArrayToMap(oldIngestRundown.segments, 'externalId')
+	const newIngestSegmentMap = normalizeArrayToMap(newIngestRundown.segments, 'externalId')
+
+	let addedSegments = addedSegmentIds // nocommit: eww
+		.map((id) => newIngestSegmentMap.get(id))
+		.filter((s): s is IngestSegment => !!s)
+
+	for (const segmentExternalId of removedSegmentIds) {
+		const oldSegmentEntry = oldIngestSegmentMap.get(segmentExternalId)
+		if (!oldSegmentEntry) continue // It didn't really exist?
+
+		let newSegmentExternalId: string | undefined
+
+		// try finding "it" in the added, using name
+		// Future: this may not be particularly accurate, as multiple could have been formed
+		newSegmentExternalId = addedSegments.find((se) => se.name === oldSegmentEntry.name)?.externalId
+
+		if (!newSegmentExternalId) {
+			// second try, match with any parts:
+			newSegmentExternalId = addedSegments.find((se) => {
+				for (const part of oldSegmentEntry.parts) {
+					if (se.parts.find((p) => p.externalId === part.externalId)) {
+						return true
+					}
+				}
+
+				return false
+			})?.externalId
+		}
+		if (newSegmentExternalId) {
+			segmentExternalIdChanges[segmentExternalId] = newSegmentExternalId
+
+			// Ensure the same id doesn't get used multiple times
+			addedSegments = addedSegments.filter((s) => s.externalId !== newSegmentExternalId)
+		}
+	}
+
+	return segmentExternalIdChanges
 }

@@ -1268,7 +1268,15 @@ describe('Test recieved mos ingest payloads', () => {
 		}
 	}
 
-	test.skip('Rename segment during update while on air', async () => {
+	function updateRankOfSegment(segments: DBSegment[], id: SegmentId | string, rank: number) {
+		for (const segment of segments) {
+			if (segment._id === id) {
+				segment._rank = rank
+			}
+		}
+	}
+
+	test('Rename segment during update while on air', async () => {
 		await resetOrphanedRundown()
 
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as DBRundown
@@ -1309,6 +1317,10 @@ describe('Test recieved mos ingest payloads', () => {
 				partsBefore,
 				partInstancesBefore
 			)
+
+			// Rank's are not guaranteed to be sequential
+			updateRankOfSegment(segmentsBefore, 'SIuQJB7ZJNtRcxtqLGljE_qBGo8_', 3)
+			updateRankOfSegment(segmentsBefore, 'ddtMj3S9nDPeQ3tkyHTCOYrU414_', 4)
 
 			expect(fixSnapshot(segmentsAfter)).toMatchObject(fixSnapshot(segmentsBefore))
 			expect(fixSnapshot(partsAfter)).toMatchObject(fixSnapshot(partsBefore))
@@ -1471,7 +1483,7 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(playlist2.name).not.toEqual(playlist.name)
 	})
 
-	test.skip('mosRoStoryReplace: Combine into start of segment', async () => {
+	test('mosRoStoryReplace: Combine into start of segment', async () => {
 		await resetOrphanedRundown()
 
 		const mosRO = mockRO.roCreate()

@@ -52,7 +52,6 @@ export function handleMosFullStory(
 
 		// We modify in-place
 		ingestPart.payload = data.story
-		console.log('set payload', data.story)
 
 		return {
 			// We modify in-place
@@ -144,6 +143,9 @@ export function handleMosInsertStories(
 		}
 
 		const oldSegmentIds = new Set(ingestRundown.segments.map((s) => s.externalId))
+		// Allow replacing with itself
+		if (data.replace && insertBeforeSegmentExternalId) oldSegmentIds.delete(insertBeforeSegmentExternalId)
+
 		const duplicateSegments = newIngestSegments.filter((segment) => oldSegmentIds.has(segment.externalId))
 		if (duplicateSegments.length > 0) {
 			throw new Error(
@@ -265,7 +267,6 @@ export function handleMosMoveStories(
 		const insertIndex = insertBeforeSegmentExternalId // insert last
 			? ingestRundown.segments.findIndex((p) => p.externalId === insertBeforeSegmentExternalId)
 			: ingestRundown.segments.length
-		console.log('check', insertBeforeSegmentExternalId, insertIndex, data.insertBeforeStoryId)
 		if (insertIndex === -1) {
 			throw new Error(`Part ${insertBeforeSegmentExternalId} in rundown ${data.rundownExternalId} not found`)
 		}

@@ -110,7 +110,7 @@ export interface IngestModelReadonly {
 	 */
 	getSegment(id: SegmentId): IngestSegmentModelReadonly | undefined
 	/**
-	 * Get the Segments of this Rundown, in order
+	 * Get the Segments of this Rundown, in no particular order
 	 */
 	getAllSegments(): IngestSegmentModelReadonly[]
 

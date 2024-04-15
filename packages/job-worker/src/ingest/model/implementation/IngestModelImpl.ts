@@ -292,7 +292,7 @@ export class IngestModelImpl implements IngestModel, DatabasePersistedModel {
 		return undefined
 	}
 	/**
-	 * Get the Segments of this Rundown, in order
+	 * Get the Segments of this Rundown, in no particular order
 	 */
 	getAllSegments(): IngestSegmentModel[] {
 		const segments: IngestSegmentModel[] = []

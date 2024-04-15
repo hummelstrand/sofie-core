@@ -306,11 +306,21 @@ async function updateSofieIngestRundown(
 			if (oldNrcsIngestRundown) sortIngestRundown(oldNrcsIngestRundown)
 
 			// nocommit - temporary hack for development
-			const { nrcsIngestRundown: nrcsIngestRundown2, changes } = wipGroupRundownForMos(
-				nrcsIngestRundown,
-				ingestRundownChanges.changes,
-				oldNrcsIngestRundown
-			)
+			const {
+				nrcsIngestRundown: nrcsIngestRundown2,
+				changes,
+				changedSegmentExternalIds,
+			} = wipGroupRundownForMos(nrcsIngestRundown, ingestRundownChanges.changes, oldNrcsIngestRundown)
+
+			// console.log('change', changedSegmentExternalIds)
+
+			for (const [oldExternalId, newExternalId] of Object.entries<string | undefined>(
+				changedSegmentExternalIds
+			)) {
+				if (!oldExternalId || !newExternalId) continue
+
+				mutableIngestRundown.renameSegment(oldExternalId, newExternalId)
+			}
 
 			// Blueprints has not defined a processIngestData()
 			mutableIngestRundown.defaultApplyIngestChanges(nrcsIngestRundown2, changes)
@@ -321,6 +331,8 @@ async function updateSofieIngestRundown(
 		const ingestObjectGenerator = new RundownIngestDataCacheGenerator(rundownId)
 		const resultChanges = mutableIngestRundown.intoIngestRundown(ingestObjectGenerator)
 		//  const newSofieIngestRundown = resultChanges.ingestRundown
+
+		// console.log(resultChanges.computedChanges.ingestRundown.segments.map((s) => s.rank))
 
 		// Sync changes to the cache
 		sofieIngestObjectCache.replaceDocuments(resultChanges.changedCacheObjects)
@@ -438,6 +450,18 @@ async function applyCalculatedIngestChangesToModel(
 				segment.setRank(newRank)
 			}
 		}
+		// computedIngestChanges.ingestRundown.segments.forEach((ingestSegment, rank) => {
+		// 	const segment = ingestModel.getSegmentByExternalId(ingestSegment.externalId)
+		// 	if (segment) {
+		// 		segment.setRank(rank)
+		// 	}
+		// })
+
+		// console.log(
+		// 	'new ranks',
+		// 	computedIngestChanges,
+		// 	ingestModel.getAllSegments().map((s) => s.segment._rank)
+		// )
 
 		// Updated segments that has had their segment.externalId changed:
 		const renamedSegments = applyExternalIdDiff(ingestModel, computedIngestChanges, true)
@@ -500,6 +524,11 @@ async function applyCalculatedIngestChangesToModel(
 				changedSegmentIdsSet.delete(segment.segment._id)
 			}
 		}
+
+		// console.log(
+		// 	'final ranks',
+		// 	ingestModel.getAllSegments().map((s) => s.segment._rank)
+		// )
 
 		span?.end()
 		return {
