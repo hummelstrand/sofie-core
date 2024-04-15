@@ -3,8 +3,7 @@ import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { PeripheralDevice } from '@sofie-automation/corelib/dist/dataModel/PeripheralDevice'
-import { protectString, unprotectString } from '@sofie-automation/corelib/dist/protectedString'
-import _ = require('underscore')
+import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { sortPartsInSortedSegments, sortSegmentsInRundowns } from '@sofie-automation/corelib/dist/playout/playlist'
 import {
 	handleMosDeleteStory,
@@ -23,7 +22,7 @@ import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/Rund
 import { MongoQuery } from '../../../db'
 import { handleRemovedRundown } from '../../ingestRundownJobs'
 import { MOS } from '@sofie-automation/corelib'
-import { literal, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
+import { groupByToMap, literal, normalizeArrayToMap, omit } from '@sofie-automation/corelib/dist/lib'
 import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { getPartId } from '../../lib'
 import { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
@@ -46,16 +45,19 @@ function getPartIdMap(segments: DBSegment[], parts: DBPart[]) {
 
 	const segmentMap = normalizeArrayToMap(segments, '_id')
 
-	const groupedParts = _.groupBy(sortedParts, (p) => unprotectString(p.segmentId))
-	const arr: [string, DBPart[]][] = _.pairs(groupedParts)
-	const idMap = _.map(arr, (g) => ({
-		segmentId: protectString<SegmentId>(g[0]),
-		segmentName: segmentMap.get(protectString<SegmentId>(g[0]))?.name ?? null,
-		parts: _.map(g[1], (p) => p.externalId),
+	const groupedParts = groupByToMap(sortedParts, 'segmentId')
+	const arr: [SegmentId, DBPart[]][] = Array.from(groupedParts.entries())
+	const idMap = arr.map((group) => ({
+		segmentId: group[0],
+		segmentName: segmentMap.get(group[0])?.name ?? null,
+		parts: group[1].map((p) => p.externalId),
 	}))
-	return _.sortBy(idMap, (s) => {
-		const obj = _.find(segments, (s2) => s2._id === s.segmentId)
-		return obj ? obj._rank : 99999
+
+	return idMap.sort((a, b) => {
+		const aRank = segmentMap.get(a.segmentId)?._rank ?? 99999
+		const bRank = segmentMap.get(b.segmentId)?._rank ?? 99999
+
+		return aRank - bRank
 	})
 }
 
@@ -1149,9 +1151,9 @@ describe('Test recieved mos ingest payloads', () => {
 		expect(partsInSegmentAfter).toHaveLength(2)
 
 		// The other parts in the segment should not not have changed:
-		expect(partsInSegmentAfter[0]).toMatchObject(_.omit(partsInSegmentBefore[1], ['segmentId', '_rank']))
+		expect(partsInSegmentAfter[0]).toMatchObject(omit(partsInSegmentBefore[1], 'segmentId', '_rank'))
 
-		expect(partsInSegmentAfter[1]).toMatchObject(_.omit(partsInSegmentBefore[2], ['segmentId', '_rank']))
+		expect(partsInSegmentAfter[1]).toMatchObject(omit(partsInSegmentBefore[2], 'segmentId', '_rank'))
 	})
 
 	async function mosReplaceBasicStory(

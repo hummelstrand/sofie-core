@@ -18,16 +18,10 @@ import {
 	RestorePlaylistSnapshotResult,
 } from '@sofie-automation/corelib/dist/worker/studio'
 import { getCurrentTime, getSystemVersion } from '../lib'
-import _ = require('underscore')
 import { JobContext } from '../jobs'
 import { runWithPlaylistLock } from './lock'
 import { CoreRundownPlaylistSnapshot } from '@sofie-automation/corelib/dist/snapshots'
-import {
-	unprotectString,
-	ProtectedString,
-	protectStringArray,
-	protectString,
-} from '@sofie-automation/corelib/dist/protectedString'
+import { unprotectString, ProtectedString, protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { saveIntoDb } from '../db/changes'
 import { getPartId, getSegmentId } from '../ingest/lib'
 import { assertNever, getRandomId, literal } from '@sofie-automation/corelib/dist/lib'
@@ -472,7 +466,7 @@ export async function handleRestorePlaylistSnapshot(
 		saveIntoDb(
 			context,
 			context.directCollections.ExpectedMediaItems,
-			{ partId: { $in: protectStringArray(_.keys(partIdMap)) } },
+			{ partId: { $in: Array.from(partIdMap.keys()) } },
 			updateItemIds(snapshot.expectedMediaItems, true)
 		),
 		saveIntoDb(

@@ -243,7 +243,7 @@ function updateNrcsIngestObjects(
 			nrcsIngestObjectCache.delete()
 			break
 		default:
-			nrcsIngestObjectCache.update(updatedIngestRundown.ingestRundown)
+			nrcsIngestObjectCache.replace(updatedIngestRundown.ingestRundown)
 			break
 	}
 

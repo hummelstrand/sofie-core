@@ -69,10 +69,15 @@ export class RundownIngestDataCache {
 		return new RundownIngestDataCache(context, collection, rundownId, docs)
 	}
 
+	/** Check whether this cache contains any documents */
 	isEmpty(): boolean {
 		return this.documents.length === 0
 	}
 
+	/**
+	 * Fetch the IngestRundown contained in the cache
+	 * Note: This does not deep clone the objects, so the returned object should not be modified
+	 */
 	fetchRundown(): LocalIngestRundown | undefined {
 		const span = this.context.startSpan('ingest.ingestCache.loadCachedRundownData')
 
@@ -126,13 +131,21 @@ export class RundownIngestDataCache {
 		return ingestRundown
 	}
 
-	update(ingestRundown: LocalIngestRundown): void {
+	/**
+	 * Replace the contents of the cache with the given IngestRundown
+	 * This will diff and replace the documents in the cache
+	 * @param ingestRundown The new IngestRundown to store in the cache
+	 */
+	replace(ingestRundown: LocalIngestRundown): void {
 		const generator = new RundownIngestDataCacheGenerator(this.rundownId)
 		const cacheEntries: IngestDataCacheObj[] = generator.generateCacheForRundown(ingestRundown)
 
 		this.documents = diffAndReturnLatestObjects(this.#changedDocumentIds, this.documents, cacheEntries)
 	}
 
+	/**
+	 * Delete the contents of the cache
+	 */
 	delete(): void {
 		// Mark each document for deletion
 		for (const doc of this.documents) {
@@ -142,6 +155,10 @@ export class RundownIngestDataCache {
 		this.documents = []
 	}
 
+	/**
+	 * Remove all documents from the cache other than the ids provided
+	 * @param documentIdsToKeep The IDs of the documents to keep in the cache
+	 */
 	removeAllOtherDocuments(documentIdsToKeep: IngestDataCacheObjId[]): void {
 		const documentIdsToKeepSet = new Set<IngestDataCacheObjId>(documentIdsToKeep)
 
@@ -156,6 +173,12 @@ export class RundownIngestDataCache {
 		this.documents = newDocuments
 	}
 
+	/**
+	 * Replace/insert a set of documents into the cache
+	 * This can be used to insert or update multiple documents at once
+	 * This does not diff the documents, it assumes that has already been done prior to calling this method
+	 * @param changedCacheObjects Documents to store in the cache
+	 */
 	replaceDocuments(changedCacheObjects: IngestDataCacheObj[]): void {
 		const newDocumentsMap = normalizeArrayToMap(this.documents, '_id')
 
@@ -167,6 +190,9 @@ export class RundownIngestDataCache {
 		this.documents = Array.from(newDocumentsMap.values())
 	}
 
+	/**
+	 * Write any changes in the cache to the database
+	 */
 	async saveToDatabase(): Promise<void> {
 		if (this.#changedDocumentIds.size === 0) return
 
