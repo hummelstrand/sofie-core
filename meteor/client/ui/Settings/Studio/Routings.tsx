@@ -471,10 +471,7 @@ interface IRenderRouteSetDeletedProps {
 }
 
 function RenderRouteSetDeletedEntry({ routeSet, overrideHelper }: Readonly<IRenderRouteSetDeletedProps>) {
-	const { t } = useTranslation()
-
 	const doUndelete = (routeSetId: string) => {
-		console.log(t('doUndelete, not implemented yet :'), routeSetId)
 		overrideHelper.resetItem(routeSetId)
 	}
 
@@ -917,10 +914,7 @@ function RenderExclusivityDeletedGroup({
 	exclusivityGroup,
 	exlusivityOverrideHelper: overrideHelper,
 }: Readonly<IRenderExclusivityDeletedGroupProps>): React.JSX.Element {
-	const { t } = useTranslation()
-
 	const doUndelete = (groupId: string) => {
-		console.log(t('doUndelete, not implemented yet :'), groupId)
 		overrideHelper.resetItem(groupId)
 	}
 
