@@ -47,30 +47,30 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 							{props.exclusivityGroups[key]?.name && (
 								<p className="mhs mbs mtn">{props.exclusivityGroups[key]?.name}</p>
 							)}
-							{
-								/* {routeSets.length === 2 &&
+
+							{routeSets.length === 2 &&
 							routeSets[0].computed.behavior === StudioRouteBehavior.ACTIVATE_ONLY &&
 							routeSets[1].computed.behavior === StudioRouteBehavior.ACTIVATE_ONLY ? (
-								<div key={routeSets[0][0]} className="switchboard-pop-up-panel__group__controls dual mhm mbs">
+								<div key={routeSets[0].id} className="switchboard-pop-up-panel__group__controls dual mhm mbs">
 									<span
 										className={classNames({
-											'switchboard-pop-up-panel__group__controls__active': routeSets[0][1].active,
-											'switchboard-pop-up-panel__group__controls__inactive': !routeSets[0][1].active,
+											'switchboard-pop-up-panel__group__controls__active': routeSets[0].computed.active,
+											'switchboard-pop-up-panel__group__controls__inactive': !routeSets[0].computed.active,
 										})}
 									>
-										{routeSets[0][1].name}
+										{routeSets[0].computed.name}
 									</span>
 									<a
 										className={classNames('switch-button', 'sb-nocolor', {
-											'sb-on': routeSets[1][1].active,
+											'sb-on': routeSets[1].computed.active,
 										})}
 										role="button"
 										onClick={(e) =>
 											props.onStudioRouteSetSwitch &&
 											props.onStudioRouteSetSwitch(
 												e,
-												routeSets[0][1].active ? routeSets[1][0] : routeSets[0][0],
-												routeSets[0][1].active ? routeSets[1][1] : routeSets[0][1],
+												routeSets[0].computed.active ? routeSets[1].id : routeSets[0].id,
+												routeSets[0].computed.active ? routeSets[1].computed : routeSets[0].computed,
 												true
 											)
 										}
@@ -86,16 +86,16 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 									</a>
 									<span
 										className={classNames({
-											'switchboard-pop-up-panel__group__controls__active': routeSets[1][1].active,
-											'switchboard-pop-up-panel__group__controls__inactive': !routeSets[1][1].active,
+											'switchboard-pop-up-panel__group__controls__active': routeSets[1].computed.active,
+											'switchboard-pop-up-panel__group__controls__inactive': !routeSets[1].computed.active,
 										})}
 									>
-										{routeSets[1][1].name}
+										{routeSets[1].computed.name}
 									</span>
-									{((routeSets[0][1].defaultActive !== undefined &&
-										routeSets[0][1].active !== routeSets[0][1].defaultActive) ||
-										(routeSets[1][1].defaultActive !== undefined &&
-											routeSets[1][1].active !== routeSets[1][1].defaultActive)) && (
+									{((routeSets[0].computed.defaultActive !== undefined &&
+										routeSets[0].computed.active !== routeSets[0].computed.defaultActive) ||
+										(routeSets[1].computed.defaultActive !== undefined &&
+											routeSets[1].computed.active !== routeSets[1].computed.defaultActive)) && (
 										<span className="switchboard-pop-up-panel__group__controls__notice">
 											<Tooltip
 												mouseEnterDelay={TOOLTIP_DEFAULT_DELAY}
@@ -109,7 +109,7 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 										</span>
 									)}
 								</div>
-							) : ( */
+							) : (
 								routeSets.map((routeSet) => (
 									<div key={routeSet.id} className="switchboard-pop-up-panel__group__controls mhm mbs">
 										<span
@@ -166,8 +166,7 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 											)}
 									</div>
 								))
-								/* ) */
-							}
+							)}
 						</div>
 					)
 				)}
