@@ -64,7 +64,7 @@ export function handleMosRundownData(
 			ingestRundown: newIngestRundown,
 			changes: {
 				source: 'ingest',
-				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate, // nocommit this is too coarse
+				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 			},
 		}
 	}

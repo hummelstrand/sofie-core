@@ -65,7 +65,6 @@ export function groupPartsInRundownAndChanges(
 	if (!previousNrcsIngestRundown) {
 		return {
 			nrcsIngestRundown: combinedIngestRundown,
-			changedSegmentExternalIds: {},
 			ingestChanges: {
 				source: 'ingest',
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
@@ -94,8 +93,8 @@ export function groupPartsInRundownAndChanges(
 			rundownChanges: ingestChanges.rundownChanges,
 			segmentOrderChanged,
 			segmentChanges,
+			changedSegmentExternalIds,
 		} satisfies Complete<NrcsIngestChangeDetails>,
-		changedSegmentExternalIds,
 	}
 }
 

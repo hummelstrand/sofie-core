@@ -309,14 +309,6 @@ async function updateSofieIngestRundown(
 					';' // Backwards compatibility
 				)
 
-				for (const [oldExternalId, newExternalId] of Object.entries<string | undefined>(
-					groupedResult.changedSegmentExternalIds
-				)) {
-					if (!oldExternalId || !newExternalId) continue
-
-					mutableIngestRundown.changeSegmentExternalId(oldExternalId, newExternalId)
-				}
-
 				blueprintContext.defaultApplyIngestChanges(
 					mutableIngestRundown,
 					groupedResult.nrcsIngestRundown,

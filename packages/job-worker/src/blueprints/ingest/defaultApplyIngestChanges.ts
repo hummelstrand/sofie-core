@@ -56,6 +56,11 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 			assertNever(ingestChanges.rundownChanges)
 	}
 
+	// Perform any renames before any other changes
+	if (ingestChanges.changedSegmentExternalIds) {
+		applySegmentRenames(mutableIngestRundown, ingestChanges.changedSegmentExternalIds)
+	}
+
 	if (regenerateAllContents) {
 		// Track any existing segment externalId changes
 		const existingSegmentExternalIdChanges = new Map<string, string>()
@@ -155,9 +160,6 @@ function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	// Perform the inserts last, so that we can ensure they happen in a sensible order
 	const segmentsToInsert: IngestSegment[] = []
 
-	// Perform any renames before any other changes
-	// applySegmentRenames(mutableIngestRundown, changes)
-
 	// Apply changes and delete segments
 	for (const [segmentId, change] of Object.entries<NrcsIngestSegmentChangeDetails | undefined>(changes)) {
 		if (!change) continue
@@ -189,21 +191,26 @@ function applyAllSegmentChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	}
 }
 
-// function applySegmentRenames<TRundownPayload, TSegmentPayload, TPartPayload>(
-// 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
-// 	changes: Record<string, NrcsIngestSegmentChangeDetails>
-// ) {
-// 	for (const [segmentId, change] of Object.entries<NrcsIngestSegmentChangeDetails | undefined>(changes)) {
-// 		if (!change) continue
+function applySegmentRenames<TRundownPayload, TSegmentPayload, TPartPayload>(
+	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
+	changedSegmentExternalIds: Record<string, string>
+) {
+	for (const [oldExternalId, newExternalId] of Object.entries<string | undefined>(changedSegmentExternalIds)) {
+		if (!oldExternalId || !newExternalId) continue
 
-// 		if (change && typeof change === 'object' && change.oldExternalId) {
-// 			const mutableSegment = mutableIngestRundown.getSegment(change.oldExternalId)
-// 			if (!mutableSegment) throw new Error(`Segment ${change.oldExternalId} not found in rundown`)
+		mutableIngestRundown.changeSegmentExternalId(oldExternalId, newExternalId)
+	}
+	// for (const [segmentId, change] of Object.entries<NrcsIngestSegmentChangeDetails | undefined>(changes)) {
+	// 	if (!change) continue
 
-// 			mutableIngestRundown.renameSegment(change.oldExternalId, segmentId)
-// 		}
-// 	}
-// }
+	// 	if (change && typeof change === 'object' && change.oldExternalId) {
+	// 		const mutableSegment = mutableIngestRundown.getSegment(change.oldExternalId)
+	// 		if (!mutableSegment) throw new Error(`Segment ${change.oldExternalId} not found in rundown`)
+
+	// 		mutableIngestRundown.renameSegment(change.oldExternalId, segmentId)
+	// 	}
+	// }
+}
 
 function applyChangesForSingleSegment<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,

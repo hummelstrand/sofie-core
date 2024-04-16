@@ -100,6 +100,13 @@ export interface NrcsIngestChangeDetails {
 	 * Describes the changes to the segments in the rundown
 	 */
 	segmentChanges?: Record<string, NrcsIngestSegmentChangeDetails>
+
+	/**
+	 * Describes any changes to segment external ids
+	 * This is used to ensure that content belonging to a segment gets moved between segments correctly
+	 * Note: this is not currently defined by Sofie, but is defined by `groupPartsInRundownAndChanges` and `groupMosPartsInRundownAndChangesWithSeparator`
+	 */
+	changedSegmentExternalIds?: Record<string, string>
 }
 
 export type DefaultUserOperations = {

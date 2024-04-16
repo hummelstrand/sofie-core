@@ -140,7 +140,6 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 		expect(result).toEqual({
 			nrcsIngestRundown: combinedIngestRundown,
-			changedSegmentExternalIds: {},
 			ingestChanges: {
 				source: 'ingest',
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
@@ -157,9 +156,9 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 		expect(result).toEqual({
 			nrcsIngestRundown: combinedIngestRundown,
-			changedSegmentExternalIds: {},
 			ingestChanges: {
 				source: 'ingest',
+				changedSegmentExternalIds: {},
 				segmentChanges: {},
 				segmentOrderChanged: false,
 			},
@@ -179,9 +178,9 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 		expect(result).toEqual({
 			nrcsIngestRundown: combinedIngestRundown,
-			changedSegmentExternalIds: {},
 			ingestChanges: {
 				source: 'ingest',
+				changedSegmentExternalIds: {},
 				segmentChanges: {},
 				segmentOrderChanged: false,
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
@@ -205,9 +204,9 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
-				changedSegmentExternalIds: {},
 				ingestChanges: {
 					source: 'ingest',
+					changedSegmentExternalIds: {},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: {
 							partChanges: {
@@ -236,11 +235,11 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
-				changedSegmentExternalIds: {
-					rundown0_SEGMENT2_s2p2: 'rundown0_SEGMENT2_s2p1',
-				},
 				ingestChanges: {
 					source: 'ingest',
+					changedSegmentExternalIds: {
+						rundown0_SEGMENT2_s2p2: 'rundown0_SEGMENT2_s2p1',
+					},
 					segmentChanges: {
 						rundown0_SEGMENT2_s2p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 						rundown0_SEGMENT2_s2p2: NrcsIngestSegmentChangeDetailsEnum.Deleted, // nocommit: verify this is correct
@@ -276,9 +275,9 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
-				changedSegmentExternalIds: {},
 				ingestChanges: {
 					source: 'ingest',
+					changedSegmentExternalIds: {},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: {
 							partChanges: {
@@ -318,11 +317,11 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
-				changedSegmentExternalIds: {
-					rundown0_SEGMENT2_s2p0: 'rundown0_SEGMENT2_s2p1',
-				},
 				ingestChanges: {
 					source: 'ingest',
+					changedSegmentExternalIds: {
+						rundown0_SEGMENT2_s2p0: 'rundown0_SEGMENT2_s2p1',
+					},
 					segmentChanges: {
 						rundown0_SEGMENT2_s2p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 						rundown0_SEGMENT2_s2p0: NrcsIngestSegmentChangeDetailsEnum.Deleted, // nocommit: verify this is correct
@@ -350,9 +349,9 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
-				changedSegmentExternalIds: {},
 				ingestChanges: {
 					source: 'ingest',
+					changedSegmentExternalIds: {},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: {
 							partChanges: {
@@ -390,11 +389,11 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
-				changedSegmentExternalIds: {
-					rundown0_SEGMENT0_s1p1: 'rundown0_SEGMENT1_s1p1',
-				},
 				ingestChanges: {
 					source: 'ingest',
+					changedSegmentExternalIds: {
+						rundown0_SEGMENT0_s1p1: 'rundown0_SEGMENT1_s1p1',
+					},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 						rundown0_SEGMENT0_s1p1: NrcsIngestSegmentChangeDetailsEnum.Deleted, // nocommit: verify this is correct
@@ -429,11 +428,11 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
-				changedSegmentExternalIds: {
-					rundown0_SEGMENT0_s1p1: 'rundown0_SEGMENT1_s1p1',
-				},
 				ingestChanges: {
 					source: 'ingest',
+					changedSegmentExternalIds: {
+						rundown0_SEGMENT0_s1p1: 'rundown0_SEGMENT1_s1p1',
+					},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 						rundown0_SEGMENT0_s1p1: NrcsIngestSegmentChangeDetailsEnum.Deleted, // nocommit: verify this is correct
@@ -464,11 +463,11 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
-				changedSegmentExternalIds: {
-					rundown0_SEGMENT1_s1p2: 'rundown0_SEGMENT1_s1p1',
-				},
 				ingestChanges: {
 					source: 'ingest',
+					changedSegmentExternalIds: {
+						rundown0_SEGMENT1_s1p2: 'rundown0_SEGMENT1_s1p1',
+					},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 						rundown0_SEGMENT1_s1p2: NrcsIngestSegmentChangeDetailsEnum.Deleted, // nocommit: verify this is correct
@@ -499,9 +498,9 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
-				changedSegmentExternalIds: {},
 				ingestChanges: {
 					source: 'ingest',
+					changedSegmentExternalIds: {},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: {
 							partChanges: {
@@ -598,9 +597,9 @@ describe('groupPartsInMosRundownAndChanges', () => {
 						},
 					],
 				},
-				changedSegmentExternalIds: {},
 				ingestChanges: {
 					source: 'ingest',
+					changedSegmentExternalIds: {},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: {
 							partChanges: {

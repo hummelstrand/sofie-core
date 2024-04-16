@@ -55,5 +55,4 @@ export interface IProcessIngestDataContext extends ICommonContext {
 export interface GroupPartsInMosRundownAndChangesResult {
 	nrcsIngestRundown: IngestRundown
 	ingestChanges: NrcsIngestChangeDetails
-	changedSegmentExternalIds: Record<string, string>
 }
