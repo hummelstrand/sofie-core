@@ -28,16 +28,17 @@ export function wipGroupRundownForMos(
 		}
 	}
 
+	// Combine parts into segments, in both the new and old ingest rundowns
 	const oldCombinedIngestRundown = oldNrcsIngestRundown
 		? groupPartsIntoNewIngestRundown(oldNrcsIngestRundown)
 		: undefined
-
-	const allPartChanges = findAllPartsWithChanges(nrcsIngestRundown, sourceChanges)
-
 	const combinedIngestRundown = groupPartsIntoNewIngestRundown(nrcsIngestRundown)
 
+	// Calculate the changes to each segment
+	const allPartChanges = findAllPartsWithChanges(nrcsIngestRundown, sourceChanges)
 	const segmentChanges = calculateSegmentChanges(oldCombinedIngestRundown, combinedIngestRundown, allPartChanges)
 
+	// Calculate other changes
 	const changedSegmentExternalIds = oldCombinedIngestRundown
 		? calculateSegmentExternalIdChanges(oldCombinedIngestRundown, combinedIngestRundown)
 		: {}

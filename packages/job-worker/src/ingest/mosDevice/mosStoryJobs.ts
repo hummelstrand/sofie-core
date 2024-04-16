@@ -131,6 +131,8 @@ export function handleMosInsertStories(
 	_context: JobContext,
 	data: MosInsertStoryProps
 ): IngestUpdateOperationFunction | null {
+	if (data.newStories.length === 0) return null
+
 	return (ingestRundown: IngestRundown | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
@@ -193,9 +195,9 @@ export function handleMosSwapStories(
 ): IngestUpdateOperationFunction | null {
 	const story0Str = parseMosString(data.story0)
 	const story1Str = parseMosString(data.story1)
-	if (story0Str === story1Str) {
-		throw new Error(`Cannot swap part ${story0Str} with itself in rundown ${data.rundownExternalId}`)
-	}
+
+	// If the stories are the same, we don't need to do anything
+	if (story0Str === story1Str) return null
 
 	return (ingestRundown: IngestRundown | undefined) => {
 		if (!ingestRundown) {
@@ -242,6 +244,8 @@ export function handleMosMoveStories(
 	_context: JobContext,
 	data: MosMoveStoryProps
 ): IngestUpdateOperationFunction | null {
+	if (data.stories.length === 0) return null
+
 	return (ingestRundown: IngestRundown | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
