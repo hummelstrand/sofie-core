@@ -106,6 +106,7 @@ export function StudioRoutings({
 			active: false,
 			routes: [],
 			behavior: StudioRouteBehavior.TOGGLE,
+			exclusivityGroup: undefined,
 		})
 
 		const addOp = literal<ObjectOverrideSetOp>({
@@ -838,7 +839,7 @@ function RenderExclusivityGroup({
 					{
 						_.filter(
 							getRouteSetsFromOverrides,
-							(routeSet) => routeSet.computed?.exclusivityGroup === exclusivityGroup.id
+							(routeSet) => routeSet.computed?.exclusivityGroup === exclusivityGroup.computed?.name
 						).length
 					}
 				</td>
