@@ -11,7 +11,7 @@ import {
 	MappingsExt,
 	MappingExt,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import { EditAttribute, EditAttributeBase } from '../../../lib/EditAttribute'
+import { EditAttribute } from '../../../lib/EditAttribute'
 import { doModalDialog } from '../../../lib/ModalDialog'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faPencilAlt, faCheck, faPlus, faSync } from '@fortawesome/free-solid-svg-icons'
@@ -73,7 +73,8 @@ export function StudioRoutings({
 	)
 
 	const getExclusivityGroupsFromOverrides = React.useMemo(
-		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetExclusivityGroups, null),
+		() =>
+			getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetExclusivityGroups, (a, b) => a[0].localeCompare(b[0])),
 		[studio.routeSetExclusivityGroups]
 	)
 
@@ -307,7 +308,7 @@ function RenderRouteSet({
 				.filter((group) => group.type === 'normal')
 				.map((group) => group.computed?.name || group.id),
 		])
-	}, [studio.routeSetExclusivityGroups, studio.routeSetExclusivityGroups])
+	}, [studio.routeSetExclusivityGroups])
 
 	const DEFAULT_ACTIVE_OPTIONS = {
 		[t('Active')]: true,
@@ -706,7 +707,7 @@ function RenderExclusivityGroups({
 }: Readonly<IRenderExclusivityGroupsProps>): React.JSX.Element {
 	const { t } = useTranslation()
 
-	const saveOverrides = React.useCallback(
+	const saveExclusivityOverrides = React.useCallback(
 		(newOps: SomeObjectOverrideOp[]) => {
 			Studios.update(studio._id, {
 				$set: {
@@ -714,10 +715,10 @@ function RenderExclusivityGroups({
 				},
 			})
 		},
-		[studio._id]
+		[studio._id, studio.routeSetExclusivityGroups]
 	)
 
-	const exclusivityOverrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSetExclusivityGroups)
+	const exclusivityOverrideHelper = useOverrideOpHelper(saveExclusivityOverrides, studio.routeSetExclusivityGroups)
 
 	if (getExclusivityGroupsFromOverrides.length === 0) {
 		return (
@@ -736,7 +737,6 @@ function RenderExclusivityGroups({
 							{exclusivityGroup.type === 'normal' ? (
 								<RenderExclusivityGroup
 									exclusivityGroup={exclusivityGroup}
-									studio={studio}
 									toggleExpanded={toggleExpanded}
 									isExpanded={isExpanded(exclusivityGroup.id)}
 									getRouteSetsFromOverrides={getRouteSetsFromOverrides}
@@ -758,7 +758,6 @@ function RenderExclusivityGroups({
 
 interface IRenderExclusivityGroupProps {
 	exclusivityGroup: WrappedOverridableItemNormal<StudioRouteSetExclusivityGroup>
-	studio: DBStudio
 	toggleExpanded: (exclusivityGroupId: string, force?: boolean) => void
 	isExpanded: boolean
 	getRouteSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
@@ -767,16 +766,15 @@ interface IRenderExclusivityGroupProps {
 
 function RenderExclusivityGroup({
 	exclusivityGroup,
-	studio,
 	toggleExpanded,
 	isExpanded,
 	getRouteSetsFromOverrides,
-	exclusivityOverrideHelper: overrideHelper,
+	exclusivityOverrideHelper,
 }: Readonly<IRenderExclusivityGroupProps>): React.JSX.Element {
 	const { t } = useTranslation()
 
 	const removeExclusivityGroup = (eGroupId: string) => {
-		overrideHelper.deleteItem(eGroupId)
+		exclusivityOverrideHelper.deleteItem(eGroupId)
 	}
 
 	const confirmRemoveEGroup = () => {
@@ -802,30 +800,14 @@ function RenderExclusivityGroup({
 			),
 		})
 	}
-	const updateExclusivityGroupId = (edit: EditAttributeBase, newValue: string) => {
-		const oldGroupId = edit.props.overrideDisplayValue
-		const newGroupId = newValue + ''
-		const group = exclusivityGroup.computed
+	const updateExclusivityGroupId = React.useCallback(
+		(newGroupId: string) => {
+			exclusivityOverrideHelper.changeItemId(exclusivityGroup.id, newGroupId)
+			toggleExpanded(newGroupId, true)
+		},
+		[exclusivityOverrideHelper, toggleExpanded, exclusivityGroup.id]
+	)
 
-		// if (studio.routeSetExclusivityGroups[newRouteId]) {
-		// 	throw new Meteor.Error(400, 'Exclusivity Group "' + newRouteId + '" already exists')
-		// }
-
-		const mSet: Record<string, any> = {}
-		const mUnset: Record<string, 1> = {}
-		mSet['routeSetExclusivityGroups.' + newGroupId] = group
-		mUnset['routeSetExclusivityGroups.' + oldGroupId] = 1
-
-		if (edit.props.collection) {
-			edit.props.collection.update(studio._id, {
-				$set: mSet,
-				$unset: mUnset,
-			})
-		}
-
-		toggleExpanded(oldGroupId)
-		toggleExpanded(newGroupId)
-	}
 	return (
 		<React.Fragment>
 			<tr
@@ -859,23 +841,20 @@ function RenderExclusivityGroup({
 						<div className="properties-grid">
 							<label className="field">
 								<LabelActual label={t('Exclusivity Group ID')} />
-								<EditAttribute
+								<TextInputControl
 									modifiedClassName="bghl"
-									attribute={'routeSetExclusivityGroups'}
-									overrideDisplayValue={exclusivityGroup.id}
-									obj={studio}
-									type="text"
-									collection={Studios}
-									updateFunction={updateExclusivityGroupId}
-									className="input text-input input-l"
-								></EditAttribute>
+									classNames="input text-input input-l"
+									value={exclusivityGroup.id}
+									handleUpdate={updateExclusivityGroupId}
+									disabled={!!exclusivityGroup.defaults}
+								/>
 							</label>
 							<LabelAndOverrides
 								label={t('Exclusivity Group Name')}
 								item={exclusivityGroup}
 								itemKey={'name'}
 								opPrefix={exclusivityGroup.id}
-								overrideHelper={overrideHelper}
+								overrideHelper={exclusivityOverrideHelper}
 							>
 								{(value, handleUpdate) => (
 									<TextInputControl
