@@ -9,7 +9,7 @@ import classNames from 'classnames'
 import { RouteSetOverrideIcon } from '../../lib/ui/icons/switchboard'
 import Tooltip from 'rc-tooltip'
 import { TOOLTIP_DEFAULT_DELAY } from '../../lib/lib'
-import { WrappedOverridableItemNormal } from '../../../lib/collections/OverrideOpHelper'
+import { WrappedOverridableItemNormal } from '../util/OverrideOpHelper'
 
 interface IProps {
 	onStudioRouteSetSwitch?: (

@@ -1,4 +1,4 @@
-import { clone, literal, objectPathSet } from '@sofie-automation/corelib/dist/lib'
+import { clone, literal, objectPathSet } from './lib'
 import {
 	SomeObjectOverrideOp,
 	ObjectWithOverrides,
@@ -7,7 +7,7 @@ import {
 	applyAndValidateOverrides,
 	filterOverrideOpsForPrefix,
 	findParentOpToUpdate,
-} from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
+} from './settings/objectWithOverrides'
 import { ReadonlyDeep } from 'type-fest'
 
 export interface WrappedOverridableItemDeleted<T extends object> {
