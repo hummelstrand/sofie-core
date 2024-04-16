@@ -10,6 +10,10 @@ import { CommitIngestData } from './lock'
 import { IngestModel } from './model/IngestModel'
 import { IngestRundown } from '@sofie-automation/blueprints-integration'
 
+/**
+ * Wrap a mos specific ingest job to be an ingest update operation, with a provided function which runs a precheck and returns the final ingestRundown mutator
+ * @param fcn Function to generate the ingestRundown mutator
+ */
 export function wrapMosIngestJob<TData extends IngestPropsBase>(
 	fcn: (context: JobContext, data: TData) => IngestUpdateOperationFunction | null
 ): (context: JobContext, data: TData) => Promise<void> {
@@ -27,21 +31,22 @@ export function wrapMosIngestJob<TData extends IngestPropsBase>(
 	}
 }
 
+/**
+ * Wrap an ingest job to be an ingest update operation, with a provided function which can mutate the ingestRundown
+ * @param fcn Function to mutate the ingestRundown
+ */
 export function wrapGenericIngestJob<TData extends IngestPropsBase>(
 	fcn: (context: JobContext, data: TData, oldIngestRundown: IngestRundown | undefined) => UpdateIngestRundownResult
 ): (context: JobContext, data: TData) => Promise<void> {
 	return async (context, data) => {
-		return runIngestUpdateOperation(context, data, (ingestRundown) => {
-			// nocommit, we can't do this for all operations, as some need to be usable by mos rundowns
-			// if (ingestRundown && ingestRundown.type === 'mos') {
-			// 	throw new Error(`Rundown "${data.rundownExternalId}" is a MOS rundown`)
-			// }
-
-			return fcn(context, data, ingestRundown)
-		})
+		return runIngestUpdateOperation(context, data, (ingestRundown) => fcn(context, data, ingestRundown))
 	}
 }
 
+/**
+ * Wrap an ingest job to be an ingest update operation, with a provided function which runs a precheck and returns the final ingestRundown mutator
+ * @param fcn Function to generate the ingestRundown mutator
+ */
 export function wrapGenericIngestJobWithPrecheck<TData extends IngestPropsBase>(
 	fcn: (context: JobContext, data: TData) => IngestUpdateOperationFunction | null
 ): (context: JobContext, data: TData) => Promise<void> {
@@ -49,17 +54,14 @@ export function wrapGenericIngestJobWithPrecheck<TData extends IngestPropsBase>(
 		const executeFcn = fcn(context, data)
 		if (!executeFcn) return
 
-		return runIngestUpdateOperation(context, data, (ingestRundown) => {
-			// nocommit, we can't do this for all operations, as some need to be usable by mos rundowns
-			// if (ingestRundown && ingestRundown.type === 'mos') {
-			// 	throw new Error(`Rundown "${data.rundownExternalId}" is a MOS rundown`)
-			// }
-
-			return executeFcn(ingestRundown)
-		})
+		return runIngestUpdateOperation(context, data, (ingestRundown) => executeFcn(ingestRundown))
 	}
 }
 
+/**
+ * Wrap an ingest job to be an ingest update operation, with a provided function to run the job to modify the IngestModel
+ * @param fcn Function to mutate the IngestModel
+ */
 export function wrapCustomIngestJob<TData extends IngestPropsBase>(
 	fcn: (
 		context: JobContext,

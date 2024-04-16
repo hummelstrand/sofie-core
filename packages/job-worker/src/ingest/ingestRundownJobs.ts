@@ -11,7 +11,7 @@ import {
 	UserRemoveRundownProps,
 	UserUnsyncRundownProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
-import { UpdateIngestRundownAction, UpdateIngestRundownChange, UpdateIngestRundownResult } from './runOperation'
+import { ComputedIngestChangeAction, UpdateIngestRundownChange, UpdateIngestRundownResult } from './runOperation'
 import { IngestRundown, NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
 import { wrapGenericIngestJob } from './jobWrappers'
 
@@ -24,7 +24,7 @@ export function handleRemovedRundown(
 	_ingestRundown: IngestRundown | undefined
 ): UpdateIngestRundownResult {
 	// Remove it
-	return data.forceDelete ? UpdateIngestRundownAction.FORCE_DELETE : UpdateIngestRundownAction.DELETE
+	return data.forceDelete ? ComputedIngestChangeAction.FORCE_DELETE : ComputedIngestChangeAction.DELETE
 }
 const handleRemovedRundownWrapped = wrapGenericIngestJob(handleRemovedRundown)
 

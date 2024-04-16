@@ -22,7 +22,7 @@ import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromInge
 import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 
-export enum UpdateIngestRundownAction {
+export enum ComputedIngestChangeAction {
 	DELETE = 'delete',
 	FORCE_DELETE = 'force-delete',
 }
@@ -32,23 +32,21 @@ export interface UpdateIngestRundownChange {
 	changes: NrcsIngestChangeDetails | UserOperationChange
 }
 
-export type UpdateIngestRundownResult = UpdateIngestRundownChange | UpdateIngestRundownAction
+export type UpdateIngestRundownResult = UpdateIngestRundownChange | ComputedIngestChangeAction
 
-// nocommit - this needs a better name
-export interface ComputedIngestChanges {
+export interface ComputedIngestChangeObject {
 	ingestRundown: IngestRundown
 
 	// define what needs regenerating
 	segmentsToRemove: string[]
 	segmentsUpdatedRanks: Record<string, number> // contains the new rank
 	segmentsToRegenerate: IngestSegment[]
-	regenerateRundown: boolean // TODO - full vs metadata?
+	regenerateRundown: boolean // Future: full vs metadata?
 
 	segmentExternalIdChanges: Record<string, string> // old -> new
 }
 
-// nocommit - this needs a better name
-export type ComputedIngestChanges2 = ComputedIngestChanges | UpdateIngestRundownAction
+export type ComputedIngestChanges = ComputedIngestChangeObject | ComputedIngestChangeAction
 
 /**
  * Perform an 'ingest' update operation which modifies a Rundown without modifying the ingest data
@@ -237,8 +235,8 @@ function updateNrcsIngestObjects(
 		// case UpdateIngestRundownAction.REJECT:
 		// 	// Reject change
 		// 	return
-		case UpdateIngestRundownAction.DELETE:
-		case UpdateIngestRundownAction.FORCE_DELETE:
+		case ComputedIngestChangeAction.DELETE:
+		case ComputedIngestChangeAction.FORCE_DELETE:
 			nrcsIngestObjectCache.delete()
 			break
 		default:
@@ -255,10 +253,10 @@ async function updateSofieIngestRundown(
 	sofieIngestObjectCache: RundownIngestDataCache,
 	ingestRundownChanges: UpdateIngestRundownResult,
 	previousNrcsIngestRundown: IngestRundown | undefined
-): Promise<ComputedIngestChanges2 | null> {
+): Promise<ComputedIngestChanges | null> {
 	if (
-		ingestRundownChanges === UpdateIngestRundownAction.DELETE ||
-		ingestRundownChanges === UpdateIngestRundownAction.FORCE_DELETE
+		ingestRundownChanges === ComputedIngestChangeAction.DELETE ||
+		ingestRundownChanges === ComputedIngestChangeAction.FORCE_DELETE
 	) {
 		// Also delete the Sofie view of the Rundown, so that future ingest calls know it has been deleted
 		sofieIngestObjectCache.delete()
@@ -356,7 +354,7 @@ function sortIngestRundown(rundown: IngestRundown): void {
 async function updateSofieRundownModel(
 	context: JobContext,
 	pIngestModel: Promise<IngestModel & DatabasePersistedModel>,
-	computedIngestChanges: ComputedIngestChanges2 | null,
+	computedIngestChanges: ComputedIngestChanges | null,
 	peripheralDeviceId: PeripheralDeviceId | null
 ) {
 	const ingestModel = await pIngestModel
@@ -368,15 +366,15 @@ async function updateSofieRundownModel(
 	let commitData: CommitIngestData | null = null
 
 	if (
-		computedIngestChanges === UpdateIngestRundownAction.DELETE ||
-		computedIngestChanges === UpdateIngestRundownAction.FORCE_DELETE
+		computedIngestChanges === ComputedIngestChangeAction.DELETE ||
+		computedIngestChanges === ComputedIngestChangeAction.FORCE_DELETE
 	) {
 		// Get the rundown, and fail if it doesn't exist
 		const rundown = ingestModel.getRundown()
 
 		// Check if it can be deleted
 		const canRemove =
-			computedIngestChanges === UpdateIngestRundownAction.FORCE_DELETE || canRundownBeUpdated(rundown, false)
+			computedIngestChanges === ComputedIngestChangeAction.FORCE_DELETE || canRundownBeUpdated(rundown, false)
 		if (!canRemove) throw UserError.create(UserErrorMessage.RundownRemoveWhileActive, { name: rundown.name })
 
 		// The rundown has been deleted
@@ -417,7 +415,7 @@ async function updateSofieRundownModel(
 async function applyCalculatedIngestChangesToModel(
 	context: JobContext,
 	ingestModel: IngestModel,
-	computedIngestChanges: ComputedIngestChanges,
+	computedIngestChanges: ComputedIngestChangeObject,
 	peripheralDeviceId: PeripheralDeviceId | null
 ): Promise<CommitIngestData | null> {
 	const newIngestRundown = computedIngestChanges.ingestRundown
@@ -547,7 +545,7 @@ async function applyCalculatedIngestChangesToModel(
  */
 function applyExternalIdDiff(
 	ingestModel: IngestModel,
-	segmentDiff: Pick<ComputedIngestChanges, 'segmentExternalIdChanges' | 'segmentsUpdatedRanks'>,
+	segmentDiff: Pick<ComputedIngestChangeObject, 'segmentExternalIdChanges' | 'segmentsUpdatedRanks'>,
 	canDiscardParts: boolean
 ): CommitIngestData['renamedSegments'] {
 	// Updated segments that has had their segment.externalId changed:

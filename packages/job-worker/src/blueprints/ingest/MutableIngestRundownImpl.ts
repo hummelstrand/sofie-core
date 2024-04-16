@@ -12,11 +12,11 @@ import { MutableIngestSegmentImpl } from './MutableIngestSegmentImpl'
 import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
 import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
-import type { ComputedIngestChanges } from '../../ingest/runOperation'
+import type { ComputedIngestChangeObject } from '../../ingest/runOperation'
 
 export interface MutableIngestRundownChanges {
 	// define what needs regenerating
-	computedChanges: ComputedIngestChanges
+	computedChanges: ComputedIngestChangeObject
 
 	// define what portions of the ingestRundown need saving
 	changedCacheObjects: IngestDataCacheObj[]

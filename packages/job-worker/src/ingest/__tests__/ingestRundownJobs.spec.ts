@@ -1,7 +1,7 @@
 import { MockJobContext, setupDefaultJobEnvironment } from '../../__mocks__/context'
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import { IngestRundown, NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
-import { UpdateIngestRundownAction, UpdateIngestRundownChange } from '../runOperation'
+import { ComputedIngestChangeAction, UpdateIngestRundownChange } from '../runOperation'
 import {
 	handleRegenerateRundown,
 	handleRemovedRundown,
@@ -71,7 +71,7 @@ describe('handleRemovedRundown', () => {
 				},
 				undefined
 			)
-		).toBe(UpdateIngestRundownAction.DELETE)
+		).toBe(ComputedIngestChangeAction.DELETE)
 	})
 
 	it('no rundown, force delete', () => {
@@ -87,7 +87,7 @@ describe('handleRemovedRundown', () => {
 				},
 				undefined
 			)
-		).toBe(UpdateIngestRundownAction.FORCE_DELETE)
+		).toBe(ComputedIngestChangeAction.FORCE_DELETE)
 	})
 
 	it('with rundown, normal delete', () => {
@@ -105,7 +105,7 @@ describe('handleRemovedRundown', () => {
 				},
 				ingestRundown
 			)
-		).toBe(UpdateIngestRundownAction.DELETE)
+		).toBe(ComputedIngestChangeAction.DELETE)
 	})
 
 	it('with rundown, force delete', () => {
@@ -123,7 +123,7 @@ describe('handleRemovedRundown', () => {
 				},
 				ingestRundown
 			)
-		).toBe(UpdateIngestRundownAction.FORCE_DELETE)
+		).toBe(ComputedIngestChangeAction.FORCE_DELETE)
 	})
 })
 
