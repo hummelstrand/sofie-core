@@ -106,9 +106,9 @@ export function RundownRightHandControls(props: Readonly<IProps>): JSX.Element {
 		setSwitchboardOpen(false)
 	}
 
-	const availableRouteSets = getAllCurrentItemsFromOverrides(props.studioRouteSets, null).filter(
-		(routeSet) => routeSet.computed?.behavior !== StudioRouteBehavior.HIDDEN
-	)
+	const availableRouteSets = getAllCurrentItemsFromOverrides(props.studioRouteSets, null)
+		.filter((routeSet) => routeSet.computed?.behavior !== StudioRouteBehavior.HIDDEN)
+		.sort((a, b) => a.id.localeCompare(b.id))
 
 	const nonDefaultRoutes = availableRouteSets.filter(
 		(routeSet) =>
