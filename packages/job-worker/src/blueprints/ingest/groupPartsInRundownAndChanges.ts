@@ -22,13 +22,11 @@ export function groupMosPartsIntoIngestSegments(
 	for (const ingestSegment of ingestSegments) {
 		const segmentName = ingestSegment.name.split(separator)[0] || ingestSegment.name
 
-		for (const ingestPart of ingestSegment.parts) {
-			const lastSegment = _.last(groupedParts)
-			if (lastSegment && lastSegment.name === segmentName) {
-				lastSegment.parts.push(ingestPart)
-			} else {
-				groupedParts.push({ name: segmentName, parts: [ingestPart] })
-			}
+		const lastSegment = _.last(groupedParts)
+		if (lastSegment && lastSegment.name === segmentName) {
+			lastSegment.parts.push(...ingestSegment.parts)
+		} else {
+			groupedParts.push({ name: segmentName, parts: [...ingestSegment.parts] })
 		}
 	}
 
