@@ -411,32 +411,4 @@ describe('handleUpdatedSegmentRanks', () => {
 	})
 })
 
-// nocommit: handleRemoveOrphanedSegemnts
-
-// TODO: This is a hard one to write and the code hasn't changed in this PR, so probably isn't necessary to write tests for right now
-// describe('handleRemoveOrphanedSegemnts', () => {
-// 	async function runRemoveOrphanedSegemnts(context: MockJobContext, data: RemoveOrphanedSegmentsProps) {
-// 		// return runWithRundownLock
-// 		const ingestModel = await loadIngestModelFromRundownExternalId(context, rundownLock, data.rundownExternalId)
-// 		return handleRemoveOrphanedSegemnts(context, data, ingestModel, ingestRundown)
-// 	}
-// 	it('no rundown', () => {
-// 		const context = setupDefaultJobEnvironment()
-
-// 		const ingestModel = {}
-
-// 		expect(() =>
-// 			handleRemoveOrphanedSegemnts(
-// 				context,
-// 				{
-// 					peripheralDeviceId: null,
-// 					rundownExternalId: 'rundown0',
-// 					orphanedDeletedSegmentIds: [],
-// 					orphanedHiddenSegmentIds: [],
-// 				},
-// 				ingestModel,
-// 				ingestRundown
-// 			)
-// 		).toThrow(/Rundown(.*)not found/)
-// 	})
-// })
+// Future: tests for handleRemoveOrphanedSegemnts
