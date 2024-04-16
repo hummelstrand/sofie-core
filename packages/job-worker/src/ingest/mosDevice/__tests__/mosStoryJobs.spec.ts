@@ -338,7 +338,7 @@ describe('handleMosInsertStories', () => {
 			changes: {
 				source: 'ingest',
 				segmentChanges: {
-					'segment-partX': NrcsIngestSegmentChangeDetailsEnum.Inserted,
+					'segment-partX': NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
 				segmentOrderChanged: true,
 			},
@@ -383,7 +383,7 @@ describe('handleMosInsertStories', () => {
 				source: 'ingest',
 				segmentChanges: {
 					'segment-part1': NrcsIngestSegmentChangeDetailsEnum.Deleted,
-					'segment-partX': NrcsIngestSegmentChangeDetailsEnum.Inserted,
+					'segment-partX': NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
 				segmentOrderChanged: true,
 			},
@@ -427,7 +427,7 @@ describe('handleMosInsertStories', () => {
 			changes: {
 				source: 'ingest',
 				segmentChanges: {
-					'segment-partX': NrcsIngestSegmentChangeDetailsEnum.Inserted,
+					'segment-partX': NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
 				segmentOrderChanged: true,
 			},

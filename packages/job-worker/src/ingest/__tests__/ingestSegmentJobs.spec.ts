@@ -258,7 +258,7 @@ describe('handleUpdatedSegment', () => {
 			changes: {
 				source: 'ingest',
 				segmentChanges: {
-					segmentX: NrcsIngestSegmentChangeDetailsEnum.Inserted,
+					segmentX: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
 			},
 		} satisfies UpdateIngestRundownChange)
@@ -302,7 +302,7 @@ describe('handleUpdatedSegment', () => {
 			changes: {
 				source: 'ingest',
 				segmentChanges: {
-					segment1: NrcsIngestSegmentChangeDetailsEnum.Inserted,
+					segment1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
 			},
 		} satisfies UpdateIngestRundownChange)

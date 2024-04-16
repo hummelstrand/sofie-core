@@ -216,7 +216,7 @@ function applyChangesForSingleSegment<TRundownPayload, TSegmentPayload, TPartPay
 	const mutableSegment = mutableIngestRundown.getSegment(segmentId)
 
 	switch (change) {
-		case NrcsIngestSegmentChangeDetailsEnum.Inserted: {
+		case NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated: {
 			if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
 
 			segmentsToInsert.push(nrcsSegment)

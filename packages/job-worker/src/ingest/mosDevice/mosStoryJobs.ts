@@ -168,7 +168,7 @@ export function handleMosInsertStories(
 
 		const segmentChanges: Record<string, NrcsIngestSegmentChangeDetails> = {}
 		for (const segment of newIngestSegments) {
-			segmentChanges[segment.externalId] = NrcsIngestSegmentChangeDetailsEnum.Inserted
+			segmentChanges[segment.externalId] = NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated
 		}
 		if (data.replace && insertBeforeSegmentExternalId) {
 			segmentChanges[insertBeforeSegmentExternalId] = NrcsIngestSegmentChangeDetailsEnum.Deleted

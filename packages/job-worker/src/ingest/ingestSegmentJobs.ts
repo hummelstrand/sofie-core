@@ -103,7 +103,7 @@ export function handleUpdatedSegment(
 			changes: {
 				source: 'ingest',
 				segmentChanges: {
-					[segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.Inserted, // This forces downstream to do a full diff themselves
+					[segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated, // This forces downstream to do a full diff themselves
 				},
 			},
 		}

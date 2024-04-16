@@ -15,37 +15,51 @@ export interface ExtendedIngestRundown extends IngestRundown {
 	coreData: IBlueprintRundownDBData | undefined
 }
 
+/**
+ * Describes the possible ingest changes that can have been made to a part by the NRCS
+ */
 export enum NrcsIngestPartChangeDetails {
 	Inserted = 'inserted',
 	Deleted = 'deleted',
 	Updated = 'updated',
-	// Rank = 'rank',
 }
+
+/**
+ * Describes some of the possible ingest changes that can have been made to a segment by the NRCS
+ */
 export enum NrcsIngestSegmentChangeDetailsEnum {
-	Inserted = 'inserted', // nocommit: or "replaced" / "upsert"?
+	/**
+	 * The segment has been inserted into the rundown, or the segment has changed sufficiently to require a full regeneration
+	 */
+	InsertedOrUpdated = 'inserted-or-updated',
+	/**
+	 * The segment has been removed from the rundown
+	 */
 	Deleted = 'deleted',
-	// Contents = 'contents',
-	// ContentsOrder = 'contentsOrder',
-	// Payload = 'payload',
-	// Rank = 'rank',
 }
+
+/**
+ * Describes the possible ingest changes that can have been made to the rundown properties by the NRCS
+ */
 export enum NrcsIngestRundownChangeDetails {
-	// Deleted = 'deleted',
-	// nocommit: describe these
+	/**
+	 * The payload or name of the rundown has changed.
+	 */
 	Payload = 'payload',
-	// CoreData = 'coreData',
+
+	/**
+	 * A full regeneration of the rundown and all segments is required.
+	 * This will typically remove all user driven changes.
+	 */
 	Regenerate = 'regenerate',
 }
 
+/**
+ * Describes the possible ingest changes that can have been made to the contents of a segment by the NRCS
+ */
 export interface NrcsIngestSegmentChangeDetailsObject {
-	// /**
-	//  * If set, this Segment has been renamed from the specified id
-	//  * @deprecated This is temporary for MOS compatibility
-	//  */
-	// oldExternalId?: string
-
 	/**
-	 * True when the payload of the segment has changed.
+	 * True when the payload or name of the segment has changed.
 	 */
 	payloadChanged?: boolean
 
@@ -60,6 +74,9 @@ export interface NrcsIngestSegmentChangeDetailsObject {
 	partChanges?: Record<string, NrcsIngestPartChangeDetails>
 }
 
+/**
+ * Describes the possible ingest changes that can have been made to a segment by the NRCS
+ */
 export type NrcsIngestSegmentChangeDetails = NrcsIngestSegmentChangeDetailsEnum | NrcsIngestSegmentChangeDetailsObject
 
 export interface NrcsIngestChangeDetails {
@@ -70,7 +87,7 @@ export interface NrcsIngestChangeDetails {
 	 * True when the rank of any segment in the rundown has changed.
 	 * Expressing what exactly has changed non-trivial particularly how to represent that in this structure,
 	 * so for now we just have a simple boolean.
-	 * If this is false, no segments have been reordered, added or removed. // nocommit: confirm this
+	 * If this is false, no segments have been reordered, added or removed.
 	 */
 	segmentOrderChanged?: boolean
 

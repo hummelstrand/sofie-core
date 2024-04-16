@@ -69,7 +69,7 @@ function findAllPartsWithChanges(
 
 		for (const part of segment.parts) {
 			switch (segmentChanges) {
-				case NrcsIngestSegmentChangeDetailsEnum.Inserted:
+				case NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated:
 					// partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Inserted)
 					break
 				case NrcsIngestSegmentChangeDetailsEnum.Deleted:
@@ -104,7 +104,7 @@ function calculateSegmentChanges(
 	for (const segment of combinedIngestRundown.segments) {
 		const oldIngestSegment = oldIngestSegments.get(segment.externalId)
 		if (!oldIngestSegment) {
-			segmentChanges[segment.externalId] = NrcsIngestSegmentChangeDetailsEnum.Inserted
+			segmentChanges[segment.externalId] = NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated
 		} else {
 			const segmentPartChanges: Record<string, NrcsIngestPartChangeDetails> = {}
 

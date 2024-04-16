@@ -463,12 +463,12 @@ describe('defaultApplyIngestChanges', () => {
 				source: 'ingest',
 				segmentChanges: {
 					seg1: NrcsIngestSegmentChangeDetailsEnum.Deleted,
-					segX: NrcsIngestSegmentChangeDetailsEnum.Inserted,
+					segX: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 					seg3: {
 						payloadChanged: true,
 					},
 					seg4: NrcsIngestSegmentChangeDetailsEnum.Deleted,
-					segY: NrcsIngestSegmentChangeDetailsEnum.Inserted,
+					segY: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 					seg2: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 				},
 			}
@@ -510,7 +510,7 @@ describe('defaultApplyIngestChanges', () => {
 			const changes: NrcsIngestChangeDetails = {
 				source: 'ingest',
 				segmentChanges: {
-					segX: NrcsIngestSegmentChangeDetailsEnum.Inserted,
+					segX: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
 			}
 
