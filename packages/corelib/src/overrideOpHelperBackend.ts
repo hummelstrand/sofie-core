@@ -85,6 +85,22 @@ export function getAllCurrentAndDeletedItemsFromOverrides<T extends object>(
 	return [...sortedItems, ...removedOutputLayers]
 }
 
+/**
+ * Compile a sorted array of all the items currently active in the ObjectWithOverrides
+ * @param rawObject The ObjectWithOverrides to look at
+ * @param comparitor Comparitor for sorting the items
+ * @returns Sorted items, with sorted deleted items at the end
+ */
+export function getAllCurrentItemsFromOverrides<T extends object>(
+	rawObject: ReadonlyDeep<ObjectWithOverrides<Record<string, T | undefined>>>,
+	comparitor:
+		| ((a: [id: string, obj: T | ReadonlyDeep<T>], b: [id: string, obj: T | ReadonlyDeep<T>]) => number)
+		| null
+): WrappedOverridableItemNormal<T>[] {
+	const allCurrentAndDeleted = getAllCurrentAndDeletedItemsFromOverrides(rawObject, comparitor)
+	return allCurrentAndDeleted.filter((item) => item.type !== 'deleted') as WrappedOverridableItemNormal<T>[]
+}
+
 type SaveOverridesFunction = (newOps: SomeObjectOverrideOp[]) => void
 
 export interface OverrideOpHelperForItemContents {

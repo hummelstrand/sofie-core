@@ -10,8 +10,8 @@ import { StudioRouteBehavior, StudioRouteSet } from '@sofie-automation/corelib/d
 import { logger } from '../../logging'
 import {
 	WrappedOverridableItem,
-	getAllCurrentAndDeletedItemsFromOverrides,
 	useOverrideOpHelperBackend,
+	getAllCurrentItemsFromOverrides,
 } from '@sofie-automation/corelib/dist/overrideOpHelperBackend'
 import { ObjectWithOverrides, SomeObjectOverrideOp } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 
@@ -83,7 +83,7 @@ export class StudioBaselineHelper {
 		const studio = this.#context.studio
 		logger.debug(`switchRouteSet "${studio._id}" "${routeSetId}"=${isActive}`)
 
-		const routeSets = getAllCurrentAndDeletedItemsFromOverrides(studio.routeSets, null)
+		const routeSets = getAllCurrentItemsFromOverrides(studio.routeSets, null)
 		const routeSet = Object.values<WrappedOverridableItem<StudioRouteSet>>(routeSets).find((routeSet) => {
 			return (routeSet.id = routeSetId)
 		})

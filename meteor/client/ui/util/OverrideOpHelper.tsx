@@ -4,84 +4,23 @@ import {
 	ObjectWithOverrides,
 	ObjectOverrideDeleteOp,
 	ObjectOverrideSetOp,
-	applyAndValidateOverrides,
 	filterOverrideOpsForPrefix,
 	findParentOpToUpdate,
 } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 import { useRef, useMemo, useEffect, MutableRefObject } from 'react'
-import { ReadonlyDeep } from 'type-fest'
-
-export interface WrappedOverridableItemDeleted<T extends object> {
-	type: 'deleted'
-	id: string
-	computed: undefined
-	defaults: ReadonlyDeep<T>
-	overrideOps: ReadonlyDeep<SomeObjectOverrideOp[]>
-}
-export interface WrappedOverridableItemNormal<T extends object> {
-	type: 'normal'
-	id: string
-	computed: T
-	defaults: ReadonlyDeep<T> | undefined
-	overrideOps: ReadonlyDeep<SomeObjectOverrideOp[]>
-}
-
-export type WrappedOverridableItem<T extends object> =
-	| WrappedOverridableItemDeleted<T>
-	| WrappedOverridableItemNormal<T>
-
-/**
- * Compile a sorted array of all the items currently in the ObjectWithOverrides, and those that have been deleted
- * @param rawObject The ObjectWithOverrides to look at
- * @param comparitor Comparitor for sorting the items
- * @returns Sorted items, with sorted deleted items at the end
- */
-export function getAllCurrentAndDeletedItemsFromOverrides<T extends object>(
-	rawObject: ReadonlyDeep<ObjectWithOverrides<Record<string, T | undefined>>>,
-	comparitor: ((a: [id: string, obj: T | ReadonlyDeep<T>], b: [id: string, obj: T | ReadonlyDeep<T>]) => number) | null
-): WrappedOverridableItem<T>[] {
-	const resolvedObject = applyAndValidateOverrides(rawObject).obj
-
-	// Convert the items into an array
-	const validItems: Array<[id: string, obj: T]> = []
-	for (const [id, obj] of Object.entries<T | undefined>(resolvedObject)) {
-		if (obj) validItems.push([id, obj])
-	}
-
-	if (comparitor) validItems.sort((a, b) => comparitor(a, b))
-
-	// Sort and wrap in the return type
-	const sortedItems = validItems.map(([id, obj]) =>
-		literal<WrappedOverridableItemNormal<T>>({
-			type: 'normal',
-			id: id,
-			computed: obj,
-			defaults: rawObject.defaults[id],
-			overrideOps: filterOverrideOpsForPrefix(rawObject.overrides, id).opsForPrefix,
-		})
-	)
-
-	const removedOutputLayers: WrappedOverridableItemDeleted<T>[] = []
-
-	// Find the items which have been deleted with an override
-	const computedOutputLayerIds = new Set(sortedItems.map((l) => l.id))
-	for (const [id, output] of Object.entries<ReadonlyDeep<T | undefined>>(rawObject.defaults)) {
-		if (!computedOutputLayerIds.has(id) && output) {
-			removedOutputLayers.push(
-				literal<WrappedOverridableItemDeleted<T>>({
-					type: 'deleted',
-					id: id,
-					computed: undefined,
-					defaults: output,
-					overrideOps: filterOverrideOpsForPrefix(rawObject.overrides, id).opsForPrefix,
-				})
-			)
-		}
-	}
-
-	if (comparitor) removedOutputLayers.sort((a, b) => comparitor([a.id, a.defaults], [b.id, b.defaults]))
-
-	return [...sortedItems, ...removedOutputLayers]
+import {
+	getAllCurrentAndDeletedItemsFromOverrides,
+	getAllCurrentItemsFromOverrides,
+	WrappedOverridableItem,
+	WrappedOverridableItemDeleted,
+	WrappedOverridableItemNormal,
+} from '@sofie-automation/corelib/dist/overrideOpHelperBackend'
+export {
+	getAllCurrentAndDeletedItemsFromOverrides,
+	getAllCurrentItemsFromOverrides,
+	WrappedOverridableItem,
+	WrappedOverridableItemDeleted,
+	WrappedOverridableItemNormal,
 }
 
 type SaveOverridesFunction = (newOps: SomeObjectOverrideOp[]) => void
