@@ -262,10 +262,6 @@ describe('defaultApplyIngestChanges', () => {
 			segment.parts.forEach(wrapPart)
 		}
 
-		mutableIngestRundown.defaultApplyIngestChanges = jest.fn(() => {
-			throw new Error('defaultApplyIngestChanges must not call itself!')
-		})
-
 		wrapMethod('rundown', 'moveSegmentAfter', mutableIngestRundown)
 		wrapMethod('rundown', 'moveSegmentBefore', mutableIngestRundown)
 		wrapMethod('rundown', 'removeAllSegments', mutableIngestRundown)

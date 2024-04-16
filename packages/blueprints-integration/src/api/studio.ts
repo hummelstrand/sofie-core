@@ -4,7 +4,13 @@ import type { BlueprintConfigCoreConfig, BlueprintManifestBase, BlueprintManifes
 import type { JSONSchema } from '@sofie-automation/shared-lib/dist/lib/JSONSchemaTypes'
 import type { JSONBlob } from '@sofie-automation/shared-lib/dist/lib/JSONBlob'
 import type { MigrationStepStudio } from '../migrations'
-import type { ICommonContext, IFixUpConfigContext, IStudioBaselineContext, IStudioUserContext } from '../context'
+import type {
+	ICommonContext,
+	IFixUpConfigContext,
+	IStudioBaselineContext,
+	IStudioUserContext,
+	IProcessIngestDataContext,
+} from '../context'
 import type { IBlueprintShowStyleBase } from '../showStyle'
 import type {
 	ExtendedIngestRundown,
@@ -86,9 +92,10 @@ export interface StudioBlueprintManifest<TRawConfig = IBlueprintConfig, TProcess
 	 * Process an ingest operation, to apply changes to the sofie interpretation of the ingest data
 	 */
 	processIngestData?: (
-		context: ICommonContext,
+		context: IProcessIngestDataContext,
 		mutableIngestRundown: MutableIngestRundown,
 		nrcsIngestRundown: IngestRundown,
+		previousNrcsIngestRundown: IngestRundown | undefined,
 		changes: NrcsIngestChangeDetails | UserOperationChange
 	) => Promise<void>
 }

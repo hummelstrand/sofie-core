@@ -1,7 +1,5 @@
 import type {
 	IngestSegment,
-	NrcsIngestChangeDetails,
-	IngestDefaultChangesOptions,
 	IngestRundown,
 	MutableIngestRundown,
 	MutableIngestSegment,
@@ -11,7 +9,6 @@ import { Complete, clone, omit } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { MutableIngestSegmentImpl } from './MutableIngestSegmentImpl'
-import { defaultApplyIngestChanges } from './defaultApplyIngestChanges'
 import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
 import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
@@ -253,19 +250,6 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		// this.#segmentOrderChanged = true
 	}
 
-	defaultApplyIngestChanges(
-		nrcsRundown: IngestRundown,
-		changes: NrcsIngestChangeDetails,
-		options?: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
-	): void {
-		defaultApplyIngestChanges(this, nrcsRundown, changes, {
-			transformRundownPayload: (payload) => payload as TRundownPayload,
-			transformSegmentPayload: (payload) => payload as TSegmentPayload,
-			transformPartPayload: (payload) => payload as TPartPayload,
-			...options,
-		})
-	}
-
 	/** Note: This is NOT exposed to blueprints */
 	intoIngestRundown(ingestObjectGenerator: RundownIngestDataCacheGenerator): MutableIngestRundownChanges {
 		const ingestSegments: IngestSegment[] = []
@@ -321,7 +305,6 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 			if (segmentInfo.originalExternalId !== segment.externalId) {
 				segmentExternalIdChanges[segmentInfo.originalExternalId] = segment.externalId
-				// TODO - validation to ensure uniqueness, and avoid a loop
 			}
 		})
 

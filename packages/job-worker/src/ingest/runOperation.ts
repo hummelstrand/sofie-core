@@ -16,12 +16,11 @@ import {
 	IngestSegment,
 } from '@sofie-automation/blueprints-integration'
 import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
-import { CommonContext } from '../blueprints/context'
+import { ProcessIngestDataContext } from '../blueprints/context'
 import { PartId, PeripheralDeviceId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromIngestDataInner } from './generationRundown'
 import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
-import { wipGroupRundownForMos } from '../blueprints/ingest/wipGroupRundownForMos'
 
 export enum UpdateIngestRundownAction {
 	DELETE = 'delete',
@@ -255,7 +254,7 @@ async function updateSofieIngestRundown(
 	rundownId: RundownId,
 	sofieIngestObjectCache: RundownIngestDataCache,
 	ingestRundownChanges: UpdateIngestRundownResult,
-	oldNrcsIngestRundown: IngestRundown | undefined
+	previousNrcsIngestRundown: IngestRundown | undefined
 ): Promise<ComputedIngestChanges2 | null> {
 	if (
 		ingestRundownChanges === UpdateIngestRundownAction.DELETE ||
@@ -286,37 +285,51 @@ async function updateSofieIngestRundown(
 					false
 			  )
 
+		const blueprintContext = new ProcessIngestDataContext({
+			name: 'processIngestData',
+			identifier: `studio:${context.studioId},blueprint:${studioBlueprint.blueprintId}`,
+		})
+
 		// Let blueprints apply changes to the Sofie ingest data
 		if (typeof studioBlueprint.processIngestData === 'function') {
-			const blueprintContext = new CommonContext({
-				name: 'processIngestData',
-				identifier: `studio:${context.studioId},blueprint:${studioBlueprint.blueprintId}`,
-			})
-
 			await studioBlueprint.processIngestData(
 				blueprintContext,
 				mutableIngestRundown,
 				nrcsIngestRundown,
+				previousNrcsIngestRundown,
 				ingestRundownChanges.changes
 			)
 		} else if (ingestRundownChanges.changes.source === 'ingest') {
-			// nocommit - temporary hack for development
-			const {
-				nrcsIngestRundown: nrcsIngestRundown2,
-				ingestChanges: changes,
-				changedSegmentExternalIds,
-			} = wipGroupRundownForMos(nrcsIngestRundown, ingestRundownChanges.changes, oldNrcsIngestRundown)
-
-			for (const [oldExternalId, newExternalId] of Object.entries<string | undefined>(
-				changedSegmentExternalIds
-			)) {
-				if (!oldExternalId || !newExternalId) continue
-
-				mutableIngestRundown.changeSegmentExternalId(oldExternalId, newExternalId)
-			}
-
 			// Blueprints has not defined a processIngestData()
-			mutableIngestRundown.defaultApplyIngestChanges(nrcsIngestRundown2, changes)
+
+			if (nrcsIngestRundown.type === 'mos') {
+				// MOS has a special flow to group parts into segments
+				const groupedResult = blueprintContext.groupPartsInMosRundownAndChanges(
+					nrcsIngestRundown,
+					previousNrcsIngestRundown,
+					ingestRundownChanges.changes
+				)
+
+				for (const [oldExternalId, newExternalId] of Object.entries<string | undefined>(
+					groupedResult.changedSegmentExternalIds
+				)) {
+					if (!oldExternalId || !newExternalId) continue
+
+					mutableIngestRundown.changeSegmentExternalId(oldExternalId, newExternalId)
+				}
+
+				blueprintContext.defaultApplyIngestChanges(
+					mutableIngestRundown,
+					groupedResult.nrcsIngestRundown,
+					groupedResult.ingestChanges
+				)
+			} else {
+				blueprintContext.defaultApplyIngestChanges(
+					mutableIngestRundown,
+					nrcsIngestRundown,
+					ingestRundownChanges.changes
+				)
+			}
 		} else {
 			throw new Error(`Blueprint missing processIngestData function`)
 		}

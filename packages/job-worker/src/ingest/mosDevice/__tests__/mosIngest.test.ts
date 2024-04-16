@@ -884,16 +884,13 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const story0 = mosTypes.mosString128.create('ro1;s1;p1')
 
-		await expect(
-			handleMosSwapStoriesWrapped(context, {
-				peripheralDeviceId: device._id,
-				rundownExternalId: rundown.externalId,
-				story0,
-				story1: story0,
-			})
-		).rejects.toThrow(
-			`Cannot swap part ${mosTypes.mosString128.stringify(story0)} with itself in rundown ${rundown.externalId}`
-		)
+		// Should complete without error
+		await handleMosSwapStoriesWrapped(context, {
+			peripheralDeviceId: device._id,
+			rundownExternalId: rundown.externalId,
+			story0,
+			story1: story0,
+		})
 	})
 
 	test('mosRoStorySwap: Story not found', async () => {

@@ -209,20 +209,6 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	// nocommit: is this better than exposing the payload property?
 	// getPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
 	// clearPayload<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
-
-	/**
-	 * Perform the default syncing of changes from the ingest data to the rundown.
-	 * This may be overly agressive at removing any changes made by user operations.
-	 * If you are using user operations, you may need to perform some pre and post fixups to ensure changes aren't wiped unnecessarily.
-	 * @param ingestRundown NRCS version of the IngestRundown to copy from
-	 * @param changes A description of the changes that have been made to the rundown and should be propogated
-	 * @param options Options for how to apply the changes
-	 */
-	defaultApplyIngestChanges(
-		ingestRundown: IngestRundown,
-		changes: NrcsIngestChangeDetails,
-		options?: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
-	): void
 }
 
 export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = unknown> {

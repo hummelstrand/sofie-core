@@ -1,4 +1,5 @@
 import {
+	GroupPartsInMosRundownAndChangesResult,
 	IngestPart,
 	IngestRundown,
 	IngestSegment,
@@ -10,32 +11,28 @@ import {
 import { Complete, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 import _ = require('underscore')
 
-export function wipGroupRundownForMos(
+export function groupPartsInMosRundownAndChanges(
 	nrcsIngestRundown: IngestRundown,
-	sourceChanges: NrcsIngestChangeDetails,
-	oldNrcsIngestRundown: IngestRundown | undefined
-): {
-	nrcsIngestRundown: IngestRundown
+	previousNrcsIngestRundown: IngestRundown | undefined,
 	ingestChanges: NrcsIngestChangeDetails
-	changedSegmentExternalIds: Record<string, string>
-} {
+): GroupPartsInMosRundownAndChangesResult {
 	// Only valid for mos rundowns
 	if (nrcsIngestRundown.type !== 'mos') {
 		return {
 			nrcsIngestRundown,
-			ingestChanges: sourceChanges,
+			ingestChanges: ingestChanges,
 			changedSegmentExternalIds: {},
 		}
 	}
 
 	// Combine parts into segments, in both the new and old ingest rundowns
-	const oldCombinedIngestRundown = oldNrcsIngestRundown
-		? groupPartsIntoNewIngestRundown(oldNrcsIngestRundown)
+	const oldCombinedIngestRundown = previousNrcsIngestRundown
+		? groupPartsIntoNewIngestRundown(previousNrcsIngestRundown)
 		: undefined
 	const combinedIngestRundown = groupPartsIntoNewIngestRundown(nrcsIngestRundown)
 
 	// Calculate the changes to each segment
-	const allPartChanges = findAllPartsWithChanges(nrcsIngestRundown, sourceChanges)
+	const allPartChanges = findAllPartsWithChanges(nrcsIngestRundown, ingestChanges)
 	const segmentChanges = calculateSegmentChanges(oldCombinedIngestRundown, combinedIngestRundown, allPartChanges)
 
 	// Calculate other changes
@@ -50,7 +47,7 @@ export function wipGroupRundownForMos(
 		nrcsIngestRundown: combinedIngestRundown,
 		ingestChanges: {
 			source: 'ingest',
-			rundownChanges: sourceChanges.rundownChanges,
+			rundownChanges: ingestChanges.rundownChanges,
 			segmentOrderChanged,
 			segmentChanges,
 		} satisfies Complete<NrcsIngestChangeDetails>,

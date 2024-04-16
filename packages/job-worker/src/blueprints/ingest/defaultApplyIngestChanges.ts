@@ -19,17 +19,17 @@ import { ReadonlyDeep } from 'type-fest'
 export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
 	nrcsRundown: IngestRundown,
-	changes: NrcsIngestChangeDetails,
+	ingestChanges: NrcsIngestChangeDetails,
 	options: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
 ): void {
-	if (changes.source !== 'ingest')
+	if (ingestChanges.source !== 'ingest')
 		throw new Error(`Changes passed to defaultApplyIngestChanges must be from ingest source`)
 
 	const payloadTransformers = new PayloadTransformers(options, mutableIngestRundown)
 
 	let regenerateAllContents = false
 
-	switch (changes.rundownChanges) {
+	switch (ingestChanges.rundownChanges) {
 		case NrcsIngestRundownChangeDetails.Regenerate: {
 			mutableIngestRundown.replacePayload(
 				payloadTransformers.transformRundownPayload(nrcsRundown, mutableIngestRundown)
@@ -53,7 +53,7 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 			// No changes
 			break
 		default:
-			assertNever(changes.rundownChanges)
+			assertNever(ingestChanges.rundownChanges)
 	}
 
 	if (regenerateAllContents) {
@@ -91,11 +91,11 @@ export function defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPar
 		}
 	} else {
 		// Propogate segment changes
-		if (changes.segmentChanges) {
-			applyAllSegmentChanges(mutableIngestRundown, nrcsRundown, changes.segmentChanges, payloadTransformers)
+		if (ingestChanges.segmentChanges) {
+			applyAllSegmentChanges(mutableIngestRundown, nrcsRundown, ingestChanges.segmentChanges, payloadTransformers)
 		}
 
-		if (changes.segmentOrderChanged) {
+		if (ingestChanges.segmentOrderChanged) {
 			applySegmentOrder(mutableIngestRundown, nrcsRundown)
 		}
 	}
