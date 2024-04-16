@@ -12,8 +12,39 @@ import {
 import { Complete, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 import _ = require('underscore')
 
+export function groupMosPartsIntoIngestSegments(
+	rundownExternalId: string,
+	ingestSegments: IngestSegment[],
+	separator: string
+): IngestSegment[] {
+	const groupedParts: { name: string; parts: IngestPart[] }[] = []
+
+	for (const ingestSegment of ingestSegments) {
+		const segmentName = ingestSegment.name.split(separator)[0] || ingestSegment.name
+
+		for (const ingestPart of ingestSegment.parts) {
+			const lastSegment = _.last(groupedParts)
+			if (lastSegment && lastSegment.name === segmentName) {
+				lastSegment.parts.push(ingestPart)
+			} else {
+				groupedParts.push({ name: segmentName, parts: [ingestPart] })
+			}
+		}
+	}
+
+	return groupedParts.map(
+		(partGroup, i) =>
+			({
+				externalId: `${rundownExternalId}_${partGroup.name}_${partGroup.parts[0].externalId}`,
+				name: partGroup.name,
+				rank: i,
+				parts: partGroup.parts.map((part, i) => ({ ...part, rank: i })),
+			} satisfies IngestSegment)
+	)
+}
+
 /**
- * Group Parts in a MOS Rundown and return a new changes object
+ * Group Parts in a Rundown and return a new changes object
  * Note: This ignores a lot of the contents of the `ingestChanges` object, and relies more on the `previousNrcsIngestRundown` instead
  * @param nrcsIngestRundown The rundown whose parts needs grouping
  * @param previousNrcsIngestRundown The rundown prior to the changes, if known
@@ -21,33 +52,14 @@ import _ = require('underscore')
  * @param groupPartsIntoSegmentsOrSeparator A string to split the segment name on, or a function to group parts into segments
  * @returns A transformed rundown and changes object
  */
-export function groupPartsInMosRundownAndChanges(
+export function groupPartsInRundownAndChanges(
 	nrcsIngestRundown: IngestRundown,
 	previousNrcsIngestRundown: IngestRundown | undefined,
 	ingestChanges: Omit<NrcsIngestChangeDetails, 'segmentOrderChanged'>,
-	groupPartsIntoSegmentsOrSeparator?: string | ((ingestSegments: IngestSegment[]) => IngestSegment[])
+	groupPartsIntoSegments: (ingestSegments: IngestSegment[]) => IngestSegment[]
 ): GroupPartsInMosRundownAndChangesResult {
-	// Only valid for mos rundowns
-	if (nrcsIngestRundown.type !== 'mos') {
-		return {
-			nrcsIngestRundown,
-			ingestChanges: ingestChanges,
-			changedSegmentExternalIds: {},
-		}
-	}
-
-	const groupPartsIntoSegmentsFunction =
-		typeof groupPartsIntoSegmentsOrSeparator === 'function'
-			? groupPartsIntoSegmentsOrSeparator
-			: (ingestSegments: IngestSegment[]) =>
-					defaultGroupPartsIntoIngestSements(
-						nrcsIngestRundown.externalId,
-						ingestSegments,
-						groupPartsIntoSegmentsOrSeparator || ';'
-					)
-
 	// Combine parts into segments
-	const combinedIngestRundown = groupPartsIntoNewIngestRundown(nrcsIngestRundown, groupPartsIntoSegmentsFunction)
+	const combinedIngestRundown = groupPartsIntoNewIngestRundown(nrcsIngestRundown, groupPartsIntoSegments)
 
 	// If there is no previous rundown, we need to regenerate everything
 	if (!previousNrcsIngestRundown) {
@@ -62,10 +74,7 @@ export function groupPartsInMosRundownAndChanges(
 	}
 
 	// Combine parts into segments, in both the new and old ingest rundowns
-	const oldCombinedIngestRundown = groupPartsIntoNewIngestRundown(
-		previousNrcsIngestRundown,
-		groupPartsIntoSegmentsFunction
-	)
+	const oldCombinedIngestRundown = groupPartsIntoNewIngestRundown(previousNrcsIngestRundown, groupPartsIntoSegments)
 
 	// Calculate the changes to each segment
 	const allPartWithChanges = findAllPartsWithChanges(nrcsIngestRundown, ingestChanges)
@@ -204,37 +213,6 @@ function hasPartOrderChanged(ingestParts: IngestPart[], oldIngestParts: IngestPa
 	}
 
 	return false
-}
-
-function defaultGroupPartsIntoIngestSements(
-	rundownExternalId: string,
-	ingestSegments: IngestSegment[],
-	separator: string
-): IngestSegment[] {
-	const groupedParts: { name: string; parts: IngestPart[] }[] = []
-
-	for (const ingestSegment of ingestSegments) {
-		const segmentName = ingestSegment.name.split(separator)[0] || ingestSegment.name
-
-		for (const ingestPart of ingestSegment.parts) {
-			const lastSegment = _.last(groupedParts)
-			if (lastSegment && lastSegment.name === segmentName) {
-				lastSegment.parts.push(ingestPart)
-			} else {
-				groupedParts.push({ name: segmentName, parts: [ingestPart] })
-			}
-		}
-	}
-
-	return groupedParts.map(
-		(partGroup, i) =>
-			({
-				externalId: `${rundownExternalId}_${partGroup.name}_${partGroup.parts[0].externalId}`,
-				name: partGroup.name,
-				rank: i,
-				parts: partGroup.parts.map((part, i) => ({ ...part, rank: i })),
-			} satisfies IngestSegment)
-	)
 }
 
 function groupPartsIntoNewIngestRundown(

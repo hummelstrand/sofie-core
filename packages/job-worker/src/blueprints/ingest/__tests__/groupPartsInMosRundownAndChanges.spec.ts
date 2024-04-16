@@ -7,10 +7,20 @@ import {
 	GroupPartsInMosRundownAndChangesResult,
 } from '@sofie-automation/blueprints-integration'
 import { Complete, clone } from '@sofie-automation/corelib/dist/lib'
-import { groupPartsInMosRundownAndChanges } from '../groupPartsInMosRundownAndChanges'
+import { groupMosPartsIntoIngestSegments, groupPartsInRundownAndChanges } from '../groupPartsInRundownAndChanges'
 import { updateRanksBasedOnOrder } from '../../../ingest/mosDevice/lib'
 
 describe('groupPartsInMosRundownAndChanges', () => {
+	function groupMosPartsInRundownAndChanges(
+		nrcsIngestRundown: IngestRundown,
+		previousNrcsIngestRundown: IngestRundown | undefined,
+		ingestChanges: Omit<NrcsIngestChangeDetails, 'segmentOrderChanged'>
+	) {
+		return groupPartsInRundownAndChanges(nrcsIngestRundown, previousNrcsIngestRundown, ingestChanges, (segments) =>
+			groupMosPartsIntoIngestSegments(nrcsIngestRundown.externalId, segments, ';')
+		)
+	}
+
 	function createBasicMosIngestRundown(): { nrcsIngestRundown: IngestRundown; combinedIngestRundown: IngestRundown } {
 		const rawRundown: IngestRundown = {
 			externalId: 'rundown0',
@@ -126,7 +136,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			segmentOrderChanged: true,
 		}
 
-		const result = groupPartsInMosRundownAndChanges(clone(nrcsIngestRundown), undefined, ingestChanges)
+		const result = groupMosPartsInRundownAndChanges(clone(nrcsIngestRundown), undefined, ingestChanges)
 
 		expect(result).toEqual({
 			nrcsIngestRundown: combinedIngestRundown,
@@ -143,7 +153,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 		const ingestChanges: NrcsIngestChangeDetails = { source: 'ingest' }
 
-		const result = groupPartsInMosRundownAndChanges(clone(nrcsIngestRundown), nrcsIngestRundown, ingestChanges)
+		const result = groupMosPartsInRundownAndChanges(clone(nrcsIngestRundown), nrcsIngestRundown, ingestChanges)
 
 		expect(result).toEqual({
 			nrcsIngestRundown: combinedIngestRundown,
@@ -165,7 +175,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			segmentOrderChanged: true,
 		}
 
-		const result = groupPartsInMosRundownAndChanges(clone(nrcsIngestRundown), nrcsIngestRundown, ingestChanges)
+		const result = groupMosPartsInRundownAndChanges(clone(nrcsIngestRundown), nrcsIngestRundown, ingestChanges)
 
 		expect(result).toEqual({
 			nrcsIngestRundown: combinedIngestRundown,
@@ -191,7 +201,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const previousIngestRundown = clone(nrcsIngestRundown)
 			previousIngestRundown.segments.splice(1, 1)
 
-			const result = groupPartsInMosRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
@@ -222,7 +232,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const previousIngestRundown = clone(nrcsIngestRundown)
 			previousIngestRundown.segments.splice(2, 1)
 
-			const result = groupPartsInMosRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
@@ -262,7 +272,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 				],
 			})
 
-			const result = groupPartsInMosRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
@@ -304,7 +314,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 				],
 			})
 
-			const result = groupPartsInMosRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
@@ -336,7 +346,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 
 			const previousIngestRundown = clone(nrcsIngestRundown)
 
-			const result = groupPartsInMosRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
@@ -376,7 +386,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			previousIngestRundown.segments[1].name = 'SEGMENT0;PART2'
 			previousIngestRundown.segments[1].parts[0].name = 'SEGMENT0;PART2'
 
-			const result = groupPartsInMosRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
@@ -415,7 +425,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			]
 			updateRanksBasedOnOrder(previousIngestRundown)
 
-			const result = groupPartsInMosRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
@@ -450,7 +460,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			]
 			updateRanksBasedOnOrder(previousIngestRundown)
 
-			const result = groupPartsInMosRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
@@ -485,7 +495,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			]
 			updateRanksBasedOnOrder(previousIngestRundown)
 
-			const result = groupPartsInMosRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
 
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
@@ -530,7 +540,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			]
 			updateRanksBasedOnOrder(nrcsIngestRundown)
 
-			const result = groupPartsInMosRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
 
 			expect(result).toEqual({
 				nrcsIngestRundown: {

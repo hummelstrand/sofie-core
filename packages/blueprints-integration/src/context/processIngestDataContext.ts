@@ -20,18 +20,35 @@ export interface IProcessIngestDataContext extends ICommonContext {
 
 	/**
 	 * Group Parts in a MOS Rundown and return a new changes object
+	 * This will group the Parts based on the segment name, using the separator provided to extract the segment name from the part name
 	 * Note: This ignores a lot of the contents of the `ingestChanges` object, and relies more on the `previousIngestRundown` instead
 	 * @param ingestRundown The rundown whose parts needs grouping
 	 * @param previousIngestRundown The rundown prior to the changes, if known
 	 * @param ingestChanges The changes which have been performed in `ingestRundown`, that need to translating
-	 * @param groupPartsIntoSegmentsOrSeparator A string to split the segment name on, or a function to group parts into segments
+	 * @param partNameSeparator A string to split the part name on
 	 * @returns A transformed rundown and changes object
 	 */
-	groupPartsInMosRundownAndChanges(
+	groupMosPartsInRundownAndChangesWithSeparator(
 		ingestRundown: IngestRundown,
 		previousIngestRundown: IngestRundown | undefined,
 		ingestChanges: NrcsIngestChangeDetails,
-		groupPartsIntoSegmentsOrSeparator?: string | ((ingestSegments: IngestSegment[]) => IngestSegment[])
+		partNameSeparator: string
+	): GroupPartsInMosRundownAndChangesResult
+
+	/**
+	 * Group Parts in a Rundown and return a new changes object
+	 * Note: This ignores a lot of the contents of the `ingestChanges` object, and relies more on the `previousIngestRundown` instead
+	 * @param ingestRundown The rundown whose parts needs grouping
+	 * @param previousIngestRundown The rundown prior to the changes, if known
+	 * @param ingestChanges The changes which have been performed in `ingestRundown`, that need to translating
+	 * @param groupPartsIntoSegments A function to group parts into segments
+	 * @returns A transformed rundown and changes object
+	 */
+	groupPartsInRundownAndChanges(
+		ingestRundown: IngestRundown,
+		previousIngestRundown: IngestRundown | undefined,
+		ingestChanges: NrcsIngestChangeDetails,
+		groupPartsIntoSegments: (ingestSegments: IngestSegment[]) => IngestSegment[]
 	): GroupPartsInMosRundownAndChangesResult
 }
 

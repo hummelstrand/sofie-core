@@ -302,10 +302,11 @@ async function updateSofieIngestRundown(
 
 			if (nrcsIngestRundown.type === 'mos') {
 				// MOS has a special flow to group parts into segments
-				const groupedResult = blueprintContext.groupPartsInMosRundownAndChanges(
+				const groupedResult = blueprintContext.groupMosPartsInRundownAndChangesWithSeparator(
 					nrcsIngestRundown,
 					previousNrcsIngestRundown,
-					ingestRundownChanges.changes
+					ingestRundownChanges.changes,
+					';' // Backwards compatibility
 				)
 
 				for (const [oldExternalId, newExternalId] of Object.entries<string | undefined>(

@@ -9,7 +9,7 @@ import type {
 } from '@sofie-automation/blueprints-integration'
 import { CommonContext } from './CommonContext'
 import { defaultApplyIngestChanges } from '../ingest/defaultApplyIngestChanges'
-import { groupPartsInMosRundownAndChanges } from '../ingest/groupPartsInMosRundownAndChanges'
+import { groupMosPartsIntoIngestSegments, groupPartsInRundownAndChanges } from '../ingest/groupPartsInRundownAndChanges'
 
 export class ProcessIngestDataContext extends CommonContext implements IProcessIngestDataContext {
 	defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
@@ -26,17 +26,30 @@ export class ProcessIngestDataContext extends CommonContext implements IProcessI
 		})
 	}
 
-	groupPartsInMosRundownAndChanges(
-		nrcsIngestRundown: IngestRundown,
-		previousNrcsIngestRundown: IngestRundown | undefined,
+	groupMosPartsInRundownAndChangesWithSeparator(
+		ingestRundown: IngestRundown,
+		previousIngestRundown: IngestRundown | undefined,
 		ingestChanges: NrcsIngestChangeDetails,
-		groupPartsIntoSegmentsOrSeparator?: string | ((ingestSegments: IngestSegment[]) => IngestSegment[])
+		partNameSeparator: string
 	): GroupPartsInMosRundownAndChangesResult {
-		return groupPartsInMosRundownAndChanges(
-			nrcsIngestRundown,
-			previousNrcsIngestRundown,
+		if (ingestRundown.type !== 'mos') throw new Error('Only supported for mos rundowns')
+
+		return groupPartsInRundownAndChanges(ingestRundown, previousIngestRundown, ingestChanges, (segments) =>
+			groupMosPartsIntoIngestSegments(ingestRundown.externalId, segments, partNameSeparator)
+		)
+	}
+
+	groupPartsInRundownAndChanges(
+		ingestRundown: IngestRundown,
+		previousIngestRundown: IngestRundown | undefined,
+		ingestChanges: NrcsIngestChangeDetails,
+		groupPartsIntoSegments: (ingestSegments: IngestSegment[]) => IngestSegment[]
+	): GroupPartsInMosRundownAndChangesResult {
+		return groupPartsInRundownAndChanges(
+			ingestRundown,
+			previousIngestRundown,
 			ingestChanges,
-			groupPartsIntoSegmentsOrSeparator
+			groupPartsIntoSegments
 		)
 	}
 }
