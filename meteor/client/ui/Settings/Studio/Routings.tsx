@@ -296,8 +296,14 @@ function RenderRouteSet({
 		[overrideHelper, toggleExpanded, routeSet.id]
 	)
 
-	const exclusivityGroups = React.useMemo(() => {
-		return getDropdownInputOptions(getExclusivityGroupsFromOverrides.map((group) => group.computed?.name || group.id))
+	const exclusivityGroupOptions = React.useMemo(() => {
+		return getDropdownInputOptions([
+			{
+				name: 'None',
+				value: undefined,
+			},
+			...getExclusivityGroupsFromOverrides.map((group) => group.computed?.name || group.id),
+		])
 	}, [studio.routeSetExclusivityGroups, studio.routeSetExclusivityGroups])
 
 	const DEFAULT_ACTIVE_OPTIONS = {
@@ -388,40 +394,25 @@ function RenderRouteSet({
 								)}
 							</LabelAndOverrides>
 
-							<label className="field">
-								<LabelActual label={t('Exclusivity group')} />
-								<div>
-									<LabelAndOverridesForCheckbox
-										label={''}
-										item={routeSet}
-										itemKey={'exclusivityGroup'}
-										opPrefix={routeSet.id}
-										overrideHelper={overrideHelper}
-									>
-										{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
-									</LabelAndOverridesForCheckbox>
-									<LabelAndOverridesForDropdown<any>
-										label={''}
-										item={routeSet}
-										itemKey={'exclusivityGroup'}
-										opPrefix={routeSet.id}
-										overrideHelper={overrideHelper}
-										options={exclusivityGroups}
-									>
-										{(value, handleUpdate, options) => (
-											<DropdownInputControl
-												classNames="input text-input input-l"
-												options={options}
-												value={value}
-												handleUpdate={handleUpdate}
-											/>
-										)}
-									</LabelAndOverridesForDropdown>
-								</div>
-								<span className="text-s dimmed field-hint">
-									{t('If set, only one Route Set will be active per exclusivity group')}
-								</span>
-							</label>
+							<LabelAndOverridesForDropdown<any>
+								label={'Exclusivity group'}
+								hint={t('If set, only one Route Set will be active per exclusivity group')}
+								item={routeSet}
+								itemKey={'exclusivityGroup'}
+								opPrefix={routeSet.id}
+								overrideHelper={overrideHelper}
+								options={exclusivityGroupOptions}
+							>
+								{(value, handleUpdate, options) => (
+									<DropdownInputControl
+										classNames="input text-input input-l"
+										options={options}
+										value={value}
+										handleUpdate={handleUpdate}
+									/>
+								)}
+							</LabelAndOverridesForDropdown>
+
 							<LabelAndOverridesForDropdown<any>
 								label={t('Behavior')}
 								hint={t('The way this Route Set should behave towards the user')}
