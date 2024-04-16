@@ -9,7 +9,7 @@ import { saveIntoDb } from '../../db/changes'
 import { StudioRouteBehavior, StudioRouteSet } from '@sofie-automation/corelib/dist/dataModel/Studio'
 import { logger } from '../../logging'
 import {
-	WrappedOverridableItem,
+	WrappedOverridableItemNormal,
 	useOverrideOpHelperBackend,
 	getAllCurrentItemsFromOverrides,
 } from '@sofie-automation/corelib/dist/overrideOpHelperBackend'
@@ -18,20 +18,19 @@ import { ObjectWithOverrides, SomeObjectOverrideOp } from '@sofie-automation/cor
 export class StudioBaselineHelper {
 	readonly #context: JobContext
 
+	#overridesRouteSetBuffer: ObjectWithOverrides<Record<string, StudioRouteSet>>
 	#pendingExpectedPackages: ExpectedPackageDBFromStudioBaselineObjects[] | undefined
 	#pendingExpectedPlayoutItems: ExpectedPlayoutItemStudio[] | undefined
-	#routeSetActive: Record<string, boolean> = {}
+	#routeSetChanged: boolean
 
 	constructor(context: JobContext) {
 		this.#context = context
+		this.#overridesRouteSetBuffer = context.studio.routeSets as ObjectWithOverrides<Record<string, StudioRouteSet>>
+		this.#routeSetChanged = false
 	}
 
 	hasChanges(): boolean {
-		return (
-			!!this.#pendingExpectedPackages ||
-			!!this.#pendingExpectedPlayoutItems ||
-			Object.keys(this.#routeSetActive).length > 0
-		)
+		return !!this.#pendingExpectedPackages || !!this.#pendingExpectedPlayoutItems || this.#routeSetChanged
 	}
 
 	setExpectedPackages(packages: ExpectedPackageDBFromStudioBaselineObjects[]): void {
@@ -62,13 +61,13 @@ export class StudioBaselineHelper {
 						this.#pendingExpectedPackages
 				  )
 				: undefined,
-			Object.keys(this.#routeSetActive).length > 0
+			this.#routeSetChanged
 				? this.#context.directCollections.Studios.update(
 						{
 							_id: this.#context.studioId,
 						},
 						{
-							$set: this.#routeSetActive,
+							$set: { 'routeSets.overrides': this.#overridesRouteSetBuffer.overrides },
 						}
 				  )
 				: undefined,
@@ -76,58 +75,46 @@ export class StudioBaselineHelper {
 
 		this.#pendingExpectedPlayoutItems = undefined
 		this.#pendingExpectedPackages = undefined
-		this.#routeSetActive = {}
+		this.#routeSetChanged = false
 	}
 
 	updateRouteSetActive(routeSetId: string, isActive: boolean): void {
 		const studio = this.#context.studio
-		logger.debug(`switchRouteSet "${studio._id}" "${routeSetId}"=${isActive}`)
-
-		const routeSets = getAllCurrentItemsFromOverrides(studio.routeSets, null)
-		const routeSet = Object.values<WrappedOverridableItem<StudioRouteSet>>(routeSets).find((routeSet) => {
-			return (routeSet.id = routeSetId)
-		})
-
-		// This is not correct as it should use:
-		// this.#routeSetActive[] in some way.
-		// And save the Array with changes on the next saveAllToDatabase()
 		const saveOverrides = (newOps: SomeObjectOverrideOp[]) => {
-			logger.debug(`saveOverrides "${studio._id}" "${routeSetId}"=${isActive}`)
-			logger.debug(`---------------------------------------------------------------`)
-			logger.alert(`NewOps: ${JSON.stringify(newOps)}`)
-			// this.#routeSetActive['routeSets.overrides'] = newOps
-			this.#context.directCollections.Studios.update(
-				{ _id: studio._id },
-				{
-					$set: {
-						'routeSets.overrides': newOps,
-					},
-				}
-			).catch((err) => {
-				logger.error(`Error updating studio "${studio._id}"`, err)
-			})
+			this.#overridesRouteSetBuffer = { defaults: this.#overridesRouteSetBuffer.defaults, overrides: newOps }
+			this.#routeSetChanged = true
 		}
+		const overrideHelper = useOverrideOpHelperBackend(saveOverrides, this.#overridesRouteSetBuffer)
 
-		const overrideHelper = useOverrideOpHelperBackend(
-			saveOverrides,
-			studio.routeSets as ObjectWithOverrides<Record<string, StudioRouteSet>>
+		const routeSets: WrappedOverridableItemNormal<StudioRouteSet>[] = getAllCurrentItemsFromOverrides(
+			this.#overridesRouteSetBuffer,
+			null
 		)
 
+		const routeSet = Object.values<WrappedOverridableItemNormal<StudioRouteSet>>(routeSets).find((routeSet) => {
+			return routeSet.id === routeSetId
+		})
+
 		if (routeSet === undefined) throw new Error(`RouteSet "${routeSetId}" not found!`)
-
 		if (routeSet.computed?.behavior === StudioRouteBehavior.ACTIVATE_ONLY && isActive === false)
-			throw new Error(`RouteSet "${routeSetId}" is ACTIVATE_ONLY`)
+			throw new Error(`RouteSet "${routeSet.id}" is ACTIVATE_ONLY`)
 
-		overrideHelper.setItemValue(routeSetId, `active`, isActive)
+		logger.debug(`switchRouteSet "${studio._id}" "${routeSet.id}"=${isActive}`)
+		overrideHelper.setItemValue(routeSet.id, `active`, isActive)
 
 		// Deactivate other routeSets in the same exclusivity group:
-		if (routeSet.computed?.exclusivityGroup && isActive === true) {
-			for (const [otherRouteSetId, otherRouteSet] of Object.entries<WrappedOverridableItem<StudioRouteSet>>(
-				routeSets
-			)) {
-				if (otherRouteSetId === routeSetId) continue
-				if (otherRouteSet.computed?.exclusivityGroup === routeSet.computed?.exclusivityGroup) {
-					overrideHelper.setItemValue(otherRouteSetId, `active`, false)
+		if (routeSet.computed.exclusivityGroup && isActive === true) {
+			for (const [, otherRouteSet] of Object.entries<WrappedOverridableItemNormal<StudioRouteSet>>(routeSets)) {
+				if (otherRouteSet.id === routeSet.id) continue
+				if (otherRouteSet.computed?.exclusivityGroup === routeSet.computed.exclusivityGroup) {
+					// Another overrideHelper is needed to add the latest overrides to the buffer:
+					const overrideHelperExclusive = useOverrideOpHelperBackend(
+						saveOverrides,
+						this.#overridesRouteSetBuffer
+					)
+
+					logger.debug(`switchRouteSet Other ID "${studio._id}" "${otherRouteSet.id}"=false`)
+					overrideHelperExclusive.setItemValue(otherRouteSet.id, `active`, false)
 				}
 			}
 		}
