@@ -5,16 +5,25 @@ import {
 	IngestSegment,
 	NrcsIngestChangeDetails,
 	NrcsIngestPartChangeDetails,
+	NrcsIngestRundownChangeDetails,
 	NrcsIngestSegmentChangeDetails,
 	NrcsIngestSegmentChangeDetailsEnum,
 } from '@sofie-automation/blueprints-integration'
 import { Complete, normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
 import _ = require('underscore')
 
+/**
+ * Group Parts in a MOS Rundown and return a new changes object
+ * Note: This ignores a lot of the contents of the `ingestChanges` object, and relies more on the `previousNrcsIngestRundown` instead
+ * @param nrcsIngestRundown The rundown whose parts needs grouping
+ * @param previousNrcsIngestRundown The rundown prior to the changes, if known
+ * @param ingestChanges The changes which have been performed in `nrcsIngestRundown`, that need to translating
+ * @returns A transformed rundown and changes object
+ */
 export function groupPartsInMosRundownAndChanges(
 	nrcsIngestRundown: IngestRundown,
 	previousNrcsIngestRundown: IngestRundown | undefined,
-	ingestChanges: NrcsIngestChangeDetails
+	ingestChanges: Omit<NrcsIngestChangeDetails, 'segmentOrderChanged'>
 ): GroupPartsInMosRundownAndChangesResult {
 	// Only valid for mos rundowns
 	if (nrcsIngestRundown.type !== 'mos') {
@@ -25,23 +34,34 @@ export function groupPartsInMosRundownAndChanges(
 		}
 	}
 
-	// Combine parts into segments, in both the new and old ingest rundowns
-	const oldCombinedIngestRundown = previousNrcsIngestRundown
-		? groupPartsIntoNewIngestRundown(previousNrcsIngestRundown)
-		: undefined
+	// Combine parts into segments
 	const combinedIngestRundown = groupPartsIntoNewIngestRundown(nrcsIngestRundown)
 
+	// If there is no previous rundown, we need to regenerate everything
+	if (!previousNrcsIngestRundown) {
+		return {
+			nrcsIngestRundown: combinedIngestRundown,
+			changedSegmentExternalIds: {},
+			ingestChanges: {
+				source: 'ingest',
+				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
+			},
+		}
+	}
+
+	// Combine parts into segments, in both the new and old ingest rundowns
+	const oldCombinedIngestRundown = groupPartsIntoNewIngestRundown(previousNrcsIngestRundown)
+
 	// Calculate the changes to each segment
-	const allPartChanges = findAllPartsWithChanges(nrcsIngestRundown, ingestChanges)
-	const segmentChanges = calculateSegmentChanges(oldCombinedIngestRundown, combinedIngestRundown, allPartChanges)
+	const allPartWithChanges = findAllPartsWithChanges(nrcsIngestRundown, ingestChanges)
+	const segmentChanges = calculateSegmentChanges(oldCombinedIngestRundown, combinedIngestRundown, allPartWithChanges)
 
 	// Calculate other changes
-	const changedSegmentExternalIds = oldCombinedIngestRundown
-		? calculateSegmentExternalIdChanges(oldCombinedIngestRundown, combinedIngestRundown)
-		: {}
-	const segmentOrderChanged = oldCombinedIngestRundown
-		? compareSegmentOrder(combinedIngestRundown.segments, oldCombinedIngestRundown.segments)
-		: true
+	const changedSegmentExternalIds = calculateSegmentExternalIdChanges(oldCombinedIngestRundown, combinedIngestRundown)
+	const segmentOrderChanged = hasSegmentOrderChanged(
+		combinedIngestRundown.segments,
+		oldCombinedIngestRundown.segments
+	)
 
 	return {
 		nrcsIngestRundown: combinedIngestRundown,
@@ -58,10 +78,10 @@ export function groupPartsInMosRundownAndChanges(
 function findAllPartsWithChanges(
 	nrcsIngestRundown: IngestRundown,
 	sourceChanges: NrcsIngestChangeDetails
-): Map<string, NrcsIngestPartChangeDetails> {
-	if (!sourceChanges.segmentChanges) return new Map()
+): Set<string> {
+	if (!sourceChanges.segmentChanges) return new Set()
 
-	const partChanges = new Map<string, NrcsIngestPartChangeDetails>() // nocommit, should this be changed to a simple set?
+	const partChanges = new Set<string>()
 
 	for (const segment of nrcsIngestRundown.segments) {
 		const segmentChanges = sourceChanges.segmentChanges[segment.externalId]
@@ -70,18 +90,18 @@ function findAllPartsWithChanges(
 		for (const part of segment.parts) {
 			switch (segmentChanges) {
 				case NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated:
-					// partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Inserted)
+					// This could have been an update, ensure that gets propogated
+					partChanges.add(part.externalId)
 					break
 				case NrcsIngestSegmentChangeDetailsEnum.Deleted:
-					// partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Deleted)
+					// Deletions will be tracked elsewhere
 					break
 				default:
 					if (typeof segmentChanges !== 'object')
 						throw new Error(`Unexpected segment change for "${segment.externalId}": ${segmentChanges}`)
 
-					// Note: this is not a perfect representation of the possible changes,
-					// but it should handle everything that our mos implementation does
-					partChanges.set(part.externalId, NrcsIngestPartChangeDetails.Updated)
+					// Something changed, this will cause the necessary propogation
+					partChanges.add(part.externalId)
 
 					break
 			}
@@ -92,17 +112,18 @@ function findAllPartsWithChanges(
 }
 
 function calculateSegmentChanges(
-	oldCombinedIngestRundown: IngestRundown | undefined,
+	oldCombinedIngestRundown: IngestRundown,
 	combinedIngestRundown: IngestRundown,
-	allPartChanges: Map<string, NrcsIngestPartChangeDetails>
+	allPartWithChanges: Set<string>
 ): Record<string, NrcsIngestSegmentChangeDetails> {
-	const oldIngestSegments = normalizeArrayToMap(oldCombinedIngestRundown?.segments || [], 'externalId')
+	const oldIngestSegments = normalizeArrayToMap(oldCombinedIngestRundown.segments, 'externalId')
 
 	const segmentChanges: Record<string, NrcsIngestSegmentChangeDetails> = {}
 
 	// Track any segment changes
 	for (const segment of combinedIngestRundown.segments) {
 		const oldIngestSegment = oldIngestSegments.get(segment.externalId)
+
 		if (!oldIngestSegment) {
 			segmentChanges[segment.externalId] = NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated
 		} else {
@@ -116,9 +137,8 @@ function calculateSegmentChanges(
 				if (!oldPart) {
 					segmentPartChanges[part.externalId] = NrcsIngestPartChangeDetails.Inserted
 				} else {
-					const partChange = allPartChanges.get(part.externalId)
-					if (partChange !== undefined) {
-						segmentPartChanges[part.externalId] = partChange
+					if (allPartWithChanges.has(part.externalId)) {
+						segmentPartChanges[part.externalId] = NrcsIngestPartChangeDetails.Updated
 					}
 				}
 			}
@@ -128,7 +148,7 @@ function calculateSegmentChanges(
 				}
 			}
 
-			const partOrderChanged = comparePartOrder(segment.parts, oldIngestSegment.parts)
+			const partOrderChanged = hasPartOrderChanged(segment.parts, oldIngestSegment.parts)
 			if (partOrderChanged || Object.keys(segmentPartChanges).length > 0) {
 				segmentChanges[segment.externalId] = {
 					partChanges: segmentPartChanges,
@@ -151,7 +171,7 @@ function calculateSegmentChanges(
 	return segmentChanges
 }
 
-function compareSegmentOrder(ingestSegments: IngestSegment[], oldIngestSegments: IngestSegment[]): boolean {
+function hasSegmentOrderChanged(ingestSegments: IngestSegment[], oldIngestSegments: IngestSegment[]): boolean {
 	if (ingestSegments.length !== oldIngestSegments.length) return true
 
 	for (let i = 0; i < ingestSegments.length; i++) {
@@ -161,7 +181,7 @@ function compareSegmentOrder(ingestSegments: IngestSegment[], oldIngestSegments:
 	return false
 }
 
-function comparePartOrder(ingestParts: IngestPart[], oldIngestParts: IngestPart[]): boolean {
+function hasPartOrderChanged(ingestParts: IngestPart[], oldIngestParts: IngestPart[]): boolean {
 	if (ingestParts.length !== oldIngestParts.length) return true
 
 	for (let i = 0; i < ingestParts.length; i++) {

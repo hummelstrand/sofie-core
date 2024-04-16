@@ -18,6 +18,14 @@ export interface IProcessIngestDataContext extends ICommonContext {
 		options?: IngestDefaultChangesOptions<TRundownPayload, TSegmentPayload, TPartPayload>
 	): void
 
+	/**
+	 * Group Parts in a MOS Rundown and return a new changes object
+	 * Note: This ignores a lot of the contents of the `ingestChanges` object, and relies more on the `previousIngestRundown` instead
+	 * @param ingestRundown The rundown whose parts needs grouping
+	 * @param previousIngestRundown The rundown prior to the changes, if known
+	 * @param ingestChanges The changes which have been performed in `ingestRundown`, that need to translating
+	 * @returns A transformed rundown and changes object
+	 */
 	groupPartsInMosRundownAndChanges(
 		ingestRundown: IngestRundown,
 		previousIngestRundown: IngestRundown | undefined,
