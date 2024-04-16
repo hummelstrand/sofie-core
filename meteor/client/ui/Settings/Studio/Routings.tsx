@@ -302,7 +302,9 @@ function RenderRouteSet({
 				name: 'None',
 				value: undefined,
 			},
-			...getExclusivityGroupsFromOverrides.map((group) => group.computed?.name || group.id),
+			...getExclusivityGroupsFromOverrides
+				.filter((group) => group.type === 'normal')
+				.map((group) => group.computed?.name || group.id),
 		])
 	}, [studio.routeSetExclusivityGroups, studio.routeSetExclusivityGroups])
 
