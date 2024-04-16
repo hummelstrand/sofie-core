@@ -1,6 +1,6 @@
-import { IngestRundown } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
+import type { IngestRundown, IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
 import type { ICommonContext } from './baseContext'
-import { IngestDefaultChangesOptions, MutableIngestRundown, NrcsIngestChangeDetails } from '../ingest'
+import type { IngestDefaultChangesOptions, MutableIngestRundown, NrcsIngestChangeDetails } from '../ingest'
 
 export interface IProcessIngestDataContext extends ICommonContext {
 	/**
@@ -24,12 +24,14 @@ export interface IProcessIngestDataContext extends ICommonContext {
 	 * @param ingestRundown The rundown whose parts needs grouping
 	 * @param previousIngestRundown The rundown prior to the changes, if known
 	 * @param ingestChanges The changes which have been performed in `ingestRundown`, that need to translating
+	 * @param groupPartsIntoSegmentsOrSeparator A string to split the segment name on, or a function to group parts into segments
 	 * @returns A transformed rundown and changes object
 	 */
 	groupPartsInMosRundownAndChanges(
 		ingestRundown: IngestRundown,
 		previousIngestRundown: IngestRundown | undefined,
-		ingestChanges: NrcsIngestChangeDetails
+		ingestChanges: NrcsIngestChangeDetails,
+		groupPartsIntoSegmentsOrSeparator?: string | ((ingestSegments: IngestSegment[]) => IngestSegment[])
 	): GroupPartsInMosRundownAndChangesResult
 }
 

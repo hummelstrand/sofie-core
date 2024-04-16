@@ -18,12 +18,14 @@ import _ = require('underscore')
  * @param nrcsIngestRundown The rundown whose parts needs grouping
  * @param previousNrcsIngestRundown The rundown prior to the changes, if known
  * @param ingestChanges The changes which have been performed in `nrcsIngestRundown`, that need to translating
+ * @param groupPartsIntoSegmentsOrSeparator A string to split the segment name on, or a function to group parts into segments
  * @returns A transformed rundown and changes object
  */
 export function groupPartsInMosRundownAndChanges(
 	nrcsIngestRundown: IngestRundown,
 	previousNrcsIngestRundown: IngestRundown | undefined,
-	ingestChanges: Omit<NrcsIngestChangeDetails, 'segmentOrderChanged'>
+	ingestChanges: Omit<NrcsIngestChangeDetails, 'segmentOrderChanged'>,
+	groupPartsIntoSegmentsOrSeparator?: string | ((ingestSegments: IngestSegment[]) => IngestSegment[])
 ): GroupPartsInMosRundownAndChangesResult {
 	// Only valid for mos rundowns
 	if (nrcsIngestRundown.type !== 'mos') {
@@ -34,8 +36,18 @@ export function groupPartsInMosRundownAndChanges(
 		}
 	}
 
+	const groupPartsIntoSegmentsFunction =
+		typeof groupPartsIntoSegmentsOrSeparator === 'function'
+			? groupPartsIntoSegmentsOrSeparator
+			: (ingestSegments: IngestSegment[]) =>
+					defaultGroupPartsIntoIngestSements(
+						nrcsIngestRundown.externalId,
+						ingestSegments,
+						groupPartsIntoSegmentsOrSeparator || ';'
+					)
+
 	// Combine parts into segments
-	const combinedIngestRundown = groupPartsIntoNewIngestRundown(nrcsIngestRundown)
+	const combinedIngestRundown = groupPartsIntoNewIngestRundown(nrcsIngestRundown, groupPartsIntoSegmentsFunction)
 
 	// If there is no previous rundown, we need to regenerate everything
 	if (!previousNrcsIngestRundown) {
@@ -50,7 +62,10 @@ export function groupPartsInMosRundownAndChanges(
 	}
 
 	// Combine parts into segments, in both the new and old ingest rundowns
-	const oldCombinedIngestRundown = groupPartsIntoNewIngestRundown(previousNrcsIngestRundown)
+	const oldCombinedIngestRundown = groupPartsIntoNewIngestRundown(
+		previousNrcsIngestRundown,
+		groupPartsIntoSegmentsFunction
+	)
 
 	// Calculate the changes to each segment
 	const allPartWithChanges = findAllPartsWithChanges(nrcsIngestRundown, ingestChanges)
@@ -191,12 +206,15 @@ function hasPartOrderChanged(ingestParts: IngestPart[], oldIngestParts: IngestPa
 	return false
 }
 
-function groupPartsIntoNewIngestRundown(ingestRundown: IngestRundown): IngestRundown {
+function defaultGroupPartsIntoIngestSements(
+	rundownExternalId: string,
+	ingestSegments: IngestSegment[],
+	separator: string
+): IngestSegment[] {
 	const groupedParts: { name: string; parts: IngestPart[] }[] = []
 
-	for (const ingestSegment of ingestRundown.segments) {
-		// nocommit: group these better
-		const segmentName = ingestSegment.name.split(';')[0] || ingestSegment.name
+	for (const ingestSegment of ingestSegments) {
+		const segmentName = ingestSegment.name.split(separator)[0] || ingestSegment.name
 
 		for (const ingestPart of ingestSegment.parts) {
 			const lastSegment = _.last(groupedParts)
@@ -208,31 +226,25 @@ function groupPartsIntoNewIngestRundown(ingestRundown: IngestRundown): IngestRun
 		}
 	}
 
-	// Ensure ranks are correct
-	for (const group of groupedParts) {
-		for (let i = 0; i < group.parts.length; i++) {
-			group.parts[i].rank = i
-		}
-	}
-
-	const segments = groupedParts.map(
-		(grp, i) =>
+	return groupedParts.map(
+		(partGroup, i) =>
 			({
-				externalId: getSegmentExternalId(ingestRundown.externalId, grp.parts[0]),
-				name: grp.name,
+				externalId: `${rundownExternalId}_${partGroup.name}_${partGroup.parts[0].externalId}`,
+				name: partGroup.name,
 				rank: i,
-				parts: grp.parts,
+				parts: partGroup.parts.map((part, i) => ({ ...part, rank: i })),
 			} satisfies IngestSegment)
 	)
-
-	return {
-		...ingestRundown,
-		segments,
-	}
 }
 
-function getSegmentExternalId(rundownExternalId: string, ingestPart: IngestPart): string {
-	return `${rundownExternalId}_${ingestPart.name.split(';')[0]}_${ingestPart.externalId}`
+function groupPartsIntoNewIngestRundown(
+	ingestRundown: IngestRundown,
+	groupPartsIntoIngestSements: (ingestSegments: IngestSegment[]) => IngestSegment[]
+): IngestRundown {
+	return {
+		...ingestRundown,
+		segments: groupPartsIntoIngestSements(ingestRundown.segments),
+	}
 }
 
 function calculateSegmentExternalIdChanges(

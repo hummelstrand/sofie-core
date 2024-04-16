@@ -3,6 +3,7 @@ import type {
 	IProcessIngestDataContext,
 	IngestDefaultChangesOptions,
 	IngestRundown,
+	IngestSegment,
 	MutableIngestRundown,
 	NrcsIngestChangeDetails,
 } from '@sofie-automation/blueprints-integration'
@@ -28,8 +29,14 @@ export class ProcessIngestDataContext extends CommonContext implements IProcessI
 	groupPartsInMosRundownAndChanges(
 		nrcsIngestRundown: IngestRundown,
 		previousNrcsIngestRundown: IngestRundown | undefined,
-		ingestChanges: NrcsIngestChangeDetails
+		ingestChanges: NrcsIngestChangeDetails,
+		groupPartsIntoSegmentsOrSeparator?: string | ((ingestSegments: IngestSegment[]) => IngestSegment[])
 	): GroupPartsInMosRundownAndChangesResult {
-		return groupPartsInMosRundownAndChanges(nrcsIngestRundown, previousNrcsIngestRundown, ingestChanges)
+		return groupPartsInMosRundownAndChanges(
+			nrcsIngestRundown,
+			previousNrcsIngestRundown,
+			ingestChanges,
+			groupPartsIntoSegmentsOrSeparator
+		)
 	}
 }
