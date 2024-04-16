@@ -6,9 +6,9 @@ import {
 	StudioRouteType,
 	StudioRouteSet,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import { WrappedOverridableItem } from '@sofie-automation/corelib/dist/overrideOpHelperBackend'
+import { WrappedOverridableItemNormal } from '@sofie-automation/corelib/dist/overrideOpHelperBackend'
 
-export function getActiveRoutes(routeSets: WrappedOverridableItem<StudioRouteSet>[]): ResultingMappingRoutes {
+export function getActiveRoutes(routeSets: WrappedOverridableItemNormal<StudioRouteSet>[]): ResultingMappingRoutes {
 	const routes: ResultingMappingRoutes = {
 		existing: {},
 		inserted: [],

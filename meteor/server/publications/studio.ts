@@ -36,7 +36,7 @@ import {
 	PeripheralDevicePubSub,
 	PeripheralDevicePubSubCollectionsNames,
 } from '@sofie-automation/shared-lib/dist/pubsub/peripheralDevice'
-import { getAllCurrentAndDeletedItemsFromOverrides } from '@sofie-automation/corelib/dist/overrideOpHelperBackend'
+import { getAllCurrentItemsFromOverrides } from '@sofie-automation/corelib/dist/overrideOpHelperBackend'
 
 meteorPublish(CorelibPubSub.studios, async function (studioIds: StudioId[] | null, token: string | undefined) {
 	check(studioIds, Match.Maybe(Array))
@@ -203,7 +203,7 @@ async function manipulateMappingsPublicationData(
 	const studio = await Studios.findOneAsync(args.studioId)
 	if (!studio) return []
 
-	const routes = getActiveRoutes(getAllCurrentAndDeletedItemsFromOverrides(studio.routeSets, null))
+	const routes = getActiveRoutes(getAllCurrentItemsFromOverrides(studio.routeSets, null))
 	const rawMappings = applyAndValidateOverrides(studio.mappingsWithOverrides)
 	const routedMappings = getRoutedMappings(rawMappings.obj, routes)
 

@@ -26,7 +26,7 @@ import { SegmentViewMode } from '../../lib/ui/icons/listView'
 import { RundownPlaylistId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { MediaStatusPopUp } from './MediaStatusPopUp'
 import { MediaStatusIcon } from '../../lib/ui/icons/mediaStatus'
-import { WrappedOverridableItemNormal, getAllCurrentAndDeletedItemsFromOverrides } from '../util/OverrideOpHelper'
+import { getAllCurrentItemsFromOverrides } from '../util/OverrideOpHelper'
 import { ObjectWithOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 
 interface IProps {
@@ -106,9 +106,9 @@ export function RundownRightHandControls(props: Readonly<IProps>): JSX.Element {
 		setSwitchboardOpen(false)
 	}
 
-	const availableRouteSets = getAllCurrentAndDeletedItemsFromOverrides(props.studioRouteSets, null).filter(
-		(routeSet) => routeSet.computed?.behavior !== StudioRouteBehavior.HIDDEN && routeSet.type === 'normal'
-	) as WrappedOverridableItemNormal<StudioRouteSet>[]
+	const availableRouteSets = getAllCurrentItemsFromOverrides(props.studioRouteSets, null).filter(
+		(routeSet) => routeSet.computed?.behavior !== StudioRouteBehavior.HIDDEN
+	)
 
 	const nonDefaultRoutes = availableRouteSets.filter(
 		(routeSet) =>
