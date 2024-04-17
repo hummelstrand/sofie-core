@@ -242,7 +242,6 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					},
 					segmentChanges: {
 						rundown0_SEGMENT2_s2p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
-						rundown0_SEGMENT2_s2p2: NrcsIngestSegmentChangeDetailsEnum.Deleted, // nocommit: verify this is correct
 					},
 					segmentOrderChanged: true,
 				},
@@ -324,7 +323,6 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					},
 					segmentChanges: {
 						rundown0_SEGMENT2_s2p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
-						rundown0_SEGMENT2_s2p0: NrcsIngestSegmentChangeDetailsEnum.Deleted, // nocommit: verify this is correct
 					},
 					segmentOrderChanged: true,
 				},
@@ -396,7 +394,6 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
-						rundown0_SEGMENT0_s1p1: NrcsIngestSegmentChangeDetailsEnum.Deleted, // nocommit: verify this is correct
 					},
 					segmentOrderChanged: true,
 				},
@@ -435,7 +432,6 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
-						rundown0_SEGMENT0_s1p1: NrcsIngestSegmentChangeDetailsEnum.Deleted, // nocommit: verify this is correct
 					},
 					segmentOrderChanged: true,
 				},
@@ -470,7 +466,6 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
-						rundown0_SEGMENT1_s1p2: NrcsIngestSegmentChangeDetailsEnum.Deleted, // nocommit: verify this is correct
 					},
 					segmentOrderChanged: true,
 				},

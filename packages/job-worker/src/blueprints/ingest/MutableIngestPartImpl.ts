@@ -32,7 +32,6 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 	}
 
 	replacePayload(payload: ReadonlyDeep<TPartPayload> | TPartPayload): void {
-		// nocommit: defer comparisons unto checkAndClearChangesFlags
 		if (this.#hasChanges || !_.isEqual(this.#ingestPart.payload, payload)) {
 			this.#ingestPart.payload = clone(payload)
 			this.#hasChanges = true
@@ -44,7 +43,6 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 			throw new Error('Part payload is not set')
 		}
 
-		// nocommit: defer comparisons unto checkAndClearChangesFlags
 		if (this.#hasChanges || !_.isEqual(this.#ingestPart.payload[key], value)) {
 			this.#ingestPart.payload[key] = clone(value)
 			this.#hasChanges = true

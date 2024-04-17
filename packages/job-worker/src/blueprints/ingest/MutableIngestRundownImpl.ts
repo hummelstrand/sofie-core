@@ -79,7 +79,6 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	replacePayload(payload: ReadonlyDeep<TRundownPayload> | TRundownPayload): void {
-		// nocommit: track the changes so the diffing can be done at the end
 		if (this.#hasChangesToRundown || !_.isEqual(this.ingestRundown.payload, payload)) {
 			this.ingestRundown.payload = clone(payload)
 			this.#hasChangesToRundown = true
@@ -91,7 +90,6 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			throw new Error('Rundown payload is not set')
 		}
 
-		// nocommit: track the changes so the diffing can be done at the end
 		if (this.#hasChangesToRundown || !_.isEqual(this.ingestRundown.payload[key], value)) {
 			this.ingestRundown.payload[key] = clone(value)
 			this.#hasChangesToRundown = true

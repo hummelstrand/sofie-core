@@ -144,7 +144,6 @@ export async function runIngestUpdateOperation(
  * @param data Ids for the rundown and peripheral device
  * @param updateNrcsIngestModelFcn Function to mutate the ingestData. Throw if the requested change is not valid. Return undefined to indicate the ingestData should be deleted
  */
-// nocommit - this needs a better name
 export async function runIngestUpdateOperationBase(
 	context: JobContext,
 	data: IngestPropsBase,
@@ -298,7 +297,7 @@ async function updateSofieIngestRundown(
 				ingestRundownChanges.changes
 			)
 		} else if (ingestRundownChanges.changes.source === 'ingest') {
-			// Blueprints has not defined a processIngestData()
+			// Backwards compabible mode: Blueprints has not defined a processIngestData()
 
 			if (nrcsIngestRundown.type === 'mos') {
 				// MOS has a special flow to group parts into segments

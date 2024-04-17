@@ -84,6 +84,15 @@ export function groupPartsInRundownAndChanges(
 		oldCombinedIngestRundown.segments
 	)
 
+	// Ensure id changes aren't flagged as deletions
+	for (const [oldSegmentExternalId, newSegmentExternalId] of Object.entries<string>(changedSegmentExternalIds)) {
+		if (!oldSegmentExternalId || !newSegmentExternalId) continue
+
+		if (segmentChanges[oldSegmentExternalId] === NrcsIngestSegmentChangeDetailsEnum.Deleted) {
+			delete segmentChanges[oldSegmentExternalId]
+		}
+	}
+
 	return {
 		nrcsIngestRundown: combinedIngestRundown,
 		ingestChanges: {
@@ -157,10 +166,8 @@ function calculateSegmentChanges(
 				const oldPart = oldPartMap.get(part.externalId)
 				if (!oldPart) {
 					segmentPartChanges[part.externalId] = NrcsIngestPartChangeDetails.Inserted
-				} else {
-					if (allPartWithChanges.has(part.externalId)) {
-						segmentPartChanges[part.externalId] = NrcsIngestPartChangeDetails.Updated
-					}
+				} else if (allPartWithChanges.has(part.externalId)) {
+					segmentPartChanges[part.externalId] = NrcsIngestPartChangeDetails.Updated
 				}
 			}
 			for (const oldPart of oldIngestSegment.parts) {

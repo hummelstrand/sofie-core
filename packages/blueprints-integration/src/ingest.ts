@@ -116,7 +116,7 @@ export interface UserOperationTarget {
 }
 
 export type DefaultUserOperations = {
-	type: '__sofie-move-segment' // TODO: define properly
+	type: '__sofie-move-segment' // Future: define properly
 }
 
 export interface UserOperationChange<TCustomBlueprintOperations = never> {
@@ -139,9 +139,6 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 
 	/** Payload of rundown metadata. For use by other blueprints methods */
 	readonly payload: ReadonlyDeep<TRundownPayload> | undefined
-
-	// nocommit - split payload into 'private' and 'public'? ie, one for `getRundown` and one for `getSegment`, so that we can affect the rundown generation without regenerating all of the segments.
-	// Or should we expect this blueprint stage to copy any needed properties into each of the segment/part payloads?
 
 	/** Array of segments in this rundown */
 	readonly segments: ReadonlyArray<MutableIngestSegment<TSegmentPayload, TPartPayload>>
@@ -235,12 +232,20 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	 */
 	setName(name: string): void
 
+	/**
+	 * Update the payload of the Rundown
+	 * This will trigger the Rundown and RundownPlaylist to be updated, but not Segments
+	 * @param payload the new payload
+	 */
 	replacePayload(payload: ReadonlyDeep<TRundownPayload> | TRundownPayload): void
 
+	/**
+	 * Update the portion of the payload of the Rundown
+	 * This will trigger the Rundown and RundownPlaylist to be updated, but not Segments
+	 * @param key the key of the payload to update
+	 * @param value the new value
+	 */
 	setPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
-	// nocommit: is this better than exposing the payload property?
-	// getPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
-	// clearPayload<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
 }
 
 export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = unknown> {
@@ -307,8 +312,19 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	 */
 	setName(name: string): void
 
+	/**
+	 * Update the payload of the Segment
+	 * This will trigger the Segment to be updated
+	 * @param payload the new payload
+	 */
 	replacePayload(payload: ReadonlyDeep<TSegmentPayload> | TSegmentPayload): void
 
+	/**
+	 * Update the portion of the payload of the Segment
+	 * This will trigger the Segment to be updated
+	 * @param key the key of the payload to update
+	 * @param value the new value
+	 */
 	setPayloadProperty<TKey extends keyof TSegmentPayload>(key: TKey, value: TSegmentPayload[TKey]): void
 }
 
@@ -326,8 +342,19 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 	 */
 	setName(name: string): void
 
+	/**
+	 * Update the payload of the Part
+	 * This will trigger the Segment to be updated
+	 * @param payload the new payload
+	 */
 	replacePayload(payload: ReadonlyDeep<TPartPayload> | TPartPayload): void
 
+	/**
+	 * Update the portion of the payload of the Part
+	 * This will trigger the Segment to be updated
+	 * @param key the key of the payload to update
+	 * @param value the new value
+	 */
 	setPayloadProperty<TKey extends keyof TPartPayload>(key: TKey, value: TPartPayload[TKey]): void
 }
 
