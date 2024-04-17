@@ -656,7 +656,6 @@ describe('MutableIngestRundownImpl', () => {
 			expectedIngestRundown.segments[1].externalId = 'segX'
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { segX: 1 }
-			expectedChanges.computedChanges.segmentsToRemove.push('seg1') // nocommit: Should this be here?
 			expectedChanges.computedChanges.segmentExternalIdChanges = { seg1: 'segX' }
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 		})
@@ -686,7 +685,6 @@ describe('MutableIngestRundownImpl', () => {
 			expectedIngestRundown.segments[1].externalId = 'segY'
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { segY: 1 }
-			expectedChanges.computedChanges.segmentsToRemove.push('seg1') // nocommit: Should this be here?
 			expectedChanges.computedChanges.segmentExternalIdChanges = { seg1: 'segY' }
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 		})

@@ -308,7 +308,9 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 		// Find any removed segments
 		const newSegmentIds = new Set(ingestSegments.map((s) => s.externalId))
-		const removedSegmentIds = Array.from(this.#originalSegmentRanks.keys()).filter((id) => !newSegmentIds.has(id))
+		const removedSegmentIds = Array.from(this.#originalSegmentRanks.keys()).filter(
+			(id) => !newSegmentIds.has(id) && !segmentExternalIdChanges[id]
+		)
 
 		// Find any with updated ranks
 		const segmentsUpdatedRanks: Record<string, number> = {}
