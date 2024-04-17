@@ -109,6 +109,12 @@ export interface NrcsIngestChangeDetails {
 	changedSegmentExternalIds?: Record<string, string>
 }
 
+export interface UserOperationTarget {
+	segmentExternalId: string | undefined
+	partExternalId: string | undefined
+	pieceExternalId: string | undefined
+}
+
 export type DefaultUserOperations = {
 	type: '__sofie-move-segment' // TODO: define properly
 }
@@ -118,6 +124,8 @@ export interface UserOperationChange<TCustomBlueprintOperations = never> {
 	source: 'user'
 
 	operation: DefaultUserOperations | TCustomBlueprintOperations
+
+	target: UserOperationTarget
 }
 
 export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {

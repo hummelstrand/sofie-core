@@ -14,7 +14,8 @@ export async function handleUserExecuteChangeOperation(
 			ingestRundown: nrcsIngestRundown,
 			changes: {
 				source: 'user',
-				operation: data.operation,
+				operation: data.operation as unknown as any,
+				target: data.target,
 			},
 		} satisfies UpdateIngestRundownResult
 	})

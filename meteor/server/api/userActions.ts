@@ -5,7 +5,7 @@ import { Time } from '../../lib/lib'
 import { ServerPlayoutAPI } from './playout/playout'
 import { NewUserActionAPI, UserActionAPIMethods } from '../../lib/api/userActions'
 import { EvaluationBase } from '../../lib/collections/Evaluations'
-import { IngestPart, IngestAdlib, ActionUserData } from '@sofie-automation/blueprints-integration'
+import { IngestPart, IngestAdlib, ActionUserData, UserOperationTarget } from '@sofie-automation/blueprints-integration'
 import { storeRundownPlaylistSnapshot } from './snapshot'
 import { registerClassToMeteorMethods, ReplaceOptionalWithNullInMethodArguments } from '../methods'
 import { ServerRundownAPI } from './rundown'
@@ -1226,14 +1226,15 @@ class ServerUserActionAPI
 		userEvent: string,
 		eventTime: Time,
 		rundownId: RundownId,
-		operation: any
+		operation: Record<string, any>,
+		target: UserOperationTarget
 	): Promise<ClientAPI.ClientResponse<void>> {
 		return ServerClientAPI.runUserActionInLog(
 			this,
 			userEvent,
 			eventTime,
 			'executeUserChangeOperation',
-			[operation],
+			[operation, target],
 			async () => {
 				const access = await RundownPlaylistContentWriteAccess.rundown(this, rundownId)
 				if (!access.rundown) throw new Error(`Rundown "${rundownId}" not found`)
@@ -1242,6 +1243,7 @@ class ServerUserActionAPI
 					rundownExternalId: access.rundown.externalId,
 					peripheralDeviceId: null,
 					operation,
+					target,
 				})
 			}
 		)

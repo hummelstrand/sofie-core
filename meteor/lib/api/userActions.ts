@@ -2,7 +2,7 @@ import { ClientAPI } from '../api/client'
 import { MethodContext } from './methods'
 import { EvaluationBase } from '../collections/Evaluations'
 import { Bucket } from '../collections/Buckets'
-import { IngestAdlib, ActionUserData } from '@sofie-automation/blueprints-integration'
+import { IngestAdlib, ActionUserData, UserOperationTarget } from '@sofie-automation/blueprints-integration'
 import { BucketAdLib } from '@sofie-automation/corelib/dist/dataModel/BucketAdLibPiece'
 import { AdLibActionCommon } from '@sofie-automation/corelib/dist/dataModel/AdlibAction'
 import { BucketAdLibAction } from '@sofie-automation/corelib/dist/dataModel/BucketAdLibAction'
@@ -331,7 +331,8 @@ export interface NewUserActionAPI extends MethodContext {
 		userEvent: string,
 		eventTime: Time,
 		rundownId: RundownId,
-		operation: any
+		operation: Record<string, any>,
+		target: UserOperationTarget
 	): Promise<ClientAPI.ClientResponse<void>>
 }
 

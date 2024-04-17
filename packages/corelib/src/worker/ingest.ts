@@ -12,7 +12,13 @@ import {
 	StudioId,
 } from '../dataModel/Ids'
 import type { MOS } from '@sofie-automation/shared-lib/dist/mos'
-import { IngestAdlib, IngestPart, IngestRundown, IngestSegment } from '@sofie-automation/blueprints-integration'
+import {
+	IngestAdlib,
+	IngestPart,
+	IngestRundown,
+	IngestSegment,
+	UserOperationTarget,
+} from '@sofie-automation/blueprints-integration'
 import { BucketAdLibAction } from '../dataModel/BucketAdLibAction'
 
 export enum IngestJobs {
@@ -229,7 +235,8 @@ export interface UserRemoveRundownProps extends UserRundownPropsBase {
 export type UserUnsyncRundownProps = UserRundownPropsBase
 
 export interface UserExecuteChangeOperationProps extends IngestPropsBase {
-	operation: any // TODO: Define this
+	operation: Record<string, any> // TODO: Define this
+	target: UserOperationTarget
 }
 
 export interface BucketItemImportProps {

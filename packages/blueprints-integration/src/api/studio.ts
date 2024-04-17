@@ -93,7 +93,7 @@ export interface StudioBlueprintManifest<TRawConfig = IBlueprintConfig, TProcess
 	 */
 	processIngestData?: (
 		context: IProcessIngestDataContext,
-		mutableIngestRundown: MutableIngestRundown,
+		mutableIngestRundown: MutableIngestRundown<any, any, any>,
 		nrcsIngestRundown: IngestRundown,
 		previousNrcsIngestRundown: IngestRundown | undefined,
 		changes: NrcsIngestChangeDetails | UserOperationChange
