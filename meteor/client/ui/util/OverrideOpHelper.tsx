@@ -9,7 +9,7 @@ import {
 	OverrideOpHelper,
 	OverrideOpHelperImpl,
 	OverrideOpHelperForItemContents,
-} from '@sofie-automation/corelib/dist/overrideOpHelperBackend'
+} from '@sofie-automation/corelib/dist/overrideOpHelper'
 export {
 	getAllCurrentAndDeletedItemsFromOverrides,
 	getAllCurrentItemsFromOverrides,

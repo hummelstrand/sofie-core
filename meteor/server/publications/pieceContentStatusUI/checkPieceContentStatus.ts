@@ -42,7 +42,7 @@ import {
 	PackageInfoLight,
 	PieceDependencies,
 } from './common'
-import { getAllCurrentAndDeletedItemsFromOverrides } from '@sofie-automation/corelib/dist/overrideOpHelperBackend'
+import { getAllCurrentAndDeletedItemsFromOverrides } from '@sofie-automation/corelib/dist/overrideOpHelper'
 
 interface ScanInfoForPackages {
 	[packageId: string]: ScanInfoForPackage

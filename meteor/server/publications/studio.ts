@@ -36,7 +36,7 @@ import {
 	PeripheralDevicePubSub,
 	PeripheralDevicePubSubCollectionsNames,
 } from '@sofie-automation/shared-lib/dist/pubsub/peripheralDevice'
-import { getAllCurrentItemsFromOverrides } from '@sofie-automation/corelib/dist/overrideOpHelperBackend'
+import { getAllCurrentItemsFromOverrides } from '@sofie-automation/corelib/dist/overrideOpHelper'
 
 meteorPublish(CorelibPubSub.studios, async function (studioIds: StudioId[] | null, token: string | undefined) {
 	check(studioIds, Match.Maybe(Array))

@@ -12,7 +12,7 @@ import {
 	WrappedOverridableItemNormal,
 	useOverrideOpHelperBackend,
 	getAllCurrentItemsFromOverrides,
-} from '@sofie-automation/corelib/dist/overrideOpHelperBackend'
+} from '@sofie-automation/corelib/dist/overrideOpHelper'
 import { ObjectWithOverrides, SomeObjectOverrideOp } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 
 export class StudioBaselineHelper {
