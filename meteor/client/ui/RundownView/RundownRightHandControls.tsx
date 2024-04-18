@@ -26,13 +26,15 @@ import { SegmentViewMode } from '../../lib/ui/icons/listView'
 import { RundownPlaylistId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { MediaStatusPopUp } from './MediaStatusPopUp'
 import { MediaStatusIcon } from '../../lib/ui/icons/mediaStatus'
-import { getAllCurrentItemsFromOverrides } from '../util/OverrideOpHelper'
-import { ObjectWithOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 
 interface IProps {
 	playlistId: RundownPlaylistId
-	studioRouteSets: ObjectWithOverrides<Record<string, StudioRouteSet>>
-	studioRouteSetExclusivityGroups: ObjectWithOverrides<Record<string, StudioRouteSetExclusivityGroup>>
+	studioRouteSets: {
+		[id: string]: StudioRouteSet
+	}
+	studioRouteSetExclusivityGroups: {
+		[id: string]: StudioRouteSetExclusivityGroup
+	}
 	isFollowingOnAir: boolean
 	onFollowOnAir?: () => void
 	onRewindSegments?: () => void
@@ -106,22 +108,23 @@ export function RundownRightHandControls(props: Readonly<IProps>): JSX.Element {
 		setSwitchboardOpen(false)
 	}
 
-	const availableRouteSets = getAllCurrentItemsFromOverrides(props.studioRouteSets, null)
-		.filter((routeSet) => routeSet.computed?.behavior !== StudioRouteBehavior.HIDDEN)
-		.sort((a, b) => a.id.localeCompare(b.id))
-
+	const availableRouteSets = Object.entries<StudioRouteSet>(props.studioRouteSets)
+		.filter(([_id, routeSet]) => routeSet.behavior !== StudioRouteBehavior.HIDDEN)
+		.sort((a, b) => {
+			if (a[1].name < b[1].name) return -1
+			if (a[1].name > b[1].name) return 1
+			return 0
+		})
 	const nonDefaultRoutes = availableRouteSets.filter(
-		(routeSet) =>
-			routeSet.computed?.defaultActive !== undefined && routeSet.computed?.active !== routeSet.computed?.defaultActive
-	)
-
-	const exclusivityGroups: Record<string, StudioRouteSet> = {}
-
-	for (const routeSet of availableRouteSets) {
-		const group = routeSet.computed?.exclusivityGroup || '__noGroup'
-		if (!exclusivityGroups[group] === undefined && routeSet.computed) {
-			exclusivityGroups[group] = routeSet.computed
-		}
+		([_id, routeSet]) => routeSet.defaultActive !== undefined && routeSet.active !== routeSet.defaultActive
+	).length
+	const exclusivityGroups: {
+		[id: string]: Array<[string, StudioRouteSet]>
+	} = {}
+	for (const [id, routeSet] of availableRouteSets) {
+		const group = routeSet.exclusivityGroup || '__noGroup'
+		if (exclusivityGroups[group] === undefined) exclusivityGroups[group] = []
+		exclusivityGroups[group].push([id, routeSet])
 	}
 
 	return (
@@ -260,7 +263,7 @@ export function RundownRightHandControls(props: Readonly<IProps>): JSX.Element {
 								aria-pressed={switchboardOpen ? 'true' : 'false'}
 							>
 								<SwitchboardIcon />
-								{nonDefaultRoutes.length > 0 && (
+								{nonDefaultRoutes > 0 && (
 									<RouteSetOverrideIcon className="status-bar__controls__button--switchboard-panel__notification" />
 								)}
 							</button>
@@ -283,7 +286,7 @@ export function RundownRightHandControls(props: Readonly<IProps>): JSX.Element {
 								{switchboardOpen && (
 									<SwitchboardPopUp
 										availableRouteSets={availableRouteSets}
-										exclusivityGroups={exclusivityGroups}
+										studioRouteSetExclusivityGroups={props.studioRouteSetExclusivityGroups}
 										onStudioRouteSetSwitch={props.onStudioRouteSetSwitch}
 									/>
 								)}
