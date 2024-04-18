@@ -116,16 +116,16 @@ export interface UserOperationTarget {
 }
 
 export type DefaultUserOperations = {
-	type: '__sofie-move-segment' // Future: define properly
+	id: '__sofie-move-segment' // Future: define properly
+	payload: Record<string, never>
 }
 
-export interface UserOperationChange<TCustomBlueprintOperations = never> {
+export interface UserOperationChange<TCustomBlueprintOperations extends { id: string } = never> {
 	/** Indicate that this change is from user operations */
 	source: 'user'
 
+	operationTarget: UserOperationTarget
 	operation: DefaultUserOperations | TCustomBlueprintOperations
-
-	target: UserOperationTarget
 }
 
 export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {

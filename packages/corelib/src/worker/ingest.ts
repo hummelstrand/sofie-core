@@ -235,8 +235,8 @@ export interface UserRemoveRundownProps extends UserRundownPropsBase {
 export type UserUnsyncRundownProps = UserRundownPropsBase
 
 export interface UserExecuteChangeOperationProps extends IngestPropsBase {
-	operation: Record<string, any> // TODO: Define this
-	target: UserOperationTarget
+	operationTarget: UserOperationTarget
+	operation: { id: string; [key: string]: any }
 }
 
 export interface BucketItemImportProps {
