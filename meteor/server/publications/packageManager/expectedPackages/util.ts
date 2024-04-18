@@ -3,7 +3,6 @@ import { MappingExt, MappingsExt, StudioRouteSet } from '@sofie-automation/corel
 import { ReadonlyDeep } from 'type-fest'
 import { getActiveRoutes, getRoutedMappings } from '../../../../lib/collections/Studios'
 import { ObjectWithOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
-import { getAllCurrentAndDeletedItemsFromOverrides } from '@sofie-automation/corelib/dist/overrideOpHelper'
 
 type MappingExtWithOriginalName = MappingExt & { originalLayerName: string }
 type MappingsExtWithOriginalName = {
@@ -23,7 +22,7 @@ export function buildMappingsToDeviceIdMap(
 	}
 
 	// Route the mappings
-	const routes = getActiveRoutes(getAllCurrentAndDeletedItemsFromOverrides(routeSets, null))
+	const routes = getActiveRoutes(routeSets)
 	const routedMappings = getRoutedMappings(mappingsWithPackages, routes)
 
 	// Compile the result

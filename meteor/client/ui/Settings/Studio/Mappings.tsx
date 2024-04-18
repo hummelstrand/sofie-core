@@ -110,10 +110,7 @@ export function StudioMappings({
 		}, 1)
 	}, [studio._id, studio.mappingsWithOverrides])
 
-	const activeRoutes = useMemo(
-		() => getActiveRoutes(getAllCurrentAndDeletedItemsFromOverrides(studio.routeSets, null)),
-		[studio.routeSets]
-	)
+	const activeRoutes = useMemo(() => getActiveRoutes(studio.routeSets), [studio.routeSets])
 
 	const sortedMappings = useMemo(
 		() => getAllCurrentAndDeletedItemsFromOverrides(studio.mappingsWithOverrides, (a, b) => a[0].localeCompare(b[0])),

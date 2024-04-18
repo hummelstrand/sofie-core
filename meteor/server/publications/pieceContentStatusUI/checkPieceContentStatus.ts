@@ -42,7 +42,6 @@ import {
 	PackageInfoLight,
 	PieceDependencies,
 } from './common'
-import { getAllCurrentAndDeletedItemsFromOverrides } from '@sofie-automation/corelib/dist/overrideOpHelper'
 
 interface ScanInfoForPackages {
 	[packageId: string]: ScanInfoForPackage
@@ -506,7 +505,7 @@ async function checkPieceContentExpectedPackageStatus(
 	let progress: number | undefined
 
 	if (piece.expectedPackages && piece.expectedPackages.length) {
-		const routes = getActiveRoutes(getAllCurrentAndDeletedItemsFromOverrides(studio.routeSets, null))
+		const routes = getActiveRoutes(studio.routeSets)
 
 		for (const expectedPackage of piece.expectedPackages) {
 			// Route the mappings

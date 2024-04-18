@@ -6,28 +6,34 @@ import {
 	StudioRouteType,
 	StudioRouteSet,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import { WrappedOverridableItemNormal } from '@sofie-automation/corelib/dist/overrideOpHelper'
+import {
+	ObjectWithOverrides,
+	applyAndValidateOverrides,
+} from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 
-export function getActiveRoutes(routeSets: WrappedOverridableItemNormal<StudioRouteSet>[]): ResultingMappingRoutes {
+export function getActiveRoutes(
+	routeSetswithOverride: ObjectWithOverrides<Record<string, StudioRouteSet>>
+): ResultingMappingRoutes {
 	const routes: ResultingMappingRoutes = {
 		existing: {},
 		inserted: [],
 	}
 
 	const exclusivityGroups: { [groupId: string]: true } = {}
+	const routeSets = applyAndValidateOverrides(routeSetswithOverride).obj
 
-	for (const routeSet of routeSets) {
-		if (routeSet.computed?.active) {
+	for (const routeSet of Object.values<StudioRouteSet>(routeSets)) {
+		if (routeSet.active) {
 			let useRoute = true
-			if (routeSet.computed.exclusivityGroup) {
+			if (routeSet.exclusivityGroup) {
 				// Fail-safe: To really make sure we're not using more than one route in the same exclusivity group:
-				if (exclusivityGroups[routeSet.computed.exclusivityGroup]) {
+				if (exclusivityGroups[routeSet.exclusivityGroup]) {
 					useRoute = false
 				}
-				exclusivityGroups[routeSet.computed.exclusivityGroup] = true
+				exclusivityGroups[routeSet.exclusivityGroup] = true
 			}
 			if (useRoute) {
-				for (const routeMapping of routeSet.computed?.routes || []) {
+				for (const routeMapping of routeSet.routes || []) {
 					if (routeMapping.outputMappedLayer) {
 						if (routeMapping.mappedLayer) {
 							// Route an existing layer
