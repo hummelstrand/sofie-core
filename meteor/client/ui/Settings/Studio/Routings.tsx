@@ -501,10 +501,23 @@ function RenderRoutes({
 	studio,
 	manifest,
 	translationNamespaces,
-	overrideHelper,
 	studioMappings,
 }: Readonly<IRenderRoutesProps>): React.JSX.Element {
 	const { t } = useTranslation()
+
+	const saveRoutesOverrides = React.useCallback(
+		(newOps: SomeObjectOverrideOp[]) => {
+			Studios.update(studio._id, {
+				$set: {
+					'routeSets.overrides': newOps,
+				},
+			})
+		},
+		[studio._id, studio.routeSets]
+	)
+
+	//This helper won't work in a sub array (routes[]) but are used in this sketch:
+	const routesOverrideHelper = useOverrideOpHelper(saveRoutesOverrides, studio.routeSets)
 
 	const confirmRemoveRoute = (routeSetId: string, route: RouteMapping) => {
 		doModalDialog({
@@ -512,7 +525,7 @@ function RenderRoutes({
 			yes: t('Remove'),
 			no: t('Cancel'),
 			onAccept: () => {
-				removeRouteSetRoute(routeSetId)
+				removeRoute(routeSetId)
 			},
 			message: (
 				<React.Fragment>
@@ -528,8 +541,8 @@ function RenderRoutes({
 		})
 	}
 
-	const removeRouteSetRoute = (routeId: string) => {
-		overrideHelper.deleteItem(routeId)
+	const removeRoute = (routeId: string) => {
+		routesOverrideHelper.deleteItem(routeId)
 	}
 
 	return (
@@ -566,84 +579,101 @@ function RenderRoutes({
 							<FontAwesomeIcon icon={faTrash} />
 						</button>
 						<div className="properties-grid">
-							<label className="field">
-								<LabelActual label={t('Original Layer')} />
-								<EditAttribute
-									modifiedClassName="bghl"
-									attribute={`routeSets.${routeSetId}.routes.${index}.mappedLayer`}
-									obj={studio}
-									type="dropdowntext"
-									options={Object.keys(studioMappings)}
-									label={t('None')}
-									collection={Studios}
-									className="input text-input input-l"
-								></EditAttribute>
-							</label>
-							<label className="field">
-								<LabelActual label={t('New Layer')} />
-								<EditAttribute
-									modifiedClassName="bghl"
-									attribute={`routeSets.${routeSetId}.routes.${index}.outputMappedLayer`}
-									obj={studio}
-									type="text"
-									collection={Studios}
-									className="input text-input input-l"
-								></EditAttribute>
-							</label>
-
-							<label className="field">
-								<LabelActual label={t('Route Type')} />
-								{!route.mappedLayer ? (
-									<span className="mls">REMAP</span>
-								) : (
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={`routeSets.${routeSetId}.routes.${index}.routeType`}
-										obj={studio}
-										type="dropdown"
-										options={StudioRouteType}
-										optionsAreNumbers={true}
-										collection={Studios}
-										className="input text-input input-l"
-									></EditAttribute>
+							<LabelAndOverridesForDropdown
+								label={'Original Layer'}
+								item={routeSet}
+								itemKey={'routes'} // this should be something like routes[this.route.id].mappedLayer
+								opPrefix={routeSet.id}
+								overrideHelper={routesOverrideHelper}
+								options={getDropdownInputOptions(studioMappings)}
+							>
+								{(value, handleUpdate, options) => (
+									<DropdownInputControl
+										classNames="input text-input input-l"
+										options={options}
+										value={value}
+										handleUpdate={handleUpdate}
+									/>
 								)}
-							</label>
-
-							<label className="field">
-								<LabelActual label={t('Device Type')} />
-								{route.routeType === StudioRouteType.REROUTE && route.mappedLayer ? (
-									deviceTypeFromMappedLayer !== undefined ? (
-										<span className="mls">{TSR.DeviceType[deviceTypeFromMappedLayer]}</span>
-									) : (
-										<span className="mls dimmed">{t('Source Layer not found')}</span>
-									)
-								) : (
-									<EditAttribute
+							</LabelAndOverridesForDropdown>
+							<LabelAndOverrides
+								label={t('New Layer')}
+								item={routeSet}
+								itemKey={'routes'} // this should be something like routes[this.route.id].outputMappedLayer
+								opPrefix={routeSet.id}
+								overrideHelper={routesOverrideHelper}
+							>
+								{(value, handleUpdate) => (
+									<TextInputControl
 										modifiedClassName="bghl"
-										attribute={`routeSets.${routeSetId}.routes.${index}.deviceType`}
-										obj={studio}
-										type="dropdown"
-										options={TSR.DeviceType}
-										optionsAreNumbers={true}
-										collection={Studios}
-										className="input text-input input-l"
-									></EditAttribute>
+										classNames="input text-input input-l"
+										value={value}
+										handleUpdate={handleUpdate}
+									/>
 								)}
-							</label>
+							</LabelAndOverrides>
+							<LabelAndOverridesForDropdown
+								label={t('Route Type')}
+								item={routeSet}
+								itemKey={'routes'} // this should be something like routes[this.route.id].routeType
+								opPrefix={routeSet.id}
+								overrideHelper={routesOverrideHelper}
+								options={getDropdownInputOptions(StudioRouteType)}
+							>
+								{(value, handleUpdate, options) => (
+									<DropdownInputControl
+										classNames="input text-input input-l"
+										options={options}
+										value={value}
+										handleUpdate={handleUpdate}
+									/>
+								)}
+							</LabelAndOverridesForDropdown>
+
+							{route.routeType === StudioRouteType.REROUTE && route.mappedLayer ? (
+								deviceTypeFromMappedLayer !== undefined ? (
+									<span className="mls">{TSR.DeviceType[deviceTypeFromMappedLayer]}</span>
+								) : (
+									<span className="mls dimmed">{t('Source Layer not found')}</span>
+								)
+							) : (
+								<LabelAndOverridesForDropdown
+									label={t('Device Type')}
+									item={routeSet}
+									itemKey={'routes'} // this should be something like routes[this.route.id].deviceType
+									opPrefix={routeSet.id}
+									overrideHelper={routesOverrideHelper}
+									options={getDropdownInputOptions(TSR.DeviceType)}
+								>
+									{(value, handleUpdate, options) => (
+										<DropdownInputControl
+											classNames="input text-input input-l"
+											options={options}
+											value={value}
+											handleUpdate={handleUpdate}
+										/>
+									)}
+								</LabelAndOverridesForDropdown>
+							)}
 
 							{mappingTypeOptions.length > 0 && (
-								<label className="field">
-									<LabelActual label={t('Mapping Type')} />
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={`routeSets.${routeSetId}.routes.${index}.remapping.options.mappingType`}
-										obj={studio}
-										type="dropdown"
-										options={mappingTypeOptions}
-										collection={Studios}
-										className="input text-input input-l"
-									></EditAttribute>
-								</label>
+								<LabelAndOverridesForDropdown
+									label={t('Mapping Type')}
+									item={routeSet}
+									itemKey={'routes'} // this should be something like routes[this.route.id].remapping.options.mappingType
+									opPrefix={routeSet.id}
+									overrideHelper={routesOverrideHelper}
+									options={getDropdownInputOptions(TSR.DeviceType)}
+								>
+									{(value, handleUpdate, options) => (
+										<DropdownInputControl
+											classNames="input text-input input-l"
+											options={options}
+											value={value}
+											handleUpdate={handleUpdate}
+										/>
+									)}
+								</LabelAndOverridesForDropdown>
 							)}
 							{route.routeType === StudioRouteType.REMAP ||
 							(routeDeviceType !== undefined && route.remapping !== undefined) ? (
@@ -675,6 +705,7 @@ function RenderRoutes({
 									<DeviceMappingSettings
 										translationNamespaces={translationNamespaces}
 										studio={studio}
+										// this should be something like routes[this.route.id].remapping.options.mappingType
 										attribute={`routeSets.${routeSetId}.routes.${index}.remapping.options`}
 										mappedLayer={mappedLayer}
 										manifest={routeMappingSchema}
@@ -921,6 +952,8 @@ function DeviceMappingSettings({
 	studio,
 	mappedLayer,
 }: IDeviceMappingSettingsProps) {
+	// this won't work as it is now, as the object is not a top level object:
+	// this should work in   routes[this.route.id].remapping.options.mappingType
 	const routeRemapping = objectPathGet(studio, attribute)
 
 	const mappingType = routeRemapping?.mappingType ?? mappedLayer?.options?.mappingType
