@@ -67,12 +67,12 @@ export function StudioRoutings({
 	const { t } = useTranslation()
 	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
 
-	const getRouteSetsFromOverrides = React.useMemo(
+	const routeSetsFromOverrides = React.useMemo(
 		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSets, null),
 		[studio.routeSets]
 	)
 
-	const getExclusivityGroupsFromOverrides = React.useMemo(
+	const exclusivityGroupsFromOverrides = React.useMemo(
 		() =>
 			getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetExclusivityGroups, (a, b) => a[0].localeCompare(b[0])),
 		[studio.routeSetExclusivityGroups]
@@ -181,10 +181,10 @@ export function StudioRoutings({
 						<tbody>
 							<RenderExclusivityGroups
 								studio={studio}
-								getRouteSetsFromOverrides={getRouteSetsFromOverrides}
+								routeSetsFromOverrides={routeSetsFromOverrides}
 								isExpanded={isExpanded}
 								toggleExpanded={toggleExpanded}
-								getExclusivityGroupsFromOverrides={getExclusivityGroupsFromOverrides}
+								exclusivityGroupsFromOverrides={exclusivityGroupsFromOverrides}
 							/>
 						</tbody>
 					</table>
@@ -196,7 +196,7 @@ export function StudioRoutings({
 					<h3 className="mhn">{t('Route Sets')}</h3>
 					<table className="expando settings-studio-mappings-table">
 						<tbody>
-							{_.map(getRouteSetsFromOverrides, (routeSet: WrappedOverridableItem<StudioRouteSet>) => {
+							{_.map(routeSetsFromOverrides, (routeSet: WrappedOverridableItem<StudioRouteSet>) => {
 								return (
 									<React.Fragment key={routeSet.id}>
 										{routeSet.type === 'normal' ? (
@@ -209,7 +209,7 @@ export function StudioRoutings({
 												toggleExpanded={toggleExpanded}
 												isExpanded={isExpanded(routeSet.id)}
 												overrideHelper={overrideHelper}
-												getExclusivityGroupsFromOverrides={getExclusivityGroupsFromOverrides}
+												getExclusivityGroupsFromOverrides={exclusivityGroupsFromOverrides}
 											/>
 										) : (
 											<RenderRouteSetDeletedEntry routeSet={routeSet} overrideHelper={overrideHelper} />
@@ -694,16 +694,16 @@ interface IRenderExclusivityGroupsProps {
 	studio: DBStudio
 	toggleExpanded: (exclusivityGroupId: string, force?: boolean) => void
 	isExpanded: (exclusivityGroupId: string) => boolean
-	getRouteSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
-	getExclusivityGroupsFromOverrides: WrappedOverridableItem<StudioRouteSetExclusivityGroup>[]
+	routeSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
+	exclusivityGroupsFromOverrides: WrappedOverridableItem<StudioRouteSetExclusivityGroup>[]
 }
 
 function RenderExclusivityGroups({
 	studio,
 	toggleExpanded,
 	isExpanded,
-	getRouteSetsFromOverrides,
-	getExclusivityGroupsFromOverrides,
+	routeSetsFromOverrides,
+	exclusivityGroupsFromOverrides,
 }: Readonly<IRenderExclusivityGroupsProps>): React.JSX.Element {
 	const { t } = useTranslation()
 
@@ -720,7 +720,7 @@ function RenderExclusivityGroups({
 
 	const exclusivityOverrideHelper = useOverrideOpHelper(saveExclusivityOverrides, studio.routeSetExclusivityGroups)
 
-	if (getExclusivityGroupsFromOverrides.length === 0) {
+	if (exclusivityGroupsFromOverrides.length === 0) {
 		return (
 			<tr>
 				<td className="mhn dimmed">{t('There are no exclusivity groups set up.')}</td>
@@ -730,7 +730,7 @@ function RenderExclusivityGroups({
 	return (
 		<React.Fragment>
 			{_.map(
-				getExclusivityGroupsFromOverrides,
+				exclusivityGroupsFromOverrides,
 				(exclusivityGroup: WrappedOverridableItem<StudioRouteSetExclusivityGroup>) => {
 					return (
 						<React.Fragment key={exclusivityGroup.id}>
@@ -739,7 +739,7 @@ function RenderExclusivityGroups({
 									exclusivityGroup={exclusivityGroup}
 									toggleExpanded={toggleExpanded}
 									isExpanded={isExpanded(exclusivityGroup.id)}
-									getRouteSetsFromOverrides={getRouteSetsFromOverrides}
+									routeSetsFromOverrides={routeSetsFromOverrides}
 									exclusivityOverrideHelper={exclusivityOverrideHelper}
 								/>
 							) : (
@@ -760,7 +760,7 @@ interface IRenderExclusivityGroupProps {
 	exclusivityGroup: WrappedOverridableItemNormal<StudioRouteSetExclusivityGroup>
 	toggleExpanded: (exclusivityGroupId: string, force?: boolean) => void
 	isExpanded: boolean
-	getRouteSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
+	routeSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
 	exclusivityOverrideHelper: OverrideOpHelper
 }
 
@@ -768,7 +768,7 @@ function RenderExclusivityGroup({
 	exclusivityGroup,
 	toggleExpanded,
 	isExpanded,
-	getRouteSetsFromOverrides,
+	routeSetsFromOverrides,
 	exclusivityOverrideHelper,
 }: Readonly<IRenderExclusivityGroupProps>): React.JSX.Element {
 	const { t } = useTranslation()
@@ -820,7 +820,7 @@ function RenderExclusivityGroup({
 				<td className="settings-studio-device__id c3">
 					{
 						_.filter(
-							getRouteSetsFromOverrides,
+							routeSetsFromOverrides,
 							(routeSet) => routeSet.computed?.exclusivityGroup === exclusivityGroup.computed?.name
 						).length
 					}
