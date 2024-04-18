@@ -1,6 +1,5 @@
 import ClassNames from 'classnames'
 import * as React from 'react'
-import * as _ from 'underscore'
 import {
 	DBStudio,
 	StudioRouteSet,
@@ -196,7 +195,7 @@ export function StudioRoutings({
 					<h3 className="mhn">{t('Route Sets')}</h3>
 					<table className="expando settings-studio-mappings-table">
 						<tbody>
-							{_.map(routeSetsFromOverrides, (routeSet: WrappedOverridableItem<StudioRouteSet>) => {
+							{routeSetsFromOverrides.map((routeSet: WrappedOverridableItem<StudioRouteSet>) => {
 								return (
 									<React.Fragment key={routeSet.id}>
 										{routeSet.type === 'normal' ? (
@@ -729,8 +728,7 @@ function RenderExclusivityGroups({
 	}
 	return (
 		<React.Fragment>
-			{_.map(
-				exclusivityGroupsFromOverrides,
+			{exclusivityGroupsFromOverrides.map(
 				(exclusivityGroup: WrappedOverridableItem<StudioRouteSetExclusivityGroup>) => {
 					return (
 						<React.Fragment key={exclusivityGroup.id}>
@@ -819,8 +817,7 @@ function RenderExclusivityGroup({
 				<td className="settings-studio-device__id c5">{exclusivityGroup.computed?.name}</td>
 				<td className="settings-studio-device__id c3">
 					{
-						_.filter(
-							routeSetsFromOverrides,
+						routeSetsFromOverrides.filter(
 							(routeSet) => routeSet.computed?.exclusivityGroup === exclusivityGroup.computed?.name
 						).length
 					}
