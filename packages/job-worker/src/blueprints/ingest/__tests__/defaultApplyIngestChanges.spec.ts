@@ -573,6 +573,57 @@ describe('defaultApplyIngestChanges', () => {
 			expect(mockCalls).toHaveLength(0)
 		})
 
+		it('change segment id', async () => {
+			const nrcsRundown = createIngestRundownWithManySegments()
+			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
+
+			const changes: NrcsIngestChangeDetails = {
+				source: 'ingest',
+				segmentChanges: {
+					segX: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
+				},
+				changedSegmentExternalIds: {
+					seg1: 'segX',
+				},
+			}
+
+			nrcsRundown.segments[1].externalId = 'segX'
+
+			// should run without error
+			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
+
+			expect(mockCalls).toHaveLength(3)
+			expect(mockCalls[0]).toEqual({ target: 'rundown', name: 'changeSegmentExternalId', args: ['seg1', 'segX'] })
+			expect(mockCalls[1]).toEqual({ target: 'options', name: 'transformSegmentPayload', args: [true] })
+			expect(mockCalls[2]).toMatchObject({
+				target: 'rundown',
+				name: 'replaceSegment',
+				args: [{ externalId: 'segX' }, 'seg2'],
+			})
+		})
+
+		it('change unknown segment id', async () => {
+			const nrcsRundown = createIngestRundownWithManySegments()
+			const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
+
+			const changes: NrcsIngestChangeDetails = {
+				source: 'ingest',
+				segmentChanges: {
+					segX: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
+				},
+				changedSegmentExternalIds: {
+					segY: 'segX',
+				},
+			}
+
+			nrcsRundown.segments[1].externalId = 'segX'
+
+			// should run without error
+			expect(() => defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)).toThrow(
+				/Segment(.*)not found/
+			)
+		})
+
 		describe('partOrderChanged', () => {
 			it('with single part', async () => {
 				const nrcsRundown = createMediumIngestRundown()
@@ -900,8 +951,4 @@ describe('defaultApplyIngestChanges', () => {
 			})
 		})
 	})
-
-	// nocommit - rename segments
-
-	// nocommit - more combinations of changes
 })
