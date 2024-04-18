@@ -353,7 +353,7 @@ function RenderRouteSet({
 									disabled={!!routeSet.defaults}
 								/>
 							</label>
-							<LabelAndOverridesForDropdown<any>
+							<LabelAndOverridesForDropdown
 								label={t('Default State')}
 								hint={t('he default state of this Route Set')}
 								item={routeSet}
@@ -397,7 +397,7 @@ function RenderRouteSet({
 								)}
 							</LabelAndOverrides>
 
-							<LabelAndOverridesForDropdown<any>
+							<LabelAndOverridesForDropdown
 								label={'Exclusivity group'}
 								hint={t('If set, only one Route Set will be active per exclusivity group')}
 								item={routeSet}
@@ -416,7 +416,7 @@ function RenderRouteSet({
 								)}
 							</LabelAndOverridesForDropdown>
 
-							<LabelAndOverridesForDropdown<any>
+							<LabelAndOverridesForDropdown
 								label={t('Behavior')}
 								hint={t('The way this Route Set should behave towards the user')}
 								item={routeSet}
