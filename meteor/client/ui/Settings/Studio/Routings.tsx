@@ -189,7 +189,7 @@ export function StudioRoutings({
 						</tbody>
 					</table>
 					<div className="mod mhs">
-						<button className="btn btn-primary" onClick={() => addNewExclusivityGroup()}>
+						<button className="btn btn-primary" onClick={addNewExclusivityGroup}>
 							<FontAwesomeIcon icon={faPlus} />
 						</button>
 					</div>
