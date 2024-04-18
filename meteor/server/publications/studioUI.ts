@@ -38,8 +38,8 @@ function convertDocument(studio: Pick<DBStudio, StudioFields>): UIStudio {
 
 		settings: studio.settings,
 
-		routeSets: studio.routeSets,
-		routeSetExclusivityGroups: studio.routeSetExclusivityGroups,
+		routeSets: applyAndValidateOverrides(studio.routeSets).obj,
+		routeSetExclusivityGroups: applyAndValidateOverrides(studio.routeSetExclusivityGroups).obj,
 	})
 }
 
