@@ -7,11 +7,11 @@ import type {
 	MutableIngestRundown,
 	NrcsIngestChangeDetails,
 } from '@sofie-automation/blueprints-integration'
-import { CommonContext } from './CommonContext'
+import { StudioContext } from './StudioContext'
 import { defaultApplyIngestChanges } from '../ingest/defaultApplyIngestChanges'
 import { groupMosPartsIntoIngestSegments, groupPartsInRundownAndChanges } from '../ingest/groupPartsInRundownAndChanges'
 
-export class ProcessIngestDataContext extends CommonContext implements IProcessIngestDataContext {
+export class ProcessIngestDataContext extends StudioContext implements IProcessIngestDataContext {
 	defaultApplyIngestChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 		mutableIngestRundown: MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>,
 		nrcsIngestRundown: IngestRundown,

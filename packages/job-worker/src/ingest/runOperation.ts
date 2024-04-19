@@ -282,10 +282,14 @@ async function updateSofieIngestRundown(
 					false
 			  )
 
-		const blueprintContext = new ProcessIngestDataContext({
-			name: 'processIngestData',
-			identifier: `studio:${context.studioId},blueprint:${studioBlueprint.blueprintId}`,
-		})
+		const blueprintContext = new ProcessIngestDataContext(
+			{
+				name: 'processIngestData',
+				identifier: `studio:${context.studioId},blueprint:${studioBlueprint.blueprintId}`,
+			},
+			context.studio,
+			context.getStudioBlueprintConfig()
+		)
 
 		// Let blueprints apply changes to the Sofie ingest data
 		if (typeof studioBlueprint.processIngestData === 'function') {

@@ -1,8 +1,8 @@
 import type { IngestRundown, IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
-import type { ICommonContext } from './baseContext'
+import type { IStudioContext } from './studioContext'
 import type { IngestDefaultChangesOptions, MutableIngestRundown, NrcsIngestChangeDetails } from '../ingest'
 
-export interface IProcessIngestDataContext extends ICommonContext {
+export interface IProcessIngestDataContext extends IStudioContext {
 	/**
 	 * Perform the default syncing of changes from the ingest data to the rundown.
 	 * This may be overly agressive at removing any changes made by user operations.
