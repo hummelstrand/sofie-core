@@ -10,7 +10,7 @@ import {
 	MappingsExt,
 	MappingExt,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import { EditAttribute } from '../../../lib/EditAttribute'
+import { EditAttribute, EditAttributeBase } from '../../../lib/EditAttribute'
 import { doModalDialog } from '../../../lib/ModalDialog'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faPencilAlt, faCheck, faPlus, faSync } from '@fortawesome/free-solid-svg-icons'
@@ -501,31 +501,20 @@ function RenderRoutes({
 	studio,
 	manifest,
 	translationNamespaces,
+	overrideHelper,
 	studioMappings,
 }: Readonly<IRenderRoutesProps>): React.JSX.Element {
 	const { t } = useTranslation()
 
-	const saveRoutesOverrides = React.useCallback(
-		(newOps: SomeObjectOverrideOp[]) => {
-			Studios.update(studio._id, {
-				$set: {
-					'routeSets.overrides': newOps,
-				},
-			})
-		},
-		[studio._id, studio.routeSets]
-	)
+	const routesBuffer = React.useMemo(() => routeSet.computed?.routes || [], [routeSet.computed?.routes])
 
-	//This helper won't work in a sub array (routes[]) but are used in this sketch:
-	const routesOverrideHelper = useOverrideOpHelper(saveRoutesOverrides, studio.routeSets)
-
-	const confirmRemoveRoute = (routeSetId: string, route: RouteMapping) => {
+	const confirmRemoveRoute = (routeSetId: string, route: RouteMapping, index: number) => {
 		doModalDialog({
 			title: t('Remove this Route from this Route Set?'),
 			yes: t('Remove'),
 			no: t('Cancel'),
 			onAccept: () => {
-				removeRoute(routeSetId)
+				removeRouteSetRoute(routeSetId, index)
 			},
 			message: (
 				<React.Fragment>
@@ -541,8 +530,25 @@ function RenderRoutes({
 		})
 	}
 
-	const removeRoute = (routeId: string) => {
-		routesOverrideHelper.deleteItem(routeId)
+	const updateRouteValueInSet = (e: EditAttributeBase, value: any, index: number) => {
+		if (!e.props.attribute) return
+		const attribute = e.props.attribute as keyof RouteMapping
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		//@ts-expect-error
+		routesBuffer[index][attribute] = value
+
+		overrideHelper.setItemValue(routeSet.id, 'routes', routesBuffer)
+	}
+
+	const removeRouteSetRoute = (routeId: string, index: number) => {
+		const unsetObject: Record<string, any> = {}
+		const newRoutes = routeSet.computed?.routes.slice()
+		if (newRoutes === undefined) return
+		newRoutes.splice(index, 1)
+		unsetObject['routeSets.' + routeId + '.routes'] = newRoutes
+		Studios.update(studio._id, {
+			$set: unsetObject,
+		})
 	}
 
 	return (
@@ -551,7 +557,7 @@ function RenderRoutes({
 			{routeSet.computed?.routes.length === 0 ? (
 				<p className="text-s dimmed field-hint mhs">{t('There are no routes set up yet')}</p>
 			) : null}
-			{routeSet.computed?.routes.map((route, index) => {
+			{routesBuffer.map((route, index) => {
 				const mappedLayer = route.mappedLayer ? studioMappings[route.mappedLayer] : undefined
 				const deviceTypeFromMappedLayer: TSR.DeviceType | undefined = mappedLayer?.device
 
@@ -575,105 +581,91 @@ function RenderRoutes({
 
 				return (
 					<div className="route-sets-editor mod pan mas" key={index}>
-						<button className="action-btn right mod man pas" onClick={() => confirmRemoveRoute(routeSetId, route)}>
+						<button
+							className="action-btn right mod man pas"
+							onClick={() => confirmRemoveRoute(routeSetId, route, index)}
+						>
 							<FontAwesomeIcon icon={faTrash} />
 						</button>
 						<div className="properties-grid">
-							<LabelAndOverridesForDropdown
-								label={'Original Layer'}
-								item={routeSet}
-								itemKey={'routes'} // this should be something like routes[this.route.id].mappedLayer
-								opPrefix={routeSet.id}
-								overrideHelper={routesOverrideHelper}
-								options={getDropdownInputOptions(studioMappings)}
-							>
-								{(value, handleUpdate, options) => (
-									<DropdownInputControl
-										classNames="input text-input input-l"
-										options={options}
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
-							</LabelAndOverridesForDropdown>
-							<LabelAndOverrides
-								label={t('New Layer')}
-								item={routeSet}
-								itemKey={'routes'} // this should be something like routes[this.route.id].outputMappedLayer
-								opPrefix={routeSet.id}
-								overrideHelper={routesOverrideHelper}
-							>
-								{(value, handleUpdate) => (
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
-							</LabelAndOverrides>
-							<LabelAndOverridesForDropdown
-								label={t('Route Type')}
-								item={routeSet}
-								itemKey={'routes'} // this should be something like routes[this.route.id].routeType
-								opPrefix={routeSet.id}
-								overrideHelper={routesOverrideHelper}
-								options={getDropdownInputOptions(StudioRouteType)}
-							>
-								{(value, handleUpdate, options) => (
-									<DropdownInputControl
-										classNames="input text-input input-l"
-										options={options}
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
-							</LabelAndOverridesForDropdown>
+							<label className="field">
+								<LabelActual label={t('Original Layer')} />
+								<EditAttribute
+									modifiedClassName="bghl"
+									attribute={`mappedLayer`}
+									updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
+									type="dropdowntext"
+									options={Object.keys(studioMappings)}
+									overrideDisplayValue={route.mappedLayer}
+									label={t('None')}
+									className="input text-input input-l"
+								></EditAttribute>
+							</label>
+							<label className="field">
+								<LabelActual label={t('New Layer')} />
+								<EditAttribute
+									modifiedClassName="bghl"
+									attribute={`outputMappedLayer`}
+									updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
+									overrideDisplayValue={route.outputMappedLayer}
+									type="text"
+									className="input text-input input-l"
+								></EditAttribute>
+							</label>
 
-							{route.routeType === StudioRouteType.REROUTE && route.mappedLayer ? (
-								deviceTypeFromMappedLayer !== undefined ? (
-									<span className="mls">{TSR.DeviceType[deviceTypeFromMappedLayer]}</span>
+							<label className="field">
+								<LabelActual label={t('Route Type')} />
+								{!route.mappedLayer ? (
+									<span className="mls">REMAP</span>
 								) : (
-									<span className="mls dimmed">{t('Source Layer not found')}</span>
-								)
-							) : (
-								<LabelAndOverridesForDropdown
-									label={t('Device Type')}
-									item={routeSet}
-									itemKey={'routes'} // this should be something like routes[this.route.id].deviceType
-									opPrefix={routeSet.id}
-									overrideHelper={routesOverrideHelper}
-									options={getDropdownInputOptions(TSR.DeviceType)}
-								>
-									{(value, handleUpdate, options) => (
-										<DropdownInputControl
-											classNames="input text-input input-l"
-											options={options}
-											value={value}
-											handleUpdate={handleUpdate}
-										/>
-									)}
-								</LabelAndOverridesForDropdown>
-							)}
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`routeType`}
+										updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
+										overrideDisplayValue={route.routeType}
+										type="dropdown"
+										options={StudioRouteType}
+										optionsAreNumbers={true}
+										className="input text-input input-l"
+									></EditAttribute>
+								)}
+							</label>
+
+							<label className="field">
+								<LabelActual label={t('Device Type')} />
+								{route.routeType === StudioRouteType.REROUTE && route.mappedLayer ? (
+									deviceTypeFromMappedLayer !== undefined ? (
+										<span className="mls">{TSR.DeviceType[deviceTypeFromMappedLayer]}</span>
+									) : (
+										<span className="mls dimmed">{t('Source Layer not found')}</span>
+									)
+								) : (
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`deviceType`}
+										updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
+										overrideDisplayValue={route.deviceType}
+										type="dropdown"
+										options={TSR.DeviceType}
+										optionsAreNumbers={true}
+										className="input text-input input-l"
+									></EditAttribute>
+								)}
+							</label>
 
 							{mappingTypeOptions.length > 0 && (
-								<LabelAndOverridesForDropdown
-									label={t('Mapping Type')}
-									item={routeSet}
-									itemKey={'routes'} // this should be something like routes[this.route.id].remapping.options.mappingType
-									opPrefix={routeSet.id}
-									overrideHelper={routesOverrideHelper}
-									options={getDropdownInputOptions(TSR.DeviceType)}
-								>
-									{(value, handleUpdate, options) => (
-										<DropdownInputControl
-											classNames="input text-input input-l"
-											options={options}
-											value={value}
-											handleUpdate={handleUpdate}
-										/>
-									)}
-								</LabelAndOverridesForDropdown>
+								<label className="field">
+									<LabelActual label={t('Mapping Type')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`remapping.options.mappingType`}
+										updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
+										overrideDisplayValue={route.remapping?.options?.mappingType}
+										type="dropdown"
+										options={mappingTypeOptions}
+										className="input text-input input-l"
+									></EditAttribute>
+								</label>
 							)}
 							{route.routeType === StudioRouteType.REMAP ||
 							(routeDeviceType !== undefined && route.remapping !== undefined) ? (
@@ -683,20 +675,20 @@ function RenderRoutes({
 										<div>
 											<EditAttribute
 												modifiedClassName="bghl"
-												attribute={`routeSets.${routeSetId}.routes.${index}.remapping.deviceId`}
-												obj={studio}
+												attribute={`remapping.deviceId`}
+												updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
+												overrideDisplayValue={route.remapping?.deviceId}
 												type="checkbox"
-												collection={Studios}
 												className="mrs mvxs"
 												mutateDisplayValue={(v) => (v === undefined ? false : true)}
 												mutateUpdateValue={() => undefined}
 											/>
 											<EditAttribute
 												modifiedClassName="bghl"
-												attribute={`routeSets.${routeSetId}.routes.${index}.remapping.deviceId`}
-												obj={studio}
+												attribute={`remapping.deviceId`}
+												updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
+												overrideDisplayValue={route.remapping?.deviceId}
 												type="text"
-												collection={Studios}
 												className="input text-input input-l"
 											></EditAttribute>
 										</div>
@@ -705,8 +697,8 @@ function RenderRoutes({
 									<DeviceMappingSettings
 										translationNamespaces={translationNamespaces}
 										studio={studio}
-										// this should be something like routes[this.route.id].remapping.options.mappingType
-										attribute={`routeSets.${routeSetId}.routes.${index}.remapping.options`}
+										attribute={`remapping.options`}
+										//										updateRouteValueInSet={updateRouteValueInSet}
 										mappedLayer={mappedLayer}
 										manifest={routeMappingSchema}
 									/>
