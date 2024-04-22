@@ -49,6 +49,8 @@ import {
 import { useToggleExpandHelper } from '../../util/useToggleExpandHelper'
 import { TextInputControl } from '../../../lib/Components/TextInput'
 import { CheckboxControl } from '../../../lib/Components/Checkbox'
+import { SchemaFormArrayTable } from '../../../lib/forms/SchemaFormTable/ArrayTable'
+import { OverrideOpHelperArrayTable } from '../../../lib/forms/SchemaFormTable/ArrayTableOpHelper'
 
 interface IStudioRoutingsProps {
 	translationNamespaces: string[]
@@ -219,7 +221,7 @@ export function StudioRoutings({
 						</tbody>
 					</table>
 					<div className="mod mhs">
-						<button className="btn btn-primary" onClick={() => addNewRouteSet()}>
+						<button className="btn btn-primary" onClick={addNewRouteSet}>
 							<FontAwesomeIcon icon={faPlus} />
 						</button>
 					</div>
@@ -505,6 +507,11 @@ function RenderRoutes({
 
 	const routesBuffer = React.useMemo(() => routeSet.computed?.routes || [], [routeSet.computed?.routes])
 
+	const tableOverrideHelper = React.useMemo(
+		() => new OverrideOpHelperArrayTable(overrideHelper, routeSet.id, routesBuffer, 'routes'),
+		[overrideHelper, routeSet.id, routesBuffer]
+	)
+
 	const confirmRemoveRoute = (route: RouteMapping, index: number) => {
 		doModalDialog({
 			title: t('Remove this Route from this Route Set?'),
@@ -598,25 +605,43 @@ function RenderRoutes({
 					})
 				)
 
+				// TODO: This can't be inside a loop. The inside of this loop should be moved to a new component
+				const rowItem = React.useMemo(
+					() =>
+						literal<WrappedOverridableItemNormal<any>>({
+							type: 'normal',
+							id: index + '',
+							computed: route,
+							defaults: undefined,
+							overrideOps: [],
+						}),
+					[route, index]
+				)
+
 				return (
 					<div className="route-sets-editor mod pan mas" key={index}>
 						<button className="action-btn right mod man pas" onClick={() => confirmRemoveRoute(route, index)}>
 							<FontAwesomeIcon icon={faTrash} />
 						</button>
 						<div className="properties-grid">
-							<label className="field">
-								<LabelActual label={t('Original Layer')} />
-								<EditAttribute
-									modifiedClassName="bghl"
-									attribute={`mappedLayer`}
-									updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
-									type="dropdowntext"
-									options={Object.keys(studioMappings)}
-									overrideDisplayValue={route.mappedLayer}
-									label={t('None')}
-									className="input text-input input-l"
-								></EditAttribute>
-							</label>
+							<LabelAndOverridesForDropdown
+								label={t('Original Layer')}
+								item={rowItem}
+								itemKey={'mappedLayer'}
+								opPrefix={rowItem.id}
+								overrideHelper={tableOverrideHelper}
+								options={getDropdownInputOptions(Object.keys(studioMappings))}
+							>
+								{(value, handleUpdate, options) => (
+									<DropdownInputControl
+										classNames="input text-input input-l"
+										options={options}
+										value={value}
+										handleUpdate={handleUpdate}
+									/>
+								)}
+							</LabelAndOverridesForDropdown>
+
 							<label className="field">
 								<LabelActual label={t('New Layer')} />
 								<EditAttribute
@@ -653,7 +678,7 @@ function RenderRoutes({
 									deviceTypeFromMappedLayer !== undefined ? (
 										<span className="mls">{TSR.DeviceType[deviceTypeFromMappedLayer]}</span>
 									) : (
-										<span className="mls dimmed">{t('Source Layer not found')}</span>
+										<span className="mls dimmed">{t('Original Layer not found')}</span>
 									)
 								) : (
 									<EditAttribute
