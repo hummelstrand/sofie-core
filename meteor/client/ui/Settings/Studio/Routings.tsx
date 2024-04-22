@@ -209,7 +209,7 @@ export function StudioRoutings({
 												toggleExpanded={toggleExpanded}
 												isExpanded={isExpanded(routeSet.id)}
 												overrideHelper={overrideHelper}
-												getExclusivityGroupsFromOverrides={exclusivityGroupsFromOverrides}
+												exclusivityGroupsFromOverrides={exclusivityGroupsFromOverrides}
 											/>
 										) : (
 											<RenderRouteSetDeletedEntry routeSet={routeSet} overrideHelper={overrideHelper} />
@@ -239,7 +239,7 @@ interface IRenderRouteSetProps {
 	toggleExpanded: (layerId: string, force?: boolean) => void
 	isExpanded: boolean
 	overrideHelper: OverrideOpHelper
-	getExclusivityGroupsFromOverrides: WrappedOverridableItem<StudioRouteSetExclusivityGroup>[]
+	exclusivityGroupsFromOverrides: WrappedOverridableItem<StudioRouteSetExclusivityGroup>[]
 }
 
 function RenderRouteSet({
@@ -251,7 +251,7 @@ function RenderRouteSet({
 	isExpanded,
 	studioMappings,
 	overrideHelper,
-	getExclusivityGroupsFromOverrides,
+	exclusivityGroupsFromOverrides,
 }: Readonly<IRenderRouteSetProps>): React.JSX.Element {
 	const { t } = useTranslation()
 	const toggleEditRouteSet = React.useCallback(() => toggleExpanded(routeSet.id), [toggleExpanded, routeSet.id])
@@ -262,7 +262,7 @@ function RenderRouteSet({
 			yes: t('Remove'),
 			no: t('Cancel'),
 			onAccept: () => {
-				removeRouteSet(routeSetId)
+				overrideHelper.deleteItem(routeSetId)
 			},
 			message: (
 				<React.Fragment>
@@ -271,10 +271,6 @@ function RenderRouteSet({
 				</React.Fragment>
 			),
 		})
-	}
-
-	const removeRouteSet = (routeId: string) => {
-		overrideHelper.deleteItem(routeId)
 	}
 
 	const addNewRouteInSet = (routeId: string) => {
@@ -304,7 +300,7 @@ function RenderRouteSet({
 				name: 'None',
 				value: undefined,
 			},
-			...getExclusivityGroupsFromOverrides
+			...exclusivityGroupsFromOverrides
 				.filter((group) => group.type === 'normal')
 				.map((group) => group.computed?.name || group.id),
 		])
@@ -520,231 +516,270 @@ function RenderRoutes({
 }: Readonly<IRenderRoutesProps>): React.JSX.Element {
 	const { t } = useTranslation()
 
-	const routesBuffer = React.useMemo(() => routeSet.computed?.routes || [], [routeSet.computed?.routes])
+	const routesBuffer = routeSet.computed.routes
 
 	const tableOverrideHelper = React.useMemo(
 		() => new OverrideOpHelperArrayTable(overrideHelper, routeSet.id, routesBuffer, 'routes'),
 		[overrideHelper, routeSet.id, routesBuffer]
 	)
 
-	const confirmRemoveRoute = (route: RouteMapping, index: number) => {
-		doModalDialog({
-			title: t('Remove this Route from this Route Set?'),
-			yes: t('Remove'),
-			no: t('Cancel'),
-			onAccept: () => {
-				tableOverrideHelper.deleteRow(index + '')
-			},
-			message: (
-				<React.Fragment>
-					<p>
-						{t('Are you sure you want to remove the Route from "{{sourceLayerId}}" to "{{newLayerId}}"?', {
-							sourceLayerId: route.mappedLayer,
-							newLayerId: route.outputMappedLayer,
-						})}
-					</p>
-					<p>{t('Please note: This action is irreversible!')}</p>
-				</React.Fragment>
-			),
-		})
-	}
+	const confirmRemoveRoute = React.useCallback(
+		(route: WrappedOverridableItemNormal<RouteMapping>) => {
+			doModalDialog({
+				title: t('Remove this Route from this Route Set?'),
+				yes: t('Remove'),
+				no: t('Cancel'),
+				onAccept: () => {
+					tableOverrideHelper.deleteRow(route.id)
+				},
+				message: (
+					<>
+						<p>
+							{t('Are you sure you want to remove the Route from "{{sourceLayerId}}" to "{{newLayerId}}"?', {
+								sourceLayerId: route.computed.mappedLayer,
+								newLayerId: route.computed.outputMappedLayer,
+							})}
+						</p>
+						<p>{t('Please note: This action is irreversible!')}</p>
+					</>
+				),
+			})
+		},
+		[tableOverrideHelper]
+	)
 
 	return (
-		<React.Fragment>
+		<>
 			<h4 className="mod mhs">{t('Routes')}</h4>
 			{routeSet.computed?.routes?.length === 0 ? (
 				<p className="text-s dimmed field-hint mhs">{t('There are no routes set up yet')}</p>
 			) : null}
-			{routesBuffer.map((route, index) => {
-				const mappedLayer = route.mappedLayer ? studioMappings[route.mappedLayer] : undefined
-				const deviceTypeFromMappedLayer: TSR.DeviceType | undefined = mappedLayer?.device
+			{routesBuffer.map((route, index) => (
+				<RenderRoutesRow
+					key={index}
+					manifest={manifest}
+					translationNamespaces={translationNamespaces}
+					tableOverrideHelper={tableOverrideHelper}
+					studioMappings={studioMappings}
+					rawRoute={route}
+					routeIndex={index}
+					confirmRemoveRoute={confirmRemoveRoute}
+				/>
+			))}
+		</>
+	)
+}
 
-				const routeDeviceType: TSR.DeviceType | undefined =
-					route.routeType === StudioRouteType.REMAP
-						? route.deviceType
-						: route.mappedLayer
-						? deviceTypeFromMappedLayer
-						: route.deviceType
+interface RenderRoutesRowProps {
+	manifest: MappingsSettingsManifests
+	translationNamespaces: string[]
+	tableOverrideHelper: OverrideOpHelperArrayTable
+	studioMappings: ReadonlyDeep<MappingsExt>
+	rawRoute: RouteMapping
+	routeIndex: number
+	confirmRemoveRoute: (route: WrappedOverridableItemNormal<RouteMapping>) => void
+}
 
-				const routeMappingSchema = manifest[(routeDeviceType ?? route.remapping?.device) as TSR.DeviceType]
+function RenderRoutesRow({
+	manifest,
+	translationNamespaces,
+	tableOverrideHelper,
+	studioMappings,
+	rawRoute,
+	routeIndex,
+	confirmRemoveRoute,
+}: Readonly<RenderRoutesRowProps>): React.JSX.Element {
+	const { t } = useTranslation()
 
-				const rawMappingTypeOptions = Object.entries<JSONSchema>(routeMappingSchema?.mappingsSchema || {})
-				const mappingTypeOptions = rawMappingTypeOptions.map(([id, entry], i) =>
-					literal<DropdownInputOption<string | number>>({
-						value: id + '',
-						name: entry?.title ?? id + '',
-						i,
-					})
-				)
+	const mappedLayer = rawRoute.mappedLayer ? studioMappings[rawRoute.mappedLayer] : undefined
+	const deviceTypeFromMappedLayer: TSR.DeviceType | undefined = mappedLayer?.device
 
-				// TODO: This can't be inside a loop. The inside of this loop should be moved to a new component
-				const rowItem = React.useMemo(
-					() =>
-						literal<WrappedOverridableItemNormal<RouteMapping>>({
-							type: 'normal',
-							id: index + '',
-							computed: route,
-							defaults: undefined,
-							overrideOps: [],
-						}),
-					[route, index]
-				)
+	const routeDeviceType: TSR.DeviceType | undefined =
+		rawRoute.routeType === StudioRouteType.REMAP
+			? rawRoute.deviceType
+			: rawRoute.mappedLayer
+			? deviceTypeFromMappedLayer
+			: rawRoute.deviceType
 
-				return (
-					<div className="route-sets-editor mod pan mas" key={index}>
-						<button className="action-btn right mod man pas" onClick={() => confirmRemoveRoute(route, index)}>
-							<FontAwesomeIcon icon={faTrash} />
-						</button>
-						<div className="properties-grid">
-							<LabelAndOverridesForDropdown
-								label={t('Original Layer')}
-								item={rowItem}
-								itemKey={'mappedLayer'}
-								opPrefix={rowItem.id}
-								overrideHelper={tableOverrideHelper}
-								options={getDropdownInputOptions(Object.keys(studioMappings))}
-							>
-								{(value, handleUpdate, options) => (
-									<DropdownInputControl
-										classNames="input text-input input-l"
-										options={options}
-										value={value}
-										handleUpdate={handleUpdate}
+	const routeMappingSchema = manifest[(routeDeviceType ?? rawRoute.remapping?.device) as TSR.DeviceType]
+
+	const mappingTypeOptions: DropdownInputOption<string | number>[] = React.useMemo(() => {
+		const rawMappingTypeOptions = Object.entries<JSONSchema>(routeMappingSchema?.mappingsSchema || {})
+		return rawMappingTypeOptions.map(([id, entry], i) =>
+			literal<DropdownInputOption<string | number>>({
+				value: id + '',
+				name: entry?.title ?? id + '',
+				i,
+			})
+		)
+	}, [routeMappingSchema?.mappingsSchema])
+
+	const route = React.useMemo(
+		() =>
+			literal<WrappedOverridableItemNormal<RouteMapping>>({
+				type: 'normal',
+				id: routeIndex + '',
+				computed: rawRoute,
+				defaults: undefined,
+				overrideOps: [],
+			}),
+		[rawRoute, routeIndex]
+	)
+
+	const confirmRemoveRouteLocal = React.useCallback(() => confirmRemoveRoute(route), [confirmRemoveRoute, route])
+
+	return (
+		<div className="route-sets-editor mod pan mas">
+			<button className="action-btn right mod man pas" onClick={confirmRemoveRouteLocal}>
+				<FontAwesomeIcon icon={faTrash} />
+			</button>
+			<div className="properties-grid">
+				<LabelAndOverridesForDropdown
+					label={t('Original Layer')}
+					item={route}
+					itemKey={'mappedLayer'}
+					opPrefix={route.id}
+					overrideHelper={tableOverrideHelper}
+					options={getDropdownInputOptions(Object.keys(studioMappings))}
+				>
+					{(value, handleUpdate, options) => (
+						<DropdownInputControl
+							classNames="input text-input input-l"
+							options={options}
+							value={value}
+							handleUpdate={handleUpdate}
+						/>
+					)}
+				</LabelAndOverridesForDropdown>
+
+				<LabelAndOverrides
+					label={t('New Layer')}
+					item={route}
+					itemKey={'outputMappedLayer'}
+					opPrefix={route.id}
+					overrideHelper={tableOverrideHelper}
+				>
+					{(value, handleUpdate) => (
+						<TextInputControl
+							modifiedClassName="bghl"
+							classNames="input text-input input-l"
+							value={value}
+							handleUpdate={handleUpdate}
+						/>
+					)}
+				</LabelAndOverrides>
+
+				<LabelAndOverridesForDropdown
+					label={t('Route Type')}
+					item={route}
+					itemKey={'routeType'}
+					opPrefix={route.id}
+					overrideHelper={tableOverrideHelper}
+					options={getDropdownInputOptions(StudioRouteType)}
+				>
+					{(value, handleUpdate, options) => {
+						if (!rawRoute.mappedLayer) {
+							return <span className="mls">REMAP</span>
+						} else {
+							return (
+								<DropdownInputControl
+									classNames="input text-input input-l"
+									options={options}
+									value={value}
+									handleUpdate={handleUpdate}
+								/>
+							)
+						}
+					}}
+				</LabelAndOverridesForDropdown>
+
+				<LabelAndOverridesForDropdown
+					label={t('Device Type')}
+					item={route}
+					itemKey={'deviceType'}
+					opPrefix={route.id}
+					overrideHelper={tableOverrideHelper}
+					options={getDropdownInputOptions(TSR.DeviceType)}
+				>
+					{(value, handleUpdate, options) => {
+						if (rawRoute.routeType === StudioRouteType.REROUTE && rawRoute.mappedLayer) {
+							return deviceTypeFromMappedLayer !== undefined ? (
+								<span className="mls">{TSR.DeviceType[deviceTypeFromMappedLayer]}</span>
+							) : (
+								<span className="mls dimmed">{t('Original Layer not found')}</span>
+							)
+						} else {
+							return (
+								<DropdownInputControl
+									classNames="input text-input input-l"
+									options={options}
+									value={value}
+									handleUpdate={handleUpdate}
+								/>
+							)
+						}
+					}}
+				</LabelAndOverridesForDropdown>
+
+				{mappingTypeOptions.length > 0 && (
+					<LabelAndOverridesForDropdown<any> // Deep key is not allowed, but is fine for now
+						label={t('Mapping Type')}
+						item={route}
+						itemKey={'remapping.options.mappingType'}
+						opPrefix={route.id}
+						overrideHelper={tableOverrideHelper}
+						options={mappingTypeOptions}
+					>
+						{(value, handleUpdate, options) => (
+							<DropdownInputControl
+								classNames="input text-input input-l"
+								options={options}
+								value={value}
+								handleUpdate={handleUpdate}
+							/>
+						)}
+					</LabelAndOverridesForDropdown>
+				)}
+				{rawRoute.routeType === StudioRouteType.REMAP ||
+				(routeDeviceType !== undefined && rawRoute.remapping !== undefined) ? (
+					<>
+						<LabelAndOverrides<any> // Deep key is not allowed, but is fine for now
+							label={t('Device ID')}
+							item={route}
+							itemKey={'remapping.deviceId'}
+							opPrefix={route.id}
+							overrideHelper={tableOverrideHelper}
+						>
+							{(value, handleUpdate) => (
+								<div>
+									<CheckboxControl
+										classNames="input"
+										title={t('Enable/Disable route set override')}
+										value={value !== undefined}
+										handleUpdate={() => handleUpdate(undefined)}
 									/>
-								)}
-							</LabelAndOverridesForDropdown>
-
-							<LabelAndOverrides
-								label={t('New Layer')}
-								item={rowItem}
-								itemKey={'outputMappedLayer'}
-								opPrefix={rowItem.id}
-								overrideHelper={tableOverrideHelper}
-							>
-								{(value, handleUpdate) => (
 									<TextInputControl
 										modifiedClassName="bghl"
 										classNames="input text-input input-l"
 										value={value}
 										handleUpdate={handleUpdate}
 									/>
-								)}
-							</LabelAndOverrides>
-
-							<LabelAndOverridesForDropdown
-								label={t('Route Type')}
-								item={rowItem}
-								itemKey={'routeType'}
-								opPrefix={rowItem.id}
-								overrideHelper={tableOverrideHelper}
-								options={getDropdownInputOptions(StudioRouteType)}
-							>
-								{(value, handleUpdate, options) => {
-									if (!route.mappedLayer) {
-										return <span className="mls">REMAP</span>
-									} else {
-										return (
-											<DropdownInputControl
-												classNames="input text-input input-l"
-												options={options}
-												value={value}
-												handleUpdate={handleUpdate}
-											/>
-										)
-									}
-								}}
-							</LabelAndOverridesForDropdown>
-
-							<LabelAndOverridesForDropdown
-								label={t('Device Type')}
-								item={rowItem}
-								itemKey={'deviceType'}
-								opPrefix={rowItem.id}
-								overrideHelper={tableOverrideHelper}
-								options={getDropdownInputOptions(TSR.DeviceType)}
-							>
-								{(value, handleUpdate, options) => {
-									if (route.routeType === StudioRouteType.REROUTE && route.mappedLayer) {
-										return deviceTypeFromMappedLayer !== undefined ? (
-											<span className="mls">{TSR.DeviceType[deviceTypeFromMappedLayer]}</span>
-										) : (
-											<span className="mls dimmed">{t('Original Layer not found')}</span>
-										)
-									} else {
-										return (
-											<DropdownInputControl
-												classNames="input text-input input-l"
-												options={options}
-												value={value}
-												handleUpdate={handleUpdate}
-											/>
-										)
-									}
-								}}
-							</LabelAndOverridesForDropdown>
-
-							{mappingTypeOptions.length > 0 && (
-								<LabelAndOverridesForDropdown<any> // Deep key is not allowed, but is fine for now
-									label={t('Mapping Type')}
-									item={rowItem}
-									itemKey={'remapping.options.mappingType'}
-									opPrefix={rowItem.id}
-									overrideHelper={tableOverrideHelper}
-									options={mappingTypeOptions}
-								>
-									{(value, handleUpdate, options) => (
-										<DropdownInputControl
-											classNames="input text-input input-l"
-											options={options}
-											value={value}
-											handleUpdate={handleUpdate}
-										/>
-									)}
-								</LabelAndOverridesForDropdown>
+								</div>
 							)}
-							{route.routeType === StudioRouteType.REMAP ||
-							(routeDeviceType !== undefined && route.remapping !== undefined) ? (
-								<>
-									<LabelAndOverrides<any> // Deep key is not allowed, but is fine for now
-										label={t('Device ID')}
-										item={rowItem}
-										itemKey={'remapping.deviceId'}
-										opPrefix={rowItem.id}
-										overrideHelper={tableOverrideHelper}
-									>
-										{(value, handleUpdate) => (
-											<div>
-												<CheckboxControl
-													classNames="input"
-													title={t('Enable/Disable route set override')}
-													value={value !== undefined}
-													handleUpdate={() => handleUpdate(undefined)}
-												/>
-												<TextInputControl
-													modifiedClassName="bghl"
-													classNames="input text-input input-l"
-													value={value}
-													handleUpdate={handleUpdate}
-												/>
-											</div>
-										)}
-									</LabelAndOverrides>
+						</LabelAndOverrides>
 
-									{/** TODO: this needs the same checkbox to enable/disable as above */}
-									<DeviceMappingSettings
-										translationNamespaces={translationNamespaces}
-										mappedLayer={mappedLayer}
-										manifest={routeMappingSchema}
-										overrideHelper={tableOverrideHelper}
-										route={rowItem}
-									/>
-								</>
-							) : null}
-						</div>
-					</div>
-				)
-			})}
-		</React.Fragment>
+						{/** TODO: this needs the same checkbox to enable/disable as above */}
+						<DeviceMappingSettings
+							translationNamespaces={translationNamespaces}
+							mappedLayer={mappedLayer}
+							manifest={routeMappingSchema}
+							overrideHelper={tableOverrideHelper}
+							route={route}
+						/>
+					</>
+				) : null}
+			</div>
+		</div>
 	)
 }
 
