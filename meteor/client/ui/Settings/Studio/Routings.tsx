@@ -541,6 +541,7 @@ function RenderRoutes({
 	// contains different objects inside
 	const updateValueInRemapping = (attribute: string, value: any, index: number) => {
 		const key = attribute as keyof RouteMapping
+		if (!routesBuffer[index].remapping) routesBuffer[index].remapping = {}
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		//@ts-expect-error
 		routesBuffer[index].remapping[key] = value
@@ -551,6 +552,11 @@ function RenderRoutes({
 	// contains different objects inside
 	const updateValueInRemappingOptions = (attribute: string, value: any, index: number) => {
 		const key = attribute as keyof RouteMapping
+		if (!routesBuffer[index].remapping?.options) {
+			routesBuffer[index].remapping = {
+				options: {},
+			}
+		}
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		//@ts-expect-error
 		routesBuffer[index].remapping.options[key] = value
@@ -708,7 +714,6 @@ function RenderRoutes({
 										translationNamespaces={translationNamespaces}
 										studio={studio}
 										attribute={`remapping.options`}
-										//										updateRouteValueInSet={updateRouteValueInSet}
 										mappedLayer={mappedLayer}
 										manifest={routeMappingSchema}
 									/>
