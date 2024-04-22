@@ -144,7 +144,7 @@ export interface OverrideOpHelper extends OverrideOpHelperForItemContents {
 	 */
 	replaceItem(itemId: string, value: any): void
 }
-export class OverrideOpHelperImpl implements OverrideOpHelper {
+class OverrideOpHelperImpl implements OverrideOpHelper {
 	readonly #saveOverrides: SaveOverridesFunction
 	readonly #objectWithOverrides: ObjectWithOverrides<any>
 
