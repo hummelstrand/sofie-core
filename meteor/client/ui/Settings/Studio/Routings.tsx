@@ -437,7 +437,6 @@ function RenderRouteSet({
 						</div>
 						<RenderRoutes
 							routeSet={routeSet}
-							routeSetId={routeSet.id}
 							studio={studio}
 							manifest={manifest}
 							translationNamespaces={translationNamespaces}
@@ -488,7 +487,6 @@ function RenderRouteSetDeletedEntry({ routeSet, overrideHelper }: Readonly<IRend
 interface IRenderRoutesProps {
 	routeSet: WrappedOverridableItem<StudioRouteSet>
 	studio: DBStudio
-	routeSetId: string
 	manifest: MappingsSettingsManifests
 	translationNamespaces: string[]
 	overrideHelper: OverrideOpHelper
@@ -497,7 +495,6 @@ interface IRenderRoutesProps {
 
 function RenderRoutes({
 	routeSet,
-	routeSetId,
 	studio,
 	manifest,
 	translationNamespaces,
@@ -508,13 +505,13 @@ function RenderRoutes({
 
 	const routesBuffer = React.useMemo(() => routeSet.computed?.routes || [], [routeSet.computed?.routes])
 
-	const confirmRemoveRoute = (routeSetId: string, route: RouteMapping, index: number) => {
+	const confirmRemoveRoute = (route: RouteMapping, index: number) => {
 		doModalDialog({
 			title: t('Remove this Route from this Route Set?'),
 			yes: t('Remove'),
 			no: t('Cancel'),
 			onAccept: () => {
-				removeRouteSetRoute(routeSetId, index)
+				removeRouteInSet(index)
 			},
 			message: (
 				<React.Fragment>
@@ -540,15 +537,11 @@ function RenderRoutes({
 		overrideHelper.setItemValue(routeSet.id, 'routes', routesBuffer)
 	}
 
-	const removeRouteSetRoute = (routeId: string, index: number) => {
-		const unsetObject: Record<string, any> = {}
-		const newRoutes = routeSet.computed?.routes.slice()
+	const removeRouteInSet = (index: number) => {
+		const newRoutes = routesBuffer.slice()
 		if (newRoutes === undefined) return
 		newRoutes.splice(index, 1)
-		unsetObject['routeSets.' + routeId + '.routes'] = newRoutes
-		Studios.update(studio._id, {
-			$set: unsetObject,
-		})
+		overrideHelper.setItemValue(routeSet.id, 'routes', newRoutes)
 	}
 
 	return (
@@ -581,10 +574,7 @@ function RenderRoutes({
 
 				return (
 					<div className="route-sets-editor mod pan mas" key={index}>
-						<button
-							className="action-btn right mod man pas"
-							onClick={() => confirmRemoveRoute(routeSetId, route, index)}
-						>
+						<button className="action-btn right mod man pas" onClick={() => confirmRemoveRoute(route, index)}>
 							<FontAwesomeIcon icon={faTrash} />
 						</button>
 						<div className="properties-grid">
