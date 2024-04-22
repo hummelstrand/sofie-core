@@ -537,6 +537,26 @@ function RenderRoutes({
 		overrideHelper.setItemValue(routeSet.id, 'routes', routesBuffer)
 	}
 
+	// This function is a workaround as remappingobject
+	// contains different objects inside
+	const updateValueInRemapping = (attribute: string, value: any, index: number) => {
+		const key = attribute as keyof RouteMapping
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		//@ts-expect-error
+		routesBuffer[index].remapping[key] = value
+		overrideHelper.setItemValue(routeSet.id, 'routes', routesBuffer)
+	}
+
+	// This function is a workaround as remapping.options
+	// contains different objects inside
+	const updateValueInRemappingOptions = (attribute: string, value: any, index: number) => {
+		const key = attribute as keyof RouteMapping
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		//@ts-expect-error
+		routesBuffer[index].remapping.options[key] = value
+		overrideHelper.setItemValue(routeSet.id, 'routes', routesBuffer)
+	}
+
 	const removeRouteInSet = (index: number) => {
 		const newRoutes = routesBuffer.slice()
 		if (newRoutes === undefined) return
@@ -649,7 +669,7 @@ function RenderRoutes({
 									<EditAttribute
 										modifiedClassName="bghl"
 										attribute={`remapping.options.mappingType`}
-										updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
+										updateFunction={(e, value) => updateValueInRemappingOptions('mappingType', value, index)}
 										overrideDisplayValue={route.remapping?.options?.mappingType}
 										type="dropdown"
 										options={mappingTypeOptions}
@@ -666,7 +686,7 @@ function RenderRoutes({
 											<EditAttribute
 												modifiedClassName="bghl"
 												attribute={`remapping.deviceId`}
-												updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
+												updateFunction={(e, value) => updateValueInRemapping('deviceId', value, index)}
 												overrideDisplayValue={route.remapping?.deviceId}
 												type="checkbox"
 												className="mrs mvxs"
@@ -676,7 +696,7 @@ function RenderRoutes({
 											<EditAttribute
 												modifiedClassName="bghl"
 												attribute={`remapping.deviceId`}
-												updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
+												updateFunction={(e, value) => updateValueInRemapping('deviceId', value, index)}
 												overrideDisplayValue={route.remapping?.deviceId}
 												type="text"
 												className="input text-input input-l"
@@ -700,6 +720,45 @@ function RenderRoutes({
 			})}
 		</React.Fragment>
 	)
+}
+
+interface IDeviceMappingSettingsProps {
+	translationNamespaces: string[]
+	studio: DBStudio
+	attribute: string
+	manifest: MappingsSettingsManifest | undefined
+	mappedLayer: ReadonlyDeep<MappingExt> | undefined
+}
+
+function DeviceMappingSettings({
+	translationNamespaces,
+	attribute,
+	manifest,
+	studio,
+	mappedLayer,
+}: IDeviceMappingSettingsProps) {
+	// this won't work as it is now, as the object is not a top level object:
+	// this should work in   routes[this.route.id].remapping.options.mappingType
+	const routeRemapping = objectPathGet(studio, attribute)
+
+	const mappingType = routeRemapping?.mappingType ?? mappedLayer?.options?.mappingType
+	const mappingSchema = manifest?.mappingsSchema?.[mappingType]
+
+	if (mappingSchema && routeRemapping) {
+		return (
+			<SchemaFormForCollection
+				schema={mappingSchema}
+				object={routeRemapping}
+				basePath={attribute}
+				translationNamespaces={translationNamespaces}
+				collection={Studios}
+				objectId={studio._id}
+				partialOverridesForObject={mappedLayer}
+			/>
+		)
+	} else {
+		return null
+	}
 }
 
 interface IRenderExclusivityGroupsProps {
@@ -917,43 +976,4 @@ function RenderExclusivityDeletedGroup({
 			</td>
 		</tr>
 	)
-}
-
-interface IDeviceMappingSettingsProps {
-	translationNamespaces: string[]
-	studio: DBStudio
-	attribute: string
-	manifest: MappingsSettingsManifest | undefined
-	mappedLayer: ReadonlyDeep<MappingExt> | undefined
-}
-
-function DeviceMappingSettings({
-	translationNamespaces,
-	attribute,
-	manifest,
-	studio,
-	mappedLayer,
-}: IDeviceMappingSettingsProps) {
-	// this won't work as it is now, as the object is not a top level object:
-	// this should work in   routes[this.route.id].remapping.options.mappingType
-	const routeRemapping = objectPathGet(studio, attribute)
-
-	const mappingType = routeRemapping?.mappingType ?? mappedLayer?.options?.mappingType
-	const mappingSchema = manifest?.mappingsSchema?.[mappingType]
-
-	if (mappingSchema && routeRemapping) {
-		return (
-			<SchemaFormForCollection
-				schema={mappingSchema}
-				object={routeRemapping}
-				basePath={attribute}
-				translationNamespaces={translationNamespaces}
-				collection={Studios}
-				objectId={studio._id}
-				partialOverridesForObject={mappedLayer}
-			/>
-		)
-	} else {
-		return null
-	}
 }
