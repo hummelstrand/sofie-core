@@ -10,7 +10,6 @@ import {
 	MappingsExt,
 	MappingExt,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import { EditAttribute, EditAttributeBase } from '../../../lib/EditAttribute'
 import { doModalDialog } from '../../../lib/ModalDialog'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faPencilAlt, faCheck, faPlus, faSync } from '@fortawesome/free-solid-svg-icons'
@@ -550,27 +549,6 @@ function RenderRoutes({
 		})
 	}
 
-	const updateRouteValueInSet = (e: EditAttributeBase, value: any, index: number) => {
-		if (!e.props.attribute) return
-		const attribute = e.props.attribute as keyof RouteMapping
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		//@ts-expect-error
-		routesBuffer[index][attribute] = value
-
-		overrideHelper.setItemValue(routeSet.id, 'routes', routesBuffer)
-	}
-
-	// This function is a workaround as remappingobject
-	// contains different objects inside
-	const updateValueInRemapping = (attribute: string, value: any, index: number) => {
-		const key = attribute as keyof RouteMapping
-		if (!routesBuffer[index].remapping) routesBuffer[index].remapping = {}
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		//@ts-expect-error
-		routesBuffer[index].remapping[key] = value
-		overrideHelper.setItemValue(routeSet.id, 'routes', routesBuffer)
-	}
-
 	return (
 		<React.Fragment>
 			<h4 className="mod mhs">{t('Routes')}</h4>
@@ -636,60 +614,77 @@ function RenderRoutes({
 								)}
 							</LabelAndOverridesForDropdown>
 
-							<label className="field">
-								<LabelActual label={t('New Layer')} />
-								<EditAttribute
-									modifiedClassName="bghl"
-									attribute={`outputMappedLayer`}
-									updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
-									overrideDisplayValue={route.outputMappedLayer}
-									type="text"
-									className="input text-input input-l"
-								></EditAttribute>
-							</label>
-
-							<label className="field">
-								<LabelActual label={t('Route Type')} />
-								{!route.mappedLayer ? (
-									<span className="mls">REMAP</span>
-								) : (
-									<EditAttribute
+							<LabelAndOverrides
+								label={t('New Layer')}
+								item={rowItem}
+								itemKey={'outputMappedLayer'}
+								opPrefix={rowItem.id}
+								overrideHelper={tableOverrideHelper}
+							>
+								{(value, handleUpdate) => (
+									<TextInputControl
 										modifiedClassName="bghl"
-										attribute={`routeType`}
-										updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
-										overrideDisplayValue={route.routeType}
-										type="dropdown"
-										options={StudioRouteType}
-										optionsAreNumbers={true}
-										className="input text-input input-l"
-									></EditAttribute>
+										classNames="input text-input input-l"
+										value={value}
+										handleUpdate={handleUpdate}
+									/>
 								)}
-							</label>
+							</LabelAndOverrides>
 
-							<label className="field">
-								<LabelActual label={t('Device Type')} />
-								{route.routeType === StudioRouteType.REROUTE && route.mappedLayer ? (
-									deviceTypeFromMappedLayer !== undefined ? (
-										<span className="mls">{TSR.DeviceType[deviceTypeFromMappedLayer]}</span>
-									) : (
-										<span className="mls dimmed">{t('Original Layer not found')}</span>
-									)
-								) : (
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={`deviceType`}
-										updateFunction={(e, value) => updateRouteValueInSet(e, value, index)}
-										overrideDisplayValue={route.deviceType}
-										type="dropdown"
-										options={TSR.DeviceType}
-										optionsAreNumbers={true}
-										className="input text-input input-l"
-									></EditAttribute>
-								)}
-							</label>
+							<LabelAndOverridesForDropdown
+								label={t('Route Type')}
+								item={rowItem}
+								itemKey={'routeType'}
+								opPrefix={rowItem.id}
+								overrideHelper={tableOverrideHelper}
+								options={getDropdownInputOptions(StudioRouteType)}
+							>
+								{(value, handleUpdate, options) => {
+									if (!route.mappedLayer) {
+										return <span className="mls">REMAP</span>
+									} else {
+										return (
+											<DropdownInputControl
+												classNames="input text-input input-l"
+												options={options}
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)
+									}
+								}}
+							</LabelAndOverridesForDropdown>
+
+							<LabelAndOverridesForDropdown
+								label={t('Device Type')}
+								item={rowItem}
+								itemKey={'deviceType'}
+								opPrefix={rowItem.id}
+								overrideHelper={tableOverrideHelper}
+								options={getDropdownInputOptions(TSR.DeviceType)}
+							>
+								{(value, handleUpdate, options) => {
+									if (route.routeType === StudioRouteType.REROUTE && route.mappedLayer) {
+										return deviceTypeFromMappedLayer !== undefined ? (
+											<span className="mls">{TSR.DeviceType[deviceTypeFromMappedLayer]}</span>
+										) : (
+											<span className="mls dimmed">{t('Original Layer not found')}</span>
+										)
+									} else {
+										return (
+											<DropdownInputControl
+												classNames="input text-input input-l"
+												options={options}
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)
+									}
+								}}
+							</LabelAndOverridesForDropdown>
 
 							{mappingTypeOptions.length > 0 && (
-								<LabelAndOverridesForDropdown<any> // Deep key is not allowed, but is fine
+								<LabelAndOverridesForDropdown<any> // Deep key is not allowed, but is fine for now
 									label={t('Mapping Type')}
 									item={rowItem}
 									itemKey={'remapping.options.mappingType'}
@@ -710,30 +705,32 @@ function RenderRoutes({
 							{route.routeType === StudioRouteType.REMAP ||
 							(routeDeviceType !== undefined && route.remapping !== undefined) ? (
 								<>
-									<label className="field">
-										<LabelActual label={t('Device ID')} />
-										<div>
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`remapping.deviceId`}
-												updateFunction={(e, value) => updateValueInRemapping('deviceId', value, index)}
-												overrideDisplayValue={route.remapping?.deviceId}
-												type="checkbox"
-												className="mrs mvxs"
-												mutateDisplayValue={(v) => (v === undefined ? false : true)}
-												mutateUpdateValue={() => undefined}
-											/>
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`remapping.deviceId`}
-												updateFunction={(e, value) => updateValueInRemapping('deviceId', value, index)}
-												overrideDisplayValue={route.remapping?.deviceId}
-												type="text"
-												className="input text-input input-l"
-											></EditAttribute>
-										</div>
-									</label>
+									<LabelAndOverrides<any> // Deep key is not allowed, but is fine for now
+										label={t('Device ID')}
+										item={rowItem}
+										itemKey={'remapping.deviceId'}
+										opPrefix={rowItem.id}
+										overrideHelper={tableOverrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<div>
+												<CheckboxControl
+													classNames="input"
+													title={t('Enable/Disable route set override')}
+													value={value !== undefined}
+													handleUpdate={() => handleUpdate(undefined)}
+												/>
+												<TextInputControl
+													modifiedClassName="bghl"
+													classNames="input text-input input-l"
+													value={value}
+													handleUpdate={handleUpdate}
+												/>
+											</div>
+										)}
+									</LabelAndOverrides>
 
+									{/** TODO: this needs the same checkbox to enable/disable as above */}
 									<DeviceMappingSettings
 										translationNamespaces={translationNamespaces}
 										mappedLayer={mappedLayer}
