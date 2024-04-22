@@ -325,7 +325,7 @@ function RenderRouteSet({
 				<th className="settings-studio-device__name c2">{routeSet.id}</th>
 				<td className="settings-studio-device__id c3">{routeSet.computed?.name}</td>
 				<td className="settings-studio-device__id c4">{routeSet.computed?.exclusivityGroup}</td>
-				<td className="settings-studio-device__id c2">{routeSet.computed?.routes.length}</td>
+				<td className="settings-studio-device__id c2">{routeSet.computed?.routes?.length}</td>
 				<td className="settings-studio-device__id c2">
 					{routeSet.computed?.active ? <span className="pill">{t('Active')}</span> : null}
 				</td>
@@ -554,7 +554,7 @@ function RenderRoutes({
 	return (
 		<React.Fragment>
 			<h4 className="mod mhs">{t('Routes')}</h4>
-			{routeSet.computed?.routes.length === 0 ? (
+			{routeSet.computed?.routes?.length === 0 ? (
 				<p className="text-s dimmed field-hint mhs">{t('There are no routes set up yet')}</p>
 			) : null}
 			{routesBuffer.map((route, index) => {
