@@ -18,8 +18,7 @@ import { useTranslation } from 'react-i18next'
 import { TSR } from '@sofie-automation/blueprints-integration'
 import { ReadonlyDeep } from 'type-fest'
 import { MappingsSettingsManifest, MappingsSettingsManifests } from './Mappings'
-import { SchemaFormForCollection } from '../../../lib/forms/SchemaFormForCollection'
-import { literal, objectPathGet } from '@sofie-automation/corelib/dist/lib'
+import { literal } from '@sofie-automation/corelib/dist/lib'
 import {
 	DropdownInputControl,
 	DropdownInputOption,
@@ -49,9 +48,9 @@ import {
 import { useToggleExpandHelper } from '../../util/useToggleExpandHelper'
 import { TextInputControl } from '../../../lib/Components/TextInput'
 import { CheckboxControl } from '../../../lib/Components/Checkbox'
-import { SchemaFormArrayTable } from '../../../lib/forms/SchemaFormTable/ArrayTable'
 import { OverrideOpHelperArrayTable } from '../../../lib/forms/SchemaFormTable/ArrayTableOpHelper'
 import { hasOpWithPath } from '../../../lib/Components/util'
+import { SchemaFormWithOverrides } from '../../../lib/forms/SchemaFormWithOverrides'
 
 interface IStudioRoutingsProps {
 	translationNamespaces: string[]
@@ -446,7 +445,6 @@ function RenderRouteSet({
 						</div>
 						<RenderRoutes
 							routeSet={routeSet}
-							studio={studio}
 							manifest={manifest}
 							translationNamespaces={translationNamespaces}
 							overrideHelper={overrideHelper}
@@ -507,8 +505,7 @@ function RenderRouteSetDeletedEntry({ routeSet, overrideHelper }: Readonly<IRend
 }
 
 interface IRenderRoutesProps {
-	routeSet: WrappedOverridableItem<StudioRouteSet>
-	studio: DBStudio
+	routeSet: WrappedOverridableItemNormal<StudioRouteSet>
 	manifest: MappingsSettingsManifests
 	translationNamespaces: string[]
 	overrideHelper: OverrideOpHelper
@@ -517,7 +514,6 @@ interface IRenderRoutesProps {
 
 function RenderRoutes({
 	routeSet,
-	studio,
 	manifest,
 	translationNamespaces,
 	overrideHelper,
@@ -538,7 +534,7 @@ function RenderRoutes({
 			yes: t('Remove'),
 			no: t('Cancel'),
 			onAccept: () => {
-				removeRouteInSet(index)
+				tableOverrideHelper.deleteRow(index + '')
 			},
 			message: (
 				<React.Fragment>
@@ -575,28 +571,6 @@ function RenderRoutes({
 		overrideHelper.setItemValue(routeSet.id, 'routes', routesBuffer)
 	}
 
-	// This function is a workaround as remapping.options
-	// contains different objects inside
-	const updateValueInRemappingOptions = (attribute: string, value: any, index: number) => {
-		const key = attribute as keyof RouteMapping
-		if (!routesBuffer[index].remapping?.options) {
-			routesBuffer[index].remapping = {
-				options: {},
-			}
-		}
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		//@ts-expect-error
-		routesBuffer[index].remapping.options[key] = value
-		overrideHelper.setItemValue(routeSet.id, 'routes', routesBuffer)
-	}
-
-	const removeRouteInSet = (index: number) => {
-		const newRoutes = routesBuffer.slice()
-		if (newRoutes === undefined) return
-		newRoutes.splice(index, 1)
-		overrideHelper.setItemValue(routeSet.id, 'routes', newRoutes)
-	}
-
 	return (
 		<React.Fragment>
 			<h4 className="mod mhs">{t('Routes')}</h4>
@@ -628,7 +602,7 @@ function RenderRoutes({
 				// TODO: This can't be inside a loop. The inside of this loop should be moved to a new component
 				const rowItem = React.useMemo(
 					() =>
-						literal<WrappedOverridableItemNormal<any>>({
+						literal<WrappedOverridableItemNormal<RouteMapping>>({
 							type: 'normal',
 							id: index + '',
 							computed: route,
@@ -715,7 +689,7 @@ function RenderRoutes({
 							</label>
 
 							{mappingTypeOptions.length > 0 && (
-								<LabelAndOverridesForDropdown
+								<LabelAndOverridesForDropdown<any> // Deep key is not allowed, but is fine
 									label={t('Mapping Type')}
 									item={rowItem}
 									itemKey={'remapping.options.mappingType'}
@@ -762,10 +736,10 @@ function RenderRoutes({
 
 									<DeviceMappingSettings
 										translationNamespaces={translationNamespaces}
-										studio={studio}
-										attribute={`remapping.options`}
 										mappedLayer={mappedLayer}
 										manifest={routeMappingSchema}
+										overrideHelper={tableOverrideHelper}
+										route={rowItem}
 									/>
 								</>
 							) : null}
@@ -779,36 +753,31 @@ function RenderRoutes({
 
 interface IDeviceMappingSettingsProps {
 	translationNamespaces: string[]
-	studio: DBStudio
-	attribute: string
 	manifest: MappingsSettingsManifest | undefined
 	mappedLayer: ReadonlyDeep<MappingExt> | undefined
+	overrideHelper: OverrideOpHelperArrayTable
+	route: WrappedOverridableItemNormal<RouteMapping>
 }
 
 function DeviceMappingSettings({
 	translationNamespaces,
-	attribute,
 	manifest,
-	studio,
 	mappedLayer,
-}: IDeviceMappingSettingsProps) {
-	// this won't work as it is now, as the object is not a top level object:
-	// this should work in   routes[this.route.id].remapping.options.mappingType
-	const routeRemapping = objectPathGet(studio, attribute)
+	overrideHelper,
+	route,
+}: Readonly<IDeviceMappingSettingsProps>) {
+	const mappingType = route.computed?.remapping?.options?.mappingType ?? mappedLayer?.options?.mappingType
+	const mappingSchema = mappingType ? manifest?.mappingsSchema?.[mappingType] : undefined
 
-	const mappingType = routeRemapping?.mappingType ?? mappedLayer?.options?.mappingType
-	const mappingSchema = manifest?.mappingsSchema?.[mappingType]
-
-	if (mappingSchema && routeRemapping) {
+	if (mappingSchema) {
 		return (
-			<SchemaFormForCollection
+			<SchemaFormWithOverrides
 				schema={mappingSchema}
-				object={routeRemapping}
-				basePath={attribute}
 				translationNamespaces={translationNamespaces}
-				collection={Studios}
-				objectId={studio._id}
-				partialOverridesForObject={mappedLayer}
+				attr={'remapping.options'}
+				item={route}
+				overrideHelper={overrideHelper}
+				isRequired
 			/>
 		)
 	} else {
