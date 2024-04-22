@@ -25,7 +25,9 @@ export class StudioBaselineHelper {
 
 	constructor(context: JobContext) {
 		this.#context = context
-		this.#overridesRouteSetBuffer = context.studio.routeSets as ObjectWithOverrides<Record<string, StudioRouteSet>>
+		this.#overridesRouteSetBuffer = { ...context.studio.routeSets } as ObjectWithOverrides<
+			Record<string, StudioRouteSet>
+		>
 		this.#routeSetChanged = false
 	}
 
@@ -76,12 +78,16 @@ export class StudioBaselineHelper {
 		this.#pendingExpectedPlayoutItems = undefined
 		this.#pendingExpectedPackages = undefined
 		this.#routeSetChanged = false
+		this.#overridesRouteSetBuffer = { ...this.#context.studio.routeSets } as ObjectWithOverrides<
+			Record<string, StudioRouteSet>
+		>
 	}
 
 	updateRouteSetActive(routeSetId: string, isActive: boolean): void {
 		const studio = this.#context.studio
 		const saveOverrides = (newOps: SomeObjectOverrideOp[]) => {
-			this.#overridesRouteSetBuffer = { defaults: this.#overridesRouteSetBuffer.defaults, overrides: newOps }
+			// this.#overridesRouteSetBuffer = { defaults: this.#overridesRouteSetBuffer.defaults, overrides: newOps }
+			this.#overridesRouteSetBuffer.overrides = newOps
 			this.#routeSetChanged = true
 		}
 		const overrideHelper = useOverrideOpHelperBackend(saveOverrides, this.#overridesRouteSetBuffer)
@@ -107,14 +113,8 @@ export class StudioBaselineHelper {
 			for (const [, otherRouteSet] of Object.entries<WrappedOverridableItemNormal<StudioRouteSet>>(routeSets)) {
 				if (otherRouteSet.id === routeSet.id) continue
 				if (otherRouteSet.computed?.exclusivityGroup === routeSet.computed.exclusivityGroup) {
-					// Another overrideHelper is needed to add the latest overrides to the buffer:
-					const overrideHelperExclusive = useOverrideOpHelperBackend(
-						saveOverrides,
-						this.#overridesRouteSetBuffer
-					)
-
 					logger.debug(`switchRouteSet Other ID "${studio._id}" "${otherRouteSet.id}"=false`)
-					overrideHelperExclusive.setItemValue(otherRouteSet.id, `active`, false)
+					overrideHelper.setItemValue(otherRouteSet.id, `active`, false)
 				}
 			}
 		}
