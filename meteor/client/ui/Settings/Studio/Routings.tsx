@@ -51,6 +51,7 @@ import { TextInputControl } from '../../../lib/Components/TextInput'
 import { CheckboxControl } from '../../../lib/Components/Checkbox'
 import { SchemaFormArrayTable } from '../../../lib/forms/SchemaFormTable/ArrayTable'
 import { OverrideOpHelperArrayTable } from '../../../lib/forms/SchemaFormTable/ArrayTableOpHelper'
+import { hasOpWithPath } from '../../../lib/Components/util'
 
 interface IStudioRoutingsProps {
 	translationNamespaces: string[]
@@ -317,6 +318,12 @@ function RenderRouteSet({
 		[t('Not defined')]: undefined,
 	}
 
+	const resyncRoutesTable = React.useCallback(
+		() => overrideHelper.clearItemOverrides(routeSet.id, 'routes'),
+		[overrideHelper, routeSet.id]
+	)
+	const routesIsOverridden = hasOpWithPath(routeSet.overrideOps, routeSet.id, 'routes')
+
 	return (
 		<React.Fragment>
 			<tr
@@ -452,6 +459,19 @@ function RenderRouteSet({
 							<button className="btn btn-secondary" onClick={() => addNewRouteInSet(routeSet.id)}>
 								<FontAwesomeIcon icon={faPlus} />
 							</button>
+							&nbsp;
+							{routeSet.defaults && (
+								<button
+									className="btn btn-primary"
+									onClick={resyncRoutesTable}
+									title="Reset to default"
+									disabled={!routesIsOverridden}
+								>
+									{t('Reset')}
+									&nbsp;
+									<FontAwesomeIcon icon={faSync} />
+								</button>
+							)}
 						</div>
 					</td>
 				</tr>
