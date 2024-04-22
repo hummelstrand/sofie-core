@@ -695,18 +695,23 @@ function RenderRoutes({
 							</label>
 
 							{mappingTypeOptions.length > 0 && (
-								<label className="field">
-									<LabelActual label={t('Mapping Type')} />
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={`remapping.options.mappingType`}
-										updateFunction={(e, value) => updateValueInRemappingOptions('mappingType', value, index)}
-										overrideDisplayValue={route.remapping?.options?.mappingType}
-										type="dropdown"
-										options={mappingTypeOptions}
-										className="input text-input input-l"
-									></EditAttribute>
-								</label>
+								<LabelAndOverridesForDropdown
+									label={t('Mapping Type')}
+									item={rowItem}
+									itemKey={'remapping.options.mappingType'}
+									opPrefix={rowItem.id}
+									overrideHelper={tableOverrideHelper}
+									options={mappingTypeOptions}
+								>
+									{(value, handleUpdate, options) => (
+										<DropdownInputControl
+											classNames="input text-input input-l"
+											options={options}
+											value={value}
+											handleUpdate={handleUpdate}
+										/>
+									)}
+								</LabelAndOverridesForDropdown>
 							)}
 							{route.routeType === StudioRouteType.REMAP ||
 							(routeDeviceType !== undefined && route.remapping !== undefined) ? (
