@@ -97,7 +97,7 @@ export class StudioBaselineHelper {
 			null
 		)
 
-		const routeSet = Object.values<WrappedOverridableItemNormal<StudioRouteSet>>(routeSets).find((routeSet) => {
+		const routeSet = routeSets.find((routeSet) => {
 			return routeSet.id === routeSetId
 		})
 
