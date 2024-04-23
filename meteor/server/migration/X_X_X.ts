@@ -28,7 +28,7 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 
 			for (const studio of studios) {
 				// is an plain object
-				if (!isObjectWithOverrides(studio.routeSets)) {
+				if (!isObjectWithOverrides(studio.routeSetsWithOverrides)) {
 					return 'routesets must be converted to an ObjectWithOverrides'
 				}
 			}
@@ -39,9 +39,9 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 			const studios = await Studios.findFetchAsync({ routeSets: { $exists: true } })
 
 			for (const studio of studios) {
-				if (!isObjectWithOverrides(studio.routeSets)) {
+				if (!isObjectWithOverrides(studio.routeSetsWithOverrides)) {
 					// studio.routeSets is an plain object
-					const oldRouteSets = studio.routeSets as any as Record<string, StudioRouteSet>
+					const oldRouteSets = studio.routeSetsWithOverrides as any as Record<string, StudioRouteSet>
 
 					const newRouteSets = convertObjectIntoOverrides(oldRouteSets)
 
@@ -62,7 +62,7 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 
 			for (const studio of studios) {
 				// is an plain object
-				if (!isObjectWithOverrides(studio.routeSetExclusivityGroups)) {
+				if (!isObjectWithOverrides(studio.routeSetExclusivityGroupsWithOverrides)) {
 					return 'routesets must be converted to an ObjectWithOverrides'
 				}
 			}
@@ -73,9 +73,9 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 			const studios = await Studios.findFetchAsync({ routeSetExclusivityGroups: { $exists: true } })
 
 			for (const studio of studios) {
-				if (!isObjectWithOverrides(studio.routeSetExclusivityGroups)) {
+				if (!isObjectWithOverrides(studio.routeSetExclusivityGroupsWithOverrides)) {
 					// studio.routeSets is an plain object
-					const oldRouteSetExclusivityGroups = studio.routeSetExclusivityGroups as any as Record<
+					const oldRouteSetExclusivityGroups = studio.routeSetExclusivityGroupsWithOverrides as any as Record<
 						string,
 						StudioRouteSetExclusivityGroup
 					>

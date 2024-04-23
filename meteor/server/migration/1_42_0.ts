@@ -19,8 +19,11 @@ export const addSteps = addMigrationSteps('1.42.0', [
 			const studios = await Studios.findFetchAsync({})
 
 			for (const studio of studios) {
-				const routeSets = studio.routeSets
+				// If routeSets has been converted to ObjectWithOverrides,
+				// it will have a defaults property, and shouln't be migrated
+				if (studio.routeSetsWithOverrides.defaults) return
 
+				const routeSets = studio.routeSetsWithOverrides as any as Record<string, StudioRouteSet>
 				Object.entries<StudioRouteSet>(routeSets).forEach(([routeSetId, routeSet]) => {
 					routeSet.routes.forEach((route) => {
 						if (!route.routeType) {

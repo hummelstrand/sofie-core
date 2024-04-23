@@ -257,8 +257,8 @@ export const addSteps = addMigrationSteps('1.50.0', [
 
 			for (const studio of studios) {
 				// Ignore this if the routeSets has been converted into an OverrideWithObjects:
-				if (studio.routeSets.defaults) continue
-				const plainRouteSets = studio.routeSets as any as Record<string, StudioRouteSet>
+				if (studio.routeSetsWithOverrides.defaults) continue
+				const plainRouteSets = studio.routeSetsWithOverrides as any as Record<string, StudioRouteSet>
 				const newRouteSets = convertRouteSetMappings(plainRouteSets)
 				if (newRouteSets) {
 					return `object needs to be updated`
@@ -272,8 +272,8 @@ export const addSteps = addMigrationSteps('1.50.0', [
 
 			for (const studio of studios) {
 				// Ignore this if the routeSets has been converted into an OverrideWithObjects:
-				if (isObjectWithOverrides(studio.routeSets)) continue
-				const plainRouteSets = studio.routeSets as any as Record<string, StudioRouteSet>
+				if (isObjectWithOverrides(studio.routeSetsWithOverrides)) continue
+				const plainRouteSets = studio.routeSetsWithOverrides as any as Record<string, StudioRouteSet>
 
 				const newRouteSets = convertRouteSetMappings(plainRouteSets)
 

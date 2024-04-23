@@ -25,7 +25,7 @@ export class StudioBaselineHelper {
 
 	constructor(context: JobContext) {
 		this.#context = context
-		this.#overridesRouteSetBuffer = { ...context.studio.routeSets } as ObjectWithOverrides<
+		this.#overridesRouteSetBuffer = { ...context.studio.routeSetsWithOverrides } as ObjectWithOverrides<
 			Record<string, StudioRouteSet>
 		>
 		this.#routeSetChanged = false
@@ -78,7 +78,7 @@ export class StudioBaselineHelper {
 		this.#pendingExpectedPlayoutItems = undefined
 		this.#pendingExpectedPackages = undefined
 		this.#routeSetChanged = false
-		this.#overridesRouteSetBuffer = { ...this.#context.studio.routeSets } as ObjectWithOverrides<
+		this.#overridesRouteSetBuffer = { ...this.#context.studio.routeSetsWithOverrides } as ObjectWithOverrides<
 			Record<string, StudioRouteSet>
 		>
 	}

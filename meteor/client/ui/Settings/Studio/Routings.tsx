@@ -68,14 +68,16 @@ export function StudioRoutings({
 	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
 
 	const routeSetsFromOverrides = React.useMemo(
-		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSets, null),
-		[studio.routeSets]
+		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetsWithOverrides, null),
+		[studio.routeSetsWithOverrides]
 	)
 
 	const exclusivityGroupsFromOverrides = React.useMemo(
 		() =>
-			getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetExclusivityGroups, (a, b) => a[0].localeCompare(b[0])),
-		[studio.routeSetExclusivityGroups]
+			getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetExclusivityGroupsWithOverrides, (a, b) =>
+				a[0].localeCompare(b[0])
+			),
+		[studio.routeSetExclusivityGroupsWithOverrides]
 	)
 
 	const saveOverrides = React.useCallback(
@@ -86,13 +88,13 @@ export function StudioRoutings({
 				},
 			})
 		},
-		[studio._id, studio.routeSets]
+		[studio._id, studio.routeSetsWithOverrides]
 	)
 
-	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSets)
+	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSetsWithOverrides)
 
 	const addNewRouteSet = React.useCallback(() => {
-		const resolvedRouteSets = applyAndValidateOverrides(studio.routeSets).obj
+		const resolvedRouteSets = applyAndValidateOverrides(studio.routeSetsWithOverrides).obj
 
 		// find free key name
 		const newRouteKeyName = 'newRouteSet'
@@ -125,11 +127,11 @@ export function StudioRoutings({
 		setTimeout(() => {
 			toggleExpanded(newId, true)
 		}, 1)
-	}, [studio._id, studio.routeSets])
+	}, [studio._id, studio.routeSetsWithOverrides])
 
 	const addNewExclusivityGroup = React.useCallback(() => {
 		const newGroupKeyName = 'exclusivityGroup'
-		const resolvedGroups = applyAndValidateOverrides(studio.routeSetExclusivityGroups).obj
+		const resolvedGroups = applyAndValidateOverrides(studio.routeSetExclusivityGroupsWithOverrides).obj
 
 		let iter = 0
 		while (resolvedGroups[newGroupKeyName + iter.toString()]) {
@@ -155,9 +157,9 @@ export function StudioRoutings({
 		setTimeout(() => {
 			toggleExpanded(newId, true)
 		}, 1)
-	}, [studio._id, studio.routeSetExclusivityGroups])
+	}, [studio._id, studio.routeSetExclusivityGroupsWithOverrides])
 
-	if (Object.keys(studio.routeSets).length === 0) {
+	if (Object.keys(studio.routeSetsWithOverrides).length === 0) {
 		return (
 			<tr>
 				<td className="mhn dimmed">{t('There are no Route Sets set up.')}</td>
@@ -304,7 +306,7 @@ function RenderRouteSet({
 				.filter((group) => group.type === 'normal')
 				.map((group) => group.computed?.name || group.id),
 		])
-	}, [studio.routeSetExclusivityGroups])
+	}, [studio.routeSetExclusivityGroupsWithOverrides])
 
 	const DEFAULT_ACTIVE_OPTIONS = {
 		[t('Active')]: true,

@@ -384,7 +384,7 @@ export class MigrationContextStudio implements IMigrationContextStudio {
 	getRouteSet(routeSetId: string): StudioRouteSet | undefined {
 		check(routeSetId, String)
 
-		const routeSet = this.studio.routeSets.defaults[routeSetId]
+		const routeSet = this.studio.routeSetsWithOverrides.defaults[routeSetId]
 
 		if (routeSet) {
 			return clone(routeSet)
@@ -393,7 +393,7 @@ export class MigrationContextStudio implements IMigrationContextStudio {
 	}
 	insertRouteSet(routeSetId: string, routeSet: StudioRouteSet): string {
 		check(routeSetId, String)
-		if (this.studio.routeSets.defaults[routeSetId]) {
+		if (this.studio.routeSetsWithOverrides.defaults[routeSetId]) {
 			throw new Meteor.Error(404, `RouteSet "${routeSetId}" cannot be inserted as it already exists`)
 		}
 		waitForPromise(

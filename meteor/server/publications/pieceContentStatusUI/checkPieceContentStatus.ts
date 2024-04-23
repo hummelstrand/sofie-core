@@ -174,7 +174,12 @@ export type PieceContentStatusPiece = Pick<PieceGeneric, '_id' | 'content' | 'ex
 export interface PieceContentStatusStudio
 	extends Pick<
 		DBStudio,
-		'_id' | 'settings' | 'packageContainers' | 'previewContainerIds' | 'thumbnailContainerIds' | 'routeSets'
+		| '_id'
+		| 'settings'
+		| 'packageContainers'
+		| 'previewContainerIds'
+		| 'thumbnailContainerIds'
+		| 'routeSetsWithOverrides'
 	> {
 	/** Mappings between the physical devices / outputs and logical ones */
 	mappings: MappingsExt
@@ -505,7 +510,7 @@ async function checkPieceContentExpectedPackageStatus(
 	let progress: number | undefined
 
 	if (piece.expectedPackages && piece.expectedPackages.length) {
-		const routes = getActiveRoutes(studio.routeSets)
+		const routes = getActiveRoutes(studio.routeSetsWithOverrides)
 
 		for (const expectedPackage of piece.expectedPackages) {
 			// Route the mappings
