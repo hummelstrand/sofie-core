@@ -12,7 +12,7 @@ import {
 	waitForPromise,
 	objectPathDelete,
 } from '../../../lib/lib'
-import { DBStudio, StudioPlayoutDevice, StudioRouteSet } from '@sofie-automation/corelib/dist/dataModel/Studio'
+import { DBStudio, StudioPlayoutDevice } from '@sofie-automation/corelib/dist/dataModel/Studio'
 import { DBShowStyleBase } from '@sofie-automation/corelib/dist/dataModel/ShowStyleBase'
 import { Meteor } from 'meteor/meteor'
 import {
@@ -376,62 +376,6 @@ export class MigrationContextStudio implements IMigrationContextStudio {
 			Studios.updateAsync(this.studio._id, {
 				$unset: {
 					[`peripheralDeviceSettings.playoutDevices.defaults.${deviceId}`]: 1,
-				},
-			})
-		)
-	}
-
-	getRouteSet(routeSetId: string): StudioRouteSet | undefined {
-		check(routeSetId, String)
-
-		const routeSet = this.studio.routeSetsWithOverrides.defaults[routeSetId]
-
-		if (routeSet) {
-			return clone(routeSet)
-		}
-		return undefined
-	}
-	insertRouteSet(routeSetId: string, routeSet: StudioRouteSet): string {
-		check(routeSetId, String)
-		if (this.studio.routeSetsWithOverrides.defaults[routeSetId]) {
-			throw new Meteor.Error(404, `RouteSet "${routeSetId}" cannot be inserted as it already exists`)
-		}
-		waitForPromise(
-			Studios.updateAsync(this.studio._id, {
-				$set: {
-					[`routeSets.${routeSetId}`]: routeSet,
-				},
-			})
-		)
-
-		return routeSetId
-	}
-	updateRouteSet(routeSetId: string, routeSet: StudioRouteSet): void {
-		check(routeSetId, String)
-
-		if (!routeSetId) {
-			throw new Meteor.Error(500, `RouteSet id "${routeSetId}" is invalid`)
-		}
-
-		waitForPromise(
-			Studios.updateAsync(this.studio._id, {
-				$set: {
-					[`routeSets.${routeSetId}`]: routeSet,
-				},
-			})
-		)
-	}
-	removeRouteSet(routeSetId: string): void {
-		check(routeSetId, String)
-
-		if (!routeSetId) {
-			throw new Meteor.Error(500, `RouteSet id "${routeSetId}" is invalid`)
-		}
-
-		waitForPromise(
-			Studios.updateAsync(this.studio._id, {
-				$unset: {
-					[`routeSets.${routeSetId}`]: 1,
 				},
 			})
 		)

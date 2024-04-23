@@ -4,7 +4,6 @@ import { IBlueprintShowStyleVariant, IOutputLayer, ISourceLayer } from './showSt
 import { IBlueprintTriggeredActions } from './triggers'
 import { BlueprintMapping } from './studio'
 import { TSR } from './timeline'
-import { StudioRouteSet } from '@sofie-automation/shared-lib/dist/core/model/StudioRouteSet'
 
 export interface MigrationStepInput {
 	stepId?: string // automatically filled in later
@@ -70,11 +69,6 @@ export interface MigrationContextStudio {
 	insertDevice: (deviceId: string, device: TSR.DeviceOptionsAny) => string | null
 	updateDevice: (deviceId: string, device: Partial<TSR.DeviceOptionsAny>) => void
 	removeDevice: (deviceId: string) => void
-
-	getRouteSet: (routeSetId: string) => StudioRouteSet | undefined
-	insertRouteSet: (routeSetId: string, routeSet: StudioRouteSet) => string | null
-	updateRouteSet: (routeSetId: string, routeSet: StudioRouteSet) => void
-	removeRouteSet: (routeSetId: string) => void
 }
 
 export interface ShowStyleVariantPart {
