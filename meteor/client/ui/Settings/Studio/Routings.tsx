@@ -847,7 +847,10 @@ function RenderExclusivityGroups({
 		[studio._id, studio.routeSetExclusivityGroupsWithOverrides]
 	)
 
-	const exclusivityOverrideHelper = useOverrideOpHelper(saveExclusivityOverrides, studio.routeSetExclusivityGroups)
+	const exclusivityOverrideHelper = useOverrideOpHelper(
+		saveExclusivityOverrides,
+		studio.routeSetExclusivityGroupsWithOverrides
+	)
 
 	if (exclusivityGroupsFromOverrides.length === 0) {
 		return (
