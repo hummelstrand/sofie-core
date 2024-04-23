@@ -69,7 +69,7 @@ export class StudioBaselineHelper {
 							_id: this.#context.studioId,
 						},
 						{
-							$set: { 'routeSets.overrides': this.#overridesRouteSetBuffer.overrides },
+							$set: { 'routeSetsWithOverrides.overrides': this.#overridesRouteSetBuffer.overrides },
 						}
 				  )
 				: undefined,

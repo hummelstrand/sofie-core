@@ -84,7 +84,7 @@ export function StudioRoutings({
 		(newOps: SomeObjectOverrideOp[]) => {
 			Studios.update(studio._id, {
 				$set: {
-					'routeSets.overrides': newOps,
+					'routeSetsWithOverrides.overrides': newOps,
 				},
 			})
 		},
@@ -120,7 +120,7 @@ export function StudioRoutings({
 
 		Studios.update(studio._id, {
 			$push: {
-				'routeSets.overrides': addOp,
+				'routeSetsWithOverrides.overrides': addOp,
 			},
 		})
 
@@ -150,7 +150,7 @@ export function StudioRoutings({
 
 		Studios.update(studio._id, {
 			$push: {
-				'routeSetExclusivityGroups.overrides': addOp,
+				'routeSetExclusivityGroupsWithOverrides.overrides': addOp,
 			},
 		})
 
@@ -840,11 +840,11 @@ function RenderExclusivityGroups({
 		(newOps: SomeObjectOverrideOp[]) => {
 			Studios.update(studio._id, {
 				$set: {
-					'routeSetExclusivityGroups.overrides': newOps,
+					'routeSetExclusivityGroupsWithOverrides.overrides': newOps,
 				},
 			})
 		},
-		[studio._id, studio.routeSetExclusivityGroups]
+		[studio._id, studio.routeSetExclusivityGroupsWithOverrides]
 	)
 
 	const exclusivityOverrideHelper = useOverrideOpHelper(saveExclusivityOverrides, studio.routeSetExclusivityGroups)

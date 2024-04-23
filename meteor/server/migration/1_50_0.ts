@@ -26,7 +26,6 @@ import {
 	wrapDefaultObject,
 	ObjectOverrideSetOp,
 	SomeObjectOverrideOp,
-	isObjectWithOverrides,
 } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 import { JSONBlobStringify, JSONSchema, TSR } from '@sofie-automation/blueprints-integration'
 import { DEFAULT_MINIMUM_TAKE_SPAN } from '@sofie-automation/shared-lib/dist/core/constants'
@@ -254,11 +253,11 @@ export const addSteps = addMigrationSteps('1.50.0', [
 		canBeRunAutomatically: true,
 		validate: async () => {
 			const studios = await Studios.findFetchAsync({ routeSets: { $exists: true } })
-
 			for (const studio of studios) {
 				// Ignore this if the routeSets has been converted into an OverrideWithObjects:
-				if (studio.routeSetsWithOverrides.defaults) continue
-				const plainRouteSets = studio.routeSetsWithOverrides as any as Record<string, StudioRouteSet>
+				if (studio.routeSetsWithOverrides) continue
+				//@ts-expect-error routeSets are not part of the typings:
+				const plainRouteSets = studio.routeSets as any as Record<string, StudioRouteSet>
 				const newRouteSets = convertRouteSetMappings(plainRouteSets)
 				if (newRouteSets) {
 					return `object needs to be updated`
@@ -271,16 +270,16 @@ export const addSteps = addMigrationSteps('1.50.0', [
 			const studios = await Studios.findFetchAsync({ routeSets: { $exists: true } })
 
 			for (const studio of studios) {
-				// Ignore this if the routeSets has been converted into an OverrideWithObjects:
-				if (isObjectWithOverrides(studio.routeSetsWithOverrides)) continue
-				const plainRouteSets = studio.routeSetsWithOverrides as any as Record<string, StudioRouteSet>
+				// Ignore this if the routeSets already has been converted into an OverrideWithObjects:
+				if (studio.routeSetsWithOverrides) continue
+				//@ts-expect-error routeSets are not part of the typings:
+				const plainRouteSets = studio.routeSets as any as Record<string, StudioRouteSet>
 
 				const newRouteSets = convertRouteSetMappings(plainRouteSets)
 
 				if (newRouteSets) {
 					await Studios.updateAsync(studio._id, {
 						$set: {
-							// @ts-expect-error routeSets have been updated to OverrideWithObjects in version 51
 							routeSets: newRouteSets,
 						},
 					})
