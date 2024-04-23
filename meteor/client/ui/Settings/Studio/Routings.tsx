@@ -105,7 +105,7 @@ export function StudioRoutings({
 
 		const newId = newRouteKeyName + iter.toString()
 		const newRoute = literal<StudioRouteSet>({
-			name: 'New Route Set',
+			name: 'New Route Set ' + iter.toString(),
 			active: false,
 			routes: [],
 			behavior: StudioRouteBehavior.TOGGLE,
