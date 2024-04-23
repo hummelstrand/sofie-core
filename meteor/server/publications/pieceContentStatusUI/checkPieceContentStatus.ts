@@ -24,6 +24,7 @@ import {
 	MappingsExt,
 	ResultingMappingRoutes,
 	StudioPackageContainer,
+	StudioRouteSet,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
 import { literal, Complete, assertNever } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
@@ -172,17 +173,11 @@ export type PieceContentStatusPiece = Pick<PieceGeneric, '_id' | 'content' | 'ex
 	pieceInstanceId?: PieceInstanceId
 }
 export interface PieceContentStatusStudio
-	extends Pick<
-		DBStudio,
-		| '_id'
-		| 'settings'
-		| 'packageContainers'
-		| 'previewContainerIds'
-		| 'thumbnailContainerIds'
-		| 'routeSetsWithOverrides'
-	> {
+	extends Pick<DBStudio, '_id' | 'settings' | 'packageContainers' | 'previewContainerIds' | 'thumbnailContainerIds'> {
 	/** Mappings between the physical devices / outputs and logical ones */
 	mappings: MappingsExt
+	/** Route sets with overrides */
+	routeSets: Record<string, StudioRouteSet>
 }
 
 export async function checkPieceContentStatusAndDependencies(
@@ -510,7 +505,7 @@ async function checkPieceContentExpectedPackageStatus(
 	let progress: number | undefined
 
 	if (piece.expectedPackages && piece.expectedPackages.length) {
-		const routes = getActiveRoutes(studio.routeSetsWithOverrides)
+		const routes = getActiveRoutes(studio.routeSets)
 
 		for (const expectedPackage of piece.expectedPackages) {
 			// Route the mappings

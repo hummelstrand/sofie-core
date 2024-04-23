@@ -117,6 +117,6 @@ export async function fetchStudio(studioId: StudioId): Promise<PieceContentStatu
 		previewContainerIds: studio.previewContainerIds,
 		thumbnailContainerIds: studio.thumbnailContainerIds,
 		mappings: applyAndValidateOverrides(studio.mappingsWithOverrides).obj,
-		routeSetsWithOverrides: studio.routeSetsWithOverrides,
+		routeSets: applyAndValidateOverrides(studio.routeSetsWithOverrides).obj,
 	}
 }

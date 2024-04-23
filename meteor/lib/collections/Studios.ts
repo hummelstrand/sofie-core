@@ -6,21 +6,14 @@ import {
 	StudioRouteType,
 	StudioRouteSet,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import {
-	ObjectWithOverrides,
-	applyAndValidateOverrides,
-} from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 
-export function getActiveRoutes(
-	routeSetswithOverride: ObjectWithOverrides<Record<string, StudioRouteSet>>
-): ResultingMappingRoutes {
+export function getActiveRoutes(routeSets: Record<string, StudioRouteSet>): ResultingMappingRoutes {
 	const routes: ResultingMappingRoutes = {
 		existing: {},
 		inserted: [],
 	}
 
 	const exclusivityGroups: { [groupId: string]: true } = {}
-	const routeSets = applyAndValidateOverrides(routeSetswithOverride).obj
 
 	for (const routeSet of Object.values<StudioRouteSet>(routeSets)) {
 		if (routeSet.active) {
