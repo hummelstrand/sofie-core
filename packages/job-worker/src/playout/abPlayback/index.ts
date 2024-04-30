@@ -12,7 +12,9 @@ import { applyAbPlayerObjectAssignments } from './applyAssignments'
 import { AbSessionHelper } from './abSessionHelper'
 import { ShowStyleContext } from '../../blueprints/context'
 import { logger } from '../../logging'
-import { ABPlayerDefinition } from '@sofie-automation/blueprints-integration'
+import { ABPlayerDefinition, StatusCode } from '@sofie-automation/blueprints-integration'
+import { objectPathGet } from '@sofie-automation/corelib/dist/lib'
+import { PlayoutModel } from '../model/PlayoutModel'
 
 /**
  * Resolve and apply AB-playback for the given timeline
@@ -20,21 +22,22 @@ import { ABPlayerDefinition } from '@sofie-automation/blueprints-integration'
  * @param abSessionHelper Helper for generation sessionId
  * @param blueprint Blueprint of the currently playing ShowStyle
  * @param showStyle The currently playing ShowStyle
- * @param playlist The currently playing Playlist
+ * @param playoutModel The current playout model
  * @param resolvedPieces All the PieceInstances on the timeline, resolved to have 'accurate' playback timings
  * @param timelineObjects The current timeline
  * @returns New AB assignments to be persisted on the playlist for the next call
  */
-export function applyAbPlaybackForTimeline(
+export async function applyAbPlaybackForTimeline(
 	context: JobContext,
 	abSessionHelper: AbSessionHelper,
 	blueprint: ReadonlyDeep<WrappedShowStyleBlueprint>,
 	showStyle: ReadonlyDeep<ProcessedShowStyleCompound>,
-	playlist: ReadonlyDeep<DBRundownPlaylist>,
+	playoutModel: PlayoutModel,
 	resolvedPieces: ResolvedPieceInstance[],
 	timelineObjects: OnGenerateTimelineObjExt[]
-): Record<string, ABSessionAssignments> {
+): Promise<Record<string, ABSessionAssignments>> {
 	if (!blueprint.blueprint.getAbResolverConfiguration) return {}
+	const playlist = playoutModel.playlist as DBRundownPlaylist
 
 	const blueprintContext = new ShowStyleContext(
 		{
@@ -56,6 +59,14 @@ export function applyAbPlaybackForTimeline(
 	const now = getCurrentTime()
 
 	const abConfiguration = blueprint.blueprint.getAbResolverConfiguration(blueprintContext)
+	console.log('_______________________________________________________________')
+	console.log('abConfiguration Pools', abConfiguration.pools)
+
+	abConfiguration.pools = await abConfigFilterOffline(context, playoutModel, abConfiguration.pools)
+	console.log('_______________________________________________________________')
+	console.log('abConfiguration Filtered', abConfiguration.pools)
+	console.log('_______________________________________________________________')
+
 	for (const [poolName, players] of Object.entries<ABPlayerDefinition[]>(abConfiguration.pools)) {
 		const previousAssignmentMap: ABSessionAssignments = previousAbSessionAssignments[poolName] || {}
 		const sessionRequests = calculateSessionTimeRanges(
@@ -102,4 +113,44 @@ export function applyAbPlaybackForTimeline(
 	if (span) span.end()
 
 	return newAbSessionsResult
+}
+
+async function abConfigFilterOffline(
+	context: JobContext,
+	playoutModel: PlayoutModel,
+	pools: Record<string, ABPlayerDefinition[]>
+): Promise<Record<string, ABPlayerDefinition[]>> {
+	const filteredPools = { ...pools }
+	//const devices = listPlayoutDevices(context, playoutModel)
+	const devices = await context.directCollections.PeripheralDevices.findFetch({
+		parentDeviceId: {
+			$in: playoutModel.peripheralDevices.map((doc) => doc._id),
+		},
+	})
+
+	for (const [poolName, players] of Object.entries<ABPlayerDefinition[]>(filteredPools)) {
+		// Find deviceId's that are assigned to pool
+		// WIP: This hack will only work if 'clipChannels' is the name for AB pools
+		// in the studio blueprint config:
+		const poolDeviceAssignments = objectPathGet(context.getStudioBlueprintConfig(), 'clipChannels')
+
+		filteredPools[poolName] = players.filter((player) => {
+			console.log('_______________________________________________________________')
+			console.log('player :', player)
+			const poolDeviceAssignment = poolDeviceAssignments.find((poolDeviceAssignment: any) => {
+				return player.playerId.toString() === poolDeviceAssignment.server.toString()
+			})
+			console.log('Pooldevice Assignment :', poolDeviceAssignment)
+			const device = devices.find((device) => device._id.toString().endsWith(poolDeviceAssignment.deviceId))
+
+			if (!device) return false
+			console.log('device.status', device.status.statusCode)
+			if (device.status.statusCode >= StatusCode.WARNING_MAJOR) {
+				return false
+			}
+			return true
+		})
+	}
+
+	return filteredPools
 }
