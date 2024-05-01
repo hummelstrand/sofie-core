@@ -12,10 +12,8 @@ import { applyAbPlayerObjectAssignments } from './applyAssignments'
 import { AbSessionHelper } from './abSessionHelper'
 import { ShowStyleContext } from '../../blueprints/context'
 import { logger } from '../../logging'
-import { ABPlayerDefinition, StatusCode } from '@sofie-automation/blueprints-integration'
-import { objectPathGet } from '@sofie-automation/corelib/dist/lib'
+import { ABPlayerDefinition } from '@sofie-automation/blueprints-integration'
 import { PlayoutModel } from '../model/PlayoutModel'
-import { PeripheralDevice } from '@sofie-automation/corelib/dist/dataModel/PeripheralDevice'
 
 /**
  * Resolve and apply AB-playback for the given timeline
@@ -59,17 +57,11 @@ export async function applyAbPlaybackForTimeline(
 
 	const now = getCurrentTime()
 
-	const poolDevices: PeripheralDevice[] = await context.directCollections.PeripheralDevices.findFetch({
-		parentDeviceId: {
-			$in: playoutModel.peripheralDevices.map((doc) => doc._id),
-		},
-	})
-
 	const abConfiguration = blueprint.blueprint.getAbResolverConfiguration(blueprintContext)
 
 	for (const [poolName, players] of Object.entries<ABPlayerDefinition[]>(abConfiguration.pools)) {
 		// Filter out offline devices
-		const filteredPlayers = abPoolsFilterOffline(context, players, poolDevices)
+		const filteredPlayers = abPoolsFilterOffline(players)
 		console.log('_______________________________________________________________')
 		console.log('abConfiguration Pool : ', poolName, 'Players :', players)
 		console.log('abConfiguration Filtered : ', poolName, 'Players :', filteredPlayers)
@@ -122,31 +114,12 @@ export async function applyAbPlaybackForTimeline(
 	return newAbSessionsResult
 }
 
-function abPoolsFilterOffline(
-	context: JobContext,
-	players: ABPlayerDefinition[],
-	devices: PeripheralDevice[]
-): ABPlayerDefinition[] {
-	//const devices = listPlayoutDevices(context, playoutModel)
-
-	// for (const [poolName, players] of Object.entries<ABPlayerDefinition[]>(filteredPools)) {
-	// Find deviceId's that are assigned to pool
-	// WIP: This hack will only work if 'clipChannels' is the name for AB pools
-	// in the studio blueprint config:
-	const poolDevices = objectPathGet(context.getStudioBlueprintConfig(), 'clipChannels')
-
+function abPoolsFilterOffline(players: ABPlayerDefinition[]): ABPlayerDefinition[] {
 	return players.filter((player) => {
-		//console.log('_______________________________________________________________')
-		//console.log('player :', player)
-		const poolDevice = poolDevices.find((poolDeviceAssignment: any) => {
-			return player.playerId.toString() === poolDeviceAssignment.server.toString()
-		})
-		//console.log('Pooldevice Assignment :', poolDeviceAssignment)
-		const device = devices.find((device) => device._id.toString().endsWith(poolDevice.deviceId))
+		console.log('_______________________________________________________________')
+		console.log('player :', player.playerId, ' inActive :', player.inactive)
 
-		if (!device) return false
-		//console.log('device.status', device.status.statusCode)
-		if (device.status.statusCode >= StatusCode.WARNING_MAJOR) {
+		if (player.inactive) {
 			return false
 		}
 		return true

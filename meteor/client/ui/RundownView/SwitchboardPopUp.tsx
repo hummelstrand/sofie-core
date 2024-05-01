@@ -176,17 +176,17 @@ function PoolsPlayersStandby() {
 		{
 			name: 'ClipPool 1',
 			players: [
-				{ name: 'A', active: true },
-				{ name: 'B', active: false },
-				{ name: 'C', active: true },
+				{ playerId: 'A', inactive: true },
+				{ playerId: 'B', inactive: false },
+				{ playerId: 'C', inactive: true },
 			],
 		},
 		{
 			name: 'ClipPool 2',
 			players: [
-				{ name: 'A', active: false },
-				{ name: 'B', active: true },
-				{ name: 'C', active: false },
+				{ playerId: 'A', inactive: false },
+				{ playerId: 'B', inactive: true },
+				{ playerId: 'C', inactive: false },
 			],
 		},
 	]
@@ -199,11 +199,11 @@ function PoolsPlayersStandby() {
 						<div className="switchboard-pop-up-panel__group">
 							{poolSet.players.map((player) => {
 								return (
-									<div key={player.name} className="switchboard-pop-up-panel__group__controls mhm mbs">
+									<div key={player.playerId} className="switchboard-pop-up-panel__group__controls mhm mbs">
 										<span className="switchboard-pop-up-panel__group__controls__active">{t('Off')}</span>
 										<a
 											className={classNames('switch-button', 'sb-nocolor', {
-												'sb-on': player.active,
+												'sb-on': !player.inactive,
 											})}
 											role="button"
 											onClick={() => {
@@ -221,11 +221,11 @@ function PoolsPlayersStandby() {
 										</a>
 										<span
 											className={classNames({
-												'switchboard-pop-up-panel__group__controls__active': player.active,
-												'switchboard-pop-up-panel__group__controls__inactive': !player.active,
+												'switchboard-pop-up-panel__group__controls__active': !player.inactive,
+												'switchboard-pop-up-panel__group__controls__inactive': player.inactive,
 											})}
 										>
-											{player.name}
+											{player.playerId}
 										</span>
 									</div>
 								)
