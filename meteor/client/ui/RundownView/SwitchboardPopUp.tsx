@@ -164,7 +164,76 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 						)}
 					</div>
 				))}
+				<PoolsPlayersStandby />
 			</div>
+		</div>
+	)
+}
+
+function PoolsPlayersStandby() {
+	const { t } = useTranslation()
+	const poolSets = [
+		{
+			name: 'ClipPool 1',
+			players: [
+				{ name: 'A', active: true },
+				{ name: 'B', active: false },
+				{ name: 'C', active: true },
+			],
+		},
+		{
+			name: 'ClipPool 2',
+			players: [
+				{ name: 'A', active: false },
+				{ name: 'B', active: true },
+				{ name: 'C', active: false },
+			],
+		},
+	]
+	return (
+		<div className="switchboard-pop-up-panel__group">
+			{poolSets.map((poolSet) => {
+				return (
+					<div key={poolSet.name} className="switchboard-pop-up-panel__group__controls">
+						{poolSet.name}:
+						<div className="switchboard-pop-up-panel__group">
+							{poolSet.players.map((player) => {
+								return (
+									<div key={player.name} className="switchboard-pop-up-panel__group__controls mhm mbs">
+										<span className="switchboard-pop-up-panel__group__controls__active">{t('Off')}</span>
+										<a
+											className={classNames('switch-button', 'sb-nocolor', {
+												'sb-on': player.active,
+											})}
+											role="button"
+											onClick={() => {
+												console.log('switch')
+											}}
+											tabIndex={0}
+										>
+											<div className="sb-content">
+												<div className="sb-label">
+													<span className="mls">&nbsp;</span>
+													<span className="mrs right">&nbsp;</span>
+												</div>
+												<div className="sb-switch"></div>
+											</div>
+										</a>
+										<span
+											className={classNames({
+												'switchboard-pop-up-panel__group__controls__active': player.active,
+												'switchboard-pop-up-panel__group__controls__inactive': !player.active,
+											})}
+										>
+											{player.name}
+										</span>
+									</div>
+								)
+							})}
+						</div>
+					</div>
+				)
+			})}
 		</div>
 	)
 }
