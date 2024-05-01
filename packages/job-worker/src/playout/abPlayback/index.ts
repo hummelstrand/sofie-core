@@ -117,9 +117,9 @@ export async function applyAbPlaybackForTimeline(
 function abPoolsFilterOffline(players: ABPlayerDefinition[]): ABPlayerDefinition[] {
 	return players.filter((player) => {
 		console.log('_______________________________________________________________')
-		console.log('player :', player.playerId, ' inActive :', player.inactive)
+		console.log('player :', player.playerId, ' disabled :', player.disabled)
 
-		if (player.inactive) {
+		if (player.disabled) {
 			return false
 		}
 		return true

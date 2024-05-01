@@ -1,14 +1,11 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-	StudioRouteSet,
-	StudioRouteSetExclusivityGroup,
-	StudioRouteBehavior,
-} from '@sofie-automation/corelib/dist/dataModel/Studio'
+import { StudioRouteSet, StudioRouteBehavior } from '@sofie-automation/corelib/dist/dataModel/Studio'
 import classNames from 'classnames'
 import { RouteSetOverrideIcon } from '../../lib/ui/icons/switchboard'
 import Tooltip from 'rc-tooltip'
 import { TOOLTIP_DEFAULT_DELAY } from '../../lib/lib'
+import { UIStudio } from '../../../lib/api/studios'
 
 interface IProps {
 	onStudioRouteSetSwitch?: (
@@ -18,9 +15,7 @@ interface IProps {
 		state: boolean
 	) => void
 	availableRouteSets: [string, StudioRouteSet][]
-	studioRouteSetExclusivityGroups: {
-		[id: string]: StudioRouteSetExclusivityGroup
-	}
+	studio: UIStudio
 }
 
 /**
@@ -43,8 +38,8 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 				<h2 className="mhn mvn">{t('Switchboard')}</h2>
 				{Object.entries<[string, StudioRouteSet][]>(exclusivityGroups).map(([key, routeSets]) => (
 					<div className="switchboard-pop-up-panel__group" key={key}>
-						{props.studioRouteSetExclusivityGroups[key]?.name && (
-							<p className="mhs mbs mtn">{props.studioRouteSetExclusivityGroups[key]?.name}</p>
+						{props.studio.routeSetExclusivityGroups[key]?.name && (
+							<p className="mhs mbs mtn">{props.studio.routeSetExclusivityGroups[key]?.name}</p>
 						)}
 						{routeSets.length === 2 &&
 						routeSets[0][1].behavior === StudioRouteBehavior.ACTIVATE_ONLY &&
@@ -164,29 +159,30 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 						)}
 					</div>
 				))}
-				<PoolsPlayersStandby />
+				<PoolsPlayersStandby studio={props.studio} />
 			</div>
 		</div>
 	)
 }
 
-function PoolsPlayersStandby() {
+function PoolsPlayersStandby(props: { studio: UIStudio }) {
 	const { t } = useTranslation()
+	console.log('Studio :', props.studio)
 	const poolSets = [
 		{
 			name: 'ClipPool 1',
 			players: [
-				{ playerId: 'A', inactive: true },
-				{ playerId: 'B', inactive: false },
-				{ playerId: 'C', inactive: true },
+				{ playerId: 'A', disabled: true },
+				{ playerId: 'B', disabled: false },
+				{ playerId: 'C', disabled: true },
 			],
 		},
 		{
 			name: 'ClipPool 2',
 			players: [
-				{ playerId: 'A', inactive: false },
-				{ playerId: 'B', inactive: true },
-				{ playerId: 'C', inactive: false },
+				{ playerId: 'A', disabled: false },
+				{ playerId: 'B', disabled: true },
+				{ playerId: 'C', disabled: false },
 			],
 		},
 	]
@@ -203,7 +199,7 @@ function PoolsPlayersStandby() {
 										<span className="switchboard-pop-up-panel__group__controls__active">{t('Off')}</span>
 										<a
 											className={classNames('switch-button', 'sb-nocolor', {
-												'sb-on': !player.inactive,
+												'sb-on': !player.disabled,
 											})}
 											role="button"
 											onClick={() => {
@@ -221,8 +217,8 @@ function PoolsPlayersStandby() {
 										</a>
 										<span
 											className={classNames({
-												'switchboard-pop-up-panel__group__controls__active': !player.inactive,
-												'switchboard-pop-up-panel__group__controls__inactive': player.inactive,
+												'switchboard-pop-up-panel__group__controls__active': !player.disabled,
+												'switchboard-pop-up-panel__group__controls__inactive': player.disabled,
 											})}
 										>
 											{player.playerId}
