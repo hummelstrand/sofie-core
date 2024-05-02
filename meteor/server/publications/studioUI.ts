@@ -40,10 +40,20 @@ function convertDocument(studio: Pick<DBStudio, StudioFields>): UIStudio {
 
 		routeSets: studio.routeSets,
 		routeSetExclusivityGroups: studio.routeSetExclusivityGroups,
+		// Hack - we shouldn't pass the full blueprint, but only the
+		// parts that are relevant to AB pools
+		blueprintConfig: applyAndValidateOverrides(studio.blueprintConfigWithOverrides).obj,
 	})
 }
 
-type StudioFields = '_id' | 'name' | 'mappingsWithOverrides' | 'settings' | 'routeSets' | 'routeSetExclusivityGroups'
+type StudioFields =
+	| '_id'
+	| 'name'
+	| 'mappingsWithOverrides'
+	| 'settings'
+	| 'routeSets'
+	| 'routeSetExclusivityGroups'
+	| 'blueprintConfigWithOverrides'
 const fieldSpecifier = literal<MongoFieldSpecifierOnesStrict<Pick<DBStudio, StudioFields>>>({
 	_id: 1,
 	name: 1,
@@ -51,6 +61,7 @@ const fieldSpecifier = literal<MongoFieldSpecifierOnesStrict<Pick<DBStudio, Stud
 	settings: 1,
 	routeSets: 1,
 	routeSetExclusivityGroups: 1,
+	blueprintConfigWithOverrides: 1,
 })
 
 async function setupUIStudioPublicationObservers(

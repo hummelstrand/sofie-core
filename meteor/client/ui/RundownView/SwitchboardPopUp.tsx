@@ -166,26 +166,30 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 }
 
 function PoolsPlayersStandby(props: { studio: UIStudio }) {
+	// Hack - abResolvers list is not yet a part of the DB and blueprints:
+	// Structure is:
+	// abResolvers: [{objName of poolSet}]
+	if (!props.studio.blueprintConfig.abResolvers) {
+		return
+	}
 	const { t } = useTranslation()
-	console.log('Studio :', props.studio)
-	const poolSets = [
-		{
-			name: 'ClipPool 1',
-			players: [
-				{ playerId: 'A', disabled: true },
-				{ playerId: 'B', disabled: false },
-				{ playerId: 'C', disabled: true },
-			],
-		},
-		{
-			name: 'ClipPool 2',
-			players: [
-				{ playerId: 'A', disabled: false },
-				{ playerId: 'B', disabled: true },
-				{ playerId: 'C', disabled: false },
-			],
-		},
-	]
+	// Hack: parsing the full blueprint config is a hack for now:
+	console.log('Ab resolverconfig :', props.studio.blueprintConfig.abResolvers)
+
+	// Hack - as we are not able to get the type of the poolSet, we are using any:
+	const resolvers = props.studio.blueprintConfig.abResolvers as String[]
+	const poolSets: any[] = []
+	resolvers.forEach((resolverName) => {
+		//@ts-expect-error - this is a hack to get the type of the poolSet
+		const poolSet = props.studio.blueprintConfig[resolverName]
+		poolSets.push({
+			name: resolverName,
+			players: poolSet.map((player: any) => {
+				return { playerId: player.server, disabled: player.disabled }
+			}),
+		})
+	})
+
 	return (
 		<div className="switchboard-pop-up-panel__group">
 			{poolSets.map((poolSet) => {
@@ -193,7 +197,7 @@ function PoolsPlayersStandby(props: { studio: UIStudio }) {
 					<div key={poolSet.name} className="switchboard-pop-up-panel__group__controls">
 						{poolSet.name}:
 						<div className="switchboard-pop-up-panel__group">
-							{poolSet.players.map((player) => {
+							{poolSet.players.map((player: any) => {
 								return (
 									<div key={player.playerId} className="switchboard-pop-up-panel__group__controls mhm mbs">
 										<span className="switchboard-pop-up-panel__group__controls__active">{t('Off')}</span>
