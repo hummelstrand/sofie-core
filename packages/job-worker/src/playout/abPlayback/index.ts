@@ -14,7 +14,6 @@ import { ShowStyleContext } from '../../blueprints/context'
 import { logger } from '../../logging'
 import { ABPlayerDefinition } from '@sofie-automation/blueprints-integration'
 import { PlayoutModel } from '../model/PlayoutModel'
-import { StudioAbPoolsDisabling } from '@sofie-automation/corelib/dist/dataModel/Studio'
 
 /**
  * Resolve and apply AB-playback for the given timeline
@@ -116,7 +115,7 @@ function abPoolFilterDisabled(
 	poolName: string,
 	players: ABPlayerDefinition[]
 ): ABPlayerDefinition[] {
-	const poolDisabling = context.studio.abPoolsDisabling[poolName] as StudioAbPoolsDisabling
+	const poolDisabling = context.studio.abPoolsDisabling[poolName]
 	return players.filter((player) => {
 		if (poolDisabling) {
 			const disabled = poolDisabling.players[player.playerId].disabled
