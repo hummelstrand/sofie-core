@@ -14,6 +14,7 @@ import { ShowStyleContext } from '../../blueprints/context'
 import { logger } from '../../logging'
 import { ABPlayerDefinition } from '@sofie-automation/blueprints-integration'
 import { PlayoutModel } from '../model/PlayoutModel'
+import { StudioAbPoolsDisabling } from '@sofie-automation/corelib/dist/dataModel/Studio'
 
 /**
  * Resolve and apply AB-playback for the given timeline
@@ -61,7 +62,7 @@ export async function applyAbPlaybackForTimeline(
 
 	for (const [poolName, players] of Object.entries<ABPlayerDefinition[]>(abConfiguration.pools)) {
 		// Filter out offline devices
-		const filteredPlayers = abPoolFilterDisabled(players)
+		const filteredPlayers = abPoolFilterDisabled(context, poolName, players)
 		console.log('_______________________________________________________________')
 		console.log('abConfiguration Pool : ', poolName, 'Players :', players)
 		console.log('abConfiguration Filtered : ', poolName, 'Players :', filteredPlayers)
@@ -114,13 +115,24 @@ export async function applyAbPlaybackForTimeline(
 	return newAbSessionsResult
 }
 
-function abPoolFilterDisabled(players: ABPlayerDefinition[]): ABPlayerDefinition[] {
+function abPoolFilterDisabled(
+	context: JobContext,
+	poolName: string,
+	players: ABPlayerDefinition[]
+): ABPlayerDefinition[] {
+	console.log('_______________________________________________________________')
+	console.log('abPoolDisabling :', context.studio.abPoolsDisabling)
+	const poolDisabling = context.studio.abPoolsDisabling[poolName] as StudioAbPoolsDisabling
+	console.log('_______________________________________________________________')
+	console.log('poolName :', poolName, ' this poolDisabling :', poolDisabling)
 	return players.filter((player) => {
-		console.log('_______________________________________________________________')
-		console.log('player :', player.playerId, ' disabled :', player.disabled)
-
-		if (player.disabled) {
-			return false
+		if (poolDisabling) {
+			const disabled = poolDisabling.players[player.playerId].disabled
+			console.log('_______________________________________________________________')
+			console.log('player :', player.playerId, ' disabled :', disabled)
+			if (disabled) {
+				return false
+			}
 		}
 		return true
 	})

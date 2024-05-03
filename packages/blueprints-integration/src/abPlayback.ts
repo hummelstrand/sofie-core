@@ -21,7 +21,6 @@ export const AB_MEDIA_PLAYER_AUTO = '__auto__'
  */
 export interface ABPlayerDefinition {
 	playerId: number | string
-	disabled?: boolean
 }
 
 /**
