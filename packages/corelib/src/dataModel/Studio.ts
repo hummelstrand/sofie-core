@@ -160,15 +160,11 @@ export interface StudioRouteSetExclusivityGroup {
 }
 
 export interface StudioAbPoolDisabling {
-	//** user presentable name */
-	name: string
 	/** Whether the player is disabled in this pool */
 	players: Record<string, StudioAbPlayerDisabling>
 }
 
 export interface StudioAbPlayerDisabling {
-	//** user presentable name */
-	name: string
 	/** Whether the player is disabled in this pool */
 	disabled: boolean
 }
