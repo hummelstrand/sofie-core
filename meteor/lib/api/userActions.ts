@@ -302,6 +302,14 @@ export interface NewUserActionAPI extends MethodContext {
 		routeSetId: string,
 		state: boolean
 	): Promise<ClientAPI.ClientResponse<void>>
+	switchAbPoolDisabling(
+		userEvent: string,
+		eventTime: Time,
+		studioId: StudioId,
+		poolId: string,
+		playerId: string,
+		state: boolean
+	): Promise<ClientAPI.ClientResponse<void>>
 	moveRundown(
 		userEvent: string,
 		eventTime: Time,
@@ -403,6 +411,7 @@ export enum UserActionAPIMethods {
 	'guiBlurred' = 'userAction.blurred',
 
 	'switchRouteSet' = 'userAction.switchRouteSet',
+	'switchAbPoolDisabling' = 'userAction.switchAbPoolDisabling',
 
 	'disablePeripheralSubDevice' = 'userAction.system.disablePeripheralSubDevice',
 

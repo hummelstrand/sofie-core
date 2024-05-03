@@ -2269,6 +2269,20 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 			}
 		}
 
+		onStudioAbPoolDisablingSwitch = (
+			e: React.MouseEvent<HTMLElement, MouseEvent>,
+			poolId: string,
+			playerId: string | number,
+			state: boolean
+		) => {
+			const { t } = this.props
+			if (this.props.studio) {
+				doUserAction(t, e, UserAction.SWITCH_ROUTE_SET, (e, ts) =>
+					MeteorCall.userAction.switchAbPoolDisabling(e, ts, this.props.studio!._id, poolId, playerId, state)
+				)
+			}
+		}
+
 		onSwitchViewMode = (segmentId: SegmentId, viewMode: SegmentViewMode) => {
 			if (!this.props.playlist?._id) return
 			this.setState(
@@ -2994,6 +3008,7 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 									onTake={this.onTake}
 									studio={studio}
 									onStudioRouteSetSwitch={this.onStudioRouteSetSwitch}
+									onStudioAbPoolDisablingSwitch={this.onStudioAbPoolDisablingSwitch}
 									onSegmentViewMode={this.onSegmentViewModeChange}
 								/>
 							</ErrorBoundary>

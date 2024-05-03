@@ -90,6 +90,7 @@ export interface DBStudio {
 
 	routeSets: Record<string, StudioRouteSet>
 	routeSetExclusivityGroups: Record<string, StudioRouteSetExclusivityGroup>
+	abPoolsDisabling: Record<string, StudioAbPoolsDisabling>
 
 	/** Contains settings for which Package Containers are present in the studio.
 	 * (These are used by the Package Manager and the Expected Packages)
@@ -156,6 +157,20 @@ export interface StudioPackageContainer {
 }
 export interface StudioRouteSetExclusivityGroup {
 	name: string
+}
+
+export interface StudioAbPoolsDisabling {
+	//** user presentable name */
+	name: string
+	/** Whether the player is disabled in this pool */
+	players: Record<string, StudioAbPoolDisabling>
+}
+
+export interface StudioAbPoolDisabling {
+	//** user presentable name */
+	name: string
+	/** Whether the player is disabled in this pool */
+	disabled: boolean
 }
 
 export interface StudioRouteSet {

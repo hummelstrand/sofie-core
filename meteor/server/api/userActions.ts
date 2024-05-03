@@ -1128,6 +1128,31 @@ class ServerUserActionAPI
 			}
 		)
 	}
+	async switchAbPoolDisabling(
+		userEvent: string,
+		eventTime: Time,
+		studioId: StudioId,
+		poolId: string,
+		playerId: string,
+		state: boolean
+	): Promise<ClientAPI.ClientResponse<void>> {
+		return ServerClientAPI.runUserActionInLog(
+			this,
+			userEvent,
+			eventTime,
+			'packageManagerRestartAllExpectations',
+			[studioId, poolId, playerId, state],
+			async () => {
+				check(studioId, String)
+				check(poolId, String)
+				check(playerId, String)
+				check(state, Boolean)
+
+				const access = await StudioContentWriteAccess.routeSet(this, studioId)
+				return ServerPlayoutAPI.switchAbPoolDisabling(access, poolId, playerId, state)
+			}
+		)
+	}
 	async moveRundown(
 		userEvent: string,
 		eventTime: Time,

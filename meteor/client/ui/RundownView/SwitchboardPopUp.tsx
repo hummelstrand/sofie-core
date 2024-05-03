@@ -14,6 +14,12 @@ interface IProps {
 		routeSet: StudioRouteSet,
 		state: boolean
 	) => void
+	onStudioAbPoolDisablingSwitch?: (
+		e: React.MouseEvent<HTMLElement>,
+		poolId: string,
+		playerId: string | number,
+		state: boolean
+	) => void
 	availableRouteSets: [string, StudioRouteSet][]
 	studio: UIStudio
 }
@@ -159,55 +165,41 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 						)}
 					</div>
 				))}
-				<PoolsPlayersStandby studio={props.studio} />
+				<AbPoolsDisabling studio={props.studio} onStudioAbPoolDisablingSwitch={props.onStudioAbPoolDisablingSwitch} />
 			</div>
 		</div>
 	)
 }
 
-function PoolsPlayersStandby(props: { studio: UIStudio }) {
-	// Hack - abResolvers list is not yet a part of the DB and blueprints:
-	// Structure is:
-	// abResolvers: [{objName of poolSet}]
-	if (!props.studio.blueprintConfig.abResolvers) {
-		return
-	}
+function AbPoolsDisabling(props: {
+	onStudioAbPoolDisablingSwitch?: IProps['onStudioAbPoolDisablingSwitch']
+	studio: UIStudio
+}) {
 	const { t } = useTranslation()
-	// Hack: parsing the full blueprint config is a hack for now:
-	console.log('Ab resolverconfig :', props.studio.blueprintConfig.abResolvers)
-
-	// Hack - as we are not able to get the type of the poolSet, we are using any:
-	const resolvers = props.studio.blueprintConfig.abResolvers as String[]
-	const poolSets: any[] = []
-	resolvers.forEach((resolverName) => {
-		//@ts-expect-error - this is a hack to get the type of the poolSet
-		const poolSet = props.studio.blueprintConfig[resolverName]
-		poolSets.push({
-			name: resolverName,
-			players: poolSet.map((player: any) => {
-				return { playerId: player.server, disabled: player.disabled }
-			}),
-		})
-	})
+	const abPools = props.studio.abPoolsDisabling
+	if (!abPools) return <div />
 
 	return (
 		<div className="switchboard-pop-up-panel__group">
-			{poolSets.map((poolSet) => {
+			{Object.keys(abPools).map((poolKey: string) => {
+				const abPool = abPools[poolKey]
 				return (
-					<div key={poolSet.name} className="switchboard-pop-up-panel__group__controls">
-						{poolSet.name}:
+					<div key={poolKey} className="switchboard-pop-up-panel__group__controls">
+						AB Pool - {abPools[poolKey].name}:
 						<div className="switchboard-pop-up-panel__group">
-							{poolSet.players.map((player: any) => {
+							{Object.keys(abPool.players).map((playerKey: string) => {
+								const player = abPool.players[playerKey]
 								return (
-									<div key={player.playerId} className="switchboard-pop-up-panel__group__controls mhm mbs">
+									<div key={playerKey} className="switchboard-pop-up-panel__group__controls mhm mbs">
 										<span className="switchboard-pop-up-panel__group__controls__active">{t('Off')}</span>
 										<a
 											className={classNames('switch-button', 'sb-nocolor', {
 												'sb-on': !player.disabled,
 											})}
 											role="button"
-											onClick={() => {
-												console.log('switch')
+											onClick={(e) => {
+												props.onStudioAbPoolDisablingSwitch &&
+													props.onStudioAbPoolDisablingSwitch(e, poolKey, playerKey, !player.disabled)
 											}}
 											tabIndex={0}
 										>
@@ -225,7 +217,7 @@ function PoolsPlayersStandby(props: { studio: UIStudio }) {
 												'switchboard-pop-up-panel__group__controls__inactive': player.disabled,
 											})}
 										>
-											{player.playerId}
+											{player.name}
 										</span>
 									</div>
 								)

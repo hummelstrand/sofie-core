@@ -61,7 +61,7 @@ export async function applyAbPlaybackForTimeline(
 
 	for (const [poolName, players] of Object.entries<ABPlayerDefinition[]>(abConfiguration.pools)) {
 		// Filter out offline devices
-		const filteredPlayers = abPoolsFilterOffline(players)
+		const filteredPlayers = abPoolFilterDisabled(players)
 		console.log('_______________________________________________________________')
 		console.log('abConfiguration Pool : ', poolName, 'Players :', players)
 		console.log('abConfiguration Filtered : ', poolName, 'Players :', filteredPlayers)
@@ -114,7 +114,7 @@ export async function applyAbPlaybackForTimeline(
 	return newAbSessionsResult
 }
 
-function abPoolsFilterOffline(players: ABPlayerDefinition[]): ABPlayerDefinition[] {
+function abPoolFilterDisabled(players: ABPlayerDefinition[]): ABPlayerDefinition[] {
 	return players.filter((player) => {
 		console.log('_______________________________________________________________')
 		console.log('player :', player.playerId, ' disabled :', player.disabled)

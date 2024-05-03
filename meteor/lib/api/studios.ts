@@ -1,8 +1,8 @@
-import { IBlueprintConfig } from '@sofie-automation/blueprints-integration'
 import { StudioId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import {
 	IStudioSettings,
 	MappingsExt,
+	StudioAbPoolsDisabling,
 	StudioRouteSet,
 	StudioRouteSetExclusivityGroup,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
@@ -35,7 +35,5 @@ export interface UIStudio {
 
 	routeSets: Record<string, StudioRouteSet>
 	routeSetExclusivityGroups: Record<string, StudioRouteSetExclusivityGroup>
-	// Hack - we shouldn't pass the full blueprint, but only the
-	// parts that are relevant to AB pools
-	blueprintConfig: IBlueprintConfig
+	abPoolsDisabling: Record<string, StudioAbPoolsDisabling>
 }
