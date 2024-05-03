@@ -1,5 +1,6 @@
 import { addMigrationSteps } from './databaseMigration'
 import { CURRENT_SYSTEM_VERSION } from './currentSystemVersion'
+import { Studios } from '../collections'
 
 /*
  * **************************************************************************************
@@ -13,4 +14,22 @@ import { CURRENT_SYSTEM_VERSION } from './currentSystemVersion'
 
 export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 	// Add your migration here
+
+	{
+		id: 'Add abPoolsDisabling to Studios',
+		canBeRunAutomatically: true,
+		validate: async () => {
+			return (
+				(await Studios.countDocuments({
+					abPoolsDisabling: { $exists: false },
+				})) > 0
+			)
+		},
+		migrate: async () => {
+			const studios = await Studios.findFetchAsync({})
+			for (const studio of studios) {
+				await Studios.updateAsync(studio._id, { $set: { abPoolsDisabling: {} } })
+			}
+		},
+	},
 ])
