@@ -185,7 +185,7 @@ function AbPoolsDisabling(props: {
 				const abPool = abPools[poolKey]
 				return (
 					<div key={poolKey} className="switchboard-pop-up-panel__group__controls">
-						AB Pool - {abPools[poolKey].name}:
+						AB Pool - {poolKey}:
 						<div className="switchboard-pop-up-panel__group">
 							{Object.keys(abPool.players).map((playerKey: string) => {
 								const player = abPool.players[playerKey]
@@ -217,7 +217,7 @@ function AbPoolsDisabling(props: {
 												'switchboard-pop-up-panel__group__controls__inactive': player.disabled,
 											})}
 										>
-											{player.name}
+											{playerKey}
 										</span>
 									</div>
 								)
