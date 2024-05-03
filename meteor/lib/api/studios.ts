@@ -2,7 +2,7 @@ import { StudioId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import {
 	IStudioSettings,
 	MappingsExt,
-	StudioAbPoolsDisabling,
+	StudioAbPoolDisabling,
 	StudioRouteSet,
 	StudioRouteSetExclusivityGroup,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
@@ -35,5 +35,5 @@ export interface UIStudio {
 
 	routeSets: Record<string, StudioRouteSet>
 	routeSetExclusivityGroups: Record<string, StudioRouteSetExclusivityGroup>
-	abPoolsDisabling: Record<string, StudioAbPoolsDisabling>
+	abPoolsDisabling: Record<string, StudioAbPoolDisabling>
 }

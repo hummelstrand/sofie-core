@@ -119,8 +119,8 @@ function abPoolFilterDisabled(
 	return players.filter((player) => {
 		if (poolDisabling) {
 			const disabled = poolDisabling.players[player.playerId].disabled
-			logger.info(`${context.studio._id} - AB Pool ${poolName} playerId : "{${player.playerId}" are disabled`)
 			if (disabled) {
+				logger.info(`${context.studio._id} - AB Pool ${poolName} playerId : ${player.playerId} are disabled`)
 				return false
 			}
 		}
