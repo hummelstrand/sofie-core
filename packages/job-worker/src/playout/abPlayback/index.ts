@@ -63,10 +63,6 @@ export async function applyAbPlaybackForTimeline(
 	for (const [poolName, players] of Object.entries<ABPlayerDefinition[]>(abConfiguration.pools)) {
 		// Filter out offline devices
 		const filteredPlayers = abPoolFilterDisabled(context, poolName, players)
-		console.log('_______________________________________________________________')
-		console.log('abConfiguration Pool : ', poolName, 'Players :', players)
-		console.log('abConfiguration Filtered : ', poolName, 'Players :', filteredPlayers)
-		console.log('_______________________________________________________________')
 
 		const previousAssignmentMap: ABSessionAssignments = previousAbSessionAssignments[poolName] || {}
 		const sessionRequests = calculateSessionTimeRanges(
@@ -120,16 +116,11 @@ function abPoolFilterDisabled(
 	poolName: string,
 	players: ABPlayerDefinition[]
 ): ABPlayerDefinition[] {
-	console.log('_______________________________________________________________')
-	console.log('abPoolDisabling :', context.studio.abPoolsDisabling)
 	const poolDisabling = context.studio.abPoolsDisabling[poolName] as StudioAbPoolsDisabling
-	console.log('_______________________________________________________________')
-	console.log('poolName :', poolName, ' this poolDisabling :', poolDisabling)
 	return players.filter((player) => {
 		if (poolDisabling) {
 			const disabled = poolDisabling.players[player.playerId].disabled
-			console.log('_______________________________________________________________')
-			console.log('player :', player.playerId, ' disabled :', disabled)
+			logger.info(`${context.studio._id} - AB Pool ${poolName} playerId : "{${player.playerId}" are disabled`)
 			if (disabled) {
 				return false
 			}
