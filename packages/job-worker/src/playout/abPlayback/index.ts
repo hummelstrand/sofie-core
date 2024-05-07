@@ -1,5 +1,9 @@
 import { ResolvedPieceInstance } from '@sofie-automation/corelib/dist/dataModel/PieceInstance'
-import { ABSessionAssignments, DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import {
+	ABSessionAssignment,
+	ABSessionAssignments,
+	DBRundownPlaylist,
+} from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { OnGenerateTimelineObjExt } from '@sofie-automation/corelib/dist/dataModel/Timeline'
 import { endTrace, sendTrace, startTrace } from '@sofie-automation/corelib/dist/influxdb'
 import { WrappedShowStyleBlueprint } from '../../blueprints/cache'
@@ -62,6 +66,13 @@ export async function applyAbPlaybackForTimeline(
 	for (const [poolName, players] of Object.entries<ABPlayerDefinition[]>(abConfiguration.pools)) {
 		// Filter out offline devices
 		const filteredPlayers = abPoolFilterDisabled(context, poolName, players)
+
+		// If a player has been enabled/disabled in the pool, clear the old assignments
+		Object.values<ABSessionAssignment | undefined>(previousAbSessionAssignments[poolName]).forEach((assignment) => {
+			if (!filteredPlayers.find((player) => player.playerId === assignment?.playerId)) {
+				previousAbSessionAssignments[poolName] = {}
+			}
+		})
 
 		const previousAssignmentMap: ABSessionAssignments = previousAbSessionAssignments[poolName] || {}
 		const sessionRequests = calculateSessionTimeRanges(
