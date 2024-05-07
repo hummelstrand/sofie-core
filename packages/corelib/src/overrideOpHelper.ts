@@ -144,36 +144,36 @@ export interface OverrideOpHelper extends OverrideOpHelperForItemContents {
 	 */
 	replaceItem(itemId: string, value: any): void
 }
-class OverrideOpHelperImpl implements OverrideOpHelper {
+export class OverrideOpHelperImpl implements OverrideOpHelper {
 	readonly #saveOverrides: SaveOverridesFunction
-	readonly #objectWithOverrides: ObjectWithOverrides<any>
+	readonly #objectWithOverrides: { current: ObjectWithOverrides<any> }
 
-	constructor(saveOverrides: SaveOverridesFunction, objectWithOverridesRef: ObjectWithOverrides<any>) {
+	constructor(saveOverrides: SaveOverridesFunction, objectWithOverridesRef: { current: ObjectWithOverrides<any> }) {
 		this.#saveOverrides = saveOverrides
 		this.#objectWithOverrides = objectWithOverridesRef
 	}
 
 	clearItemOverrides = (itemId: string, subPath: string): void => {
-		if (!this.#objectWithOverrides) return
+		if (!this.#objectWithOverrides.current) return
 
 		const opPath = `${itemId}.${subPath}`
 
-		const newOps = this.#objectWithOverrides.overrides.filter((op) => op.path !== opPath)
+		const newOps = this.#objectWithOverrides.current.overrides.filter((op) => op.path !== opPath)
 
 		this.#saveOverrides(newOps)
 	}
 
 	resetItem = (itemId: string): void => {
-		if (!this.#objectWithOverrides) return
+		if (!this.#objectWithOverrides.current) return
 
-		const newOps = filterOverrideOpsForPrefix(this.#objectWithOverrides.overrides, itemId).otherOps
+		const newOps = filterOverrideOpsForPrefix(this.#objectWithOverrides.current.overrides, itemId).otherOps
 
 		this.#saveOverrides(newOps)
 	}
 
 	deleteItem = (itemId: string): void => {
-		const newOps = filterOverrideOpsForPrefix(this.#objectWithOverrides.overrides, itemId).otherOps
-		if (this.#objectWithOverrides.defaults[itemId]) {
+		const newOps = filterOverrideOpsForPrefix(this.#objectWithOverrides.current.overrides, itemId).otherOps
+		if (this.#objectWithOverrides.current.defaults[itemId]) {
 			// If it was from the defaults, we need to mark it deleted
 			newOps.push(
 				literal<ObjectOverrideDeleteOp>({
@@ -187,18 +187,22 @@ class OverrideOpHelperImpl implements OverrideOpHelper {
 	}
 
 	changeItemId = (oldItemId: string, newItemId: string): void => {
-		if (!this.#objectWithOverrides) return
+		if (!this.#objectWithOverrides.current) return
 
 		const { otherOps: newOps, opsForPrefix: opsForId } = filterOverrideOpsForPrefix(
-			this.#objectWithOverrides.overrides,
+			this.#objectWithOverrides.current.overrides,
 			oldItemId
 		)
 
-		if (!newItemId || newOps.find((op) => op.path === newItemId) || this.#objectWithOverrides.defaults[newItemId]) {
+		if (
+			!newItemId ||
+			newOps.find((op) => op.path === newItemId) ||
+			this.#objectWithOverrides.current.defaults[newItemId]
+		) {
 			throw new Error('Id is invalid or already in use')
 		}
 
-		if (this.#objectWithOverrides.defaults[oldItemId]) {
+		if (this.#objectWithOverrides.current.defaults[oldItemId]) {
 			// Future: should we be able to handle this?
 			throw new Error("Can't change id of object with defaults")
 		} else {
@@ -222,14 +226,14 @@ class OverrideOpHelperImpl implements OverrideOpHelper {
 	}
 
 	setItemValue = (itemId: string, subPath: string, value: unknown): void => {
-		if (!this.#objectWithOverrides) return
+		if (!this.#objectWithOverrides.current) return
 
 		if (subPath === '_id') {
 			throw new Error('Item id cannot be changed through this helper')
 		} else {
 			// Set a property
 			const { otherOps: newOps, opsForPrefix: opsForId } = filterOverrideOpsForPrefix(
-				this.#objectWithOverrides.overrides,
+				this.#objectWithOverrides.current.overrides,
 				itemId
 			)
 
@@ -276,10 +280,10 @@ class OverrideOpHelperImpl implements OverrideOpHelper {
 	}
 
 	replaceItem = (itemId: string, value: unknown): void => {
-		if (!this.#objectWithOverrides) return
+		if (!this.#objectWithOverrides.current) return
 
 		// Set a property
-		const { otherOps: newOps } = filterOverrideOpsForPrefix(this.#objectWithOverrides.overrides, itemId)
+		const { otherOps: newOps } = filterOverrideOpsForPrefix(this.#objectWithOverrides.current.overrides, itemId)
 
 		// TODO - is this too naive?
 
@@ -302,5 +306,5 @@ export function useOverrideOpHelperBackend<T extends object>(
 	saveOverrides: (newOps: SomeObjectOverrideOp[]) => void,
 	objectWithOverrides: ObjectWithOverrides<T>
 ): OverrideOpHelper {
-	return new OverrideOpHelperImpl(saveOverrides, objectWithOverrides)
+	return new OverrideOpHelperImpl(saveOverrides, { current: objectWithOverrides })
 }
