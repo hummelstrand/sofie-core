@@ -41,26 +41,8 @@ export function getAllCurrentAndDeletedItemsFromOverrides<T extends object>(
 		| ((a: [id: string, obj: T | ReadonlyDeep<T>], b: [id: string, obj: T | ReadonlyDeep<T>]) => number)
 		| null
 ): WrappedOverridableItem<T>[] {
-	const resolvedObject = applyAndValidateOverrides(rawObject).obj
-
-	// Convert the items into an array
-	const validItems: Array<[id: string, obj: T]> = []
-	for (const [id, obj] of Object.entries<T | undefined>(resolvedObject)) {
-		if (obj) validItems.push([id, obj])
-	}
-
-	if (comparitor) validItems.sort((a, b) => comparitor(a, b))
-
 	// Sort and wrap in the return type
-	const sortedItems = validItems.map(([id, obj]) =>
-		literal<WrappedOverridableItemNormal<T>>({
-			type: 'normal',
-			id: id,
-			computed: obj,
-			defaults: rawObject.defaults[id],
-			overrideOps: filterOverrideOpsForPrefix(rawObject.overrides, id).opsForPrefix,
-		})
-	)
+	const sortedItems = getAllCurrentItemsFromOverrides(rawObject, comparitor)
 
 	const removedOutputLayers: WrappedOverridableItemDeleted<T>[] = []
 
@@ -89,7 +71,7 @@ export function getAllCurrentAndDeletedItemsFromOverrides<T extends object>(
  * Compile a sorted array of all the items currently active in the ObjectWithOverrides
  * @param rawObject The ObjectWithOverrides to look at
  * @param comparitor Comparitor for sorting the items
- * @returns Sorted items, with sorted deleted items at the end
+ * @returns Sorted items
  */
 export function getAllCurrentItemsFromOverrides<T extends object>(
 	rawObject: ReadonlyDeep<ObjectWithOverrides<Record<string, T | undefined>>>,
@@ -97,8 +79,28 @@ export function getAllCurrentItemsFromOverrides<T extends object>(
 		| ((a: [id: string, obj: T | ReadonlyDeep<T>], b: [id: string, obj: T | ReadonlyDeep<T>]) => number)
 		| null
 ): WrappedOverridableItemNormal<T>[] {
-	const allCurrentAndDeleted = getAllCurrentAndDeletedItemsFromOverrides(rawObject, comparitor)
-	return allCurrentAndDeleted.filter((item) => item.type !== 'deleted') as WrappedOverridableItemNormal<T>[]
+	const resolvedObject = applyAndValidateOverrides(rawObject).obj
+
+	// Convert the items into an array
+	const validItems: Array<[id: string, obj: T]> = []
+	for (const [id, obj] of Object.entries<T | undefined>(resolvedObject)) {
+		if (obj) validItems.push([id, obj])
+	}
+
+	if (comparitor) validItems.sort((a, b) => comparitor(a, b))
+
+	// Sort and wrap in the return type
+	const sortedItems = validItems.map(([id, obj]) =>
+		literal<WrappedOverridableItemNormal<T>>({
+			type: 'normal',
+			id: id,
+			computed: obj,
+			defaults: rawObject.defaults[id],
+			overrideOps: filterOverrideOpsForPrefix(rawObject.overrides, id).opsForPrefix,
+		})
+	)
+
+	return sortedItems
 }
 
 type SaveOverridesFunction = (newOps: SomeObjectOverrideOp[]) => void
