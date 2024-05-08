@@ -481,11 +481,7 @@ interface IRenderRouteSetDeletedProps {
 }
 
 function RenderRouteSetDeletedEntry({ routeSet, overrideHelper }: Readonly<IRenderRouteSetDeletedProps>) {
-	const doUndelete = (routeSetId: string) => {
-		overrideHelper.resetItem(routeSetId)
-	}
-
-	const doUndeleteItem = React.useCallback(() => doUndelete(routeSet.id), [doUndelete, routeSet.id])
+	const doUndeleteItem = React.useCallback(() => overrideHelper.resetItem(routeSet.id), [overrideHelper, routeSet.id])
 
 	return (
 		<tr>
