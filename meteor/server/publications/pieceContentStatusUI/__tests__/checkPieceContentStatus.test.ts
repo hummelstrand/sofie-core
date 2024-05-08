@@ -176,8 +176,7 @@ describe('lib/mediaObjects', () => {
 		const mockDefaultStudio = defaultStudio(protectString('studio0'))
 		const mockStudio: Complete<
 			Pick<DBStudio, '_id' | 'settings' | 'packageContainers' | 'previewContainerIds' | 'thumbnailContainerIds'> &
-				Pick<UIStudio, 'mappings'> &
-				Pick<UIStudio, 'routeSets'>
+				Pick<UIStudio, 'mappings' | 'routeSets'>
 		> = {
 			_id: mockDefaultStudio._id,
 			settings: mockStudioSettings,
