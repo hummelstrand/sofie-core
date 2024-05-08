@@ -88,7 +88,7 @@ export function StudioRoutings({
 				},
 			})
 		},
-		[studio._id, studio.routeSetsWithOverrides]
+		[studio._id]
 	)
 
 	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSetsWithOverrides)
