@@ -1017,11 +1017,7 @@ function RenderExclusivityDeletedGroup({
 	exclusivityGroup,
 	exlusivityOverrideHelper: overrideHelper,
 }: Readonly<IRenderExclusivityDeletedGroupProps>): React.JSX.Element {
-	const doUndelete = (groupId: string) => {
-		overrideHelper.resetItem(groupId)
-	}
-
-	const doUndeleteItem = React.useCallback(() => doUndelete(exclusivityGroup.id), [doUndelete, exclusivityGroup.id])
+	const doUndeleteItem = React.useCallback(() => overrideHelper.resetItem(exclusivityGroup.id), [overrideHelper, exclusivityGroup.id])
 
 	return (
 		<tr>
