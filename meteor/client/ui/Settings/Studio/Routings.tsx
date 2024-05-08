@@ -306,7 +306,7 @@ function RenderRouteSet({
 				.filter((group) => group.type === 'normal')
 				.map((group) => group.computed?.name || group.id),
 		])
-	}, [studio.routeSetExclusivityGroupsWithOverrides])
+	}, [exclusivityGroupsFromOverrides])
 
 	const DEFAULT_ACTIVE_OPTIONS = {
 		[t('Active')]: true,
