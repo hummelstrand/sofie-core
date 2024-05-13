@@ -83,7 +83,7 @@ export class StudioBaselineHelper {
 		>
 	}
 
-	updateRouteSetActive(routeSetId: string, isActive: boolean): void {
+	updateRouteSetActive(routeSetId: string, isActive: boolean | 'toggle'): void {
 		const studio = this.#context.studio
 		const saveOverrides = (newOps: SomeObjectOverrideOp[]) => {
 			// this.#overridesRouteSetBuffer = { defaults: this.#overridesRouteSetBuffer.defaults, overrides: newOps }
@@ -102,6 +102,9 @@ export class StudioBaselineHelper {
 		})
 
 		if (routeSet === undefined) throw new Error(`RouteSet "${routeSetId}" not found!`)
+
+		if (isActive === 'toggle') isActive = !routeSet.computed.active
+
 		if (routeSet.computed?.behavior === StudioRouteBehavior.ACTIVATE_ONLY && isActive === false)
 			throw new Error(`RouteSet "${routeSet.id}" is ACTIVATE_ONLY`)
 

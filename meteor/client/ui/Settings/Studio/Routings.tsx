@@ -205,7 +205,6 @@ export function StudioRoutings({
 											<RenderRouteSet
 												routeSet={routeSet}
 												manifest={manifest}
-												studio={studio}
 												translationNamespaces={translationNamespaces}
 												studioMappings={studioMappings}
 												toggleExpanded={toggleExpanded}
@@ -235,7 +234,6 @@ export function StudioRoutings({
 interface IRenderRouteSetProps {
 	routeSet: WrappedOverridableItemNormal<StudioRouteSet>
 	manifest: MappingsSettingsManifests
-	studio: DBStudio
 	translationNamespaces: string[]
 	studioMappings: ReadonlyDeep<MappingsExt>
 	toggleExpanded: (layerId: string, force?: boolean) => void
@@ -247,7 +245,6 @@ interface IRenderRouteSetProps {
 function RenderRouteSet({
 	routeSet,
 	manifest,
-	studio,
 	translationNamespaces,
 	toggleExpanded,
 	isExpanded,
@@ -1013,7 +1010,10 @@ function RenderExclusivityDeletedGroup({
 	exclusivityGroup,
 	exlusivityOverrideHelper: overrideHelper,
 }: Readonly<IRenderExclusivityDeletedGroupProps>): React.JSX.Element {
-	const doUndeleteItem = React.useCallback(() => overrideHelper.resetItem(exclusivityGroup.id), [overrideHelper, exclusivityGroup.id])
+	const doUndeleteItem = React.useCallback(
+		() => overrideHelper.resetItem(exclusivityGroup.id),
+		[overrideHelper, exclusivityGroup.id]
+	)
 
 	return (
 		<tr>

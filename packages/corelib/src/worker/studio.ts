@@ -334,7 +334,7 @@ export interface ActivateScratchpadProps extends RundownPlayoutPropsBase {
 
 export interface SwitchRouteSetProps {
 	routeSetId: string
-	state: boolean
+	state: boolean | 'toggle'
 }
 
 /**
