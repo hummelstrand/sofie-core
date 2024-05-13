@@ -1,10 +1,31 @@
-import { BlueprintMapping, IBlueprintConfig, PackageContainer, TSR } from '@sofie-automation/blueprints-integration'
+import { IBlueprintConfig, PackageContainer, TSR } from '@sofie-automation/blueprints-integration'
 import { ObjectWithOverrides } from '../settings/objectWithOverrides'
 import { StudioId, OrganizationId, BlueprintId, ShowStyleBaseId, MappingsHash, PeripheralDeviceId } from './Ids'
 import { BlueprintHash, LastBlueprintConfig } from './Blueprint'
 import { MappingsExt, MappingExt } from '@sofie-automation/shared-lib/dist/core/model/Timeline'
+import {
+	ResultingMappingRoute,
+	RouteMapping,
+	StudioRouteBehavior,
+	ResultingMappingRoutes,
+	StudioRouteSet,
+	StudioRouteSetExclusivityGroup,
+	StudioRouteType,
+} from '@sofie-automation/shared-lib/dist/core/model/StudioRouteSet'
 
 export { MappingsExt, MappingExt, MappingsHash }
+
+// RouteSet functions has been moved to shared-lib:
+// So we need to re-export them here:
+export {
+	StudioRouteSetExclusivityGroup,
+	ResultingMappingRoute,
+	RouteMapping,
+	StudioRouteBehavior,
+	ResultingMappingRoutes,
+	StudioRouteSet,
+	StudioRouteType,
+}
 
 export interface IStudioSettings {
 	/** The framerate (frames per second) used to convert internal timing information (in milliseconds)
@@ -88,8 +109,8 @@ export interface DBStudio {
 
 	_rundownVersionHash: string
 
-	routeSets: Record<string, StudioRouteSet>
-	routeSetExclusivityGroups: Record<string, StudioRouteSetExclusivityGroup>
+	routeSetsWithOverrides: ObjectWithOverrides<Record<string, StudioRouteSet>>
+	routeSetExclusivityGroupsWithOverrides: ObjectWithOverrides<Record<string, StudioRouteSetExclusivityGroup>>
 	abPoolsDisabling: Record<string, StudioAbPoolDisabling>
 
 	/** Contains settings for which Package Containers are present in the studio.

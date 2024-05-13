@@ -4,7 +4,7 @@ import { objectPathGet } from '@sofie-automation/corelib/dist/lib'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ReadonlyDeep } from 'type-fest'
-import { OverrideOpHelperForItemContents, WrappedOverridableItemNormal } from '../../ui/Settings/util/OverrideOpHelper'
+import { OverrideOpHelperForItemContents, WrappedOverridableItemNormal } from '../../ui/util/OverrideOpHelper'
 import { DropdownInputOption, findOptionByValue } from './DropdownInput'
 import { hasOpWithPath } from './util'
 
@@ -51,7 +51,7 @@ export function LabelAndOverrides<T extends object, TValue = any>({
 
 	let displayValue = '""'
 	if (item.defaults) {
-		const defaultValue: any = item.defaults[itemKey]
+		const defaultValue: any = objectPathGet(item.defaults, String(itemKey))
 		// Special cases for formatting of the default
 		if (formatDefaultValue) {
 			displayValue = formatDefaultValue(defaultValue)

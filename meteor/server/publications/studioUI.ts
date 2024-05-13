@@ -38,8 +38,8 @@ function convertDocument(studio: Pick<DBStudio, StudioFields>): UIStudio {
 
 		settings: studio.settings,
 
-		routeSets: studio.routeSets,
-		routeSetExclusivityGroups: studio.routeSetExclusivityGroups,
+		routeSets: applyAndValidateOverrides(studio.routeSetsWithOverrides).obj,
+		routeSetExclusivityGroups: applyAndValidateOverrides(studio.routeSetExclusivityGroupsWithOverrides).obj,
 		abPoolsDisabling: studio.abPoolsDisabling,
 	})
 }
@@ -49,16 +49,15 @@ type StudioFields =
 	| 'name'
 	| 'mappingsWithOverrides'
 	| 'settings'
-	| 'routeSets'
-	| 'routeSetExclusivityGroups'
-	| 'abPoolsDisabling'
+	| 'routeSetsWithOverrides'
+	| 'routeSetExclusivityGroupsWithOverrides'
 const fieldSpecifier = literal<MongoFieldSpecifierOnesStrict<Pick<DBStudio, StudioFields>>>({
 	_id: 1,
 	name: 1,
 	mappingsWithOverrides: 1,
 	settings: 1,
-	routeSets: 1,
-	routeSetExclusivityGroups: 1,
+	routeSetsWithOverrides: 1,
+	routeSetExclusivityGroupsWithOverrides: 1,
 	abPoolsDisabling: 1,
 })
 
