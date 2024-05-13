@@ -2,17 +2,13 @@ import { PeripheralDeviceId } from '@sofie-automation/corelib/dist/dataModel/Ids
 import { MappingExt, MappingsExt, StudioRouteSet } from '@sofie-automation/corelib/dist/dataModel/Studio'
 import { ReadonlyDeep } from 'type-fest'
 import { getActiveRoutes, getRoutedMappings } from '../../../../lib/collections/Studios'
-import {
-	ObjectWithOverrides,
-	applyAndValidateOverrides,
-} from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 
 type MappingExtWithOriginalName = MappingExt & { originalLayerName: string }
 type MappingsExtWithOriginalName = {
 	[layerName: string]: MappingExtWithOriginalName
 }
 export function buildMappingsToDeviceIdMap(
-	routeSets: ObjectWithOverrides<Record<string, StudioRouteSet>>,
+	routeSets: Record<string, StudioRouteSet>,
 	studioMappings: ReadonlyDeep<MappingsExt>
 ): Map<string, PeripheralDeviceId[]> {
 	// Map the expectedPackages onto their specified layer:
@@ -25,7 +21,7 @@ export function buildMappingsToDeviceIdMap(
 	}
 
 	// Route the mappings
-	const routes = getActiveRoutes(applyAndValidateOverrides(routeSets).obj)
+	const routes = getActiveRoutes(routeSets)
 	const routedMappings = getRoutedMappings(mappingsWithPackages, routes)
 
 	// Compile the result

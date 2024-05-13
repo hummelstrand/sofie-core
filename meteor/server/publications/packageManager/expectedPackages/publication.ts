@@ -143,7 +143,10 @@ async function manipulateExpectedPackagesPublicationData(
 			state.layerNameToDeviceIds = new Map()
 		} else {
 			const studioMappings = applyAndValidateOverrides(state.studio.mappingsWithOverrides).obj
-			state.layerNameToDeviceIds = buildMappingsToDeviceIdMap(state.studio.routeSetsWithOverrides, studioMappings)
+			state.layerNameToDeviceIds = buildMappingsToDeviceIdMap(
+				applyAndValidateOverrides(state.studio.routeSetsWithOverrides).obj,
+				studioMappings
+			)
 		}
 	}
 
