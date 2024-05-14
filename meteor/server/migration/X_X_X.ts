@@ -18,7 +18,7 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 	// Add your migration here
 
 	{
-		id: `convert routesets to ObjectWithOverrides`,
+		id: `convert routesets to ObjectWithOverrides and add abPlayers object`,
 		canBeRunAutomatically: true,
 		validate: async () => {
 			const studios = await Studios.findFetchAsync({ routeSets: { $exists: true } })
@@ -40,6 +40,12 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 				if (!studio.routeSets) continue
 				//@ts-expect-error routeSets is not typed as ObjectWithOverrides
 				const oldRouteSets = studio.routeSets as any as Record<string, StudioRouteSet>
+
+				for (const key of Object.keys(oldRouteSets)) {
+					if (!oldRouteSets[key].abPlayers) {
+						oldRouteSets[key].abPlayers = []
+					}
+				}
 
 				const newRouteSets = convertObjectIntoOverrides(oldRouteSets)
 
@@ -89,45 +95,6 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 					},
 					$unset: {
 						routeSetExclusivityGroups: 1,
-					},
-				})
-			}
-		},
-	},
-	{
-		id: `add abPlayers to routeSetsWithOverrides`,
-		canBeRunAutomatically: true,
-		validate: async () => {
-			const studios = await Studios.findFetchAsync({ routeSetsWithOverrides: { $exists: true } })
-
-			for (const studio of studios) {
-				// iterate over routeSetsWithOverrides.defaults and check if abPlayers is missing
-				const routeSets = studio.routeSetsWithOverrides.defaults
-				if (!routeSets) return 'routeSetsWithOverrides.defaults is missing'
-				for (const routeSet of Object.values<any>(routeSets)) {
-					if (!routeSet.abPlayers) {
-						return 'abPlayers is missing in routeSetsWithOverrides.defaults'
-					}
-				}
-			}
-
-			return false
-		},
-		migrate: async () => {
-			const studios = await Studios.findFetchAsync({ routeSetExclusivityGroups: { $exists: true } })
-
-			for (const studio of studios) {
-				const routeSets = studio.routeSetsWithOverrides
-				// iterate over routeSetsWithOverrides.defaults and check if abPlayers is missing
-				// if missing add it to the routeSet
-				for (const routeSet of Object.values<any>(routeSets.defaults)) {
-					if (!routeSet.abPlayers) {
-						routeSet.abPlayers = {}
-					}
-				}
-				await Studios.updateAsync(studio._id, {
-					$set: {
-						routeSetsWithOverrides: routeSets,
 					},
 				})
 			}
