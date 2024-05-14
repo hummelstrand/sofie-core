@@ -94,4 +94,43 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 			}
 		},
 	},
+	{
+		id: `add abPlayers to routeSetsWithOverrides`,
+		canBeRunAutomatically: true,
+		validate: async () => {
+			const studios = await Studios.findFetchAsync({ routeSetsWithOverrides: { $exists: true } })
+
+			for (const studio of studios) {
+				// iterate over routeSetsWithOverrides.defaults and check if abPlayers is missing
+				const routeSets = studio.routeSetsWithOverrides.defaults
+				if (!routeSets) return 'routeSetsWithOverrides.defaults is missing'
+				for (const routeSet of Object.values<any>(routeSets)) {
+					if (!routeSet.abPlayers) {
+						return 'abPlayers is missing in routeSetsWithOverrides.defaults'
+					}
+				}
+			}
+
+			return false
+		},
+		migrate: async () => {
+			const studios = await Studios.findFetchAsync({ routeSetExclusivityGroups: { $exists: true } })
+
+			for (const studio of studios) {
+				const routeSets = studio.routeSetsWithOverrides
+				// iterate over routeSetsWithOverrides.defaults and check if abPlayers is missing
+				// if missing add it to the routeSet
+				for (const routeSet of Object.values<any>(routeSets.defaults)) {
+					if (!routeSet.abPlayers) {
+						routeSet.abPlayers = {}
+					}
+				}
+				await Studios.updateAsync(studio._id, {
+					$set: {
+						routeSetsWithOverrides: routeSets,
+					},
+				})
+			}
+		},
+	},
 ])
