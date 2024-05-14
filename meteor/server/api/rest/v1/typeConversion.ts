@@ -269,7 +269,6 @@ export async function studioFrom(apiStudio: APIStudio, existingId?: StudioId): P
 		routeSetsWithOverrides: wrapDefaultObject({}),
 		_rundownVersionHash: '',
 		routeSetExclusivityGroupsWithOverrides: wrapDefaultObject({}),
-		abPoolsDisabling: {},
 		packageContainers: {},
 		previewContainerIds: [],
 		thumbnailContainerIds: [],

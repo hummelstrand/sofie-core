@@ -44,24 +44,4 @@ export namespace ServerPlayoutAPI {
 		})
 		await queuedJob.complete
 	}
-
-	export async function switchAbPoolDisabling(
-		access: StudioContentAccess,
-		poolId: string,
-		playerId: string,
-		state: boolean
-	): Promise<void> {
-		logger.debug(`switchAbPoolDisabling "${access.studioId}" "${poolId}" "${playerId}"=${state}`)
-
-		const studio = access.studio
-
-		if (studio.abPoolsDisabling[poolId] === undefined) throw new Meteor.Error(404, `AB Pool "${poolId}" not found!`)
-
-		const modification: Record<string, any> = {}
-		modification[`abPoolsDisabling.${poolId}.players.${playerId}.disabled`] = state
-
-		await Studios.updateAsync(studio._id, {
-			$set: modification,
-		})
-	}
 }

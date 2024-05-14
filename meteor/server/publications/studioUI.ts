@@ -40,7 +40,6 @@ function convertDocument(studio: Pick<DBStudio, StudioFields>): UIStudio {
 
 		routeSets: applyAndValidateOverrides(studio.routeSetsWithOverrides).obj,
 		routeSetExclusivityGroups: applyAndValidateOverrides(studio.routeSetExclusivityGroupsWithOverrides).obj,
-		abPoolsDisabling: studio.abPoolsDisabling,
 	})
 }
 
@@ -58,7 +57,6 @@ const fieldSpecifier = literal<MongoFieldSpecifierOnesStrict<Pick<DBStudio, Stud
 	settings: 1,
 	routeSetsWithOverrides: 1,
 	routeSetExclusivityGroupsWithOverrides: 1,
-	abPoolsDisabling: 1,
 })
 
 async function setupUIStudioPublicationObservers(

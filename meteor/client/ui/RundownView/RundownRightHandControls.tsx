@@ -42,12 +42,6 @@ interface IProps {
 		routeSet: StudioRouteSet,
 		state: boolean
 	) => void
-	onStudioAbPoolDisablingSwitch?: (
-		e: React.MouseEvent<HTMLElement>,
-		poolId: string,
-		playerId: string | number,
-		state: boolean
-	) => void
 	onSegmentViewMode?: (e: React.MouseEvent<HTMLButtonElement>) => void
 }
 
@@ -286,7 +280,6 @@ export function RundownRightHandControls(props: Readonly<IProps>): JSX.Element {
 										availableRouteSets={availableRouteSets}
 										studio={props.studio}
 										onStudioRouteSetSwitch={props.onStudioRouteSetSwitch}
-										onStudioAbPoolDisablingSwitch={props.onStudioAbPoolDisablingSwitch}
 									/>
 								)}
 							</VelocityReact.VelocityTransitionGroup>

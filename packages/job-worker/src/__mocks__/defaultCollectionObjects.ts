@@ -103,7 +103,6 @@ export function defaultStudio(_id: StudioId): DBStudio {
 		},
 		routeSetsWithOverrides: wrapDefaultObject({}),
 		routeSetExclusivityGroupsWithOverrides: wrapDefaultObject({}),
-		abPoolsDisabling: {},
 		packageContainers: {},
 		previewContainerIds: [],
 		thumbnailContainerIds: [],

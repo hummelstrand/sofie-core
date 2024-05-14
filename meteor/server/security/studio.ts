@@ -85,11 +85,6 @@ export namespace StudioContentWriteAccess {
 		return anyContent(cred0, studioId)
 	}
 
-	/** Check for permission to disable/enbale a playoutdevice in a AB pool */
-	export async function abPoolsDisabling(cred0: Credentials, studioId: StudioId): Promise<StudioContentAccess> {
-		return anyContent(cred0, studioId)
-	}
-
 	export async function timelineDatastore(cred0: Credentials, studioId: StudioId): Promise<StudioContentAccess> {
 		return anyContent(cred0, studioId)
 	}

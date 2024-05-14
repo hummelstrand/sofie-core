@@ -51,7 +51,6 @@ export async function insertStudioInner(organizationId: OrganizationId | null, n
 			_rundownVersionHash: '',
 			routeSetsWithOverrides: wrapDefaultObject({}),
 			routeSetExclusivityGroupsWithOverrides: wrapDefaultObject({}),
-			abPoolsDisabling: {},
 			packageContainers: {},
 			thumbnailContainerIds: [],
 			previewContainerIds: [],

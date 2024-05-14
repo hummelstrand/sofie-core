@@ -15,7 +15,6 @@ import type {
 	StudioRouteSet,
 	StudioRouteSetExclusivityGroup,
 } from '@sofie-automation/shared-lib/dist/core/model/StudioRouteSet'
-import { StudioAbPoolDisabling } from '@sofie-automation/shared-lib/src/core/model/AbPoolDisabling'
 
 export interface StudioBlueprintManifest<TRawConfig = IBlueprintConfig, TProcessedConfig = unknown>
 	extends BlueprintManifestBase {
@@ -117,12 +116,6 @@ export interface BlueprintResultApplyStudioConfig {
 	routeSets?: Record<string, StudioRouteSet>
 	/** Route Set Exclusivity Groups */
 	routeSetExclusivityGroups?: Record<string, StudioRouteSetExclusivityGroup>
-	/**
-	 * AbPoolDisabling for disabling one or more playoutdevices in an AB Pool
-	 * The key and the players-key should be the same as the key and playerId
-	 * returned from getAbResolverConfig()
-	 *  */
-	abPoolsDisabling: Record<string, StudioAbPoolDisabling>
 }
 
 export interface IStudioConfigPreset<TConfig = IBlueprintConfig> {

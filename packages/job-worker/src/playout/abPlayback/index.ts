@@ -18,6 +18,8 @@ import { ShowStyleContext } from '../../blueprints/context'
 import { logger } from '../../logging'
 import { ABPlayerDefinition } from '@sofie-automation/blueprints-integration'
 import { PlayoutModel } from '../model/PlayoutModel'
+import { applyAndValidateOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
+import { StudioRouteSet, StudioAbPlayerDisabling } from '@sofie-automation/shared-lib/dist/core/model/StudioRouteSet'
 
 /**
  * Resolve and apply AB-playback for the given timeline
@@ -136,14 +138,25 @@ function abPoolFilterDisabled(
 	poolName: string,
 	players: ABPlayerDefinition[]
 ): ABPlayerDefinition[] {
-	const poolDisabling = context.studio.abPoolsDisabling[poolName]
-	return players.filter((player) => {
-		if (poolDisabling) {
-			const disabled = poolDisabling.players[player.playerId].disabled
-			if (disabled) {
-				logger.info(`${context.studio._id} - AB Pool ${poolName} playerId : ${player.playerId} are disabled`)
-				return false
+	const routeSets = applyAndValidateOverrides(context.studio.routeSetsWithOverrides).obj
+
+	//iterate over routeSets and locate the abPlayers that is part of this pool:
+	const playersFromSets: StudioAbPlayerDisabling[] = []
+	for (const [_key, routeSet] of Object.entries<StudioRouteSet>(routeSets)) {
+		for (const [_key, abPlayer] of Object.entries<StudioAbPlayerDisabling>(routeSet.abPlayers)) {
+			if (abPlayer.poolName === poolName) {
+				playersFromSets.push(abPlayer)
 			}
+		}
+	}
+	if (playersFromSets.length == 0) return players
+
+	// Filter out any disabled players:
+	return players.filter((player) => {
+		const disabled = playersFromSets.find((abPlayer) => abPlayer.playerId === player.playerId)?.disabled
+		if (disabled) {
+			logger.info(`${context.studio._id} - AB Pool ${poolName} playerId : ${player.playerId} are disabled`)
+			return false
 		}
 		return true
 	})
