@@ -19,7 +19,7 @@ export interface StudioRouteSet {
 
 	routes: RouteMapping[]
 	/** AB Pool members */
-	abPlayers: Record<string, StudioAbPlayerDisabling>
+	abPlayers: StudioAbPlayerDisabling[]
 }
 
 export enum StudioRouteBehavior {

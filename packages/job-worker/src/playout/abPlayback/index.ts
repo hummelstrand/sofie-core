@@ -19,7 +19,7 @@ import { logger } from '../../logging'
 import { ABPlayerDefinition } from '@sofie-automation/blueprints-integration'
 import { PlayoutModel } from '../model/PlayoutModel'
 import { applyAndValidateOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
-import { StudioRouteSet, StudioAbPlayerDisabling } from '@sofie-automation/shared-lib/dist/core/model/StudioRouteSet'
+import { StudioRouteSet } from '@sofie-automation/shared-lib/dist/core/model/StudioRouteSet'
 
 interface MembersOfRouteSets {
 	poolName: string
@@ -143,13 +143,13 @@ export async function applyAbPlaybackForTimeline(
 function findPlayersInRouteSets(routeSets: Record<string, StudioRouteSet>): MembersOfRouteSets[] {
 	const players: MembersOfRouteSets[] = []
 	for (const [_key, routeSet] of Object.entries<StudioRouteSet>(routeSets)) {
-		for (const [_key, abPlayer] of Object.entries<StudioAbPlayerDisabling>(routeSet.abPlayers)) {
+		routeSet.abPlayers.forEach((abPlayer) => {
 			players.push({
 				playerId: abPlayer.playerId,
 				poolName: abPlayer.poolName,
 				disabled: !routeSet.active,
 			})
-		}
+		})
 	}
 	return players
 }
