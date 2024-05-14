@@ -100,7 +100,7 @@ export function RundownRightHandControls(props: Readonly<IProps>): JSX.Element {
 		setSwitchboardOpen(false)
 	}
 
-	const availableRouteSets = Object.entries<StudioRouteSet>(props.studioRouteSets)
+	const availableRouteSets = Object.entries<StudioRouteSet>(props.studio.routeSets)
 		.filter(([_id, routeSet]) => routeSet.behavior !== StudioRouteBehavior.HIDDEN)
 		.sort((a, b) => {
 			if (a[1].name < b[1].name) return -1

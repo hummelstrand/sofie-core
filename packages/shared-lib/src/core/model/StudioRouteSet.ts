@@ -43,9 +43,6 @@ export interface RouteMapping extends ResultingMappingRoute {
 export interface StudioAbPlayerDisabling {
 	poolName: string
 	playerId: string | number
-
-	/** Whether the player is disabled in this pool */
-	disabled: boolean
 }
 
 export interface ResultingMappingRoutes {

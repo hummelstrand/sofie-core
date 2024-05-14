@@ -21,6 +21,12 @@ import { PlayoutModel } from '../model/PlayoutModel'
 import { applyAndValidateOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 import { StudioRouteSet, StudioAbPlayerDisabling } from '@sofie-automation/shared-lib/dist/core/model/StudioRouteSet'
 
+interface MembersOfRouteSets {
+	poolName: string
+	playerId: string | number
+	disabled: boolean
+}
+
 /**
  * Resolve and apply AB-playback for the given timeline
  * @param context Context of the job
@@ -64,10 +70,11 @@ export async function applyAbPlaybackForTimeline(
 	const now = getCurrentTime()
 
 	const abConfiguration = blueprint.blueprint.getAbResolverConfiguration(blueprintContext)
+	const routeSetMembers = findPlayersInRouteSets(applyAndValidateOverrides(context.studio.routeSetsWithOverrides).obj)
 
 	for (const [poolName, players] of Object.entries<ABPlayerDefinition[]>(abConfiguration.pools)) {
 		// Filter out offline devices
-		const filteredPlayers = abPoolFilterDisabled(context, poolName, players)
+		const filteredPlayers = abPoolFilterDisabled(context, poolName, players, routeSetMembers)
 
 		const assingmentsToPlayer: Record<string, number> = {}
 		// If a player has been disabled in the pool, clear the old assignments
@@ -133,27 +140,31 @@ export async function applyAbPlaybackForTimeline(
 	return newAbSessionsResult
 }
 
+function findPlayersInRouteSets(routeSets: Record<string, StudioRouteSet>): MembersOfRouteSets[] {
+	const players: MembersOfRouteSets[] = []
+	for (const [_key, routeSet] of Object.entries<StudioRouteSet>(routeSets)) {
+		for (const [_key, abPlayer] of Object.entries<StudioAbPlayerDisabling>(routeSet.abPlayers)) {
+			players.push({
+				playerId: abPlayer.playerId,
+				poolName: abPlayer.poolName,
+				disabled: !routeSet.active,
+			})
+		}
+	}
+	return players
+}
+
 function abPoolFilterDisabled(
 	context: JobContext,
 	poolName: string,
-	players: ABPlayerDefinition[]
+	players: ABPlayerDefinition[],
+	membersOfRouteSets: MembersOfRouteSets[]
 ): ABPlayerDefinition[] {
-	const routeSets = applyAndValidateOverrides(context.studio.routeSetsWithOverrides).obj
-
-	//iterate over routeSets and locate the abPlayers that is part of this pool:
-	const playersFromSets: StudioAbPlayerDisabling[] = []
-	for (const [_key, routeSet] of Object.entries<StudioRouteSet>(routeSets)) {
-		for (const [_key, abPlayer] of Object.entries<StudioAbPlayerDisabling>(routeSet.abPlayers)) {
-			if (abPlayer.poolName === poolName) {
-				playersFromSets.push(abPlayer)
-			}
-		}
-	}
-	if (playersFromSets.length == 0) return players
+	if (membersOfRouteSets.length == 0) return players
 
 	// Filter out any disabled players:
 	return players.filter((player) => {
-		const disabled = playersFromSets.find((abPlayer) => abPlayer.playerId === player.playerId)?.disabled
+		const disabled = membersOfRouteSets.find((abPlayer) => abPlayer.playerId === player.playerId)?.disabled
 		if (disabled) {
 			logger.info(`${context.studio._id} - AB Pool ${poolName} playerId : ${player.playerId} are disabled`)
 			return false
