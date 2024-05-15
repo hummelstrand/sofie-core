@@ -16,6 +16,7 @@ export interface LabelAndOverridesProps<T extends object, TValue> {
 	opPrefix: string
 	overrideHelper: OverrideOpHelperForItemContents
 
+	showClearButton?: boolean
 	formatDefaultValue?: (value: any) => string
 
 	children: (value: TValue, setValue: (value: TValue) => void) => React.ReactNode
@@ -33,6 +34,7 @@ export function LabelAndOverrides<T extends object, TValue = any>({
 	itemKey,
 	opPrefix,
 	overrideHelper,
+	showClearButton,
 	formatDefaultValue,
 }: Readonly<LabelAndOverridesProps<T, TValue>>): JSX.Element {
 	const { t } = useTranslation()
@@ -75,7 +77,16 @@ export function LabelAndOverrides<T extends object, TValue = any>({
 		<label className="field">
 			<LabelActual label={label} />
 
-			{children(value, setValue)}
+			<div className="field-content">
+				{showClearButton && (
+					<button className="btn btn-primary field-clear" onClick={() => setValue(undefined)} title={t('Clear value')}>
+						&nbsp;
+						<FontAwesomeIcon icon={faSync} />
+					</button>
+				)}
+
+				{children(value, setValue)}
+			</div>
 
 			{item.defaults && (
 				<>

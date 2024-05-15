@@ -744,26 +744,18 @@ function RenderRoutesRow({
 							itemKey={'remapping.deviceId'}
 							opPrefix={route.id}
 							overrideHelper={tableOverrideHelper}
+							showClearButton={true}
 						>
 							{(value, handleUpdate) => (
-								<div>
-									<CheckboxControl
-										classNames="input"
-										title={t('Enable/Disable route set override')}
-										value={value !== undefined}
-										handleUpdate={() => handleUpdate(undefined)}
-									/>
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								</div>
+								<TextInputControl
+									modifiedClassName="bghl"
+									classNames="input text-input input-l"
+									value={value}
+									handleUpdate={handleUpdate}
+								/>
 							)}
 						</LabelAndOverrides>
 
-						{/** TODO: this needs the same checkbox to enable/disable as above */}
 						<DeviceMappingSettings
 							translationNamespaces={translationNamespaces}
 							mappedLayer={mappedLayer}
@@ -796,15 +788,23 @@ function DeviceMappingSettings({
 	const mappingType = route.computed?.remapping?.options?.mappingType ?? mappedLayer?.options?.mappingType
 	const mappingSchema = mappingType ? manifest?.mappingsSchema?.[mappingType] : undefined
 
-	if (mappingSchema) {
+	// Remove the required field from the schema, as that the properties show the clear button
+	const mappingSchemaPartial = React.useMemo(() => {
+		if (!mappingSchema) return null
+
+		return { ...mappingSchema, required: [] }
+	}, [mappingSchema])
+
+	if (mappingSchemaPartial) {
 		return (
 			<SchemaFormWithOverrides
-				schema={mappingSchema}
+				schema={mappingSchemaPartial}
 				translationNamespaces={translationNamespaces}
 				attr={'remapping.options'}
 				item={route}
 				overrideHelper={overrideHelper}
 				isRequired
+				showClearButtonForNonRequiredFields={true}
 			/>
 		)
 	} else {
