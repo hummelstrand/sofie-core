@@ -466,9 +466,6 @@ function RenderRouteSet({
 							studioMappings={studioMappings}
 						/>
 						<div className="mod">
-							<button className="btn btn-primary right" onClick={() => toggleExpanded(routeSet.id)}>
-								<FontAwesomeIcon icon={faCheck} />
-							</button>
 							<button className="btn btn-secondary" onClick={() => addNewRouteInSet(routeSet.id)}>
 								<FontAwesomeIcon icon={faPlus} />
 							</button>
@@ -486,11 +483,7 @@ function RenderRouteSet({
 								</button>
 							)}
 						</div>
-						<RenderAbPlayers
-							routeSet={routeSet}
-							translationNamespaces={translationNamespaces}
-							overrideHelper={overrideHelper}
-						/>
+						<RenderAbPlayers routeSet={routeSet} overrideHelper={overrideHelper} />
 						<div className="mod">
 							<button className="btn btn-primary right" onClick={() => toggleExpanded(routeSet.id)}>
 								<FontAwesomeIcon icon={faCheck} />
@@ -958,7 +951,7 @@ function RenderAbPlayerRow({
 			</button>
 			<div className="properties-grid">
 				<LabelAndOverrides
-					label={t('Playout device ID')}
+					label={t('Pool PlayerId')}
 					item={player}
 					itemKey={'playerId'}
 					opPrefix={player.id}
