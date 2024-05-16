@@ -251,7 +251,6 @@ export function convertPartToBlueprints(part: ReadonlyDeep<DBPart>): IBlueprintP
 		disableNextInTransition: part.disableNextInTransition,
 		outTransition: clone(part.outTransition),
 		expectedDuration: part.expectedDuration,
-		budgetDuration: part.budgetDuration,
 		holdMode: part.holdMode,
 		shouldNotifyCurrentPlayingPart: part.shouldNotifyCurrentPlayingPart,
 		classes: clone<string[] | undefined>(part.classes),

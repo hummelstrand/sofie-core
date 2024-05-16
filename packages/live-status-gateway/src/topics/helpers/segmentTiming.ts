@@ -1,5 +1,6 @@
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
+import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 
 export interface SegmentTiming {
 	budgetDurationMs?: number
@@ -11,12 +12,13 @@ export interface CurrentSegmentTiming extends SegmentTiming {
 }
 
 export function calculateCurrentSegmentTiming(
+	segment: DBSegment,
 	currentPartInstance: DBPartInstance,
 	firstInstanceInSegmentPlayout: DBPartInstance | undefined,
 	segmentPartInstances: DBPartInstance[],
 	segmentParts: DBPart[]
 ): CurrentSegmentTiming {
-	const segmentTiming = calculateSegmentTiming(segmentParts)
+	const segmentTiming = calculateSegmentTiming(segment, segmentParts)
 	const playedDurations = segmentPartInstances.reduce((sum, partInstance) => {
 		return (partInstance.timings?.duration ?? 0) + sum
 	}, 0)
@@ -36,11 +38,9 @@ export function calculateCurrentSegmentTiming(
 	}
 }
 
-export function calculateSegmentTiming(segmentParts: DBPart[]): SegmentTiming {
+export function calculateSegmentTiming(segment: DBSegment, segmentParts: DBPart[]): SegmentTiming {
 	return {
-		budgetDurationMs: segmentParts.reduce<number | undefined>((sum, part): number | undefined => {
-			return part.budgetDuration != null && !part.untimed ? (sum ?? 0) + part.budgetDuration : sum
-		}, undefined),
+		budgetDurationMs: segment.segmentTiming?.budgetDuration,
 		expectedDurationMs: segmentParts.reduce<number>((sum, part): number => {
 			return part.expectedDurationWithPreroll != null && !part.untimed
 				? sum + part.expectedDurationWithPreroll

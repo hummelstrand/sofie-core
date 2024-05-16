@@ -13,7 +13,7 @@ import { PieceIconContainer } from '../PieceIcons/PieceIcon'
 import { PieceNameContainer } from '../PieceIcons/PieceName'
 import { Timediff } from './Timediff'
 import { RundownUtils } from '../../lib/rundown'
-import { PieceLifespan } from '@sofie-automation/blueprints-integration'
+import { CountdownType, PieceLifespan } from '@sofie-automation/blueprints-integration'
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { PieceCountdownContainer } from '../PieceIcons/PieceCountdown'
 import { PlaylistTiming } from '@sofie-automation/corelib/dist/playout/rundownTiming'
@@ -433,9 +433,11 @@ function PresenterScreenContentDefaultLayout({
 	rundownIds,
 }: Readonly<WithTiming<PresenterScreenProps & PresenterScreenTrackedProps>>) {
 	if (playlist && playlistId && segments) {
-		let currentPartCountdown = 0
-		if (currentPartInstance) {
-			currentPartCountdown = timingDurations.remainingTimeOnCurrentPart || 0
+		let currentPartOrSegmentCountdown = 0
+		if (currentSegment?.segmentTiming?.countdownType === CountdownType.SEGMENT_BUDGET_DURATION) {
+			currentPartOrSegmentCountdown = timingDurations.remainingBudgetOnCurrentSegment ?? 0
+		} else if (currentPartInstance) {
+			currentPartOrSegmentCountdown = timingDurations.remainingTimeOnCurrentPart || 0
 		}
 
 		const expectedStart = PlaylistTiming.getExpectedStart(playlist.timing)
@@ -485,7 +487,7 @@ function PresenterScreenContentDefaultLayout({
 								/>
 							</div>
 							<div className="presenter-screen__part__part-countdown">
-								<Timediff time={currentPartCountdown} />
+								<Timediff time={currentPartOrSegmentCountdown} />
 							</div>
 						</>
 					) : expectedStart ? (

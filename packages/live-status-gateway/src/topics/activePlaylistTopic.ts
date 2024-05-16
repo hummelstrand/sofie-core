@@ -15,6 +15,7 @@ import _ = require('underscore')
 import { PartTiming, calculateCurrentPartTiming } from './helpers/partTiming'
 import { SelectedPieceInstances, PieceInstancesHandler, PieceInstanceMin } from '../collections/pieceInstancesHandler'
 import { PieceStatus, toPieceStatus } from './helpers/pieceStatus'
+import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 
 const THROTTLE_PERIOD_MS = 100
 
@@ -55,7 +56,8 @@ export class ActivePlaylistTopic
 		CollectionObserver<ShowStyleBaseExt>,
 		CollectionObserver<SelectedPartInstances>,
 		CollectionObserver<DBPart[]>,
-		CollectionObserver<SelectedPieceInstances>
+		CollectionObserver<SelectedPieceInstances>,
+		CollectionObserver<DBSegment[]>
 {
 	public observerName = ActivePlaylistTopic.name
 	private _activePlaylist: DBRundownPlaylist | undefined
