@@ -36,7 +36,7 @@ export namespace ServerPlayoutAPI {
 	export async function switchRouteSet(
 		access: StudioContentAccess,
 		routeSetId: string,
-		state: boolean
+		state: boolean | 'toggle'
 	): Promise<void> {
 		const queuedJob = await QueueStudioJob(StudioJobs.SwitchRouteSet, access.studioId, {
 			routeSetId,
