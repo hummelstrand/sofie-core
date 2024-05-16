@@ -68,10 +68,10 @@ export function StudioRoutings({
 	const { t } = useTranslation()
 	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
 
-	const routeSetsFromOverrides = React.useMemo(
-		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetsWithOverrides, null),
-		[studio.routeSetsWithOverrides]
-	)
+	const routeSetsFromOverrides = React.useMemo(() => {
+		const unsortedRouteSets = getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetsWithOverrides, null)
+		return unsortedRouteSets.sort((a, b) => a.id.localeCompare(b.id))
+	}, [studio.routeSetsWithOverrides])
 
 	const exclusivityGroupsFromOverrides = React.useMemo(
 		() =>
