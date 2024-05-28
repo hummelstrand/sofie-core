@@ -5,6 +5,7 @@ import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 export interface SegmentTiming {
 	budgetDurationMs?: number
 	expectedDurationMs: number
+	countdownType?: 'part_expected_duration' | 'segment_budget_duration'
 }
 
 export interface CurrentSegmentTiming extends SegmentTiming {
@@ -31,7 +32,7 @@ export function calculateCurrentSegmentTiming(
 	const projectedBudgetEndTime =
 		(firstInstanceInSegmentPlayout?.timings?.reportedStartedPlayback ??
 			firstInstanceInSegmentPlayout?.timings?.plannedStartedPlayback ??
-			0) + (segmentTiming.budgetDurationMs ?? 0)
+			Date.now()) + (segmentTiming.budgetDurationMs ?? 0)
 	return {
 		...segmentTiming,
 		projectedEndTime: segmentTiming.budgetDurationMs != null ? projectedBudgetEndTime : projectedEndTime,
@@ -46,5 +47,6 @@ export function calculateSegmentTiming(segment: DBSegment, segmentParts: DBPart[
 				? sum + part.expectedDurationWithPreroll
 				: sum
 		}, 0),
+		countdownType: segment.segmentTiming?.countdownType,
 	}
 }
