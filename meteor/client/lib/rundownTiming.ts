@@ -26,6 +26,7 @@ import { getCurrentTime, objectFromEntries } from '../../lib/lib'
 import { Settings } from '../../lib/Settings'
 import { Rundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
+import { CountdownType } from '@sofie-automation/blueprints-integration'
 
 // Minimum duration that a part can be assigned. Used by gap parts to allow them to "compress" to indicate time running out.
 const MINIMAL_NONZERO_DURATION = 1
@@ -169,18 +170,28 @@ export class RundownTimingCalculator {
 				const partsSegment = segmentsMap.get(partInstance.segmentId)
 				const segmentBudget = partsSegment?.segmentTiming?.budgetDuration
 				const segmentUsesBudget = segmentBudget !== undefined
+				const lastStartedPlayback = partInstance.timings?.plannedStartedPlayback
 
 				if (partInstance.segmentId !== lastSegmentId) {
 					this.untimedSegments.add(partInstance.segmentId)
-					lastSegmentId = partInstance.segmentId
+					if (liveSegmentId && lastSegmentId === liveSegmentId) {
+						const liveSegment = segmentsMap.get(liveSegmentId)
+
+						if (liveSegment?.segmentTiming?.countdownType === CountdownType.SEGMENT_BUDGET_DURATION) {
+							remainingBudgetOnCurrentSegment =
+								(this.segmentStartedPlayback[unprotectString(liveSegmentId)] ??
+									lastStartedPlayback ??
+									now) +
+								(liveSegment.segmentTiming.budgetDuration ?? 0) -
+								now
+						}
+					}
 					segmentDisplayDuration = 0
 					if (segmentBudgetDurationLeft > 0) {
 						waitAccumulator += segmentBudgetDurationLeft
 					}
-					if (lastSegmentId === liveSegmentId) {
-						remainingBudgetOnCurrentSegment = segmentBudgetDurationLeft
-					}
 					segmentBudgetDurationLeft = segmentBudget ?? 0
+					lastSegmentId = partInstance.segmentId
 				}
 
 				// add piece to accumulator
@@ -215,7 +226,6 @@ export class RundownTimingCalculator {
 						calculatePartInstanceExpectedDurationWithPreroll(partInstance, piecesForPart) || 0
 				}
 
-				const lastStartedPlayback = partInstance.timings?.plannedStartedPlayback
 				const playOffset = partInstance.timings?.playOffset || 0
 
 				let partDuration = 0
@@ -731,7 +741,7 @@ export interface RundownTimingContext {
 	segmentStartedPlayback?: Record<string, number>
 	/** Remaining time on current part */
 	remainingTimeOnCurrentPart?: number
-	/** Remaining budget on current segment */
+	/** Remaining budget on current segment, if its countdownType === CountdownType.SEGMENT_BUDGET_DURATION */
 	remainingBudgetOnCurrentSegment?: number
 	/** Current part will autoNext */
 	currentPartWillAutoNext?: boolean

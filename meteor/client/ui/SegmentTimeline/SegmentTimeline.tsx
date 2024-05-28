@@ -13,7 +13,7 @@ import { SegmentTimelineZoomControls } from './SegmentTimelineZoomControls'
 import { SegmentDuration } from '../RundownView/RundownTiming/SegmentDuration'
 import { PartCountdown } from '../RundownView/RundownTiming/PartCountdown'
 import { RundownTiming } from '../RundownView/RundownTiming/RundownTiming'
-import { CurrentPartRemaining } from '../RundownView/RundownTiming/CurrentPartRemaining'
+import { CurrentPartOrSegmentRemaining } from '../RundownView/RundownTiming/CurrentPartOrSegmentRemaining'
 
 import { RundownUtils } from '../../lib/rundown'
 import { Translated } from '../../lib/ReactMeteorData/ReactMeteorData'
@@ -686,7 +686,7 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 					</div>
 					<div className="segment-timeline__liveline__timecode">
 						{this.props.displayLiveLineCounter && (
-							<CurrentPartRemaining
+							<CurrentPartOrSegmentRemaining
 								currentPartInstanceId={this.props.playlist.currentPartInfo?.partInstanceId ?? null}
 								speaking={getAllowSpeaking()}
 								vibrating={getAllowVibrating()}

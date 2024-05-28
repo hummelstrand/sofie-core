@@ -13,7 +13,7 @@ import { PieceIconContainer } from '../PieceIcons/PieceIcon'
 import { PieceNameContainer } from '../PieceIcons/PieceName'
 import { Timediff } from './Timediff'
 import { RundownUtils } from '../../lib/rundown'
-import { CountdownType, PieceLifespan } from '@sofie-automation/blueprints-integration'
+import { PieceLifespan } from '@sofie-automation/blueprints-integration'
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { PieceCountdownContainer } from '../PieceIcons/PieceCountdown'
 import { PlaylistTiming } from '@sofie-automation/corelib/dist/playout/rundownTiming'
@@ -433,12 +433,8 @@ function PresenterScreenContentDefaultLayout({
 	rundownIds,
 }: Readonly<WithTiming<PresenterScreenProps & PresenterScreenTrackedProps>>) {
 	if (playlist && playlistId && segments) {
-		let currentPartOrSegmentCountdown = 0
-		if (currentSegment?.segmentTiming?.countdownType === CountdownType.SEGMENT_BUDGET_DURATION) {
-			currentPartOrSegmentCountdown = timingDurations.remainingBudgetOnCurrentSegment ?? 0
-		} else if (currentPartInstance) {
-			currentPartOrSegmentCountdown = timingDurations.remainingTimeOnCurrentPart || 0
-		}
+		const currentPartOrSegmentCountdown =
+			timingDurations.remainingBudgetOnCurrentSegment ?? timingDurations.remainingTimeOnCurrentPart ?? 0
 
 		const expectedStart = PlaylistTiming.getExpectedStart(playlist.timing)
 		const overUnderClock = getPlaylistTimingDiff(playlist, timingDurations) ?? 0
