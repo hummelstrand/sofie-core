@@ -12,12 +12,19 @@ import { Accessor } from '@sofie-automation/blueprints-integration'
 import { Studios } from '../../../collections'
 import {
 	ObjectOverrideSetOp,
+	SomeObjectOverrideOp,
 	applyAndValidateOverrides,
 } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
-import { LabelActual } from '../../../lib/Components/LabelAndOverrides'
+import { LabelActual, LabelAndOverrides } from '../../../lib/Components/LabelAndOverrides'
 import { useToggleExpandHelper } from '../../util/useToggleExpandHelper'
-import { WrappedOverridableItem, getAllCurrentAndDeletedItemsFromOverrides } from '../util/OverrideOpHelper'
+import {
+	OverrideOpHelper,
+	WrappedOverridableItem,
+	getAllCurrentAndDeletedItemsFromOverrides,
+	useOverrideOpHelper,
+} from '../util/OverrideOpHelper'
 import { literal } from '@sofie-automation/corelib/dist/lib'
+import { TextInputControl } from '../../../lib/Components/TextInput'
 
 interface StudioPackageManagerSettingsProps {
 	studio: DBStudio
@@ -151,10 +158,24 @@ export function StudioPackageManagerSettings({ studio }: StudioPackageManagerSet
 function RenderPackageContainers(
 	studio: DBStudio,
 	packageContainersFromOverrides: WrappedOverridableItem<StudioPackageContainer>[],
-	toggleExpanded: (id: string) => void,
+	toggleExpanded: (id: string, forceState?: boolean | undefined) => void,
 	isExpanded: (id: string) => boolean
 ) {
 	const { t } = useTranslation()
+
+	const saveOverrides = React.useCallback(
+		(newOps: SomeObjectOverrideOp[]) => {
+			Studios.update(studio._id, {
+				$set: {
+					'packageContainersWithOverrides.overrides': newOps,
+				},
+			})
+		},
+		[studio._id]
+	)
+
+	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.packageContainersWithOverrides)
+
 	const confirmRemovePackageContainer = (containerId: string) => {
 		doModalDialog({
 			title: t('Remove this Package Container?'),
@@ -182,64 +203,10 @@ function RenderPackageContainers(
 			$unset: unsetObject,
 		})
 	}
-	const getPlayoutDeviceIds = () => {
-		const deviceIds: {
-			name: string
-			value: string
-		}[] = []
-
-		const playoutDevices = applyAndValidateOverrides(studio.peripheralDeviceSettings.playoutDevices).obj
-
-		for (const deviceId of Object.keys(playoutDevices)) {
-			deviceIds.push({
-				name: deviceId,
-				value: deviceId,
-			})
-		}
-
-		return deviceIds
-	}
-	const addNewAccessor = (containerId: string) => {
-		// find free key name
-		const newKeyName = 'local'
-		let iter = 0
-		const packageContainer = packageContainersFromOverrides.find((_, packageContainerId) => {
-			return packageContainerId.toString() === containerId
-		})?.computed
-		if (!packageContainer) throw new Error(`Can't add an accessor to nonexistant Package Container "${containerId}"`)
-
-		while (packageContainer.container.accessors[newKeyName + iter]) {
-			iter++
-		}
-		const accessorId = newKeyName + iter
-
-		const newAccessor: Accessor.LocalFolder = {
-			type: Accessor.AccessType.LOCAL_FOLDER,
-			label: 'Local folder',
-			allowRead: true,
-			allowWrite: false,
-			folderPath: '',
-		}
-		const setObject: Record<string, any> = {}
-		setObject[`packageContainers.${containerId}.container.accessors.${accessorId}`] = newAccessor
-
-		Studios.update(studio._id, {
-			$set: setObject,
-		})
-	}
-	if (Object.keys(packageContainersFromOverrides).length === 0) {
-		return (
-			<tr>
-				<td className="mhn dimmed">{t('There are no Package Containers set up.')}</td>
-			</tr>
-		)
-	}
 
 	return packageContainersFromOverrides.map(
 		(packageContainer: WrappedOverridableItem<StudioPackageContainer>, id: number): React.JSX.Element => {
 			if (!packageContainer.computed) throw new Error(`Package Container "${id}" not found`)
-
-			const containerId = packageContainer.id
 
 			return (
 				<React.Fragment key={packageContainer.id}>
@@ -260,77 +227,166 @@ function RenderPackageContainers(
 							</button>
 						</td>
 					</tr>
-					{isExpanded(packageContainer.id) && (
-						<tr className="expando-details hl">
-							<td colSpan={6}>
-								<div className="properties-grid">
-									<label className="field">
-										<LabelActual label={t('Package Container ID')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={'packageContainers'}
-											overrideDisplayValue={packageContainer.id}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											updateFunction={packageContainer.id}
-											className="input text-input input-l"
-										></EditAttribute>
-									</label>
-
-									<label className="field">
-										<LabelActual label={t('Label')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.label`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">{t('Display name/label of the Package Container')}</span>
-									</label>
-
-									<label className="field">
-										<LabelActual label={t('Playout devices which uses this package container')} />
-										<EditAttribute
-											attribute={`packageContainers.${containerId}.deviceIds`}
-											obj={studio}
-											options={getPlayoutDeviceIds()}
-											label={t('Select playout devices')}
-											type="multiselect"
-											collection={Studios}
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">
-											{t('Select which playout devices are using this package container')}
-										</span>
-									</label>
-
-									<div className="mdi"></div>
-								</div>
-								<div>
-									<div className="settings-studio-accessors">
-										<h3 className="mhn">{t('Accessors')}</h3>
-										<table className="expando settings-studio-package-containers-accessors-table">
-											<tbody>{RenderAccessors(studio, packageContainer)}</tbody>
-										</table>
-										<div className="mod mhs">
-											<button className="btn btn-primary" onClick={() => addNewAccessor(packageContainer.id)}>
-												<FontAwesomeIcon icon={faPlus} />
-											</button>
-										</div>
-									</div>
-								</div>
-							</td>
-						</tr>
-					)}
+					<RenderPackageContainer
+						studio={studio}
+						packageContainer={packageContainer}
+						overrideHelper={overrideHelper}
+						toggleExpanded={toggleExpanded}
+						isExpanded={isExpanded}
+					/>
 				</React.Fragment>
 			)
 		}
 	)
 }
 
-function RenderAccessors(studio: DBStudio, packageContainer: WrappedOverridableItem<StudioPackageContainer>) {
+interface RenderPackageContainerProps {
+	studio: DBStudio
+	packageContainer: WrappedOverridableItem<StudioPackageContainer>
+	overrideHelper: OverrideOpHelper
+	toggleExpanded: (id: string, forceState?: boolean | undefined) => void
+	isExpanded: (id: string) => boolean
+}
+
+function RenderPackageContainer({
+	studio,
+	packageContainer,
+	overrideHelper,
+	toggleExpanded,
+	isExpanded,
+}: RenderPackageContainerProps): React.JSX.Element {
+	const { t } = useTranslation()
+
+	const getPlayoutDeviceIds = () => {
+		const deviceIds: {
+			name: string
+			value: string
+		}[] = []
+
+		const playoutDevices = applyAndValidateOverrides(studio.peripheralDeviceSettings.playoutDevices).obj
+
+		for (const deviceId of Object.keys(playoutDevices)) {
+			deviceIds.push({
+				name: deviceId,
+				value: deviceId,
+			})
+		}
+
+		return deviceIds
+	}
+	const updatePackageContainerId = React.useCallback(
+		(newPackageContainerId: string) => {
+			overrideHelper.changeItemId(packageContainer.id, newPackageContainerId)
+			toggleExpanded(newPackageContainerId, true)
+		},
+		[overrideHelper, toggleExpanded, packageContainer.id]
+	)
+
+	const addNewAccessor = (containerId: string) => {
+		// find free key name
+		const newKeyName = 'local'
+		let iter = 0
+		if (!packageContainer.id) throw new Error(`Can't add an accessor to nonexistant Package Container "${containerId}"`)
+
+		while (packageContainer.computed?.container.accessors[newKeyName + iter]) {
+			iter++
+		}
+		const accessorId = newKeyName + iter
+
+		const newAccessor: Accessor.LocalFolder = {
+			type: Accessor.AccessType.LOCAL_FOLDER,
+			label: 'Local folder',
+			allowRead: true,
+			allowWrite: false,
+			folderPath: '',
+		}
+		const setObject: Record<string, any> = {}
+		setObject[`packageContainers.${containerId}.container.accessors.${accessorId}`] = newAccessor
+
+		Studios.update(studio._id, {
+			$set: setObject,
+		})
+	}
+
+	if (!packageContainer.computed) throw new Error(`Package Container "${id}" not found`)
+
+	const containerId = packageContainer.id
+
+	return (
+		<React.Fragment key={packageContainer.id}>
+			{isExpanded(packageContainer.id) && (
+				<tr className="expando-details hl">
+					<td colSpan={6}>
+						<div className="properties-grid">
+							<label className="field">
+								<LabelActual label={t('Package Container ID')} />
+								<TextInputControl
+									modifiedClassName="bghl"
+									classNames="input text-input input-l"
+									value={packageContainer.id}
+									handleUpdate={updatePackageContainerId}
+									disabled={!!packageContainer.defaults}
+								/>
+							</label>
+							<LabelAndOverrides
+								label={t('Label')}
+								item={packageContainer}
+								//@ts-expect-error one level deep is not supported:
+								itemKey={'container.label'}
+								opPrefix={packageContainer.id}
+								overrideHelper={overrideHelper}
+							>
+								{(value, handleUpdate) => (
+									<TextInputControl
+										modifiedClassName="bghl"
+										classNames="input text-input input-l"
+										value={value}
+										handleUpdate={handleUpdate}
+									/>
+								)}
+							</LabelAndOverrides>
+							<label className="field">
+								<LabelActual label={t('Playout devices which uses this package container')} />
+								<EditAttribute
+									attribute={`packageContainers.${containerId}.deviceIds`}
+									obj={studio}
+									options={getPlayoutDeviceIds()}
+									label={t('Select playout devices')}
+									type="multiselect"
+									collection={Studios}
+								></EditAttribute>
+								<span className="text-s dimmed field-hint">
+									{t('Select which playout devices are using this package container')}
+								</span>
+							</label>
+
+							<div className="mdi"></div>
+						</div>
+						<div>
+							<div className="settings-studio-accessors">
+								<h3 className="mhn">{t('Accessors')}</h3>
+								<table className="expando settings-studio-package-containers-accessors-table">
+									<tbody>{RenderAccessors(studio, packageContainer)}</tbody>
+								</table>
+								<div className="mod mhs">
+									<button className="btn btn-primary" onClick={() => addNewAccessor(packageContainer.id)}>
+										<FontAwesomeIcon icon={faPlus} />
+									</button>
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+			)}
+		</React.Fragment>
+	)
+}
+
+function RenderAccessors(
+	studio: DBStudio,
+	packageContainer: WrappedOverridableItem<StudioPackageContainer>
+): React.JSX.Element[] {
+	return []
 	const { t } = useTranslation()
 	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
 
