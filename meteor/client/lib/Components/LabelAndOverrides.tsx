@@ -185,3 +185,44 @@ export function LabelAndOverridesForInt<T extends object>(
 export function LabelActual(props: Readonly<LabelActualProps>): JSX.Element {
 	return <div className="label-actual">{props.label}</div>
 }
+
+export function LabelAndOverridesForMultiSelect<T extends object, TValue = any>(
+	props: Omit<LabelAndOverridesProps<T, TValue>, 'formatDefaultValue' | 'children'> & {
+		options: DropdownInputOption<TValue>[]
+		children: (
+			value: [TValue],
+			setValue: (value: [TValue]) => void,
+			options: DropdownInputOption<TValue>[]
+		) => React.ReactNode
+	}
+): JSX.Element {
+	const formatMultiLine = useCallback(
+		(value: any) => {
+			const matchedOption = findOptionByValue(props.options, value)
+			if (matchedOption) {
+				return `"${matchedOption.name}"`
+			} else {
+				return `Value: "${value}"`
+			}
+		},
+		[props.options]
+	)
+	const formatter = useCallback(
+		(defaultValue: any) => {
+			if (defaultValue === undefined || defaultValue.length === 0) return '""'
+
+			if (Array.isArray(defaultValue)) {
+				return defaultValue.map(formatMultiLine).join('/n')
+			} else {
+				return formatMultiLine(defaultValue)
+			}
+		},
+		[formatMultiLine]
+	)
+
+	return (
+		<LabelAndOverrides<T, [TValue]> {...props} formatDefaultValue={formatter}>
+			{(value, setValue) => props.children(value, setValue, props.options)}
+		</LabelAndOverrides>
+	)
+}

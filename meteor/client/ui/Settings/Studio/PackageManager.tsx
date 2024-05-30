@@ -15,16 +15,22 @@ import {
 	SomeObjectOverrideOp,
 	applyAndValidateOverrides,
 } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
-import { LabelActual, LabelAndOverrides } from '../../../lib/Components/LabelAndOverrides'
+import {
+	LabelActual,
+	LabelAndOverrides,
+	LabelAndOverridesForMultiSelect,
+} from '../../../lib/Components/LabelAndOverrides'
 import { useToggleExpandHelper } from '../../util/useToggleExpandHelper'
+import { literal } from '@sofie-automation/corelib/dist/lib'
+import { TextInputControl } from '../../../lib/Components/TextInput'
+import { DropdownInputOption, getDropdownInputOptions } from '../../../lib/Components/DropdownInput'
+import { MultiSelectInputControl } from '../../../lib/Components/MultiSelectInput'
 import {
 	OverrideOpHelper,
 	WrappedOverridableItem,
 	getAllCurrentAndDeletedItemsFromOverrides,
 	useOverrideOpHelper,
-} from '../util/OverrideOpHelper'
-import { literal } from '@sofie-automation/corelib/dist/lib'
-import { TextInputControl } from '../../../lib/Components/TextInput'
+} from '../../util/OverrideOpHelper'
 
 interface StudioPackageManagerSettingsProps {
 	studio: DBStudio
@@ -257,23 +263,23 @@ function RenderPackageContainer({
 }: RenderPackageContainerProps): React.JSX.Element {
 	const { t } = useTranslation()
 
-	const getPlayoutDeviceIds = () => {
-		const deviceIds: {
+	const getPlayoutDeviceIds: DropdownInputOption<string>[] = React.useMemo(() => {
+		const playoutDevicesFromOverrrides = applyAndValidateOverrides(studio.peripheralDeviceSettings.playoutDevices).obj
+
+		const devices: {
 			name: string
 			value: string
 		}[] = []
 
-		const playoutDevices = applyAndValidateOverrides(studio.peripheralDeviceSettings.playoutDevices).obj
-
-		for (const deviceId of Object.keys(playoutDevices)) {
-			deviceIds.push({
+		for (const deviceId of Object.keys(playoutDevicesFromOverrrides)) {
+			devices.push({
 				name: deviceId,
 				value: deviceId,
 			})
 		}
+		return getDropdownInputOptions([...devices])
+	}, [studio.peripheralDeviceSettings.playoutDevices])
 
-		return deviceIds
-	}
 	const updatePackageContainerId = React.useCallback(
 		(newPackageContainerId: string) => {
 			overrideHelper.changeItemId(packageContainer.id, newPackageContainerId)
@@ -310,8 +316,6 @@ function RenderPackageContainer({
 
 	if (!packageContainer.computed) throw new Error(`Package Container "${id}" not found`)
 
-	const containerId = packageContainer.id
-
 	return (
 		<React.Fragment key={packageContainer.id}>
 			{isExpanded(packageContainer.id) && (
@@ -331,7 +335,7 @@ function RenderPackageContainer({
 							<LabelAndOverrides
 								label={t('Label')}
 								item={packageContainer}
-								//@ts-expect-error one level deep is not supported:
+								//@ts-expect-error can't be 2 levels deep
 								itemKey={'container.label'}
 								opPrefix={packageContainer.id}
 								overrideHelper={overrideHelper}
@@ -345,21 +349,24 @@ function RenderPackageContainer({
 									/>
 								)}
 							</LabelAndOverrides>
-							<label className="field">
-								<LabelActual label={t('Playout devices which uses this package container')} />
-								<EditAttribute
-									attribute={`packageContainers.${containerId}.deviceIds`}
-									obj={studio}
-									options={getPlayoutDeviceIds()}
-									label={t('Select playout devices')}
-									type="multiselect"
-									collection={Studios}
-								></EditAttribute>
-								<span className="text-s dimmed field-hint">
-									{t('Select which playout devices are using this package container')}
-								</span>
-							</label>
-
+							<LabelAndOverridesForMultiSelect
+								label={t('Playout devices which uses this package container')}
+								hint={t('Select which playout devices are using this package container')}
+								item={packageContainer}
+								itemKey={'deviceIds'}
+								opPrefix={packageContainer.id}
+								overrideHelper={overrideHelper}
+								options={getPlayoutDeviceIds}
+							>
+								{(value, handleUpdate, options) => (
+									<MultiSelectInputControl
+										classNames="input text-input input-l"
+										options={options}
+										value={value}
+										handleUpdate={handleUpdate}
+									/>
+								)}
+							</LabelAndOverridesForMultiSelect>
 							<div className="mdi"></div>
 						</div>
 						<div>
