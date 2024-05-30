@@ -78,7 +78,7 @@ export function StudioPackageManagerSettings({ studio }: StudioPackageManagerSet
 			value: string
 		}[] = []
 
-		packageContainersFromOverrides.forEach((packageContainer, containerId) => {
+		packageContainersFromOverrides.forEach((packageContainer) => {
 			let hasHttpAccessor = false
 			if (packageContainer.computed) {
 				for (const accessor of Object.values<Accessor.Any>(packageContainer.computed.container.accessors)) {
@@ -90,7 +90,7 @@ export function StudioPackageManagerSettings({ studio }: StudioPackageManagerSet
 				if (hasHttpAccessor) {
 					arr.push({
 						name: packageContainer.computed.container.label,
-						value: containerId.toString(),
+						value: packageContainer.id,
 					})
 				}
 			}
@@ -236,31 +236,31 @@ function RenderPackageContainers(
 	}
 
 	return packageContainersFromOverrides.map(
-		(container: WrappedOverridableItem<StudioPackageContainer>, id: number): React.JSX.Element => {
-			const containerId = id.toString()
-			const packageContainer = container.computed
-			if (!packageContainer) throw new Error(`Package Container "${id}" not found`)
+		(packageContainer: WrappedOverridableItem<StudioPackageContainer>, id: number): React.JSX.Element => {
+			if (!packageContainer.computed) throw new Error(`Package Container "${id}" not found`)
+
+			const containerId = packageContainer.id
 
 			return (
-				<React.Fragment key={containerId}>
+				<React.Fragment key={packageContainer.id}>
 					<tr
 						className={ClassNames({
-							hl: isExpanded(containerId),
+							hl: isExpanded(packageContainer.id),
 						})}
 					>
-						<th className="settings-studio-package-container__id c2">{containerId}</th>
-						<td className="settings-studio-package-container__name c2">{packageContainer.container.label}</td>
+						<th className="settings-studio-package-container__id c2">{packageContainer.id}</th>
+						<td className="settings-studio-package-container__name c2">{packageContainer.computed.container.label}</td>
 
 						<td className="settings-studio-package-container__actions table-item-actions c3">
-							<button className="action-btn" onClick={() => toggleExpanded(containerId)}>
+							<button className="action-btn" onClick={() => toggleExpanded(packageContainer.id)}>
 								<FontAwesomeIcon icon={faPencilAlt} />
 							</button>
-							<button className="action-btn" onClick={() => confirmRemovePackageContainer(containerId)}>
+							<button className="action-btn" onClick={() => confirmRemovePackageContainer(packageContainer.id)}>
 								<FontAwesomeIcon icon={faTrash} />
 							</button>
 						</td>
 					</tr>
-					{isExpanded(containerId) && (
+					{isExpanded(packageContainer.id) && (
 						<tr className="expando-details hl">
 							<td colSpan={6}>
 								<div className="properties-grid">
@@ -269,11 +269,11 @@ function RenderPackageContainers(
 										<EditAttribute
 											modifiedClassName="bghl"
 											attribute={'packageContainers'}
-											overrideDisplayValue={containerId}
+											overrideDisplayValue={packageContainer.id}
 											obj={studio}
 											type="text"
 											collection={Studios}
-											updateFunction={containerId}
+											updateFunction={packageContainer.id}
 											className="input text-input input-l"
 										></EditAttribute>
 									</label>
@@ -312,10 +312,10 @@ function RenderPackageContainers(
 									<div className="settings-studio-accessors">
 										<h3 className="mhn">{t('Accessors')}</h3>
 										<table className="expando settings-studio-package-containers-accessors-table">
-											<tbody>{RenderAccessors(studio, containerId, packageContainer)}</tbody>
+											<tbody>{RenderAccessors(studio, packageContainer)}</tbody>
 										</table>
 										<div className="mod mhs">
-											<button className="btn btn-primary" onClick={() => addNewAccessor(containerId)}>
+											<button className="btn btn-primary" onClick={() => addNewAccessor(packageContainer.id)}>
 												<FontAwesomeIcon icon={faPlus} />
 											</button>
 										</div>
@@ -330,7 +330,7 @@ function RenderPackageContainers(
 	)
 }
 
-function RenderAccessors(studio: DBStudio, containerId: string, packageContainer: StudioPackageContainer) {
+function RenderAccessors(studio: DBStudio, packageContainer: WrappedOverridableItem<StudioPackageContainer>) {
 	const { t } = useTranslation()
 	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
 
@@ -368,9 +368,9 @@ function RenderAccessors(studio: DBStudio, containerId: string, packageContainer
 		if (!containerId) throw new Error(`containerId not set`)
 		if (!packageContainer) throw new Error(`Can't edit an accessor to nonexistant Package Container "${containerId}"`)
 
-		const accessor = packageContainer.container.accessors[oldAccessorId]
+		const accessor = packageContainer.computed?.container.accessors[oldAccessorId]
 
-		if (packageContainer.container.accessors[newAccessorId]) {
+		if (packageContainer.computed?.container.accessors[newAccessorId]) {
 			throw new Meteor.Error(400, 'Accessor "' + newAccessorId + '" already exists')
 		}
 
@@ -389,7 +389,7 @@ function RenderAccessors(studio: DBStudio, containerId: string, packageContainer
 		toggleExpanded(containerId, newAccessorId)
 	}
 
-	if (Object.keys(packageContainer.container).length === 0) {
+	if (Object.keys(packageContainer.computed?.container || {}).length === 0) {
 		return (
 			<tr>
 				<td className="mhn dimmed">{t('There are no Accessors set up.')}</td>
@@ -397,7 +397,7 @@ function RenderAccessors(studio: DBStudio, containerId: string, packageContainer
 		)
 	}
 
-	return _.map(packageContainer.container.accessors, (accessor: Accessor.Any, accessorId: string) => {
+	return _.map(packageContainer.computed?.container.accessors || {}, (accessor: Accessor.Any, accessorId: string) => {
 		const accessorContent: string[] = []
 		_.each(accessor as any, (value, key: string) => {
 			if (key !== 'type' && value !== '') {
