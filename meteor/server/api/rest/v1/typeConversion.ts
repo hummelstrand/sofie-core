@@ -269,7 +269,7 @@ export async function studioFrom(apiStudio: APIStudio, existingId?: StudioId): P
 		routeSets: {},
 		_rundownVersionHash: '',
 		routeSetExclusivityGroups: {},
-		packageContainers: {},
+		packageContainersWithOverrides: wrapDefaultObject({}),
 		previewContainerIds: [],
 		thumbnailContainerIds: [],
 		peripheralDeviceSettings: {

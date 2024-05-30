@@ -107,7 +107,7 @@ export function defaultStudio(_id: StudioId): DBStudio {
 		_rundownVersionHash: '',
 		routeSets: {},
 		routeSetExclusivityGroups: {},
-		packageContainers: {},
+		packageContainersWithOverrides: wrapDefaultObject({}),
 		previewContainerIds: [],
 		thumbnailContainerIds: [],
 		peripheralDeviceSettings: {

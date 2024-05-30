@@ -132,7 +132,7 @@ describe('Migrations', () => {
 						_rundownVersionHash: '',
 						routeSets: {},
 						routeSetExclusivityGroups: {},
-						packageContainers: {},
+						packageContainersWithOverrides: wrapDefaultObject({}),
 						previewContainerIds: [],
 						thumbnailContainerIds: [],
 						peripheralDeviceSettings: {
@@ -170,7 +170,7 @@ describe('Migrations', () => {
 						_rundownVersionHash: '',
 						routeSets: {},
 						routeSetExclusivityGroups: {},
-						packageContainers: {},
+						packageContainersWithOverrides: wrapDefaultObject({}),
 						previewContainerIds: [],
 						thumbnailContainerIds: [],
 						peripheralDeviceSettings: {
@@ -208,7 +208,7 @@ describe('Migrations', () => {
 						_rundownVersionHash: '',
 						routeSets: {},
 						routeSetExclusivityGroups: {},
-						packageContainers: {},
+						packageContainersWithOverrides: wrapDefaultObject({}),
 						previewContainerIds: [],
 						thumbnailContainerIds: [],
 						peripheralDeviceSettings: {

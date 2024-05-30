@@ -94,7 +94,7 @@ export interface DBStudio {
 	/** Contains settings for which Package Containers are present in the studio.
 	 * (These are used by the Package Manager and the Expected Packages)
 	 */
-	packageContainers: Record<string, StudioPackageContainer>
+	packageContainersWithOverrides: ObjectWithOverrides<Record<string, StudioPackageContainer>>
 
 	/** Which package containers is used for media previews in GUI */
 	previewContainerIds: string[]
