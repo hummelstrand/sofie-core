@@ -181,7 +181,7 @@ export interface PieceContentStatusStudio
 		| 'packageContainersWithOverrides'
 		| 'previewContainerIds'
 		| 'thumbnailContainerIds'
-		| 'routeSets'
+		| 'routeSetsWithOverrides'
 	> {
 	/** Mappings between the physical devices / outputs and logical ones */
 	mappings: MappingsExt
