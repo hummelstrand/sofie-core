@@ -24,6 +24,7 @@ import {
 	MappingsExt,
 	ResultingMappingRoutes,
 	StudioPackageContainer,
+	StudioRouteSet,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
 import { literal, Complete, assertNever } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
@@ -184,6 +185,8 @@ export interface PieceContentStatusStudio
 	> {
 	/** Mappings between the physical devices / outputs and logical ones */
 	mappings: MappingsExt
+	/** Route sets with overrides */
+	routeSets: Record<string, StudioRouteSet>
 }
 
 export async function checkPieceContentStatusAndDependencies(
