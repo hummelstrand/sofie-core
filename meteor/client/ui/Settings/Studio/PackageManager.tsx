@@ -68,54 +68,29 @@ export function StudioPackageManagerSettings(studio: DBStudio): React.JSX.Elemen
 		}, 1)
 	}, [studio._id, studio.packageContainersWithOverrides])
 
-	// const containerId = (edit: EditAttributeBase, newValue: string) => {
-	// 	const oldContainerId = edit.overrideDisplayValue
-	// 	const newContainerId = newValue + ''
-	// 	const packageContainer = packageContainersFromOverrides[oldContainerId]
-
-	// 	if (packageContainersFromOverrides[newContainerId]) {
-	// 		throw new Meteor.Error(400, 'PackageContainer "' + newContainerId + '" already exists')
-	// 	}
-
-	// 	const mSet: Record<string, any> = {}
-	// 	const mUnset: Record<string, 1> = {}
-	// 	mSet['packageContainers.' + newContainerId] = packageContainer
-	// 	mUnset['packageContainers.' + oldContainerId] = 1
-
-	// 	if (edit.collection) {
-	// 		edit.collection.update(studio._id, {
-	// 			$set: mSet,
-	// 			$unset: mUnset,
-	// 		})
-	// 	}
-
-	// 	finishEditPackageContainer(oldContainerId)
-	// 	editPackageContainer(newContainerId)
-	// }
-
 	const getAvailablePackageContainers = () => {
 		const arr: {
 			name: string
 			value: string
 		}[] = []
 
-		for (const [containerId, packageContainer] of Object.entries<StudioPackageContainer>(
-			packageContainersFromOverrides
-		)) {
+		packageContainersFromOverrides.forEach((packageContainer, containerId) => {
 			let hasHttpAccessor = false
-			for (const accessor of Object.values<Accessor.Any>(packageContainer.container.accessors)) {
-				if (accessor.type === Accessor.AccessType.HTTP_PROXY) {
-					hasHttpAccessor = true
-					break
+			if (packageContainer.computed) {
+				for (const accessor of Object.values<Accessor.Any>(packageContainer.computed.container.accessors)) {
+					if (accessor.type === Accessor.AccessType.HTTP_PROXY) {
+						hasHttpAccessor = true
+						break
+					}
+				}
+				if (hasHttpAccessor) {
+					arr.push({
+						name: packageContainer.computed.container.label,
+						value: containerId.toString(),
+					})
 				}
 			}
-			if (hasHttpAccessor) {
-				arr.push({
-					name: packageContainer.container.label,
-					value: containerId,
-				})
-			}
-		}
+		})
 		return arr
 	}
 
@@ -224,7 +199,9 @@ function RenderPackageContainers(
 		// find free key name
 		const newKeyName = 'local'
 		let iter = 0
-		const packageContainer = packageContainersFromOverrides[containerId]
+		const packageContainer = packageContainersFromOverrides.find((_, packageContainerId) => {
+			return packageContainerId.toString() === containerId
+		})?.computed
 		if (!packageContainer) throw new Error(`Can't add an accessor to nonexistant Package Container "${containerId}"`)
 
 		while (packageContainer.container.accessors[newKeyName + iter]) {
@@ -254,93 +231,99 @@ function RenderPackageContainers(
 		)
 	}
 
-	return _.map(packageContainersFromOverrides, (packageContainer: StudioPackageContainer, containerId: string) => {
-		return (
-			<React.Fragment key={containerId}>
-				<tr
-					className={ClassNames({
-						hl: isExpanded(containerId),
-					})}
-				>
-					<th className="settings-studio-package-container__id c2">{containerId}</th>
-					<td className="settings-studio-package-container__name c2">{packageContainer.container.label}</td>
+	return packageContainersFromOverrides.map(
+		(container: WrappedOverridableItem<StudioPackageContainer>, id: number): React.JSX.Element => {
+			const containerId = id.toString()
+			const packageContainer = container.computed
+			if (!packageContainer) throw new Error(`Package Container "${id}" not found`)
 
-					<td className="settings-studio-package-container__actions table-item-actions c3">
-						<button className="action-btn" onClick={() => toggleExpanded(containerId)}>
-							<FontAwesomeIcon icon={faPencilAlt} />
-						</button>
-						<button className="action-btn" onClick={() => confirmRemovePackageContainer(containerId)}>
-							<FontAwesomeIcon icon={faTrash} />
-						</button>
-					</td>
-				</tr>
-				{isExpanded(containerId) && (
-					<tr className="expando-details hl">
-						<td colSpan={6}>
-							<div className="properties-grid">
-								<label className="field">
-									<LabelActual label={t('Package Container ID')} />
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={'packageContainers'}
-										overrideDisplayValue={containerId}
-										obj={studio}
-										type="text"
-										collection={Studios}
-										updateFunction={containerId}
-										className="input text-input input-l"
-									></EditAttribute>
-								</label>
+			return (
+				<React.Fragment key={containerId}>
+					<tr
+						className={ClassNames({
+							hl: isExpanded(containerId),
+						})}
+					>
+						<th className="settings-studio-package-container__id c2">{containerId}</th>
+						<td className="settings-studio-package-container__name c2">{packageContainer.container.label}</td>
 
-								<label className="field">
-									<LabelActual label={t('Label')} />
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={`packageContainers.${containerId}.container.label`}
-										obj={studio}
-										type="text"
-										collection={Studios}
-										className="input text-input input-l"
-									></EditAttribute>
-									<span className="text-s dimmed field-hint">{t('Display name/label of the Package Container')}</span>
-								</label>
-
-								<label className="field">
-									<LabelActual label={t('Playout devices which uses this package container')} />
-									<EditAttribute
-										attribute={`packageContainers.${containerId}.deviceIds`}
-										obj={studio}
-										options={getPlayoutDeviceIds()}
-										label={t('Select playout devices')}
-										type="multiselect"
-										collection={Studios}
-									></EditAttribute>
-									<span className="text-s dimmed field-hint">
-										{t('Select which playout devices are using this package container')}
-									</span>
-								</label>
-
-								<div className="mdi"></div>
-							</div>
-							<div>
-								<div className="settings-studio-accessors">
-									<h3 className="mhn">{t('Accessors')}</h3>
-									<table className="expando settings-studio-package-containers-accessors-table">
-										<tbody>{RenderAccessors(studio, containerId, packageContainer)}</tbody>
-									</table>
-									<div className="mod mhs">
-										<button className="btn btn-primary" onClick={() => addNewAccessor(containerId)}>
-											<FontAwesomeIcon icon={faPlus} />
-										</button>
-									</div>
-								</div>
-							</div>
+						<td className="settings-studio-package-container__actions table-item-actions c3">
+							<button className="action-btn" onClick={() => toggleExpanded(containerId)}>
+								<FontAwesomeIcon icon={faPencilAlt} />
+							</button>
+							<button className="action-btn" onClick={() => confirmRemovePackageContainer(containerId)}>
+								<FontAwesomeIcon icon={faTrash} />
+							</button>
 						</td>
 					</tr>
-				)}
-			</React.Fragment>
-		)
-	})
+					{isExpanded(containerId) && (
+						<tr className="expando-details hl">
+							<td colSpan={6}>
+								<div className="properties-grid">
+									<label className="field">
+										<LabelActual label={t('Package Container ID')} />
+										<EditAttribute
+											modifiedClassName="bghl"
+											attribute={'packageContainers'}
+											overrideDisplayValue={containerId}
+											obj={studio}
+											type="text"
+											collection={Studios}
+											updateFunction={containerId}
+											className="input text-input input-l"
+										></EditAttribute>
+									</label>
+
+									<label className="field">
+										<LabelActual label={t('Label')} />
+										<EditAttribute
+											modifiedClassName="bghl"
+											attribute={`packageContainers.${containerId}.container.label`}
+											obj={studio}
+											type="text"
+											collection={Studios}
+											className="input text-input input-l"
+										></EditAttribute>
+										<span className="text-s dimmed field-hint">{t('Display name/label of the Package Container')}</span>
+									</label>
+
+									<label className="field">
+										<LabelActual label={t('Playout devices which uses this package container')} />
+										<EditAttribute
+											attribute={`packageContainers.${containerId}.deviceIds`}
+											obj={studio}
+											options={getPlayoutDeviceIds()}
+											label={t('Select playout devices')}
+											type="multiselect"
+											collection={Studios}
+										></EditAttribute>
+										<span className="text-s dimmed field-hint">
+											{t('Select which playout devices are using this package container')}
+										</span>
+									</label>
+
+									<div className="mdi"></div>
+								</div>
+								<div>
+									<div className="settings-studio-accessors">
+										<h3 className="mhn">{t('Accessors')}</h3>
+										<table className="expando settings-studio-package-containers-accessors-table">
+											<tbody>{RenderAccessors(studio, containerId, packageContainer)}</tbody>
+										</table>
+										<div className="mod mhs">
+											<button className="btn btn-primary" onClick={() => addNewAccessor(containerId)}>
+												<FontAwesomeIcon icon={faPlus} />
+											</button>
+										</div>
+									</div>
+								</div>
+							</td>
+						</tr>
+					)}
+				</React.Fragment>
+			)
+		}
+	)
 }
 
 function RenderAccessors(studio: DBStudio, containerId: string, packageContainer: StudioPackageContainer) {
@@ -423,7 +406,7 @@ function RenderAccessors(studio: DBStudio, containerId: string, packageContainer
 			<React.Fragment key={accessorId}>
 				<tr
 					className={ClassNames({
-						hl: isExpanded(containerId, accessorId),
+						hl: isExpanded(accessorId),
 					})}
 				>
 					<th className="settings-studio-accessor__id c2">{accessorId}</th>
@@ -432,7 +415,7 @@ function RenderAccessors(studio: DBStudio, containerId: string, packageContainer
 					<td className="settings-studio-accessor__accessorContent c7">{accessorContent.join(', ')}</td>
 
 					<td className="settings-studio-accessor__actions table-item-actions c3">
-						<button className="action-btn" onClick={() => toggleExpanded(containerId, accessorId)}>
+						<button className="action-btn" onClick={() => toggleExpanded(accessorId)}>
 							<FontAwesomeIcon icon={faPencilAlt} />
 						</button>
 						<button className="action-btn" onClick={() => confirmRemoveAccessor(containerId, accessorId)}>
@@ -440,7 +423,7 @@ function RenderAccessors(studio: DBStudio, containerId: string, packageContainer
 						</button>
 					</td>
 				</tr>
-				{isExpanded(containerId, accessorId) && (
+				{isExpanded(accessorId) && (
 					<tr className="expando-details hl">
 						<td colSpan={6}>
 							<div className="properties-grid">
