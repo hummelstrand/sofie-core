@@ -19,7 +19,11 @@ import { useToggleExpandHelper } from '../../util/useToggleExpandHelper'
 import { WrappedOverridableItem, getAllCurrentAndDeletedItemsFromOverrides } from '../util/OverrideOpHelper'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 
-export function StudioPackageManagerSettings(studio: DBStudio): React.JSX.Element {
+interface StudioPackageManagerSettingsProps {
+	studio: DBStudio
+}
+
+export function StudioPackageManagerSettings({ studio }: StudioPackageManagerSettingsProps): React.JSX.Element {
 	const { t } = useTranslation()
 
 	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
