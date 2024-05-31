@@ -314,7 +314,7 @@ function RenderPackageContainer({
 		})
 	}
 
-	if (!packageContainer.computed) throw new Error(`Package Container "${id}" not found`)
+	if (!packageContainer.computed) throw new Error(`Package Container "${packageContainer.id}" not found`)
 
 	return (
 		<React.Fragment key={packageContainer.id}>
@@ -373,7 +373,7 @@ function RenderPackageContainer({
 							<div className="settings-studio-accessors">
 								<h3 className="mhn">{t('Accessors')}</h3>
 								<table className="expando settings-studio-package-containers-accessors-table">
-									<tbody>{RenderAccessors(studio, packageContainer)}</tbody>
+									<RenderAccessors studio={studio} packageContainer={packageContainer} />
 								</table>
 								<div className="mod mhs">
 									<button className="btn btn-primary" onClick={() => addNewAccessor(packageContainer.id)}>
@@ -389,11 +389,12 @@ function RenderPackageContainer({
 	)
 }
 
-function RenderAccessors(
-	studio: DBStudio,
+interface RenderAccessorsProps {
+	studio: DBStudio
 	packageContainer: WrappedOverridableItem<StudioPackageContainer>
-): React.JSX.Element[] {
-	return []
+}
+
+function RenderAccessors({ studio, packageContainer }: RenderAccessorsProps): React.JSX.Element[] {
 	const { t } = useTranslation()
 	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
 
@@ -423,33 +424,6 @@ function RenderAccessors(
 		Studios.update(studio._id, {
 			$unset: unsetObject,
 		})
-	}
-	const updateAccessorId = (edit: EditAttributeBase, newValue: string) => {
-		const oldAccessorId = edit.overrideDisplayValue
-		const newAccessorId = newValue + ''
-		const containerId = edit.attribute
-		if (!containerId) throw new Error(`containerId not set`)
-		if (!packageContainer) throw new Error(`Can't edit an accessor to nonexistant Package Container "${containerId}"`)
-
-		const accessor = packageContainer.computed?.container.accessors[oldAccessorId]
-
-		if (packageContainer.computed?.container.accessors[newAccessorId]) {
-			throw new Meteor.Error(400, 'Accessor "' + newAccessorId + '" already exists')
-		}
-
-		const mSet: Record<string, any> = {}
-		const mUnset: Record<string, 1> = {}
-		mSet[`packageContainers.${containerId}.container.accessors.${newAccessorId}`] = accessor
-		mUnset[`packageContainers.${containerId}.container.accessors.${oldAccessorId}`] = 1
-
-		if (edit.collection) {
-			edit.collection.update(studio._id, {
-				$set: mSet,
-				$unset: mUnset,
-			})
-		}
-		toggleExpanded(containerId, oldAccessorId)
-		toggleExpanded(containerId, newAccessorId)
 	}
 
 	if (Object.keys(packageContainer.computed?.container || {}).length === 0) {
@@ -491,335 +465,393 @@ function RenderAccessors(
 					</td>
 				</tr>
 				{isExpanded(accessorId) && (
-					<tr className="expando-details hl">
-						<td colSpan={6}>
-							<div className="properties-grid">
-								<label className="field">
-									<LabelActual label={t('Accessor ID')} />
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={containerId}
-										overrideDisplayValue={accessorId}
-										obj={studio}
-										type="text"
-										collection={Studios}
-										updateFunction={updateAccessorId}
-										className="input text-input input-l"
-									></EditAttribute>
-								</label>
-								<label className="field">
-									<LabelActual label={t('Label')} />
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.label`}
-										obj={studio}
-										type="text"
-										collection={Studios}
-										className="input text-input input-l"
-									></EditAttribute>
-									<span className="text-s dimmed field-hint">{t('Display name of the Package Container')}</span>
-								</label>
-								<label className="field">
-									<LabelActual label={t('Accessor Type')} />
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.type`}
-										obj={studio}
-										type="dropdown"
-										options={Accessor.AccessType}
-										collection={Studios}
-										className="input text-input input-l"
-									></EditAttribute>
-								</label>
-								{accessor.type === Accessor.AccessType.LOCAL_FOLDER ? (
-									<>
-										<label className="field">
-											<LabelActual label={t('Folder path')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.folderPath`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">
-												{t('File path to the folder of the local folder')}
-											</span>
-										</label>
-
-										<label className="field">
-											<LabelActual label={t('Resource Id')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.resourceId`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">
-												{t('(Optional) This could be the name of the computer on which the local folder is on')}
-											</span>
-										</label>
-									</>
-								) : accessor.type === Accessor.AccessType.HTTP ? (
-									<>
-										<label className="field">
-											<LabelActual label={t('Base URL')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.baseUrl`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">
-												{t('Base url to the resource (example: http://myserver/folder)')}
-											</span>
-										</label>
-
-										<label className="field">
-											<LabelActual label={t('Network Id')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.networkId`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">
-												{t(
-													'(Optional) A name/identifier of the local network where the share is located, leave empty if globally accessible'
-												)}
-											</span>
-										</label>
-									</>
-								) : accessor.type === Accessor.AccessType.HTTP_PROXY ? (
-									<>
-										<label className="field">
-											<LabelActual label={t('Base URL')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.baseUrl`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">
-												{t('Base url to the resource (example: http://myserver/folder)')}
-											</span>
-										</label>
-
-										<label className="field">
-											<LabelActual label={t('Network Id')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.networkId`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">
-												{t(
-													'(Optional) A name/identifier of the local network where the share is located, leave empty if globally accessible'
-												)}
-											</span>
-										</label>
-									</>
-								) : accessor.type === Accessor.AccessType.FILE_SHARE ? (
-									<>
-										<label className="field">
-											<LabelActual label={t('Base URL')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.folderPath`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">{t('Folder path to shared folder')}</span>
-										</label>
-										<label className="field">
-											<LabelActual label={t('UserName')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.userName`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">{t('Username for athuentication')}</span>
-										</label>
-										<label className="field">
-											<LabelActual label={t('Password')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.password`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">{t('Password for authentication')}</span>
-										</label>
-										<label className="field">
-											<LabelActual label={t('Network Id')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.networkId`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">
-												{t('(Optional) A name/identifier of the local network where the share is located')}
-											</span>
-										</label>
-									</>
-								) : accessor.type === Accessor.AccessType.QUANTEL ? (
-									<>
-										<label className="field">
-											<LabelActual label={t('Quantel gateway URL')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.quantelGatewayUrl`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">{t('URL to the Quantel Gateway')}</span>
-										</label>
-										<label className="field">
-											<LabelActual label={t('ISA URLs')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.ISAUrls`}
-												obj={studio}
-												type="array"
-												arrayType="string"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">
-												{t('URLs to the ISAs, in order of importance (comma separated)')}
-											</span>
-										</label>
-										<label className="field">
-											<LabelActual label={t('Zone ID')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.zoneId`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">{t('Zone ID (default value: "default")')}</span>
-										</label>
-										<label className="field">
-											<LabelActual label={t('Server ID')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.serverId`}
-												obj={studio}
-												type="int"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">
-												{t(
-													'Server ID. For sources, this should generally be omitted (or set to 0) so clip-searches are zone-wide. If set, clip-searches are limited to that server.'
-												)}
-											</span>
-										</label>
-
-										<label className="field">
-											<LabelActual label={t('Quantel transformer URL')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.transformerURL`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">{t('URL to the Quantel HTTP transformer')}</span>
-										</label>
-
-										<label className="field">
-											<LabelActual label={t('Quantel FileFlow URL')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.fileflowURL`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">{t('URL to the Quantel FileFlow Manager')}</span>
-										</label>
-
-										<label className="field">
-											<LabelActual label={t('Quantel FileFlow Profile name')} />
-											<EditAttribute
-												modifiedClassName="bghl"
-												attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.fileflowProfile`}
-												obj={studio}
-												type="text"
-												collection={Studios}
-												className="input text-input input-l"
-											></EditAttribute>
-											<span className="text-s dimmed field-hint">
-												{t('Profile name to be used by FileFlow when exporting the clips')}
-											</span>
-										</label>
-									</>
-								) : null}
-
-								<label className="field">
-									<LabelActual label={t('Allow Read access')} />
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.allowRead`}
-										obj={studio}
-										type="checkbox"
-										collection={Studios}
-										className="input"
-									></EditAttribute>
-									<span className="text-s dimmed field-hint">{t('')}</span>
-								</label>
-
-								<label className="field">
-									<LabelActual label={t('Allow Write access')} />
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.allowWrite`}
-										obj={studio}
-										type="checkbox"
-										collection={Studios}
-										className="input"
-									></EditAttribute>
-									<span className="text-s dimmed field-hint">{t('')}</span>
-								</label>
-							</div>
-							<div className="mod">
-								<button className="btn btn-primary right" onClick={() => finishEditAccessor(containerId, accessorId)}>
-									<FontAwesomeIcon icon={faCheck} />
-								</button>
-							</div>
-						</td>
-					</tr>
+					<RenderAccessor studio={studio} accessor={accessor} packageContainer={packageContainer} />
 				)}
 			</React.Fragment>
 		)
 	})
+}
+
+interface RenderAccessorProps {
+	studio: DBStudio
+	containerId: string
+	packageContainer: WrappedOverridableItem<StudioPackageContainer>
+	accessor: Accessor.Any
+	toggleExpanded: (id: string, forceState?: boolean | undefined) => void
+}
+
+function RenderAccessor({
+	studio,
+	accessor,
+	containerId,
+	packageContainer,
+	toggleExpanded,
+}: RenderAccessorProps): React.JSX.Element {
+	const { t } = useTranslation()
+
+	const updateAccessorId = (edit: EditAttributeBase, newValue: string) => {
+		const oldAccessorId = edit.overrideDisplayValue
+		const newAccessorId = newValue + ''
+		const containerId = edit.attribute
+		if (!containerId) throw new Error(`containerId not set`)
+		if (!packageContainer) throw new Error(`Can't edit an accessor to nonexistant Package Container "${containerId}"`)
+
+		const accessor = packageContainer.computed?.container.accessors[oldAccessorId]
+
+		if (packageContainer.computed?.container.accessors[newAccessorId]) {
+			throw new Meteor.Error(400, 'Accessor "' + newAccessorId + '" already exists')
+		}
+
+		const mSet: Record<string, any> = {}
+		const mUnset: Record<string, 1> = {}
+		mSet[`packageContainers.${containerId}.container.accessors.${newAccessorId}`] = accessor
+		mUnset[`packageContainers.${containerId}.container.accessors.${oldAccessorId}`] = 1
+
+		if (edit.collection) {
+			edit.collection.update(studio._id, {
+				$set: mSet,
+				$unset: mUnset,
+			})
+		}
+		toggleExpanded(containerId, oldAccessorId)
+		toggleExpanded(containerId, newAccessorId)
+	}
+
+	if (Object.keys(packageContainer.computed?.container || {}).length === 0) {
+		return (
+			<tr>
+				<td className="mhn dimmed">{t('There are no Accessors set up.')}</td>
+			</tr>
+		)
+	}
+
+	return (
+		<React.Fragment key={accessorId}>
+			<tr className="expando-details hl">
+				<td colSpan={6}>
+					<div className="properties-grid">
+						<label className="field">
+							<LabelActual label={t('Accessor ID')} />
+							<EditAttribute
+								modifiedClassName="bghl"
+								attribute={containerId}
+								overrideDisplayValue={accessorId}
+								obj={studio}
+								type="text"
+								collection={Studios}
+								updateFunction={updateAccessorId}
+								className="input text-input input-l"
+							></EditAttribute>
+						</label>
+						<label className="field">
+							<LabelActual label={t('Label')} />
+							<EditAttribute
+								modifiedClassName="bghl"
+								attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.label`}
+								obj={studio}
+								type="text"
+								collection={Studios}
+								className="input text-input input-l"
+							></EditAttribute>
+							<span className="text-s dimmed field-hint">{t('Display name of the Package Container')}</span>
+						</label>
+						<label className="field">
+							<LabelActual label={t('Accessor Type')} />
+							<EditAttribute
+								modifiedClassName="bghl"
+								attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.type`}
+								obj={studio}
+								type="dropdown"
+								options={Accessor.AccessType}
+								collection={Studios}
+								className="input text-input input-l"
+							></EditAttribute>
+						</label>
+						{accessor.type === Accessor.AccessType.LOCAL_FOLDER ? (
+							<>
+								<label className="field">
+									<LabelActual label={t('Folder path')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.folderPath`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">{t('File path to the folder of the local folder')}</span>
+								</label>
+
+								<label className="field">
+									<LabelActual label={t('Resource Id')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.resourceId`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">
+										{t('(Optional) This could be the name of the computer on which the local folder is on')}
+									</span>
+								</label>
+							</>
+						) : accessor.type === Accessor.AccessType.HTTP ? (
+							<>
+								<label className="field">
+									<LabelActual label={t('Base URL')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.baseUrl`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">
+										{t('Base url to the resource (example: http://myserver/folder)')}
+									</span>
+								</label>
+
+								<label className="field">
+									<LabelActual label={t('Network Id')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.networkId`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">
+										{t(
+											'(Optional) A name/identifier of the local network where the share is located, leave empty if globally accessible'
+										)}
+									</span>
+								</label>
+							</>
+						) : accessor.type === Accessor.AccessType.HTTP_PROXY ? (
+							<>
+								<label className="field">
+									<LabelActual label={t('Base URL')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.baseUrl`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">
+										{t('Base url to the resource (example: http://myserver/folder)')}
+									</span>
+								</label>
+
+								<label className="field">
+									<LabelActual label={t('Network Id')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.networkId`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">
+										{t(
+											'(Optional) A name/identifier of the local network where the share is located, leave empty if globally accessible'
+										)}
+									</span>
+								</label>
+							</>
+						) : accessor.type === Accessor.AccessType.FILE_SHARE ? (
+							<>
+								<label className="field">
+									<LabelActual label={t('Base URL')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.folderPath`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">{t('Folder path to shared folder')}</span>
+								</label>
+								<label className="field">
+									<LabelActual label={t('UserName')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.userName`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">{t('Username for athuentication')}</span>
+								</label>
+								<label className="field">
+									<LabelActual label={t('Password')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.password`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">{t('Password for authentication')}</span>
+								</label>
+								<label className="field">
+									<LabelActual label={t('Network Id')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.networkId`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">
+										{t('(Optional) A name/identifier of the local network where the share is located')}
+									</span>
+								</label>
+							</>
+						) : accessor.type === Accessor.AccessType.QUANTEL ? (
+							<>
+								<label className="field">
+									<LabelActual label={t('Quantel gateway URL')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.quantelGatewayUrl`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">{t('URL to the Quantel Gateway')}</span>
+								</label>
+								<label className="field">
+									<LabelActual label={t('ISA URLs')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.ISAUrls`}
+										obj={studio}
+										type="array"
+										arrayType="string"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">
+										{t('URLs to the ISAs, in order of importance (comma separated)')}
+									</span>
+								</label>
+								<label className="field">
+									<LabelActual label={t('Zone ID')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.zoneId`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">{t('Zone ID (default value: "default")')}</span>
+								</label>
+								<label className="field">
+									<LabelActual label={t('Server ID')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.serverId`}
+										obj={studio}
+										type="int"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">
+										{t(
+											'Server ID. For sources, this should generally be omitted (or set to 0) so clip-searches are zone-wide. If set, clip-searches are limited to that server.'
+										)}
+									</span>
+								</label>
+
+								<label className="field">
+									<LabelActual label={t('Quantel transformer URL')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.transformerURL`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">{t('URL to the Quantel HTTP transformer')}</span>
+								</label>
+
+								<label className="field">
+									<LabelActual label={t('Quantel FileFlow URL')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.fileflowURL`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">{t('URL to the Quantel FileFlow Manager')}</span>
+								</label>
+
+								<label className="field">
+									<LabelActual label={t('Quantel FileFlow Profile name')} />
+									<EditAttribute
+										modifiedClassName="bghl"
+										attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.fileflowProfile`}
+										obj={studio}
+										type="text"
+										collection={Studios}
+										className="input text-input input-l"
+									></EditAttribute>
+									<span className="text-s dimmed field-hint">
+										{t('Profile name to be used by FileFlow when exporting the clips')}
+									</span>
+								</label>
+							</>
+						) : null}
+
+						<label className="field">
+							<LabelActual label={t('Allow Read access')} />
+							<EditAttribute
+								modifiedClassName="bghl"
+								attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.allowRead`}
+								obj={studio}
+								type="checkbox"
+								collection={Studios}
+								className="input"
+							></EditAttribute>
+							<span className="text-s dimmed field-hint">{t('')}</span>
+						</label>
+
+						<label className="field">
+							<LabelActual label={t('Allow Write access')} />
+							<EditAttribute
+								modifiedClassName="bghl"
+								attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.allowWrite`}
+								obj={studio}
+								type="checkbox"
+								collection={Studios}
+								className="input"
+							></EditAttribute>
+							<span className="text-s dimmed field-hint">{t('')}</span>
+						</label>
+					</div>
+					<div className="mod">
+						<button className="btn btn-primary right" onClick={() => toggleExpanded(accessorId)}>
+							<FontAwesomeIcon icon={faCheck} />
+						</button>
+					</div>
+				</td>
+			</tr>
+		</React.Fragment>
+	)
 }
