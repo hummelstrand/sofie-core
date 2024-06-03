@@ -1,4 +1,4 @@
-import { IBlueprintConfig, PackageContainer, TSR } from '@sofie-automation/blueprints-integration'
+import { IBlueprintConfig, TSR } from '@sofie-automation/blueprints-integration'
 import { ObjectWithOverrides } from '../settings/objectWithOverrides'
 import { StudioId, OrganizationId, BlueprintId, ShowStyleBaseId, MappingsHash, PeripheralDeviceId } from './Ids'
 import { BlueprintHash, LastBlueprintConfig } from './Blueprint'
@@ -12,6 +12,7 @@ import {
 	StudioRouteSetExclusivityGroup,
 	StudioRouteType,
 } from '@sofie-automation/shared-lib/dist/core/model/StudioRouteSet'
+import { StudioPackageContainer } from '@sofie-automation/shared-lib/dist/core/model/PackageContainer'
 
 export { MappingsExt, MappingExt, MappingsHash }
 
@@ -25,6 +26,7 @@ export {
 	ResultingMappingRoutes,
 	StudioRouteSet,
 	StudioRouteType,
+	StudioPackageContainer,
 }
 
 export interface IStudioSettings {
@@ -168,10 +170,4 @@ export interface StudioPlayoutDevice {
 	peripheralDeviceId: PeripheralDeviceId | undefined
 
 	options: TSR.DeviceOptionsAny
-}
-
-export interface StudioPackageContainer {
-	/** List of which peripheraldevices uses this packageContainer */
-	deviceIds: string[]
-	container: PackageContainer
 }
