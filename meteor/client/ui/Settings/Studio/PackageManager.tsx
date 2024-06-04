@@ -18,12 +18,18 @@ import {
 import {
 	LabelActual,
 	LabelAndOverrides,
+	LabelAndOverridesForCheckbox,
+	LabelAndOverridesForDropdown,
 	LabelAndOverridesForMultiSelect,
 } from '../../../lib/Components/LabelAndOverrides'
 import { useToggleExpandHelper } from '../../util/useToggleExpandHelper'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import { TextInputControl } from '../../../lib/Components/TextInput'
-import { DropdownInputOption, getDropdownInputOptions } from '../../../lib/Components/DropdownInput'
+import {
+	DropdownInputControl,
+	DropdownInputOption,
+	getDropdownInputOptions,
+} from '../../../lib/Components/DropdownInput'
 import { MultiSelectInputControl } from '../../../lib/Components/MultiSelectInput'
 import {
 	OverrideOpHelper,
@@ -31,6 +37,7 @@ import {
 	getAllCurrentAndDeletedItemsFromOverrides,
 	useOverrideOpHelper,
 } from '../../util/OverrideOpHelper'
+import { CheckboxControl } from '../../../lib/Components/Checkbox'
 
 interface StudioPackageManagerSettingsProps {
 	studio: DBStudio
@@ -402,14 +409,9 @@ interface RenderAccessorsProps {
 function RenderAccessors({ studio, packageContainer, overrideHelper }: RenderAccessorsProps): React.JSX.Element {
 	const { t } = useTranslation()
 
-	const accessors = packageContainer.computed?.container
+	const container = packageContainer.computed?.container
 
-	// const tableOverrideHelper = React.useMemo(
-	// 	() => new OverrideOpHelperObjectTable(overrideHelper, packageContainer.id, accessors, 'container.accessors'),
-	// 	[overrideHelper, packageContainer.id, accessors]
-	// )
-
-	if (!accessors || Object.keys(accessors).length === 0) {
+	if (!container || Object.keys(container).length === 0) {
 		return (
 			<tr>
 				<td className="mhn dimmed">{t('There are no Accessors set up.')}</td>
@@ -418,16 +420,8 @@ function RenderAccessors({ studio, packageContainer, overrideHelper }: RenderAcc
 	}
 
 	return (
-		<React.Component>
-			{_.map(accessors || {}, (accessor: Accessor.Any, accessorId: string) => {
-				const accessorContent: string[] = []
-				_.each(accessor as any, (value, key: string) => {
-					if (key !== 'type' && value !== '') {
-						let str = JSON.stringify(value)
-						if (str.length > 20) str = str.slice(0, 17) + '...'
-						accessorContent.push(`${key}: ${str}`)
-					}
-				})
+		<React.Fragment>
+			{_.map(container.accessors || {}, (accessor: Accessor.Any, accessorId: string) => {
 				return (
 					<React.Fragment key={accessorId}>
 						<RenderAccessor
@@ -440,7 +434,7 @@ function RenderAccessors({ studio, packageContainer, overrideHelper }: RenderAcc
 					</React.Fragment>
 				)
 			})}
-		</React.Component>
+		</React.Fragment>
 	)
 }
 
@@ -568,9 +562,10 @@ function RenderAccessor({
 							</label>
 							<LabelAndOverrides
 								label={t('Label')}
+								hint={t('Display name of the Package Container')}
 								item={packageContainer}
-								//@ts-expect-error can't be 2 levels deep
-								itemKey={'container.label'}
+								//@ts-expect-error can't be 4 levels deep
+								itemKey={`container.accessors.${accessorId}.label`}
 								opPrefix={packageContainer.id}
 								overrideHelper={overrideHelper}
 							>
@@ -583,307 +578,375 @@ function RenderAccessor({
 									/>
 								)}
 							</LabelAndOverrides>
-							<label className="field">
-								<LabelActual label={t('Label')} />
-								<EditAttribute
-									modifiedClassName="bghl"
-									attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.label`}
-									obj={studio}
-									type="text"
-									collection={Studios}
-									className="input text-input input-l"
-								></EditAttribute>
-								<span className="text-s dimmed field-hint">{t('Display name of the Package Container')}</span>
-							</label>
-							<label className="field">
-								<LabelActual label={t('Accessor Type')} />
-								<EditAttribute
-									modifiedClassName="bghl"
-									attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.type`}
-									obj={studio}
-									type="dropdown"
-									options={Accessor.AccessType}
-									collection={Studios}
-									className="input text-input input-l"
-								></EditAttribute>
-							</label>
+							<LabelAndOverridesForDropdown
+								label={t('Accessor Type')}
+								item={packageContainer}
+								//@ts-expect-error can't be 4 levels deep
+								itemKey={`container.accessors.${accessorId}.type`}
+								opPrefix={packageContainer.id}
+								overrideHelper={overrideHelper}
+								options={getDropdownInputOptions(Accessor.AccessType)}
+							>
+								{(value, handleUpdate, options) => {
+									return (
+										<DropdownInputControl
+											classNames="input text-input input-l"
+											options={options}
+											value={value}
+											handleUpdate={handleUpdate}
+										/>
+									)
+								}}
+							</LabelAndOverridesForDropdown>
 							{accessor.type === Accessor.AccessType.LOCAL_FOLDER ? (
 								<>
-									<label className="field">
-										<LabelActual label={t('Folder path')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.folderPath`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">{t('File path to the folder of the local folder')}</span>
-									</label>
-
-									<label className="field">
-										<LabelActual label={t('Resource Id')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.resourceId`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">
-											{t('(Optional) This could be the name of the computer on which the local folder is on')}
-										</span>
-									</label>
+									<LabelAndOverrides
+										label={t('Folder path')}
+										hint={t('File path to the folder of the local folder')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.folderPath`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('Resourse Id')}
+										hint={t('(Optional) This could be the name of the computer on which the local folder is on')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.resourceId`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
 								</>
 							) : accessor.type === Accessor.AccessType.HTTP ? (
 								<>
-									<label className="field">
-										<LabelActual label={t('Base URL')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.baseUrl`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">
-											{t('Base url to the resource (example: http://myserver/folder)')}
-										</span>
-									</label>
-
-									<label className="field">
-										<LabelActual label={t('Network Id')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.networkId`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">
-											{t(
-												'(Optional) A name/identifier of the local network where the share is located, leave empty if globally accessible'
-											)}
-										</span>
-									</label>
+									<LabelAndOverrides
+										label={t('Base URL')}
+										hint={t('Base url to the resource (example: http://myserver/folder)')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.baseUrl`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('Network Id')}
+										hint={t(
+											'(Optional) A name/identifier of the local network where the share is located, leave empty if globally accessible'
+										)}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.networkId`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
 								</>
 							) : accessor.type === Accessor.AccessType.HTTP_PROXY ? (
 								<>
-									<label className="field">
-										<LabelActual label={t('Base URL')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.baseUrl`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">
-											{t('Base url to the resource (example: http://myserver/folder)')}
-										</span>
-									</label>
-
-									<label className="field">
-										<LabelActual label={t('Network Id')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.networkId`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">
-											{t(
-												'(Optional) A name/identifier of the local network where the share is located, leave empty if globally accessible'
-											)}
-										</span>
-									</label>
+									<LabelAndOverrides
+										label={t('Base URL')}
+										hint={t('Base url to the resource (example: http://myserver/folder)')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.baseUrl`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('Network Id')}
+										hint={t(
+											'(Optional) A name/identifier of the local network where the share is located, leave empty if globally accessible'
+										)}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.networkId`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
 								</>
 							) : accessor.type === Accessor.AccessType.FILE_SHARE ? (
 								<>
-									<label className="field">
-										<LabelActual label={t('Base URL')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.folderPath`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">{t('Folder path to shared folder')}</span>
-									</label>
-									<label className="field">
-										<LabelActual label={t('UserName')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.userName`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">{t('Username for athuentication')}</span>
-									</label>
-									<label className="field">
-										<LabelActual label={t('Password')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.password`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">{t('Password for authentication')}</span>
-									</label>
-									<label className="field">
-										<LabelActual label={t('Network Id')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.networkId`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">
-											{t('(Optional) A name/identifier of the local network where the share is located')}
-										</span>
-									</label>
+									<LabelAndOverrides
+										label={t('Base URL')}
+										hint={t('Folder path to shared folder')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.folderPath`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('User Name')}
+										hint={t('Username for authentication')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.userName`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('Password')}
+										hint={t('Password for authentication')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.password`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('Network Id')}
+										hint={t('(Optional) A name/identifier of the local network where the share is located')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.networkId`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
 								</>
 							) : accessor.type === Accessor.AccessType.QUANTEL ? (
 								<>
-									<label className="field">
-										<LabelActual label={t('Quantel gateway URL')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.quantelGatewayUrl`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">{t('URL to the Quantel Gateway')}</span>
-									</label>
-									<label className="field">
-										<LabelActual label={t('ISA URLs')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.ISAUrls`}
-											obj={studio}
-											type="array"
-											arrayType="string"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">
-											{t('URLs to the ISAs, in order of importance (comma separated)')}
-										</span>
-									</label>
-									<label className="field">
-										<LabelActual label={t('Zone ID')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.zoneId`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">{t('Zone ID (default value: "default")')}</span>
-									</label>
-									<label className="field">
-										<LabelActual label={t('Server ID')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.serverId`}
-											obj={studio}
-											type="int"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">
-											{t(
-												'Server ID. For sources, this should generally be omitted (or set to 0) so clip-searches are zone-wide. If set, clip-searches are limited to that server.'
-											)}
-										</span>
-									</label>
-
-									<label className="field">
-										<LabelActual label={t('Quantel transformer URL')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.transformerURL`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">{t('URL to the Quantel HTTP transformer')}</span>
-									</label>
-
-									<label className="field">
-										<LabelActual label={t('Quantel FileFlow URL')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.fileflowURL`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">{t('URL to the Quantel FileFlow Manager')}</span>
-									</label>
-
-									<label className="field">
-										<LabelActual label={t('Quantel FileFlow Profile name')} />
-										<EditAttribute
-											modifiedClassName="bghl"
-											attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.fileflowProfile`}
-											obj={studio}
-											type="text"
-											collection={Studios}
-											className="input text-input input-l"
-										></EditAttribute>
-										<span className="text-s dimmed field-hint">
-											{t('Profile name to be used by FileFlow when exporting the clips')}
-										</span>
-									</label>
+									<LabelAndOverrides
+										label={t('Quantel gateway URL')}
+										hint={t('URL to the Quantel Gateway')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.quantelGatewayUrl`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('ISA URLs')}
+										hint={t('URLs to the ISAs, in order of importance (comma separated)')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.ISAUrls`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('Quantel Zone ID')}
+										hint={t('Zone ID')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.zoneId`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('Server ID')}
+										hint={t(
+											'Server ID. For sources, this should generally be omitted (or set to 0) so clip-searches are zone-wide. If set, clip-searches are limited to that server.'
+										)}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.serverId`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('Quantel transformer URL')}
+										hint={t('URL to the Quantel HTTP transformer')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.transformerURL`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('Quantel FileFlow URL')}
+										hint={t('URL to the Quantel FileFlow Manager')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.fileflowURL`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
+									<LabelAndOverrides
+										label={t('Quantel FileFlow Profile name')}
+										hint={t('Profile name to be used by FileFlow when exporting the clips')}
+										item={packageContainer}
+										//@ts-expect-error can't be 4 levels deep
+										itemKey={`container.accessors.${accessorId}.fileflowProfile`}
+										opPrefix={packageContainer.id}
+										overrideHelper={overrideHelper}
+									>
+										{(value, handleUpdate) => (
+											<TextInputControl
+												modifiedClassName="bghl"
+												classNames="input text-input input-l"
+												value={value}
+												handleUpdate={handleUpdate}
+											/>
+										)}
+									</LabelAndOverrides>
 								</>
 							) : null}
 
-							<label className="field">
-								<LabelActual label={t('Allow Read access')} />
-								<EditAttribute
-									modifiedClassName="bghl"
-									attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.allowRead`}
-									obj={studio}
-									type="checkbox"
-									collection={Studios}
-									className="input"
-								></EditAttribute>
-								<span className="text-s dimmed field-hint">{t('')}</span>
-							</label>
-
-							<label className="field">
-								<LabelActual label={t('Allow Write access')} />
-								<EditAttribute
-									modifiedClassName="bghl"
-									attribute={`packageContainers.${containerId}.container.accessors.${accessorId}.allowWrite`}
-									obj={studio}
-									type="checkbox"
-									collection={Studios}
-									className="input"
-								></EditAttribute>
-								<span className="text-s dimmed field-hint">{t('')}</span>
-							</label>
+							<LabelAndOverridesForCheckbox
+								label={t('Allow Read access')}
+								item={packageContainer}
+								//@ts-expect-error can't be 4 levels deep
+								itemKey={`container.accessors.${accessorId}.allowRead`}
+								opPrefix={packageContainer.id}
+								overrideHelper={overrideHelper}
+							>
+								{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
+							</LabelAndOverridesForCheckbox>
+							<LabelAndOverridesForCheckbox
+								label={t('Allow Write access')}
+								item={packageContainer}
+								//@ts-expect-error can't be 4 levels deep
+								itemKey={`container.accessors.${accessorId}.allowWrite`}
+								opPrefix={packageContainer.id}
+								overrideHelper={overrideHelper}
+							>
+								{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
+							</LabelAndOverridesForCheckbox>
 						</div>
 						<div className="mod">
 							<button className="btn btn-primary right" onClick={() => toggleExpanded(accessorId)}>
