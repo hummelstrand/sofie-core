@@ -34,6 +34,7 @@ import { MultiSelectInputControl } from '../../../lib/Components/MultiSelectInpu
 import {
 	OverrideOpHelper,
 	WrappedOverridableItem,
+	WrappedOverridableItemNormal,
 	getAllCurrentAndDeletedItemsFromOverrides,
 	useOverrideOpHelper,
 } from '../../util/OverrideOpHelper'
@@ -273,22 +274,56 @@ function RenderPackageContainers(
 							</button>
 						</td>
 					</tr>
-					<RenderPackageContainer
-						studio={studio}
-						packageContainer={packageContainer}
-						overrideHelper={overrideHelper}
-						toggleExpanded={toggleExpanded}
-						isExpanded={isExpanded}
-					/>
+					{packageContainer.computed ? (
+						<RenderPackageContainerDeletedEntry packageContainer={packageContainer} overrideHelper={overrideHelper} />
+					) : (
+						<RenderPackageContainer
+							studio={studio}
+							packageContainer={packageContainer}
+							overrideHelper={overrideHelper}
+							toggleExpanded={toggleExpanded}
+							isExpanded={isExpanded}
+						/>
+					)}
 				</React.Fragment>
 			)
 		}
 	)
 }
 
+interface RenderPackageContainerDeletedProps {
+	packageContainer: WrappedOverridableItem<StudioPackageContainer>
+	overrideHelper: OverrideOpHelper
+}
+
+function RenderPackageContainerDeletedEntry({
+	packageContainer,
+	overrideHelper,
+}: Readonly<RenderPackageContainerDeletedProps>) {
+	const doUndeleteItem = React.useCallback(
+		() => overrideHelper.resetItem(packageContainer.id),
+		[overrideHelper, packageContainer.id]
+	)
+
+	return (
+		<tr>
+			<th className="settings-studio-device__name c3 notifications-s notifications-text">
+				{packageContainer.defaults?.container.label}
+			</th>
+			<td className="settings-studio-device__id c2 deleted">{packageContainer.defaults?.container.label}</td>
+			<td className="settings-studio-device__id c2 deleted">{packageContainer.id}</td>
+			<td className="settings-studio-output-table__actions table-item-actions c3">
+				<button className="action-btn" onClick={doUndeleteItem} title="Restore to defaults">
+					<FontAwesomeIcon icon={faSync} />
+				</button>
+			</td>
+		</tr>
+	)
+}
+
 interface RenderPackageContainerProps {
 	studio: DBStudio
-	packageContainer: WrappedOverridableItem<StudioPackageContainer>
+	packageContainer: WrappedOverridableItemNormal<StudioPackageContainer>
 	overrideHelper: OverrideOpHelper
 	toggleExpanded: (id: string, forceState?: boolean | undefined) => void
 	isExpanded: (id: string) => boolean
@@ -466,7 +501,7 @@ function RenderAccessors({ packageContainer, overrideHelper }: RenderAccessorsPr
 }
 
 interface RenderAccessorProps {
-	packageContainer: WrappedOverridableItem<StudioPackageContainer>
+	packageContainer: WrappedOverridableItemNormal<StudioPackageContainer>
 	accessorId: string
 	accessor: Accessor.Any
 	overrideHelper: OverrideOpHelper
@@ -481,15 +516,13 @@ function RenderAccessor({
 	const { t } = useTranslation()
 	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
 
-	const containerId = packageContainer.id
-
 	const confirmRemoveAccessor = (accessorId: string) => {
 		doModalDialog({
 			title: t('Remove this Package Container Accessor?'),
 			yes: t('Remove'),
 			no: t('Cancel'),
 			onAccept: () => {
-				overrideHelper.setItemValue(containerId, `container.accessors.${accessorId}`, undefined)
+				overrideHelper.setItemValue(packageContainer.id, `container.accessors.${accessorId}`, undefined)
 			},
 			message: (
 				<React.Fragment>
@@ -507,7 +540,7 @@ function RenderAccessor({
 	const updateAccessorId = React.useCallback(
 		(newAccessorId: string) => {
 			const oldAccessorId = accessorId
-			if (!containerId) throw new Error(`containerId not set`)
+			if (!packageContainer.id) throw new Error(`containerId not set`)
 			if (!packageContainer) throw new Error(`Can't edit an accessor to nonexistant Package Container "${containerId}"`)
 
 			const accessor = packageContainer.computed?.container.accessors[oldAccessorId]
@@ -517,14 +550,14 @@ function RenderAccessor({
 			}
 
 			// Add a copy of accessor with the new ID
-			overrideHelper.setItemValue(containerId, `container.accessors.${newAccessorId}`, accessor)
+			overrideHelper.setItemValue(packageContainer.id, `container.accessors.${newAccessorId}`, accessor)
 
 			// Remove the old accessor with the old ID
 			// Issue: For some reason the PacackageContainer is not updated in the overrideHelper.
 			// As a HACK we use a setTimeout to wait for the PackageContainer to be updated.
 			// This is a temporary solution until as a fix for this is about to be implemented in NRK corelib.
 			setTimeout(() => {
-				overrideHelper.setItemValue(containerId, `container.accessors.${oldAccessorId}`, undefined)
+				overrideHelper.setItemValue(packageContainer.id, `container.accessors.${oldAccessorId}`, undefined)
 				toggleExpanded(oldAccessorId, false)
 				toggleExpanded(newAccessorId, true)
 			}, 10)
