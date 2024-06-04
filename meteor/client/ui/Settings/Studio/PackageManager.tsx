@@ -3,7 +3,7 @@ import * as React from 'react'
 import { Meteor } from 'meteor/meteor'
 import * as _ from 'underscore'
 import { DBStudio, StudioPackageContainer } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import { EditAttribute, EditAttributeBase } from '../../../lib/EditAttribute'
+import { EditAttribute } from '../../../lib/EditAttribute'
 import { doModalDialog } from '../../../lib/ModalDialog'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faPencilAlt, faCheck, faPlus, faSync } from '@fortawesome/free-solid-svg-icons'
@@ -413,14 +413,10 @@ function RenderPackageContainer({
 							<div className="settings-studio-accessors">
 								<h3 className="mhn">{t('Accessors')}</h3>
 								<table className="expando settings-studio-package-containers-accessors-table">
-									<RenderAccessors
-										studio={studio}
-										packageContainer={packageContainer}
-										overrideHelper={overrideHelper}
-									/>
+									<RenderAccessors packageContainer={packageContainer} overrideHelper={overrideHelper} />
 								</table>
 								<div className="mod mhs">
-									<button className="btn btn-primary" onClick={() => addNewAccessor(packageContainer.id)}>
+									<button className="btn btn-primary" onClick={addNewAccessor}>
 										<FontAwesomeIcon icon={faPlus} />
 									</button>
 								</div>
@@ -434,12 +430,11 @@ function RenderPackageContainer({
 }
 
 interface RenderAccessorsProps {
-	studio: DBStudio
 	packageContainer: WrappedOverridableItem<StudioPackageContainer>
 	overrideHelper: OverrideOpHelper
 }
 
-function RenderAccessors({ studio, packageContainer, overrideHelper }: RenderAccessorsProps): React.JSX.Element {
+function RenderAccessors({ packageContainer, overrideHelper }: RenderAccessorsProps): React.JSX.Element {
 	const { t } = useTranslation()
 
 	const container = packageContainer.computed?.container
@@ -458,7 +453,6 @@ function RenderAccessors({ studio, packageContainer, overrideHelper }: RenderAcc
 				return (
 					<React.Fragment key={accessorId}>
 						<RenderAccessor
-							studio={studio}
 							accessorId={accessorId}
 							accessor={accessor}
 							packageContainer={packageContainer}
@@ -472,7 +466,6 @@ function RenderAccessors({ studio, packageContainer, overrideHelper }: RenderAcc
 }
 
 interface RenderAccessorProps {
-	studio: DBStudio
 	packageContainer: WrappedOverridableItem<StudioPackageContainer>
 	accessorId: string
 	accessor: Accessor.Any
@@ -480,7 +473,6 @@ interface RenderAccessorProps {
 }
 
 function RenderAccessor({
-	studio,
 	accessor,
 	accessorId,
 	packageContainer,
@@ -512,33 +504,33 @@ function RenderAccessor({
 		})
 	}
 
-	const updateAccessorId = (edit: EditAttributeBase, newValue: string) => {
-		const oldAccessorId = edit.overrideDisplayValue
-		const newAccessorId = newValue + ''
-		const containerId = edit.attribute
-		if (!containerId) throw new Error(`containerId not set`)
-		if (!packageContainer) throw new Error(`Can't edit an accessor to nonexistant Package Container "${containerId}"`)
+	const updateAccessorId = React.useCallback(
+		(newAccessorId: string) => {
+			const oldAccessorId = accessorId
+			if (!containerId) throw new Error(`containerId not set`)
+			if (!packageContainer) throw new Error(`Can't edit an accessor to nonexistant Package Container "${containerId}"`)
 
-		const accessor = packageContainer.computed?.container.accessors[oldAccessorId]
+			const accessor = packageContainer.computed?.container.accessors[oldAccessorId]
 
-		if (packageContainer.computed?.container.accessors[newAccessorId]) {
-			throw new Meteor.Error(400, 'Accessor "' + newAccessorId + '" already exists')
-		}
+			if (packageContainer.computed?.container.accessors[newAccessorId]) {
+				throw new Meteor.Error(400, 'Accessor "' + newAccessorId + '" already exists')
+			}
 
-		const mSet: Record<string, any> = {}
-		const mUnset: Record<string, 1> = {}
-		mSet[`packageContainers.${containerId}.container.accessors.${newAccessorId}`] = accessor
-		mUnset[`packageContainers.${containerId}.container.accessors.${oldAccessorId}`] = 1
+			// Add a copy of accessor with the new ID
+			overrideHelper.setItemValue(containerId, `container.accessors.${newAccessorId}`, accessor)
 
-		if (edit.collection) {
-			edit.collection.update(studio._id, {
-				$set: mSet,
-				$unset: mUnset,
-			})
-		}
-		toggleExpanded(containerId, oldAccessorId)
-		toggleExpanded(containerId, newAccessorId)
-	}
+			// Remove the old accessor with the old ID
+			// Issue: For some reason the PacackageContainer is not updated in the overrideHelper.
+			// As a HACK we use a setTimeout to wait for the PackageContainer to be updated.
+			// This is a temporary solution until as a fix for this is about to be implemented in NRK corelib.
+			setTimeout(() => {
+				overrideHelper.setItemValue(containerId, `container.accessors.${oldAccessorId}`, undefined)
+				toggleExpanded(oldAccessorId, false)
+				toggleExpanded(newAccessorId, true)
+			}, 10)
+		},
+		[overrideHelper, toggleExpanded, packageContainer, accessorId]
+	)
 
 	if (Object.keys(packageContainer.computed?.container || {}).length === 0) {
 		return (
@@ -575,16 +567,13 @@ function RenderAccessor({
 						<div className="properties-grid">
 							<label className="field">
 								<LabelActual label={t('Accessor ID')} />
-								<EditAttribute
+								<TextInputControl
 									modifiedClassName="bghl"
-									attribute={containerId}
-									overrideDisplayValue={accessorId}
-									obj={studio}
-									type="text"
-									collection={Studios}
-									updateFunction={updateAccessorId}
-									className="input text-input input-l"
-								></EditAttribute>
+									classNames="input text-input input-l"
+									value={accessorId}
+									handleUpdate={updateAccessorId}
+									disabled={!!packageContainer.defaults}
+								/>
 							</label>
 							<LabelAndOverrides
 								label={t('Label')}
