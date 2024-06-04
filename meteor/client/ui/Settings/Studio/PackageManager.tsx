@@ -6,7 +6,7 @@ import { DBStudio, StudioPackageContainer } from '@sofie-automation/corelib/dist
 import { EditAttribute, EditAttributeBase } from '../../../lib/EditAttribute'
 import { doModalDialog } from '../../../lib/ModalDialog'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faPencilAlt, faCheck, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faTrash, faPencilAlt, faCheck, faPlus, faSync } from '@fortawesome/free-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
 import { Accessor } from '@sofie-automation/blueprints-integration'
 import { Studios } from '../../../collections'
@@ -217,6 +217,30 @@ function RenderPackageContainers(
 		})
 	}
 
+	const confirmReset = React.useCallback(
+		(packgageContainerId: string) => {
+			doModalDialog({
+				title: t('Reset this Package Container?'),
+				yes: t('Reset'),
+				no: t('Cancel'),
+				onAccept: () => {
+					overrideHelper.resetItem(packgageContainerId)
+				},
+				message: (
+					<React.Fragment>
+						<p>
+							{t('Are you sure you want to reset all overrides for Packing Container "{{id}}"?', {
+								id: packgageContainerId,
+							})}
+						</p>
+						<p>{t('Please note: This action is irreversible!')}</p>
+					</React.Fragment>
+				),
+			})
+		},
+		[t, packageContainersFromOverrides, overrideHelper]
+	)
+
 	return packageContainersFromOverrides.map(
 		(packageContainer: WrappedOverridableItem<StudioPackageContainer>, id: number): React.JSX.Element => {
 			if (!packageContainer.computed) throw new Error(`Package Container "${id}" not found`)
@@ -232,6 +256,15 @@ function RenderPackageContainers(
 						<td className="settings-studio-package-container__name c2">{packageContainer.computed.container.label}</td>
 
 						<td className="settings-studio-package-container__actions table-item-actions c3">
+							{packageContainer.defaults && packageContainer.overrideOps.length > 0 && (
+								<button
+									className="action-btn"
+									onClick={() => confirmReset(packageContainer.id)}
+									title={t('Reset Package Container to default values')}
+								>
+									<FontAwesomeIcon icon={faSync} />
+								</button>
+							)}
 							<button className="action-btn" onClick={() => toggleExpanded(packageContainer.id)}>
 								<FontAwesomeIcon icon={faPencilAlt} />
 							</button>
@@ -298,7 +331,8 @@ function RenderPackageContainer({
 	const addNewAccessor = React.useCallback(() => {
 		const newKeyName = 'local'
 		let iter = 0
-		if (!packageContainer.id) throw new Error(`Can't add an accessor to nonexistant Package Container "${containerId}"`)
+		if (!packageContainer.id)
+			throw new Error(`Can't add an accessor to nonexistant Package Container "${packageContainer.id}"`)
 
 		while (packageContainer.computed?.container.accessors[newKeyName + iter]) {
 			iter++
@@ -457,13 +491,13 @@ function RenderAccessor({
 
 	const containerId = packageContainer.id
 
-	const confirmRemoveAccessor = (containerId: string, accessorId: string) => {
+	const confirmRemoveAccessor = (accessorId: string) => {
 		doModalDialog({
 			title: t('Remove this Package Container Accessor?'),
 			yes: t('Remove'),
 			no: t('Cancel'),
 			onAccept: () => {
-				removeAccessor(containerId, accessorId)
+				overrideHelper.setItemValue(containerId, `container.accessors.${accessorId}`, undefined)
 			},
 			message: (
 				<React.Fragment>
@@ -475,13 +509,6 @@ function RenderAccessor({
 					<p>{t('Please note: This action is irreversible!')}</p>
 				</React.Fragment>
 			),
-		})
-	}
-	const removeAccessor = (containerId: string, accessorId: string) => {
-		const unsetObject: Record<string, 1> = {}
-		unsetObject[`packageContainers.${containerId}.container.accessors.${accessorId}`] = 1
-		Studios.update(studio._id, {
-			$unset: unsetObject,
 		})
 	}
 
@@ -537,7 +564,7 @@ function RenderAccessor({
 					<button className="action-btn" onClick={() => toggleExpanded(accessorId)}>
 						<FontAwesomeIcon icon={faPencilAlt} />
 					</button>
-					<button className="action-btn" onClick={() => confirmRemoveAccessor(containerId, accessorId)}>
+					<button className="action-btn" onClick={() => confirmRemoveAccessor(accessorId)}>
 						<FontAwesomeIcon icon={faTrash} />
 					</button>
 				</td>
