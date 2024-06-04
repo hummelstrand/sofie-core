@@ -295,8 +295,7 @@ function RenderPackageContainer({
 		[overrideHelper, toggleExpanded, packageContainer.id]
 	)
 
-	const addNewAccessor = (containerId: string) => {
-		// find free key name
+	const addNewAccessor = React.useCallback(() => {
 		const newKeyName = 'local'
 		let iter = 0
 		if (!packageContainer.id) throw new Error(`Can't add an accessor to nonexistant Package Container "${containerId}"`)
@@ -313,13 +312,13 @@ function RenderPackageContainer({
 			allowWrite: false,
 			folderPath: '',
 		}
-		const setObject: Record<string, any> = {}
-		setObject[`packageContainers.${containerId}.container.accessors.${accessorId}`] = newAccessor
 
-		Studios.update(studio._id, {
-			$set: setObject,
-		})
-	}
+		overrideHelper.setItemValue(packageContainer.id, `container.accessors.${accessorId}`, newAccessor)
+
+		setTimeout(() => {
+			toggleExpanded(accessorId, true)
+		}, 1)
+	}, [studio._id, studio.packageContainersWithOverrides])
 
 	if (!packageContainer.computed) throw new Error(`Package Container "${packageContainer.id}" not found`)
 
