@@ -465,7 +465,7 @@ function RenderPackageContainer({
 }
 
 interface RenderAccessorsProps {
-	packageContainer: WrappedOverridableItem<StudioPackageContainer>
+	packageContainer: WrappedOverridableItemNormal<StudioPackageContainer>
 	overrideHelper: OverrideOpHelper
 }
 
@@ -541,7 +541,7 @@ function RenderAccessor({
 		(newAccessorId: string) => {
 			const oldAccessorId = accessorId
 			if (!packageContainer.id) throw new Error(`containerId not set`)
-			if (!packageContainer) throw new Error(`Can't edit an accessor to nonexistant Package Container "${containerId}"`)
+			if (!packageContainer) throw new Error(`Can't edit an accessor to nonexistant Package Container"`)
 
 			const accessor = packageContainer.computed?.container.accessors[oldAccessorId]
 

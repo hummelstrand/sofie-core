@@ -190,8 +190,8 @@ export function LabelAndOverridesForMultiSelect<T extends object, TValue = any>(
 	props: Omit<LabelAndOverridesProps<T, TValue>, 'formatDefaultValue' | 'children'> & {
 		options: DropdownInputOption<TValue>[]
 		children: (
-			value: [TValue],
-			setValue: (value: [TValue]) => void,
+			value: TValue[],
+			setValue: (value: TValue[]) => void,
 			options: DropdownInputOption<TValue>[]
 		) => React.ReactNode
 	}
@@ -221,7 +221,7 @@ export function LabelAndOverridesForMultiSelect<T extends object, TValue = any>(
 	)
 
 	return (
-		<LabelAndOverrides<T, [TValue]> {...props} formatDefaultValue={formatter}>
+		<LabelAndOverrides<T, TValue[]> {...props} formatDefaultValue={formatter}>
 			{(value, setValue) => props.children(value, setValue, props.options)}
 		</LabelAndOverrides>
 	)
