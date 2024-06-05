@@ -206,7 +206,7 @@ function RenderPackageContainers({
 			yes: t('Remove'),
 			no: t('Cancel'),
 			onAccept: () => {
-				removePackageContainer(containerId)
+				overrideHelper.deleteItem(containerId)
 			},
 			message: (
 				<React.Fragment>
@@ -218,13 +218,6 @@ function RenderPackageContainers({
 					<p>{t('Please note: This action is irreversible!')}</p>
 				</React.Fragment>
 			),
-		})
-	}
-	const removePackageContainer = (containerId: string) => {
-		const unsetObject: Record<string, 1> = {}
-		unsetObject['packageContainers.' + containerId] = 1
-		Studios.update(studio._id, {
-			$unset: unsetObject,
 		})
 	}
 
@@ -255,47 +248,47 @@ function RenderPackageContainers({
 	return (
 		<table className="table expando settings-studio-package-containers-table">
 			{packageContainersFromOverrides.map(
-				(packageContainer: WrappedOverridableItem<StudioPackageContainer>, id: number): React.JSX.Element => {
-					if (!packageContainer.computed) throw new Error(`Package Container "${id}" not found`)
-
+				(packageContainer: WrappedOverridableItem<StudioPackageContainer>): React.JSX.Element => {
 					return (
 						<React.Fragment key={packageContainer.id}>
-							<tr
-								className={ClassNames({
-									hl: isExpanded(packageContainer.id),
-								})}
-							>
-								<th className="settings-studio-package-container__id c2">{packageContainer.id}</th>
-								<td className="settings-studio-package-container__name c2">
-									{packageContainer.computed.container.label}
-								</td>
-
-								<td className="settings-studio-package-container__actions table-item-actions c3">
-									{packageContainer.defaults && packageContainer.overrideOps.length > 0 && (
-										<button
-											className="action-btn"
-											onClick={() => confirmReset(packageContainer.id)}
-											title={t('Reset Package Container to default values')}
-										>
-											<FontAwesomeIcon icon={faSync} />
-										</button>
-									)}
-									<button className="action-btn" onClick={() => toggleExpanded(packageContainer.id)}>
-										<FontAwesomeIcon icon={faPencilAlt} />
-									</button>
-									<button className="action-btn" onClick={() => confirmRemovePackageContainer(packageContainer.id)}>
-										<FontAwesomeIcon icon={faTrash} />
-									</button>
-								</td>
-							</tr>
 							{packageContainer.type == 'normal' ? (
-								<RenderPackageContainer
-									studio={studio}
-									packageContainer={packageContainer}
-									overrideHelper={overrideHelper}
-									toggleExpanded={toggleExpanded}
-									isExpanded={isExpanded}
-								/>
+								<React.Fragment>
+									<tr
+										className={ClassNames({
+											hl: isExpanded(packageContainer.id),
+										})}
+									>
+										<th className="settings-studio-package-container__id c2">{packageContainer.id}</th>
+										<td className="settings-studio-package-container__name c2">
+											{packageContainer.computed.container.label}
+										</td>
+
+										<td className="settings-studio-package-container__actions table-item-actions c3">
+											{packageContainer.defaults && packageContainer.overrideOps.length > 0 && (
+												<button
+													className="action-btn"
+													onClick={() => confirmReset(packageContainer.id)}
+													title={t('Reset Package Container to default values')}
+												>
+													<FontAwesomeIcon icon={faSync} />
+												</button>
+											)}
+											<button className="action-btn" onClick={() => toggleExpanded(packageContainer.id)}>
+												<FontAwesomeIcon icon={faPencilAlt} />
+											</button>
+											<button className="action-btn" onClick={() => confirmRemovePackageContainer(packageContainer.id)}>
+												<FontAwesomeIcon icon={faTrash} />
+											</button>
+										</td>
+									</tr>
+									<RenderPackageContainer
+										studio={studio}
+										packageContainer={packageContainer}
+										overrideHelper={overrideHelper}
+										toggleExpanded={toggleExpanded}
+										isExpanded={isExpanded}
+									/>
+								</React.Fragment>
 							) : (
 								<RenderPackageContainerDeletedEntry
 									packageContainer={packageContainer}
@@ -326,9 +319,7 @@ function RenderPackageContainerDeletedEntry({
 
 	return (
 		<tr>
-			<th className="settings-studio-device__name c3 notifications-s notifications-text">
-				{packageContainer.defaults?.container.label}
-			</th>
+			<th className="settings-studio-device__name c3 notifications-s notifications-text">{packageContainer.id}</th>
 			<td className="settings-studio-device__id c2 deleted">{packageContainer.defaults?.container.label}</td>
 			<td className="settings-studio-device__id c2 deleted">{packageContainer.id}</td>
 			<td className="settings-studio-output-table__actions table-item-actions c3">
@@ -573,13 +564,14 @@ function RenderAccessor({
 
 			// Remove the old accessor with the old ID
 			// Issue: For some reason the PacackageContainer is not updated in the overrideHelper.
-			// As a HACK we use a setTimeout to wait for the PackageContainer to be updated.
+			// As a HACK we use a 100ms setTimeout to wait for the PackageContainer to be updated.
+			// 1ms should be enough, but 100ms is used to be safe.
 			// This is a temporary solution until as a fix for this is about to be implemented in NRK corelib.
 			setTimeout(() => {
 				overrideHelper.setItemValue(packageContainer.id, `container.accessors.${oldAccessorId}`, undefined)
 				toggleExpanded(oldAccessorId, false)
 				toggleExpanded(newAccessorId, true)
-			}, 10)
+			}, 100)
 		},
 		[overrideHelper, toggleExpanded, packageContainer, accessorId]
 	)
