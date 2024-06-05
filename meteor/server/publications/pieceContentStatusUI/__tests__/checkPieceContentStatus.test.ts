@@ -175,12 +175,15 @@ describe('lib/mediaObjects', () => {
 
 		const mockDefaultStudio = defaultStudio(protectString('studio0'))
 		const mockStudio: Complete<
-			Pick<DBStudio, '_id' | 'settings' | 'packageContainers' | 'previewContainerIds' | 'thumbnailContainerIds'> &
+			Pick<
+				DBStudio,
+				'_id' | 'settings' | 'packageContainersWithOverrides' | 'previewContainerIds' | 'thumbnailContainerIds'
+			> &
 				Pick<UIStudio, 'mappings' | 'routeSets'>
 		> = {
 			_id: mockDefaultStudio._id,
 			settings: mockStudioSettings,
-			packageContainers: mockDefaultStudio.packageContainers,
+			packageContainersWithOverrides: mockDefaultStudio.packageContainersWithOverrides,
 			previewContainerIds: ['previews0'],
 			thumbnailContainerIds: ['thumbnails0'],
 			routeSets: applyAndValidateOverrides(mockDefaultStudio.routeSetsWithOverrides).obj,
