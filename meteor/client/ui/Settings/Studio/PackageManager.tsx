@@ -63,7 +63,7 @@ export function StudioPackageManagerSettings({ studio }: StudioPackageManagerSet
 		// find free key name
 		const newKeyName = 'newContainer'
 		let iter = 0
-		while (resolvedPackageContainers[newKeyName + iter.toString]) {
+		while (resolvedPackageContainers[newKeyName + iter.toString()]) {
 			iter++
 		}
 
@@ -163,7 +163,7 @@ export function StudioPackageManagerSettings({ studio }: StudioPackageManagerSet
 					isExpanded={isExpanded}
 				/>
 				<div className="mod mhs">
-					<button className="btn btn-primary" onClick={() => addNewPackageContainer()}>
+					<button className="btn btn-primary" onClick={addNewPackageContainer}>
 						<FontAwesomeIcon icon={faPlus} />
 					</button>
 				</div>
