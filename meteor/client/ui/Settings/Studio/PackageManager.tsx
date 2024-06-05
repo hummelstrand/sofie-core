@@ -156,9 +156,12 @@ export function StudioPackageManagerSettings({ studio }: StudioPackageManagerSet
 				</div>
 
 				<h3 className="mhn">{t('Package Containers')}</h3>
-				<table className="table expando settings-studio-package-containers-table">
-					<tbody>{RenderPackageContainers(studio, packageContainersFromOverrides, toggleExpanded, isExpanded)}</tbody>
-				</table>
+				<RenderPackageContainers
+					studio={studio}
+					packageContainersFromOverrides={packageContainersFromOverrides}
+					toggleExpanded={toggleExpanded}
+					isExpanded={isExpanded}
+				/>
 				<div className="mod mhs">
 					<button className="btn btn-primary" onClick={() => addNewPackageContainer()}>
 						<FontAwesomeIcon icon={faPlus} />
@@ -169,12 +172,19 @@ export function StudioPackageManagerSettings({ studio }: StudioPackageManagerSet
 	)
 }
 
-function RenderPackageContainers(
-	studio: DBStudio,
-	packageContainersFromOverrides: WrappedOverridableItem<StudioPackageContainer>[],
-	toggleExpanded: (id: string, forceState?: boolean | undefined) => void,
+interface RenderPackageContainersProps {
+	studio: DBStudio
+	packageContainersFromOverrides: WrappedOverridableItem<StudioPackageContainer>[]
+	toggleExpanded: (id: string, forceState?: boolean | undefined) => void
 	isExpanded: (id: string) => boolean
-) {
+}
+
+function RenderPackageContainers({
+	studio,
+	packageContainersFromOverrides,
+	toggleExpanded,
+	isExpanded,
+}: RenderPackageContainersProps): React.JSX.Element {
 	const { t } = useTranslation()
 
 	const saveOverrides = React.useCallback(
@@ -242,52 +252,61 @@ function RenderPackageContainers(
 		[t, packageContainersFromOverrides, overrideHelper]
 	)
 
-	return packageContainersFromOverrides.map(
-		(packageContainer: WrappedOverridableItem<StudioPackageContainer>, id: number): React.JSX.Element => {
-			if (!packageContainer.computed) throw new Error(`Package Container "${id}" not found`)
+	return (
+		<table className="table expando settings-studio-package-containers-table">
+			{packageContainersFromOverrides.map(
+				(packageContainer: WrappedOverridableItem<StudioPackageContainer>, id: number): React.JSX.Element => {
+					if (!packageContainer.computed) throw new Error(`Package Container "${id}" not found`)
 
-			return (
-				<React.Fragment key={packageContainer.id}>
-					<tr
-						className={ClassNames({
-							hl: isExpanded(packageContainer.id),
-						})}
-					>
-						<th className="settings-studio-package-container__id c2">{packageContainer.id}</th>
-						<td className="settings-studio-package-container__name c2">{packageContainer.computed.container.label}</td>
+					return (
+						<React.Fragment key={packageContainer.id}>
+							<tr
+								className={ClassNames({
+									hl: isExpanded(packageContainer.id),
+								})}
+							>
+								<th className="settings-studio-package-container__id c2">{packageContainer.id}</th>
+								<td className="settings-studio-package-container__name c2">
+									{packageContainer.computed.container.label}
+								</td>
 
-						<td className="settings-studio-package-container__actions table-item-actions c3">
-							{packageContainer.defaults && packageContainer.overrideOps.length > 0 && (
-								<button
-									className="action-btn"
-									onClick={() => confirmReset(packageContainer.id)}
-									title={t('Reset Package Container to default values')}
-								>
-									<FontAwesomeIcon icon={faSync} />
-								</button>
+								<td className="settings-studio-package-container__actions table-item-actions c3">
+									{packageContainer.defaults && packageContainer.overrideOps.length > 0 && (
+										<button
+											className="action-btn"
+											onClick={() => confirmReset(packageContainer.id)}
+											title={t('Reset Package Container to default values')}
+										>
+											<FontAwesomeIcon icon={faSync} />
+										</button>
+									)}
+									<button className="action-btn" onClick={() => toggleExpanded(packageContainer.id)}>
+										<FontAwesomeIcon icon={faPencilAlt} />
+									</button>
+									<button className="action-btn" onClick={() => confirmRemovePackageContainer(packageContainer.id)}>
+										<FontAwesomeIcon icon={faTrash} />
+									</button>
+								</td>
+							</tr>
+							{packageContainer.type == 'normal' ? (
+								<RenderPackageContainer
+									studio={studio}
+									packageContainer={packageContainer}
+									overrideHelper={overrideHelper}
+									toggleExpanded={toggleExpanded}
+									isExpanded={isExpanded}
+								/>
+							) : (
+								<RenderPackageContainerDeletedEntry
+									packageContainer={packageContainer}
+									overrideHelper={overrideHelper}
+								/>
 							)}
-							<button className="action-btn" onClick={() => toggleExpanded(packageContainer.id)}>
-								<FontAwesomeIcon icon={faPencilAlt} />
-							</button>
-							<button className="action-btn" onClick={() => confirmRemovePackageContainer(packageContainer.id)}>
-								<FontAwesomeIcon icon={faTrash} />
-							</button>
-						</td>
-					</tr>
-					{packageContainer.computed ? (
-						<RenderPackageContainerDeletedEntry packageContainer={packageContainer} overrideHelper={overrideHelper} />
-					) : (
-						<RenderPackageContainer
-							studio={studio}
-							packageContainer={packageContainer}
-							overrideHelper={overrideHelper}
-							toggleExpanded={toggleExpanded}
-							isExpanded={isExpanded}
-						/>
-					)}
-				</React.Fragment>
-			)
-		}
+						</React.Fragment>
+					)
+				}
+			)}
+		</table>
 	)
 }
 
