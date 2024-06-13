@@ -1,4 +1,10 @@
-import { RundownPlaylistTiming, Time } from '@sofie-automation/blueprints-integration'
+import {
+	ITranslatableMessage,
+	JSONBlob,
+	JSONSchema,
+	RundownPlaylistTiming,
+	Time,
+} from '@sofie-automation/blueprints-integration'
 import {
 	RundownId,
 	OrganizationId,
@@ -89,7 +95,28 @@ export interface Rundown {
 	playlistId: RundownPlaylistId
 	/** If the playlistId has ben set manually by a user in Sofie */
 	playlistIdIsSetInSofie?: boolean
+	/**
+	 * User editing definitions for this rundown
+	 */
+	userEdits?: CoreUserEditingDefinitionAction[]
 }
 
 /** Note: Use Rundown instead */
 export type DBRundown = Rundown
+
+export type CoreUserEditingDefinition = CoreUserEditingDefinitionAction | CoreUserEditingDefinitionForm
+
+export interface CoreUserEditingDefinitionAction {
+	type: 'action'
+	id: string
+	label: ITranslatableMessage
+}
+
+export interface CoreUserEditingDefinitionForm {
+	type: 'form'
+	id: string
+	label: ITranslatableMessage
+	schema: JSONBlob<JSONSchema>
+	currentValues: Record<string, any>
+	translationNamespaces: string[]
+}
