@@ -10,6 +10,7 @@ import { IContextMenuContext } from '../RundownView'
 import { PartUi, SegmentUi } from './SegmentTimelineContainer'
 import { SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
+import { RenderUserEditOperations } from '../UserEditOperations/RenderUserEditOperations'
 
 interface IProps {
 	onSetNext: (part: DBPart | undefined, e: any, offset?: number, take?: boolean) => void
@@ -68,6 +69,18 @@ export const SegmentContextMenu = withTranslation()(
 										<span>{t('Clear queued segment')}</span>
 									</MenuItem>
 								)}
+								{segment ? (
+									<RenderUserEditOperations
+										rundownId={segment.rundownId}
+										targetName={segment.name}
+										userEdits={segment.userEdits}
+										operationTarget={{
+											segmentExternalId: segment.externalId,
+											partExternalId: undefined,
+											pieceExternalId: undefined,
+										}}
+									/>
+								) : null}
 								<hr />
 							</>
 						)}
@@ -99,6 +112,16 @@ export const SegmentContextMenu = withTranslation()(
 										</MenuItem>
 									</>
 								) : null}
+								<RenderUserEditOperations
+									rundownId={part.instance.rundownId}
+									targetName={part.instance.part.title}
+									userEdits={part.instance.part.userEdits}
+									operationTarget={{
+										segmentExternalId: segment?.externalId,
+										partExternalId: part.instance.part.externalId,
+										pieceExternalId: undefined,
+									}}
+								/>
 							</>
 						)}
 					</ContextMenu>
