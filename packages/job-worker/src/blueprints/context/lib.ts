@@ -53,6 +53,11 @@ import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/Rund
 import _ = require('underscore')
 import { BlueprintId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { wrapTranslatableMessageFromBlueprints } from '@sofie-automation/corelib/dist/TranslatableMessage'
+import {
+	UserEditingDefinition,
+	UserEditingDefinitionAction,
+	UserEditingDefinitionForm,
+} from '@sofie-automation/blueprints-integration/dist/userEditing'
 
 /**
  * Convert an object to have all the values of all keys (including optionals) be 'true'
@@ -492,7 +497,7 @@ export async function getMediaObjectDuration(context: JobContext, mediaId: strin
 
 function translateUserEditsToBlueprint(
 	userEdits: ReadonlyDeep<CoreUserEditingDefinition[]> | undefined
-): CoreUserEditingDefinition[] | undefined {
+): UserEditingDefinition[] | undefined {
 	if (!userEdits) return undefined
 
 	return _.compact(
@@ -503,7 +508,7 @@ function translateUserEditsToBlueprint(
 						type: 'action',
 						id: userEdit.id,
 						label: omit(userEdit.label, 'namespaces'),
-					} satisfies Complete<CoreUserEditingDefinitionAction>
+					} satisfies Complete<UserEditingDefinitionAction>
 				case 'form':
 					return {
 						type: 'form',
@@ -511,7 +516,7 @@ function translateUserEditsToBlueprint(
 						label: omit(userEdit.label, 'namespaces'),
 						schema: clone(userEdit.schema),
 						currentValues: clone(userEdit.currentValues),
-					} satisfies Complete<CoreUserEditingDefinitionForm>
+					} satisfies Complete<UserEditingDefinitionForm>
 				default:
 					assertNever(userEdit)
 					return undefined
@@ -521,7 +526,7 @@ function translateUserEditsToBlueprint(
 }
 
 export function translateUserEditsFromBlueprint(
-	userEdits: CoreUserEditingDefinition[] | undefined,
+	userEdits: UserEditingDefinition[] | undefined,
 	blueprintIds: BlueprintId[]
 ): CoreUserEditingDefinition[] | undefined {
 	if (!userEdits) return undefined
