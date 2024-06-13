@@ -1,10 +1,5 @@
-import {
-	ITranslatableMessage,
-	JSONBlob,
-	JSONSchema,
-	RundownPlaylistTiming,
-	Time,
-} from '@sofie-automation/blueprints-integration'
+import { JSONBlob, JSONSchema, RundownPlaylistTiming, Time } from '@sofie-automation/blueprints-integration'
+import { ITranslatableMessage } from '../TranslatableMessage'
 import {
 	RundownId,
 	OrganizationId,
