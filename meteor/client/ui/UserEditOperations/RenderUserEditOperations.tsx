@@ -16,38 +16,67 @@ import { i18nTranslator } from '../i18n'
 import { doModalDialog } from '../../lib/ModalDialog'
 import { SchemaFormInPlace } from '../../lib/forms/SchemaFormInPlace'
 
-export function RenderUserEditOperations(
-	rundownId: RundownId,
-	targetName: string,
-	userEdits: CoreUserEditingDefinition[] | undefined,
+interface UserEditOperationsProps {
+	rundownId: RundownId
+	targetName: string
+	userEdits: CoreUserEditingDefinition[] | undefined
 	operationTarget: UserOperationTarget
-): React.JSX.Element {
+}
+
+export function RenderUserEditOperations({
+	rundownId,
+	targetName,
+	userEdits,
+	operationTarget,
+}: UserEditOperationsProps): React.JSX.Element {
 	if (!userEdits || userEdits.length === 0) return <React.Fragment />
 
 	return (
-		<>
+		<React.Fragment>
 			<hr />
 			{userEdits.map((userEdit, i) => {
 				switch (userEdit.type) {
 					case 'action':
-						return renderUserEditOperationAction(rundownId, userEdit, i, operationTarget)
+						return (
+							<RenderUserEditOperationAction
+								rundownId={rundownId}
+								userEdit={userEdit}
+								i={i}
+								operationTarget={operationTarget}
+							/>
+						)
 					case 'form':
-						return renderUserEditOperationForm(rundownId, targetName, userEdit, i, operationTarget)
+						return (
+							<RenderUserEditOperationForm
+								rundownId={rundownId}
+								targetName={targetName}
+								userEdit={userEdit}
+								i={i}
+								operationTarget={operationTarget}
+							/>
+						)
 					default:
 						assertNever(userEdit)
 						return null
 				}
 			})}
-		</>
+		</React.Fragment>
 	)
 }
 
-function renderUserEditOperationAction(
-	rundownId: RundownId,
-	userEdit: CoreUserEditingDefinitionAction,
-	i: number,
+interface UserEditOperationActionProps {
+	rundownId: RundownId
+	userEdit: CoreUserEditingDefinitionAction
+	i: number
 	operationTarget: UserOperationTarget
-) {
+}
+
+function RenderUserEditOperationAction({
+	rundownId,
+	userEdit,
+	i,
+	operationTarget,
+}: UserEditOperationActionProps): React.JSX.Element {
 	const { t } = useTranslation()
 
 	return (
@@ -66,13 +95,21 @@ function renderUserEditOperationAction(
 	)
 }
 
-function renderUserEditOperationForm(
-	rundownId: RundownId,
-	targetName: string,
-	userEdit: CoreUserEditingDefinitionForm,
-	i: number,
+interface UserEditOperationFormProps {
+	rundownId: RundownId
+	targetName: string
+	userEdit: CoreUserEditingDefinitionForm
+	i: number
 	operationTarget: UserOperationTarget
-) {
+}
+
+function RenderUserEditOperationForm({
+	rundownId,
+	targetName,
+	userEdit,
+	i,
+	operationTarget,
+}: UserEditOperationFormProps): React.JSX.Element {
 	const { t } = useTranslation()
 
 	return (
