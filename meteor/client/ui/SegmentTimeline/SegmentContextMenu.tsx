@@ -94,6 +94,9 @@ export const SegmentContextMenu = withTranslation()(
 									{startsAt !== null &&
 										'\u00a0(' + RundownUtils.formatTimeToShortTime(Math.floor(startsAt / 1000) * 1000) + ')'}
 								</MenuItem>
+								<MenuItem>
+									<span>{t('Yet another item')}</span>
+								</MenuItem>
 								{startsAt !== null && part && this.props.enablePlayFromAnywhere ? (
 									<>
 										{/* <MenuItem
