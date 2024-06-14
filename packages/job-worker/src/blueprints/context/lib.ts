@@ -57,6 +57,7 @@ import {
 	UserEditingDefinition,
 	UserEditingDefinitionAction,
 	UserEditingDefinitionForm,
+	UserEditingType,
 } from '@sofie-automation/blueprints-integration/dist/userEditing'
 
 /**
@@ -503,15 +504,15 @@ function translateUserEditsToBlueprint(
 	return _.compact(
 		userEdits.map((userEdit) => {
 			switch (userEdit.type) {
-				case 'action':
+				case UserEditingType.ACTION:
 					return {
-						type: 'action',
+						type: UserEditingType.ACTION,
 						id: userEdit.id,
 						label: omit(userEdit.label, 'namespaces'),
 					} satisfies Complete<UserEditingDefinitionAction>
-				case 'form':
+				case UserEditingType.FORM:
 					return {
-						type: 'form',
+						type: UserEditingType.FORM,
 						id: userEdit.id,
 						label: omit(userEdit.label, 'namespaces'),
 						schema: clone(userEdit.schema),
@@ -534,15 +535,15 @@ export function translateUserEditsFromBlueprint(
 	return _.compact(
 		userEdits.map((userEdit) => {
 			switch (userEdit.type) {
-				case 'action':
+				case UserEditingType.ACTION:
 					return {
-						type: 'action',
+						type: UserEditingType.ACTION,
 						id: userEdit.id,
 						label: wrapTranslatableMessageFromBlueprints(userEdit.label, blueprintIds),
 					} satisfies Complete<CoreUserEditingDefinitionAction>
-				case 'form':
+				case UserEditingType.FORM:
 					return {
-						type: 'form',
+						type: UserEditingType.FORM,
 						id: userEdit.id,
 						label: wrapTranslatableMessageFromBlueprints(userEdit.label, blueprintIds),
 						schema: clone(userEdit.schema),

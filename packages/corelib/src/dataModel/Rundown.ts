@@ -1,4 +1,10 @@
-import { JSONBlob, JSONSchema, RundownPlaylistTiming, Time } from '@sofie-automation/blueprints-integration'
+import {
+	JSONBlob,
+	JSONSchema,
+	RundownPlaylistTiming,
+	Time,
+	UserEditingType,
+} from '@sofie-automation/blueprints-integration'
 import { ITranslatableMessage } from '../TranslatableMessage'
 import {
 	RundownId,
@@ -102,13 +108,13 @@ export type DBRundown = Rundown
 export type CoreUserEditingDefinition = CoreUserEditingDefinitionAction | CoreUserEditingDefinitionForm
 
 export interface CoreUserEditingDefinitionAction {
-	type: 'action'
+	type: UserEditingType.ACTION
 	id: string
 	label: ITranslatableMessage
 }
 
 export interface CoreUserEditingDefinitionForm {
-	type: 'form'
+	type: UserEditingType.FORM
 	id: string
 	label: ITranslatableMessage
 	schema: JSONBlob<JSONSchema>
