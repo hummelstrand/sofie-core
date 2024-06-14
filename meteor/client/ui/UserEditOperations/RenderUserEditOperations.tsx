@@ -30,7 +30,6 @@ export function RenderUserEditOperations({
 	operationTarget,
 }: UserEditOperationsProps): React.JSX.Element {
 	if (!userEdits || userEdits.length === 0) return <React.Fragment />
-
 	return (
 		<React.Fragment>
 			<hr />
@@ -39,6 +38,7 @@ export function RenderUserEditOperations({
 					case UserEditingType.ACTION:
 						return (
 							<RenderUserEditOperationAction
+								key={targetName + '_' + i}
 								rundownId={rundownId}
 								userEdit={userEdit}
 								i={i}
@@ -48,6 +48,7 @@ export function RenderUserEditOperations({
 					case UserEditingType.FORM:
 						return (
 							<RenderUserEditOperationForm
+								key={targetName + '_' + i}
 								rundownId={rundownId}
 								targetName={targetName}
 								userEdit={userEdit}
@@ -78,20 +79,23 @@ function RenderUserEditOperationAction({
 	operationTarget,
 }: UserEditOperationActionProps): React.JSX.Element {
 	const { t } = useTranslation()
+	const [col, setCol] = React.useState('white')
 
 	return (
-		<MenuItem
-			key={`${userEdit.id}_${i}`}
-			onClick={(e) => {
-				doUserAction(t, e, UserAction.EXECUTE_USER_OPERATION, (e, ts) =>
-					MeteorCall.userAction.executeUserChangeOperation(e, ts, rundownId, operationTarget, {
-						id: userEdit.id,
-					})
-				)
-			}}
-		>
-			<span>{translateMessage(userEdit.label, i18nTranslator)}</span>
-		</MenuItem>
+		<div style={{ background: `${col}` }} onMouseEnter={() => setCol('#999999')} onMouseLeave={() => setCol('white')}>
+			<MenuItem
+				key={`${userEdit.id}_${i}`}
+				onClick={(e) => {
+					doUserAction(t, e, UserAction.EXECUTE_USER_OPERATION, (e, ts) =>
+						MeteorCall.userAction.executeUserChangeOperation(e, ts, rundownId, operationTarget, {
+							id: userEdit.id,
+						})
+					)
+				}}
+			>
+				<span>{translateMessage(userEdit.label, i18nTranslator)}</span>
+			</MenuItem>
+		</div>
 	)
 }
 
@@ -111,35 +115,45 @@ function RenderUserEditOperationForm({
 	operationTarget,
 }: UserEditOperationFormProps): React.JSX.Element {
 	const { t } = useTranslation()
+	// Using inline styles to change the background color on hover
+	// This is a workaround for the fact that the MenuItem component does not support being in a
+	// sub functional component
+	const [col, setCol] = React.useState('white')
 
 	return (
-		<MenuItem
-			key={`${userEdit.id}_${i}`}
-			onClick={(e) => {
-				const schema = JSONBlobParse(userEdit.schema)
-				const values = clone(userEdit.currentValues)
+		<div style={{ background: `${col}` }} onMouseEnter={() => setCol('#999999')} onMouseLeave={() => setCol('white')}>
+			<MenuItem
+				key={`${userEdit.id}_${i}`}
+				onClick={(e) => {
+					const schema = JSONBlobParse(userEdit.schema)
+					const values = clone(userEdit.currentValues)
 
-				// TODO:
-				doModalDialog({
-					title: t(`Edit {{targetName}}`, { targetName }),
-					message: (
-						<SchemaFormInPlace schema={schema} object={values} translationNamespaces={userEdit.translationNamespaces} />
-					),
-					// acceptText: 'OK',
-					yes: t('Save Changes'),
-					no: t('Cancel'),
-					onAccept: () => {
-						doUserAction(t, e, UserAction.EXECUTE_USER_OPERATION, (e, ts) =>
-							MeteorCall.userAction.executeUserChangeOperation(e, ts, rundownId, operationTarget, {
-								...values,
-								id: userEdit.id,
-							})
-						)
-					},
-				})
-			}}
-		>
-			<span>{translateMessage(userEdit.label, i18nTranslator)}</span>
-		</MenuItem>
+					// TODO:
+					doModalDialog({
+						title: t(`Edit {{targetName}}`, { targetName }),
+						message: (
+							<SchemaFormInPlace
+								schema={schema}
+								object={values}
+								translationNamespaces={userEdit.translationNamespaces}
+							/>
+						),
+						// acceptText: 'OK',
+						yes: t('Save Changes'),
+						no: t('Cancel'),
+						onAccept: () => {
+							doUserAction(t, e, UserAction.EXECUTE_USER_OPERATION, (e, ts) =>
+								MeteorCall.userAction.executeUserChangeOperation(e, ts, rundownId, operationTarget, {
+									...values,
+									id: userEdit.id,
+								})
+							)
+						},
+					})
+				}}
+			>
+				<span>{translateMessage(userEdit.label, i18nTranslator)}</span>
+			</MenuItem>
+		</div>
 	)
 }
