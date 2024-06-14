@@ -6,7 +6,7 @@ import {
 	CoreUserEditingDefinitionAction,
 	CoreUserEditingDefinitionForm,
 } from '@sofie-automation/corelib/dist/dataModel/Rundown'
-import { JSONBlobParse, UserOperationTarget } from '@sofie-automation/blueprints-integration'
+import { JSONBlobParse, UserEditingType, UserOperationTarget } from '@sofie-automation/blueprints-integration'
 import { UserAction, doUserAction } from '../../../lib/clientUserAction'
 import { translateMessage } from '@sofie-automation/corelib/dist/TranslatableMessage'
 import { MenuItem } from '@jstarpl/react-contextmenu'
@@ -36,7 +36,7 @@ export function RenderUserEditOperations({
 			<hr />
 			{userEdits.map((userEdit, i) => {
 				switch (userEdit.type) {
-					case 'action':
+					case UserEditingType.ACTION:
 						return (
 							<RenderUserEditOperationAction
 								rundownId={rundownId}
@@ -45,7 +45,7 @@ export function RenderUserEditOperations({
 								operationTarget={operationTarget}
 							/>
 						)
-					case 'form':
+					case UserEditingType.FORM:
 						return (
 							<RenderUserEditOperationForm
 								rundownId={rundownId}
