@@ -32,6 +32,8 @@ export const SegmentContextMenu = withTranslation()(
 		render(): JSX.Element | null {
 			const { t } = this.props
 
+			if (!this.props.studioMode || !this.props.playlist || !this.props.playlist.activationId) return null
+
 			const part = this.getPartFromContext()
 			const segment = this.getSegmentFromContext()
 			const timecode = this.getTimePosition()
