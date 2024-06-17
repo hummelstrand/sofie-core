@@ -43,6 +43,14 @@ export const SegmentContextMenu = withTranslation()(
 				(part && this.props.playlist && part.instance._id === this.props.playlist.currentPartInfo?.partInstanceId) ||
 				undefined
 
+			const isSegmentEditAble = segment?._id !== this.props.playlist.queuedSegmentId
+
+			const isPartEditAble =
+				isSegmentEditAble &&
+				part?.instance._id !== this.props.playlist.currentPartInfo?.partInstanceId &&
+				part?.instance._id !== this.props.playlist.nextPartInfo?.partInstanceId &&
+				part?.instance._id !== this.props.playlist.previousPartInfo?.partInstanceId
+
 			const canSetAsNext = !!this.props.playlist?.activationId
 
 			return this.props.studioMode &&
@@ -73,6 +81,7 @@ export const SegmentContextMenu = withTranslation()(
 								)}
 								{segment ? (
 									<RenderUserEditOperations
+										isFormEditable={isSegmentEditAble}
 										rundownId={segment.rundownId}
 										targetName={segment.name}
 										userEdits={segment.userEdits}
@@ -115,6 +124,7 @@ export const SegmentContextMenu = withTranslation()(
 									</>
 								) : null}
 								<RenderUserEditOperations
+									isFormEditable={isPartEditAble}
 									rundownId={part.instance.rundownId}
 									targetName={part.instance.part.title}
 									userEdits={part.instance.part.userEdits}

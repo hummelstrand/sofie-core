@@ -17,6 +17,7 @@ import { doModalDialog } from '../../lib/ModalDialog'
 import { SchemaFormInPlace } from '../../lib/forms/SchemaFormInPlace'
 
 interface UserEditOperationsProps {
+	isFormEditable: boolean
 	rundownId: RundownId
 	targetName: string
 	userEdits: CoreUserEditingDefinition[] | undefined
@@ -24,6 +25,7 @@ interface UserEditOperationsProps {
 }
 
 export function RenderUserEditOperations({
+	isFormEditable,
 	rundownId,
 	targetName,
 	userEdits,
@@ -48,6 +50,7 @@ export function RenderUserEditOperations({
 					case UserEditingType.FORM:
 						return (
 							<RenderUserEditOperationForm
+								isFormEditable={isFormEditable}
 								key={targetName + '_' + i}
 								rundownId={rundownId}
 								targetName={targetName}
@@ -100,6 +103,7 @@ function RenderUserEditOperationAction({
 }
 
 interface UserEditOperationFormProps {
+	isFormEditable: boolean
 	rundownId: RundownId
 	targetName: string
 	userEdit: CoreUserEditingDefinitionForm
@@ -108,6 +112,7 @@ interface UserEditOperationFormProps {
 }
 
 function RenderUserEditOperationForm({
+	isFormEditable,
 	rundownId,
 	targetName,
 	userEdit,
@@ -123,6 +128,7 @@ function RenderUserEditOperationForm({
 	return (
 		<div style={{ background: `${col}` }} onMouseEnter={() => setCol('#999999')} onMouseLeave={() => setCol('white')}>
 			<MenuItem
+				disabled={!isFormEditable}
 				key={`${userEdit.id}_${i}`}
 				onClick={(e) => {
 					const schema = JSONBlobParse(userEdit.schema)
