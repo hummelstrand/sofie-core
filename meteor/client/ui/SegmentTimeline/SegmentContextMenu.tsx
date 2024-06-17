@@ -79,19 +79,18 @@ export const SegmentContextMenu = withTranslation()(
 										<span>{t('Clear queued segment')}</span>
 									</MenuItem>
 								)}
-								{segment ? (
-									<RenderUserEditOperations
-										isFormEditable={isSegmentEditAble}
-										rundownId={segment.rundownId}
-										targetName={segment.name}
-										userEdits={segment.userEdits}
-										operationTarget={{
-											segmentExternalId: segment.externalId,
-											partExternalId: undefined,
+								{segment &&
+									RenderUserEditOperations(
+										isPartEditAble,
+										part.instance.rundownId,
+										part.instance.part.title,
+										part.instance.part.userEdits,
+										{
+											segmentExternalId: segment?.externalId,
+											partExternalId: part.instance.part.externalId,
 											pieceExternalId: undefined,
-										}}
-									/>
-								) : null}
+										}
+									)}
 								<hr />
 							</>
 						)}
@@ -123,17 +122,17 @@ export const SegmentContextMenu = withTranslation()(
 										</MenuItem>
 									</>
 								) : null}
-								<RenderUserEditOperations
-									isFormEditable={isPartEditAble}
-									rundownId={part.instance.rundownId}
-									targetName={part.instance.part.title}
-									userEdits={part.instance.part.userEdits}
-									operationTarget={{
+								{RenderUserEditOperations(
+									isPartEditAble,
+									part.instance.rundownId,
+									part.instance.part.title,
+									part.instance.part.userEdits,
+									{
 										segmentExternalId: segment?.externalId,
 										partExternalId: part.instance.part.externalId,
 										pieceExternalId: undefined,
-									}}
-								/>
+									}
+								)}
 							</>
 						)}
 					</ContextMenu>
