@@ -7,6 +7,7 @@ import {
 } from '../ingestSegmentJobs'
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import {
+	IngestChangeType,
 	IngestRundown,
 	IngestSegment,
 	NrcsIngestSegmentChangeDetailsEnum,
@@ -114,7 +115,7 @@ describe('handleRegenerateSegment', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segment1: {
 						payloadChanged: true,
@@ -181,7 +182,7 @@ describe('handleRemovedSegment', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segment1: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 				},
@@ -256,7 +257,7 @@ describe('handleUpdatedSegment', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segmentX: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
@@ -300,7 +301,7 @@ describe('handleUpdatedSegment', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segment1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
@@ -349,7 +350,7 @@ describe('handleUpdatedSegmentRanks', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentOrderChanged: false,
 			},
 		} satisfies UpdateIngestRundownChange)
@@ -377,7 +378,7 @@ describe('handleUpdatedSegmentRanks', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentOrderChanged: true,
 			},
 		} satisfies UpdateIngestRundownChange)
@@ -404,7 +405,7 @@ describe('handleUpdatedSegmentRanks', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentOrderChanged: false,
 			},
 		} satisfies UpdateIngestRundownChange)

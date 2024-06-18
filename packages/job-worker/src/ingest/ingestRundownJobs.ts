@@ -12,7 +12,11 @@ import {
 	UserUnsyncRundownProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
 import { ComputedIngestChangeAction, UpdateIngestRundownChange, UpdateIngestRundownResult } from './runOperation'
-import { IngestRundown, NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
+import {
+	IngestChangeType,
+	IngestRundown,
+	NrcsIngestRundownChangeDetails,
+} from '@sofie-automation/blueprints-integration'
 import { wrapGenericIngestJob } from './jobWrappers'
 
 /**
@@ -84,7 +88,7 @@ export function handleUpdatedRundown(
 	return {
 		ingestRundown: data.ingestRundown,
 		changes: {
-			source: 'ingest',
+			source: IngestChangeType.Ingest,
 			rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 		},
 	} satisfies UpdateIngestRundownChange
@@ -106,7 +110,7 @@ export function handleUpdatedRundownMetaData(
 			segments: ingestRundown.segments,
 		},
 		changes: {
-			source: 'ingest',
+			source: IngestChangeType.Ingest,
 			rundownChanges: NrcsIngestRundownChangeDetails.Payload,
 		},
 	} satisfies UpdateIngestRundownChange
@@ -126,7 +130,7 @@ export function handleRegenerateRundown(
 		// We want to regenerate unmodified
 		ingestRundown,
 		changes: {
-			source: 'ingest',
+			source: IngestChangeType.Ingest,
 			rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 		},
 	} satisfies UpdateIngestRundownChange

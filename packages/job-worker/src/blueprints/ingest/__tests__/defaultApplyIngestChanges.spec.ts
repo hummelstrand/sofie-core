@@ -10,6 +10,7 @@ import {
 	MutableIngestPart,
 	MutableIngestRundown,
 	MutableIngestSegment,
+	IngestChangeType,
 } from '@sofie-automation/blueprints-integration'
 import { clone } from '@sofie-automation/corelib/dist/lib'
 
@@ -291,7 +292,7 @@ describe('defaultApplyIngestChanges', () => {
 			const nrcsRundown = createBasicIngestRundown()
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
-			const changes: NrcsIngestChangeDetails = { source: 'ingest' }
+			const changes: NrcsIngestChangeDetails = { source: IngestChangeType.Ingest }
 
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
 
@@ -302,7 +303,7 @@ describe('defaultApplyIngestChanges', () => {
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				rundownChanges: NrcsIngestRundownChangeDetails.Payload,
 			}
 
@@ -318,7 +319,7 @@ describe('defaultApplyIngestChanges', () => {
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 				segmentOrderChanged: true, // will be ignored
 				segmentChanges: {}, // will be ignored
@@ -360,7 +361,7 @@ describe('defaultApplyIngestChanges', () => {
 			const nrcsRundown = createIngestRundownWithManySegments()
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(nrcsRundown)
 
-			const changes: NrcsIngestChangeDetails = { source: 'ingest', segmentOrderChanged: true }
+			const changes: NrcsIngestChangeDetails = { source: IngestChangeType.Ingest, segmentOrderChanged: true }
 
 			defaultApplyIngestChanges(mutableIngestRundown, nrcsRundown, changes, defaultOptions)
 
@@ -381,7 +382,7 @@ describe('defaultApplyIngestChanges', () => {
 			// include some changes, which should be ignored
 			const modifiedRundown = createIngestRundownWithManySegmentsAlternateOrder()
 
-			const changes: NrcsIngestChangeDetails = { source: 'ingest', segmentOrderChanged: true }
+			const changes: NrcsIngestChangeDetails = { source: IngestChangeType.Ingest, segmentOrderChanged: true }
 
 			defaultApplyIngestChanges(mutableIngestRundown, modifiedRundown, changes, defaultOptions)
 
@@ -403,7 +404,7 @@ describe('defaultApplyIngestChanges', () => {
 			const modifiedRundown = createIngestRundownWithManySegmentsAlternateOrder()
 			modifiedRundown.segments.splice(2, 1) // remove seg4
 
-			const changes: NrcsIngestChangeDetails = { source: 'ingest', segmentOrderChanged: true }
+			const changes: NrcsIngestChangeDetails = { source: IngestChangeType.Ingest, segmentOrderChanged: true }
 
 			defaultApplyIngestChanges(mutableIngestRundown, modifiedRundown, changes, defaultOptions)
 
@@ -433,7 +434,7 @@ describe('defaultApplyIngestChanges', () => {
 				parts: [],
 			})
 
-			const changes: NrcsIngestChangeDetails = { source: 'ingest', segmentOrderChanged: true }
+			const changes: NrcsIngestChangeDetails = { source: IngestChangeType.Ingest, segmentOrderChanged: true }
 
 			defaultApplyIngestChanges(mutableIngestRundown, modifiedRundown, changes, defaultOptions)
 
@@ -460,7 +461,7 @@ describe('defaultApplyIngestChanges', () => {
 			modifiedRundown.segments.splice(4, 1) // remove seg4
 
 			const changes: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					seg1: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 					segX: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
@@ -508,7 +509,7 @@ describe('defaultApplyIngestChanges', () => {
 			const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segX: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
@@ -524,7 +525,7 @@ describe('defaultApplyIngestChanges', () => {
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segX: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 				},
@@ -542,7 +543,7 @@ describe('defaultApplyIngestChanges', () => {
 			const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segX: {
 						payloadChanged: true,
@@ -561,7 +562,7 @@ describe('defaultApplyIngestChanges', () => {
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					seg1: {},
 				},
@@ -578,7 +579,7 @@ describe('defaultApplyIngestChanges', () => {
 			const { mutableIngestRundown, defaultOptions, mockCalls } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segX: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
@@ -607,7 +608,7 @@ describe('defaultApplyIngestChanges', () => {
 			const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
 
 			const changes: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segX: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
@@ -632,7 +633,7 @@ describe('defaultApplyIngestChanges', () => {
 				)
 
 				const changes: NrcsIngestChangeDetails = {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					segmentChanges: {
 						seg1: {
 							partOrderChanged: true,
@@ -657,7 +658,7 @@ describe('defaultApplyIngestChanges', () => {
 				nrcsRundown.segments[2].parts = [origParts[1], origParts[0], origParts[2]]
 
 				const changes: NrcsIngestChangeDetails = {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					segmentChanges: {
 						seg2: {
 							partOrderChanged: true,
@@ -692,7 +693,7 @@ describe('defaultApplyIngestChanges', () => {
 				nrcsRundown.segments[2].parts.splice(1, 1)
 
 				const changes: NrcsIngestChangeDetails = {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					segmentChanges: {
 						seg2: {
 							partOrderChanged: true,
@@ -734,7 +735,7 @@ describe('defaultApplyIngestChanges', () => {
 				})
 
 				const changes: NrcsIngestChangeDetails = {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					segmentChanges: {
 						seg2: {
 							partOrderChanged: true,
@@ -776,7 +777,7 @@ describe('defaultApplyIngestChanges', () => {
 				segment2.parts.splice(1, 1) // remove part4
 
 				const changes: NrcsIngestChangeDetails = {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					segmentChanges: {
 						seg0: {
 							partChanges: {
@@ -830,7 +831,7 @@ describe('defaultApplyIngestChanges', () => {
 				const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
 
 				const changes: NrcsIngestChangeDetails = {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					segmentChanges: {
 						seg0: {
 							partChanges: {
@@ -852,7 +853,7 @@ describe('defaultApplyIngestChanges', () => {
 				)
 
 				const changes: NrcsIngestChangeDetails = {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					segmentChanges: {
 						seg0: {
 							partChanges: {
@@ -874,7 +875,7 @@ describe('defaultApplyIngestChanges', () => {
 				const { mutableIngestRundown, defaultOptions } = createMutableIngestRundown(clone(nrcsRundown))
 
 				const changes: NrcsIngestChangeDetails = {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					segmentChanges: {
 						seg0: {
 							partChanges: {
@@ -897,7 +898,7 @@ describe('defaultApplyIngestChanges', () => {
 				)
 
 				const changes: NrcsIngestChangeDetails = {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					segmentChanges: {
 						seg0: {
 							partChanges: {},
@@ -922,7 +923,7 @@ describe('defaultApplyIngestChanges', () => {
 				nrcsRundown.segments[1].parts.unshift(...removed)
 
 				const changes: NrcsIngestChangeDetails = {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					segmentChanges: {
 						seg0: {
 							partChanges: {

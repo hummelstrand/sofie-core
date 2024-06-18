@@ -1,6 +1,7 @@
 import { setupDefaultJobEnvironment } from '../../../__mocks__/context'
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import {
+	IngestChangeType,
 	IngestRundown,
 	MOS,
 	NrcsIngestPartChangeDetails,
@@ -156,7 +157,7 @@ describe('handleMosDeleteStory', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					'segment-part1': NrcsIngestSegmentChangeDetailsEnum.Deleted,
 				},
@@ -228,7 +229,7 @@ describe('handleMosFullStory', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					'segment-part1': {
 						partChanges: {
@@ -336,7 +337,7 @@ describe('handleMosInsertStories', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					'segment-partX': NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
@@ -380,7 +381,7 @@ describe('handleMosInsertStories', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					'segment-part1': NrcsIngestSegmentChangeDetailsEnum.Deleted,
 					'segment-partX': NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
@@ -425,7 +426,7 @@ describe('handleMosInsertStories', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					'segment-partX': NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 				},
@@ -518,7 +519,7 @@ describe('handleMosSwapStories', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentOrderChanged: true,
 			},
 		} satisfies UpdateIngestRundownChange)
@@ -593,7 +594,7 @@ describe('handleMosMoveStories', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentOrderChanged: true,
 			},
 		} satisfies UpdateIngestRundownChange)
@@ -623,7 +624,7 @@ describe('handleMosMoveStories', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentOrderChanged: true,
 			},
 		} satisfies UpdateIngestRundownChange)

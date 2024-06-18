@@ -74,6 +74,13 @@ export interface NrcsIngestSegmentChangeDetailsObject {
 	partChanges?: Record<string, NrcsIngestPartChangeDetails>
 }
 
+export enum IngestChangeType {
+	/** Indicate that this change is from ingest operations */
+	Ingest = 'ingest',
+	/** Indicate that this change is from user operations */
+	User = 'user',
+}
+
 /**
  * Describes the possible ingest changes that can have been made to a segment by the NRCS
  */
@@ -81,7 +88,7 @@ export type NrcsIngestSegmentChangeDetails = NrcsIngestSegmentChangeDetailsEnum 
 
 export interface NrcsIngestChangeDetails {
 	/** Indicate that this change is from ingest operations */
-	source: 'ingest'
+	source: IngestChangeType.Ingest
 
 	/**
 	 * True when the rank of any segment in the rundown has changed.
@@ -122,7 +129,7 @@ export type DefaultUserOperations = {
 
 export interface UserOperationChange<TCustomBlueprintOperations extends { id: string } = never> {
 	/** Indicate that this change is from user operations */
-	source: 'user'
+	source: IngestChangeType.User
 
 	operationTarget: UserOperationTarget
 	operation: DefaultUserOperations | TCustomBlueprintOperations

@@ -11,7 +11,11 @@ import {
 	RemoveOrphanedSegmentsProps,
 } from '@sofie-automation/corelib/dist/worker/ingest'
 import { IngestUpdateOperationFunction, UpdateIngestRundownChange, UpdateIngestRundownResult } from './runOperation'
-import { IngestRundown, NrcsIngestSegmentChangeDetailsEnum } from '@sofie-automation/blueprints-integration'
+import {
+	IngestChangeType,
+	IngestRundown,
+	NrcsIngestSegmentChangeDetailsEnum,
+} from '@sofie-automation/blueprints-integration'
 import { IngestModel } from './model/IngestModel'
 
 /**
@@ -36,7 +40,7 @@ export function handleRegenerateSegment(
 		// We modify in-place
 		ingestRundown,
 		changes: {
-			source: 'ingest',
+			source: IngestChangeType.Ingest,
 			segmentChanges: {
 				[data.segmentExternalId]: {
 					payloadChanged: true,
@@ -69,7 +73,7 @@ export function handleRemovedSegment(
 		// We modify in-place
 		ingestRundown,
 		changes: {
-			source: 'ingest',
+			source: IngestChangeType.Ingest,
 			segmentChanges: {
 				[data.segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 			},
@@ -101,7 +105,7 @@ export function handleUpdatedSegment(
 			// We modify in-place
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					[segmentExternalId]: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated, // This forces downstream to do a full diff themselves
 				},
@@ -135,7 +139,7 @@ export function handleUpdatedSegmentRanks(
 		// We modify in-place
 		ingestRundown,
 		changes: {
-			source: 'ingest',
+			source: IngestChangeType.Ingest,
 			segmentOrderChanged: hasChange,
 		},
 	}

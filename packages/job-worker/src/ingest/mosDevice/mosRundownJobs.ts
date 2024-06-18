@@ -1,4 +1,9 @@
-import { NrcsIngestRundownChangeDetails, IngestPart, IngestRundown } from '@sofie-automation/blueprints-integration'
+import {
+	NrcsIngestRundownChangeDetails,
+	IngestPart,
+	IngestRundown,
+	IngestChangeType,
+} from '@sofie-automation/blueprints-integration'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import {
 	MosRundownProps,
@@ -63,7 +68,7 @@ export function handleMosRundownData(
 		return {
 			ingestRundown: newIngestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 			},
 		}
@@ -85,7 +90,7 @@ export function handleMosRundownMetadata(
 				// We modify in-place
 				ingestRundown,
 				changes: {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					rundownChanges: NrcsIngestRundownChangeDetails.Payload,
 				},
 			}

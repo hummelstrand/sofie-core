@@ -1,7 +1,12 @@
 import { setupDefaultJobEnvironment } from '../../__mocks__/context'
 import { handleRemovedPart, handleUpdatedPart } from '../ingestPartJobs'
 import { clone } from '@sofie-automation/corelib/dist/lib'
-import { IngestPart, IngestRundown, NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
+import {
+	IngestChangeType,
+	IngestPart,
+	IngestRundown,
+	NrcsIngestPartChangeDetails,
+} from '@sofie-automation/blueprints-integration'
 import { UpdateIngestRundownChange } from '../runOperation'
 
 function getDefaultIngestRundown(): IngestRundown {
@@ -104,7 +109,7 @@ describe('handleRemovedPart', () => {
 			ingestRundown,
 			changes: {
 				// No changes
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 			},
 		} satisfies UpdateIngestRundownChange)
 	})
@@ -128,7 +133,7 @@ describe('handleRemovedPart', () => {
 			ingestRundown,
 			changes: {
 				// No changes
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 			},
 		} satisfies UpdateIngestRundownChange)
 	})
@@ -155,7 +160,7 @@ describe('handleRemovedPart', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segment1: {
 						partChanges: {
@@ -239,7 +244,7 @@ describe('handleUpdatedPart', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segment1: {
 						partChanges: {
@@ -277,7 +282,7 @@ describe('handleUpdatedPart', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					segment1: {
 						partChanges: {

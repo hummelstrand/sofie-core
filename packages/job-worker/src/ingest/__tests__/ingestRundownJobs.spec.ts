@@ -1,6 +1,10 @@
 import { MockJobContext, setupDefaultJobEnvironment } from '../../__mocks__/context'
 import { clone } from '@sofie-automation/corelib/dist/lib'
-import { IngestRundown, NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
+import {
+	IngestChangeType,
+	IngestRundown,
+	NrcsIngestRundownChangeDetails,
+} from '@sofie-automation/blueprints-integration'
 import { ComputedIngestChangeAction, UpdateIngestRundownChange } from '../runOperation'
 import {
 	handleRegenerateRundown,
@@ -162,7 +166,7 @@ describe('handleRegenerateRundown', () => {
 		expect(changes).toEqual({
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 			},
 		} satisfies UpdateIngestRundownChange)
@@ -307,7 +311,7 @@ describe('handleUpdatedRundown', () => {
 		expect(changes).toEqual({
 			ingestRundown: ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 			},
 		} satisfies UpdateIngestRundownChange)
@@ -351,7 +355,7 @@ describe('handleUpdatedRundown', () => {
 		expect(changes).toEqual({
 			ingestRundown: newIngestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 			},
 		} satisfies UpdateIngestRundownChange)
@@ -409,7 +413,7 @@ describe('handleUpdatedRundownMetaData', () => {
 		expect(changes).toEqual({
 			ingestRundown: expectedIngestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				rundownChanges: NrcsIngestRundownChangeDetails.Payload,
 			},
 		} satisfies UpdateIngestRundownChange)

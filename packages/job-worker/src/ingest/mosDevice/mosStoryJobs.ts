@@ -15,6 +15,7 @@ import {
 	updateRanksBasedOnOrder,
 } from './lib'
 import {
+	IngestChangeType,
 	IngestRundown,
 	IngestSegment,
 	MOS,
@@ -62,7 +63,7 @@ export function handleMosFullStory(
 			// We modify in-place
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					[segmentExternalId]: {
 						partChanges: {
@@ -117,7 +118,7 @@ export function handleMosDeleteStory(
 			// We modify in-place
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges,
 			},
 		}
@@ -178,7 +179,7 @@ export function handleMosInsertStories(
 			// We modify in-place
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: segmentChanges,
 				segmentOrderChanged: true,
 			},
@@ -230,7 +231,7 @@ export function handleMosSwapStories(
 			// We modify in-place
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentOrderChanged: true,
 			},
 		}
@@ -288,7 +289,7 @@ export function handleMosMoveStories(
 			// We modify in-place
 			ingestRundown,
 			changes: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentOrderChanged: true,
 			},
 		}

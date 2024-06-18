@@ -5,6 +5,7 @@ import {
 	NrcsIngestSegmentChangeDetailsEnum,
 	IngestRundown,
 	GroupPartsInMosRundownAndChangesResult,
+	IngestChangeType,
 } from '@sofie-automation/blueprints-integration'
 import { Complete, clone } from '@sofie-automation/corelib/dist/lib'
 import { groupMosPartsIntoIngestSegments, groupPartsInRundownAndChanges } from '../groupPartsInRundownAndChanges'
@@ -129,7 +130,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 		const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 		const ingestChanges: NrcsIngestChangeDetails = {
-			source: 'ingest',
+			source: IngestChangeType.Ingest,
 			segmentChanges: {
 				'segment-s1p1': NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 			},
@@ -141,7 +142,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 		expect(result).toEqual({
 			nrcsIngestRundown: combinedIngestRundown,
 			ingestChanges: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 			},
 		} satisfies Complete<GroupPartsInMosRundownAndChangesResult>)
@@ -150,14 +151,14 @@ describe('groupPartsInMosRundownAndChanges', () => {
 	it('no change in rundown', () => {
 		const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
-		const ingestChanges: NrcsIngestChangeDetails = { source: 'ingest' }
+		const ingestChanges: NrcsIngestChangeDetails = { source: IngestChangeType.Ingest }
 
 		const result = groupMosPartsInRundownAndChanges(clone(nrcsIngestRundown), nrcsIngestRundown, ingestChanges)
 
 		expect(result).toEqual({
 			nrcsIngestRundown: combinedIngestRundown,
 			ingestChanges: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				changedSegmentExternalIds: {},
 				segmentChanges: {},
 				segmentOrderChanged: false,
@@ -169,7 +170,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 		const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 		const ingestChanges: NrcsIngestChangeDetails = {
-			source: 'ingest',
+			source: IngestChangeType.Ingest,
 			rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 			segmentOrderChanged: true,
 		}
@@ -179,7 +180,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 		expect(result).toEqual({
 			nrcsIngestRundown: combinedIngestRundown,
 			ingestChanges: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				changedSegmentExternalIds: {},
 				segmentChanges: {},
 				segmentOrderChanged: false,
@@ -193,7 +194,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {}, // Note: this is ignored for inserts/deletes
 			}
 
@@ -205,7 +206,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
 				ingestChanges: {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: {
@@ -224,7 +225,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {}, // Note: this is ignored for inserts/deletes
 			}
 
@@ -236,7 +237,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
 				ingestChanges: {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {
 						rundown0_SEGMENT2_s2p2: 'rundown0_SEGMENT2_s2p1',
 					},
@@ -252,7 +253,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {}, // Note: this is ignored for inserts/deletes
 			}
 
@@ -275,7 +276,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
 				ingestChanges: {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: {
@@ -294,7 +295,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {}, // Note: this is ignored for inserts/deletes
 			}
 
@@ -317,7 +318,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
 				ingestChanges: {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {
 						rundown0_SEGMENT2_s2p0: 'rundown0_SEGMENT2_s2p1',
 					},
@@ -333,7 +334,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {
 					// Note: this is ignored for inserts/deletes
 					'segment-s1p2': { anything: 'here' } as any, // Note: contents is ignored
@@ -348,7 +349,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
 				ingestChanges: {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: {
@@ -373,7 +374,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {}, // Note: this is ignored for inserts/deletes
 			}
 
@@ -388,7 +389,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
 				ingestChanges: {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {
 						rundown0_SEGMENT0_s1p1: 'rundown0_SEGMENT1_s1p1',
 					},
@@ -404,7 +405,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {}, // Note: this is ignored for inserts/deletes
 			}
 
@@ -426,7 +427,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
 				ingestChanges: {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {
 						rundown0_SEGMENT0_s1p1: 'rundown0_SEGMENT1_s1p1',
 					},
@@ -442,7 +443,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {}, // Note: this is ignored for inserts/deletes
 			}
 
@@ -460,7 +461,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
 				ingestChanges: {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {
 						rundown0_SEGMENT1_s1p2: 'rundown0_SEGMENT1_s1p1',
 					},
@@ -476,7 +477,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {}, // Note: this is ignored for inserts/deletes
 			}
 
@@ -494,7 +495,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			expect(result).toEqual({
 				nrcsIngestRundown: combinedIngestRundown,
 				ingestChanges: {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: {
@@ -521,7 +522,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			const { nrcsIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				segmentChanges: {}, // Note: this is ignored for inserts/deletes
 			}
 
@@ -593,7 +594,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					],
 				},
 				ingestChanges: {
-					source: 'ingest',
+					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {},
 					segmentChanges: {
 						rundown0_SEGMENT1_s1p1: {

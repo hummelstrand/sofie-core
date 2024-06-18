@@ -1,5 +1,6 @@
 import {
 	GroupPartsInMosRundownAndChangesResult,
+	IngestChangeType,
 	IngestPart,
 	IngestRundown,
 	IngestSegment,
@@ -64,7 +65,7 @@ export function groupPartsInRundownAndChanges(
 		return {
 			nrcsIngestRundown: combinedIngestRundown,
 			ingestChanges: {
-				source: 'ingest',
+				source: IngestChangeType.Ingest,
 				rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
 			},
 		}
@@ -96,7 +97,7 @@ export function groupPartsInRundownAndChanges(
 	return {
 		nrcsIngestRundown: combinedIngestRundown,
 		ingestChanges: {
-			source: 'ingest',
+			source: IngestChangeType.Ingest,
 			rundownChanges: ingestChanges.rundownChanges,
 			segmentOrderChanged,
 			segmentChanges,
