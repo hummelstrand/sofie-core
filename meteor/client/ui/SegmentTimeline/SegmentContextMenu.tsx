@@ -81,7 +81,7 @@ export const SegmentContextMenu = withTranslation()(
 								)}
 								{segment &&
 									RenderUserEditOperations(
-										isPartEditAble,
+										isSegmentEditAble,
 										part.instance.rundownId,
 										part.instance.part.title,
 										part.instance.part.userEdits,
