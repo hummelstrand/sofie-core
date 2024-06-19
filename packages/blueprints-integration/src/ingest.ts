@@ -122,9 +122,16 @@ export interface UserOperationTarget {
 	pieceExternalId: string | undefined
 }
 
+export enum DefaultUserOperationTypes {
+	MOVE_SEGMENT = '__sofie-move-segment', // Future: define properly
+}
+
 export type DefaultUserOperations = {
 	id: '__sofie-move-segment' // Future: define properly
-	payload: Record<string, never>
+	payload: {
+		moveId: string
+		afterId: string
+	}
 }
 
 export interface UserOperationChange<TCustomBlueprintOperations extends { id: string } = never> {

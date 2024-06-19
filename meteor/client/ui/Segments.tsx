@@ -27,6 +27,9 @@ import { DndProvider, DropTargetMonitor, useDrag, useDrop } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { doModalDialog } from '../lib/ModalDialog'
 import { i18nTranslator } from './i18n'
+import { UserAction } from '../../lib/userAction'
+import { doUserAction } from '../../lib/clientUserAction'
+import { MeteorCall } from '../../lib/api/methods'
 
 const DEFAULT_SEGMENT_VIEW_MODE = SegmentViewMode.Timeline
 
@@ -124,8 +127,8 @@ export function RenderSegments({
 		})
 
 		console.log('Segment dropped after index:', segmentDroppedAfterIndex)
-		const segmentDroppedAfter = matchedSegments[0].segments[segmentDroppedAfterIndex]._id
-		console.log('Segment dropped after:', segmentDroppedAfter)
+		const segmentDroppedAfterId = matchedSegments[0].segments[segmentDroppedAfterIndex].externalId
+		console.log('Segment dropped after:', segmentDroppedAfterId)
 
 		doModalDialog({
 			title: t('Reorder Segments'),
@@ -139,8 +142,26 @@ export function RenderSegments({
 			no: t('Cancel'),
 			actions: [],
 			warning: true,
-			onAccept: () => {
-				console.log('Segment dropped:', draggedSegmentId)
+			onAccept: (e) => {
+				doUserAction(t, e, UserAction.EXECUTE_USER_OPERATION, (e, ts) =>
+					MeteorCall.userAction.executeUserChangeOperation(
+						e,
+						ts,
+						matchedSegments[0].rundown._id,
+						{
+							segmentExternalId: draggedSegmentId,
+							partExternalId: undefined,
+							pieceExternalId: undefined,
+						},
+						{
+							id: '__sofie-move-segment',
+							payload: {
+								moveId: draggedSegmentId,
+								afterId: segmentDroppedAfterId,
+							},
+						}
+					)
+				)
 			},
 		})
 	}
@@ -188,13 +209,13 @@ export function RenderSegments({
 									const isLastSegment =
 										rundownIndex === rundownArray.length - 1 && segmentIndex === segmentArray.length - 1
 
-									const id = segment._id
+									const externalId = segment.externalId
 									const segmentRef: React.MutableRefObject<HTMLDivElement | null> = React.createRef()
 									segmentRefs[segmentIndex] = segmentRef
 
 									const [{ isDragging }, drag] = useDrag(() => ({
 										type: 'ITEM',
-										item: { id: id },
+										item: { id: externalId },
 										collect: (monitor) => ({
 											isDragging: !!monitor.isDragging(),
 										}),
