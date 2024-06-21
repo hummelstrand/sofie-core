@@ -54,28 +54,31 @@ const DropTarget = ({ children, onDrop }) => {
 	)
 }
 
-interface SegmentProps {
-	studio: UIStudio | undefined
-	showStyleBase: UIShowStyleBase | undefined
-	playlist: DBRundownPlaylist
-	matchedSegments: MatchedSegment[]
-	rundownViewLayout: RundownViewLayout | undefined
-	currentPartInstance: PartInstance | undefined
-	nextPartInstance: PartInstance | undefined
+interface SegmentsParseProps {
 	rundownPlaylist: DBRundownPlaylist
+	studio: UIStudio
 	studioMode: boolean
+	showStyleBase: UIShowStyleBase
 	segmentViewModes: { [segmentId: string]: SegmentViewMode }
 	rundownDefaultSegmentViewMode: SegmentViewMode | undefined
+	rundownViewLayout: RundownViewLayout | undefined
 	followLiveSegments: boolean
 	timeScale: number
-	rundownsToShowstyles: Map<RundownId, ShowStyleBaseId>
 	onContextMenu: (contextMenuContext: any) => void
 	onSegmentScroll: () => void
-	onSelectPiece: (piece: PieceUi) => void | undefined
+	rundownsToShowstyles: Map<RundownId, ShowStyleBaseId>
+	onSelectPiece: (piece: PieceUi) => void
 	onPieceDoubleClick: (item: PieceUi, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
 	onHeaderNoteClick: (segmentId: SegmentId, level: NoteSeverity) => void
 	onSwitchViewMode: (segmentId: SegmentId, viewMode: SegmentViewMode) => void
 	miniShelfFilter: RundownLayoutFilterBase | undefined
+}
+
+interface SegmentProps extends SegmentsParseProps {
+	playlist: DBRundownPlaylist
+	matchedSegments: MatchedSegment[]
+	currentPartInstance: PartInstance | undefined
+	nextPartInstance: PartInstance | undefined
 }
 
 export function RenderSegments({
@@ -99,41 +102,60 @@ export function RenderSegments({
 	onHeaderNoteClick,
 	onSwitchViewMode,
 	miniShelfFilter,
-}: SegmentProps): React.ReactElement {
+}: SegmentProps): React.JSX.Element {
 	const t = i18nTranslator
-	const segmentRefs: React.MutableRefObject<HTMLDivElement | null>[] = []
 	if (!matchedSegments) {
 		return <React.Fragment />
 	}
 
+	const segmentRefs: React.MutableRefObject<HTMLDivElement | null>[] = []
+
 	const handleDrop = (draggedSegmentId: string, monitor: DropTargetMonitor<unknown, unknown>) => {
-		// Get the current coordinates of the dragged item
 		const clientOffset = monitor.getClientOffset()
 
-		// Find the segment that the dragged item is dropped after
-		const segmentDroppedAfterIndex = matchedSegments[0].segments.findIndex((_, index) => {
-			if (!segmentRefs[index] || !segmentRefs[index].current) return false
+		// Debugging:
+		const draggedSegmentName =
+			matchedSegments[0].segments[
+				matchedSegments[0].segments.findIndex((segment) => segment.externalId === draggedSegmentId)
+			].name
 
-			const segmentRect = segmentRefs[index].current?.getBoundingClientRect()
-			if (clientOffset && segmentRect) {
-				return (
-					clientOffset.y >= segmentRect.top &&
-					clientOffset.y < segmentRect.bottom &&
-					clientOffset.x >= segmentRect.left &&
-					clientOffset.x < segmentRect.right
-				)
+		// Debugging:
+		const draggedSegmentIndex = matchedSegments[0].segments.findIndex(
+			(segment) => segment.externalId === draggedSegmentId
+		)
+
+		// Find the segment that the dragged item is dropped after
+		const segmentDroppedAfterIndex = matchedSegments[0].segments.findIndex((segment) => {
+			const segmentRef = segmentRefs.find((ref) => ref.current?.getAttribute('data-key') === segment.externalId)
+			if (!segmentRef?.current) return false
+
+			const segmentRect = segmentRef.current.getBoundingClientRect()
+			if (!clientOffset || !segmentRect) {
+				return false
 			}
-			return false
+			return (
+				clientOffset.y >= segmentRect.top &&
+				clientOffset.y < segmentRect.bottom &&
+				clientOffset.x >= segmentRect.left &&
+				clientOffset.x < segmentRect.right
+			)
 		})
 
-		console.log('Segment dropped after index:', segmentDroppedAfterIndex)
-		const segmentDroppedAfterId = matchedSegments[0].segments[segmentDroppedAfterIndex].externalId
-		console.log('Segment dropped after:', segmentDroppedAfterId)
+		if (segmentDroppedAfterIndex === -1) return
 
+		const segmentDroppedAfterId = matchedSegments[0].segments[segmentDroppedAfterIndex].externalId
+
+		// Debugging:
+		const segmentDroppedAfterName = matchedSegments[0].segments[segmentDroppedAfterIndex].name
 		doModalDialog({
 			title: t('Reorder Segments'),
 			message: t(
-				'Are you sure you want to move this segment to this position? This will affect the order of the segments in the playlist.',
+				`Index: ${draggedSegmentIndex} - ${draggedSegmentName} ${
+					draggedSegmentId.split(';')[1]
+				} is moved to after index: ${segmentDroppedAfterIndex} - ${segmentDroppedAfterName} ${
+					segmentDroppedAfterId.split(';')[1]
+				}`,
+				//`Are you sure you want to move this segment to this position? This will affect the order of the segments in the playlist.`,
 				{
 					draggedSegmentId: draggedSegmentId,
 				}
@@ -209,73 +231,41 @@ export function RenderSegments({
 									const isLastSegment =
 										rundownIndex === rundownArray.length - 1 && segmentIndex === segmentArray.length - 1
 
-									const externalId = segment.externalId
-									const segmentRef: React.MutableRefObject<HTMLDivElement | null> = React.createRef()
+									const segmentRef: React.MutableRefObject<HTMLDivElement | null> = React.createRef<HTMLDivElement>()
 									segmentRefs[segmentIndex] = segmentRef
-
-									const [{ isDragging }, drag] = useDrag(() => ({
-										type: 'ITEM',
-										item: { id: externalId },
-										collect: (monitor) => ({
-											isDragging: !!monitor.isDragging(),
-										}),
-									}))
+									globalIndex++
 
 									return (
-										<div
+										<RenderSegmentComponent
 											key={unprotectString(segment._id)}
-											ref={(node) => {
-												drag(node)
-												if (node) {
-													segmentRef.current = node
-												}
-											}}
-											style={{ opacity: isDragging ? 0.5 : 1 }}
-										>
-											<ErrorBoundary>
-												<VirtualElement
-													className={ClassNames({
-														'segment-timeline-wrapper--hidden': segment.isHidden,
-														'segment-timeline-wrapper--shelf': segment.showShelf,
-													})}
-													id={SEGMENT_TIMELINE_ELEMENT_ID + segment._id}
-													margin={'100% 0px 100% 0px'}
-													initialShow={globalIndex++ < window.innerHeight / 260}
-													placeholderHeight={260}
-													placeholderClassName="placeholder-shimmer-element segment-timeline-placeholder"
-													width="auto"
-												>
-													<RenderSegmentComponent
-														studio={studio}
-														_index={segmentIndex}
-														showStyleBase={showStyleBase}
-														rundownPlaylist={playlist}
-														rundownAndSegments={rundownAndSegments}
-														segment={segment}
-														studioMode={studioMode}
-														isLastSegment={isLastSegment}
-														isFollowingOnAirSegment={isFollowingOnAirSegment}
-														ownCurrentPartInstance={ownCurrentPartInstance}
-														ownNextPartInstance={ownNextPartInstance}
-														segmentIdsBeforeSegment={rundownAndSegments.segmentIdsBeforeEachSegment[segmentIndex]}
-														rundownIdsBefore={rundownIdsBefore}
-														segmentViewModes={segmentViewModes}
-														rundownDefaultSegmentViewMode={rundownDefaultSegmentViewMode}
-														rundownViewLayout={rundownViewLayout}
-														followLiveSegments={followLiveSegments}
-														timeScale={timeScale}
-														onContextMenu={onContextMenu}
-														onSegmentScroll={onSegmentScroll}
-														rundownsToShowstyles={rundownsToShowstyles}
-														onSelectPiece={onSelectPiece}
-														onPieceDoubleClick={onPieceDoubleClick}
-														onHeaderNoteClick={onHeaderNoteClick}
-														onSwitchViewMode={onSwitchViewMode}
-														miniShelfFilter={miniShelfFilter}
-													/>
-												</VirtualElement>
-											</ErrorBoundary>
-										</div>
+											_index={segmentIndex}
+											globalIndex={globalIndex}
+											segmentRef={segmentRef}
+											segment={segment}
+											studio={studio}
+											showStyleBase={showStyleBase}
+											rundownAndSegments={rundownAndSegments}
+											rundownPlaylist={playlist}
+											studioMode={studioMode}
+											isLastSegment={isLastSegment}
+											isFollowingOnAirSegment={isFollowingOnAirSegment}
+											ownCurrentPartInstance={ownCurrentPartInstance}
+											ownNextPartInstance={ownNextPartInstance}
+											rundownIdsBefore={rundownIdsBefore}
+											segmentViewModes={segmentViewModes}
+											rundownDefaultSegmentViewMode={rundownDefaultSegmentViewMode}
+											rundownViewLayout={rundownViewLayout}
+											followLiveSegments={followLiveSegments}
+											timeScale={timeScale}
+											onContextMenu={onContextMenu}
+											onSegmentScroll={onSegmentScroll}
+											rundownsToShowstyles={rundownsToShowstyles}
+											onSelectPiece={onSelectPiece}
+											onPieceDoubleClick={onPieceDoubleClick}
+											onHeaderNoteClick={onHeaderNoteClick}
+											onSwitchViewMode={onSwitchViewMode}
+											miniShelfFilter={miniShelfFilter}
+										/>
 									)
 								}
 							})}
@@ -290,36 +280,23 @@ export function RenderSegments({
 	)
 }
 
-interface SegmentComponentProps {
+interface SegmentComponentProps extends SegmentsParseProps {
 	segment: DBSegment
+	globalIndex: number
+	segmentRef: React.MutableRefObject<HTMLDivElement | null>
 	_index: number
 	rundownAndSegments: MatchedSegment
-	rundownPlaylist: DBRundownPlaylist
-	studio: UIStudio
-	studioMode: boolean
-	showStyleBase: UIShowStyleBase
 	isLastSegment: boolean
 	isFollowingOnAirSegment: boolean
 	ownCurrentPartInstance: PartInstance | undefined
 	ownNextPartInstance: PartInstance | undefined
-	segmentIdsBeforeSegment: Set<SegmentId>
 	rundownIdsBefore: RundownId[]
-	segmentViewModes: { [segmentId: string]: SegmentViewMode }
-	rundownDefaultSegmentViewMode: SegmentViewMode | undefined
-	rundownViewLayout: RundownViewLayout | undefined
-	followLiveSegments: boolean
-	timeScale: number
-	onContextMenu: (contextMenuContext: any) => void
-	onSegmentScroll: () => void
-	rundownsToShowstyles: Map<RundownId, ShowStyleBaseId>
-	onSelectPiece: (piece: PieceUi) => void
-	onPieceDoubleClick: (item: PieceUi, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
-	onHeaderNoteClick: (segmentId: SegmentId, level: NoteSeverity) => void
-	onSwitchViewMode: (segmentId: SegmentId, viewMode: SegmentViewMode) => void
-	miniShelfFilter: RundownLayoutFilterBase | undefined
 }
 
 function RenderSegmentComponent({
+	_index,
+	globalIndex,
+	segmentRef,
 	segment,
 	studio,
 	showStyleBase,
@@ -330,7 +307,6 @@ function RenderSegmentComponent({
 	isFollowingOnAirSegment,
 	ownCurrentPartInstance,
 	ownNextPartInstance,
-	segmentIdsBeforeSegment,
 	rundownIdsBefore,
 	segmentViewModes,
 	rundownDefaultSegmentViewMode,
@@ -346,6 +322,14 @@ function RenderSegmentComponent({
 	onSwitchViewMode,
 	miniShelfFilter,
 }: SegmentComponentProps): React.ReactElement {
+	const [{ isDragging }, drag] = useDrag(() => ({
+		type: 'ITEM',
+		item: { id: segment.externalId },
+		collect: (monitor) => ({
+			isDragging: !!monitor.isDragging(),
+		}),
+	}))
+
 	const userSegmentViewMode = segmentViewModes[unprotectString(segment._id)] as SegmentViewMode | undefined
 	const userRundownSegmentViewMode = rundownDefaultSegmentViewMode
 	const displayMode =
@@ -368,7 +352,7 @@ function RenderSegmentComponent({
 		timeScale: timeScale,
 		onContextMenu: onContextMenu,
 		onSegmentScroll: onSegmentScroll,
-		segmentsIdsBefore: segmentIdsBeforeSegment,
+		segmentsIdsBefore: rundownAndSegments.segmentIdsBeforeEachSegment[_index],
 		rundownIdsBefore: rundownIdsBefore,
 		rundownsToShowstyles: rundownsToShowstyles,
 		isLastSegment: isLastSegment,
@@ -386,17 +370,50 @@ function RenderSegmentComponent({
 		showDurationSourceLayers: showDurationSourceLayers,
 	}
 
-	if (segment.orphaned === SegmentOrphanedReason.SCRATCHPAD) {
-		return <SegmentScratchpadContainer {...resolvedSegmentProps} />
-	}
+	return (
+		<div
+			key={unprotectString(segment._id)}
+			ref={(node) => {
+				drag(node)
+				if (node && node !== null) {
+					segmentRef.current = node
+					//segmentRefs.current[segmentIndex] = node
+					// return setSegmentRef(node, segmentIndex)
+				}
+			}}
+			data-key={segment.externalId}
+			style={{ opacity: isDragging ? 0.5 : 1 }}
+		>
+			<ErrorBoundary>
+				<VirtualElement
+					className={ClassNames({
+						'segment-timeline-wrapper--hidden': segment.isHidden,
+						'segment-timeline-wrapper--shelf': segment.showShelf,
+					})}
+					id={SEGMENT_TIMELINE_ELEMENT_ID + segment._id}
+					margin={'100% 0px 100% 0px'}
+					initialShow={globalIndex < window.innerHeight / 260}
+					placeholderHeight={260}
+					placeholderClassName="placeholder-shimmer-element segment-timeline-placeholder"
+					width="auto"
+				>
+					{((): React.ReactNode => {
+						if (segment.orphaned === SegmentOrphanedReason.SCRATCHPAD) {
+							return <SegmentScratchpadContainer {...resolvedSegmentProps} />
+						}
 
-	switch (displayMode) {
-		case SegmentViewMode.Storyboard:
-			return <SegmentStoryboardContainer {...resolvedSegmentProps} />
-		case SegmentViewMode.List:
-			return <SegmentListContainer {...resolvedSegmentProps} />
-		case SegmentViewMode.Timeline:
-		default:
-			return <SegmentTimelineContainer {...resolvedSegmentProps} />
-	}
+						switch (displayMode) {
+							case SegmentViewMode.Storyboard:
+								return <SegmentStoryboardContainer {...resolvedSegmentProps} />
+							case SegmentViewMode.List:
+								return <SegmentListContainer {...resolvedSegmentProps} />
+							case SegmentViewMode.Timeline:
+							default:
+								return <SegmentTimelineContainer {...resolvedSegmentProps} />
+						}
+					})()}
+				</VirtualElement>
+			</ErrorBoundary>
+		</div>
+	)
 }
