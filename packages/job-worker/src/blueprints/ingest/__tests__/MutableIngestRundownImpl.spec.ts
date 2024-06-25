@@ -121,6 +121,15 @@ describe('MutableIngestRundownImpl', () => {
 			changes.changedCacheObjects.push(ingestObjectGenerator.generateSegmentObject(ingestSegment))
 		}
 	}
+	function addChangedRankSegments(
+		changes: MutableIngestRundownChanges,
+		_ingestRundown: IngestRundown,
+		...ingestSegments: IngestSegment[]
+	): void {
+		for (const ingestSegment of ingestSegments) {
+			changes.changedCacheObjects.push(ingestObjectGenerator.generateSegmentObject(ingestSegment))
+		}
+	}
 	function addChangedRundown(changes: MutableIngestRundownChanges): void {
 		changes.computedChanges.regenerateRundown = true
 		changes.changedCacheObjects.push(
@@ -312,6 +321,7 @@ describe('MutableIngestRundownImpl', () => {
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
 			expectedChanges.computedChanges.segmentsToRemove.push('seg1')
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { seg2: 1 }
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[1])
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 
 			// try removing a second time
@@ -414,6 +424,7 @@ describe('MutableIngestRundownImpl', () => {
 			expectedIngestRundown.segments.push({ ...newSegment, rank: 2 })
 
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[1])
 			addChangedSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[2])
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { seg2: 1, seg1: 2 }
 
@@ -559,6 +570,8 @@ describe('MutableIngestRundownImpl', () => {
 			expectedIngestRundown.segments[0].rank = 0
 			expectedIngestRundown.segments[1].rank = 1
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[0])
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[1])
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { seg1: 0, seg0: 1 }
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 
@@ -606,6 +619,8 @@ describe('MutableIngestRundownImpl', () => {
 			expectedIngestRundown.segments[1].rank = 1
 			expectedIngestRundown.segments[2].rank = 2
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[1])
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[2])
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { seg2: 1, seg1: 2 }
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 
@@ -664,6 +679,7 @@ describe('MutableIngestRundownImpl', () => {
 			const expectedIngestRundown = clone(ingestRundown)
 			expectedIngestRundown.segments[1].externalId = 'segX'
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[1])
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { segX: 1 }
 			expectedChanges.computedChanges.segmentExternalIdChanges = { seg1: 'segX' }
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
@@ -696,6 +712,7 @@ describe('MutableIngestRundownImpl', () => {
 			const expectedIngestRundown = clone(ingestRundown)
 			expectedIngestRundown.segments[1].externalId = 'segY'
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[1])
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { segY: 1 }
 			expectedChanges.computedChanges.segmentExternalIdChanges = { seg1: 'segY' }
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
@@ -738,6 +755,8 @@ describe('MutableIngestRundownImpl', () => {
 			expectedIngestRundown.segments[1].externalId = 'seg2'
 			expectedIngestRundown.segments[2].externalId = 'seg1'
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[1])
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[2])
 			expectedChanges.computedChanges.segmentsUpdatedRanks = { seg2: 1, seg1: 2 }
 			expectedChanges.computedChanges.segmentExternalIdChanges = { seg1: 'seg2', seg2: 'seg1' }
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
@@ -790,6 +809,7 @@ describe('MutableIngestRundownImpl', () => {
 			// Check the reported changes
 			const expectedIngestRundown = clone(ingestRundown)
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[1])
 			expectedChanges.computedChanges.segmentExternalIdChanges = { segX: 'seg1' }
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 		})
@@ -820,6 +840,7 @@ describe('MutableIngestRundownImpl', () => {
 			// Check the reported changes
 			const expectedIngestRundown = clone(ingestRundown)
 			const expectedChanges = createNoChangesObject(expectedIngestRundown)
+			addChangedRankSegments(expectedChanges, ingestRundown, expectedIngestRundown.segments[1])
 			expectedChanges.computedChanges.segmentExternalIdChanges = { segY: 'seg1' }
 			expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(expectedChanges)
 		})
