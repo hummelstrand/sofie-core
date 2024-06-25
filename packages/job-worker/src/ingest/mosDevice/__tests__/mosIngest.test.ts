@@ -1265,14 +1265,6 @@ describe('Test recieved mos ingest payloads', () => {
 		}
 	}
 
-	function updateRankOfSegment(segments: DBSegment[], id: SegmentId | string, rank: number) {
-		for (const segment of segments) {
-			if (segment._id === id) {
-				segment._rank = rank
-			}
-		}
-	}
-
 	test('Rename segment during update while on air', async () => {
 		await resetOrphanedRundown()
 
@@ -1314,10 +1306,6 @@ describe('Test recieved mos ingest payloads', () => {
 				partsBefore,
 				partInstancesBefore
 			)
-
-			// Rank's are not guaranteed to be sequential
-			updateRankOfSegment(segmentsBefore, 'SIuQJB7ZJNtRcxtqLGljE_qBGo8_', 3)
-			updateRankOfSegment(segmentsBefore, 'ddtMj3S9nDPeQ3tkyHTCOYrU414_', 4)
 
 			expect(fixSnapshot(segmentsAfter)).toMatchObject(fixSnapshot(segmentsBefore))
 			expect(fixSnapshot(partsAfter)).toMatchObject(fixSnapshot(partsBefore))
