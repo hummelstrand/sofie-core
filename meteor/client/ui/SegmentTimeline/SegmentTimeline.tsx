@@ -8,7 +8,7 @@ import { ContextMenuTrigger } from '@jstarpl/react-contextmenu'
 import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { SegmentUi, PartUi, IOutputLayerUi, PieceUi } from './SegmentTimelineContainer'
 import { TimelineGrid } from './TimelineGrid'
-import { SegmentTimelinePart, SegmentTimelinePartClass } from './Parts/SegmentTimelinePart'
+import { SegmentTimelinePart, getPartDisplayDuration } from './Parts/SegmentTimelinePart'
 import { SegmentTimelineZoomControls } from './SegmentTimelineZoomControls'
 import { SegmentDuration } from '../RundownView/RundownTiming/SegmentDuration'
 import { PartCountdown } from '../RundownView/RundownTiming/PartCountdown'
@@ -57,6 +57,7 @@ interface IProps {
 	id: string
 	key: string
 	segment: SegmentUi
+	partHtmlRefs: React.MutableRefObject<HTMLDivElement | null>[]
 	playlist: DBRundownPlaylist
 	followLiveSegments: boolean
 	studio: UIStudio
@@ -735,6 +736,16 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 			const livePartStartsAt = this.calcLivePartStartsAt(livePart, firstPartInSegment)
 			const livePartDisplayDuration = this.calcLivePartDisplayDuration(livePart)
 
+			// const [{ isDragging }, drag] = useDrag(() => ({
+			// 	type: 'ITEM',
+			// 	item: { id: part.partId },
+			// 	collect: (monitor) => ({
+			// 		isDragging: !!monitor.isDragging(),
+			// 	}),
+			// }))
+			// const partHtmlRef: React.MutableRefObject<HTMLDivElement | null> = React.createRef<HTMLDivElement>()
+			// this.props.partHtmlRefs[index] = partHtmlRef
+
 			return (
 				<React.Fragment key={unprotectString(part.instance._id)}>
 					{emitSmallPartsInFlag && !emitSmallPartsInFlagAtEnd && (
@@ -762,43 +773,58 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 							livePartDisplayDuration={livePartDisplayDuration}
 						/>
 					)}
-					<SegmentTimelinePart
-						segment={this.props.segment}
-						playlist={this.props.playlist}
-						studio={this.props.studio}
-						collapsedOutputs={this.props.collapsedOutputs}
-						scrollLeft={this.props.scrollLeft}
-						timeToPixelRatio={this.props.timeScale}
-						autoNextPart={this.props.autoNextPart}
-						followLiveLine={this.props.followLiveLine}
-						liveLineHistorySize={this.props.liveLineHistorySize}
-						livePosition={this.props.livePosition}
-						onScroll={this.props.onScroll}
-						onCollapseOutputToggle={this.props.onCollapseOutputToggle}
-						onFollowLiveLine={this.props.onFollowLiveLine}
-						onContextMenu={this.props.onContextMenu}
-						onPieceClick={this.props.onItemClick}
-						onPieceDoubleClick={this.props.onItemDoubleClick}
-						onPartTooSmallChanged={this.onPartTooSmallChanged}
-						scrollWidth={this.state.timelineWidth / this.props.timeScale}
-						firstPartInSegment={firstPartInSegment}
-						isLastSegment={this.props.isLastSegment}
-						isLastInSegment={index === this.props.parts.length - 1}
-						isAfterLastValidInSegmentAndItsLive={
-							index === (this.props.lastValidPartIndex || 0) + 1 &&
-							previousPartIsLive &&
-							!!this.props.playlist.nextPartInfo
-						}
-						showDurationSourceLayers={this.props.showDurationSourceLayers}
-						part={part}
-						pieces={this.props.pieces.get(part.partId) ?? []}
-						isBudgetGap={false}
-						isLiveSegment={this.props.isLiveSegment}
-						anyPriorPartWasLive={anyPriorPartWasLive}
-						livePartStartsAt={livePartStartsAt}
-						livePartDisplayDuration={livePartDisplayDuration}
-						budgetDuration={undefined}
-					/>
+					<div
+					// key={unprotectString(part.partId)}
+					// ref={(node) => {
+					// 	drag(node)
+					// 	if (node && node !== null) {
+					// 		partHtmlRef.current = node
+					// 		//segmentRefs.current[segmentIndex] = node
+					// 		// return setSegmentRef(node, segmentIndex)
+					// 	}
+					// }}
+					// data-key={part.partId}
+					// style={{ opacity: isDragging ? 0.5 : 1 }}
+					>
+						<SegmentTimelinePart
+							timingDurations={this.props.timingDurations}
+							segment={this.props.segment}
+							playlist={this.props.playlist}
+							studio={this.props.studio}
+							collapsedOutputs={this.props.collapsedOutputs}
+							scrollLeft={this.props.scrollLeft}
+							timeToPixelRatio={this.props.timeScale}
+							autoNextPart={this.props.autoNextPart}
+							followLiveLine={this.props.followLiveLine}
+							liveLineHistorySize={this.props.liveLineHistorySize}
+							livePosition={this.props.livePosition}
+							onScroll={this.props.onScroll}
+							onCollapseOutputToggle={this.props.onCollapseOutputToggle}
+							onFollowLiveLine={this.props.onFollowLiveLine}
+							onContextMenu={this.props.onContextMenu}
+							onPieceClick={this.props.onItemClick}
+							onPieceDoubleClick={this.props.onItemDoubleClick}
+							onPartTooSmallChanged={this.onPartTooSmallChanged}
+							scrollWidth={this.state.timelineWidth / this.props.timeScale}
+							firstPartInSegment={firstPartInSegment}
+							isLastSegment={this.props.isLastSegment}
+							isLastInSegment={index === this.props.parts.length - 1}
+							isAfterLastValidInSegmentAndItsLive={
+								index === (this.props.lastValidPartIndex || 0) + 1 &&
+								previousPartIsLive &&
+								!!this.props.playlist.nextPartInfo
+							}
+							showDurationSourceLayers={this.props.showDurationSourceLayers}
+							part={part}
+							pieces={this.props.pieces.get(part.partId) ?? []}
+							isBudgetGap={false}
+							isLiveSegment={this.props.isLiveSegment}
+							anyPriorPartWasLive={anyPriorPartWasLive}
+							livePartStartsAt={livePartStartsAt}
+							livePartDisplayDuration={livePartDisplayDuration}
+							budgetDuration={undefined}
+						/>
+					</div>
 					{emitSmallPartsInFlag && emitSmallPartsInFlagAtEnd && (
 						<SegmentTimelineSmallPartFlag
 							parts={emitSmallPartsInFlag}
@@ -843,6 +869,7 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 			<SegmentTimelinePart
 				segment={this.props.segment}
 				playlist={this.props.playlist}
+				timingDurations={this.props.timingDurations}
 				studio={this.props.studio}
 				collapsedOutputs={this.props.collapsedOutputs}
 				scrollLeft={this.props.scrollLeft}
@@ -977,7 +1004,9 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 	}
 
 	private calcLivePartDisplayDuration(livePart: PartUi | undefined | null): number {
-		return livePart ? SegmentTimelinePartClass.getPartDisplayDuration(livePart, this.props.timingDurations) : 0
+		let debug = 0
+		if (livePart) debug = getPartDisplayDuration(livePart, this.props.timingDurations)
+		return debug
 	}
 
 	render(): JSX.Element {

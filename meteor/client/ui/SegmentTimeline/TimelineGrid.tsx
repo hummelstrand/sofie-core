@@ -9,7 +9,7 @@ import { onElementResize } from '../../lib/resizeObserver'
 import { PartUi } from './SegmentTimelineContainer'
 import { getCurrentTime } from '../../../lib/lib'
 import { RundownTiming } from '../RundownView/RundownTiming/RundownTiming'
-import { SegmentTimelinePartClass } from './Parts/SegmentTimelinePart'
+import { getCurrentLiveLinePosition, getLiveLineTimePadding, getPartDisplayDuration } from './Parts/SegmentTimelinePart'
 import { RundownTimingContext } from '../../lib/rundownTiming'
 import { PartId, PartInstanceId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { CalculateTimingsPiece } from '@sofie-automation/corelib/dist/playout/timings'
@@ -323,12 +323,11 @@ export class TimelineGrid extends React.Component<ITimelineGridProps> {
 				const duration =
 					partInstance.instance.timings?.duration ??
 					Math.max(
-						SegmentTimelinePartClass.getPartDisplayDuration(partInstance, durations),
+						getPartDisplayDuration(partInstance, durations),
 						partInstance.instance._id === this.props.currentPartInstanceId && !partInstance.instance.part.autoNext
-							? SegmentTimelinePartClass.getCurrentLiveLinePosition(partInstance, currentTime) +
-									SegmentTimelinePartClass.getLiveLineTimePadding(this.props.timeScale)
+							? getCurrentLiveLinePosition(partInstance, currentTime) + getLiveLineTimePadding(this.props.timeScale)
 							: partInstance.instance._id === this.props.currentPartInstanceId && partInstance.instance.part.autoNext
-							? SegmentTimelinePartClass.getCurrentLiveLinePosition(partInstance, currentTime)
+							? getCurrentLiveLinePosition(partInstance, currentTime)
 							: 0
 					)
 				total += duration
