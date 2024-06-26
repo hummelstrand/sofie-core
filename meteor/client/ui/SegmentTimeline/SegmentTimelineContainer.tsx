@@ -17,7 +17,7 @@ import RundownViewEventBus, {
 	GoToPartEvent,
 	GoToPartInstanceEvent,
 } from '../../../lib/api/triggers/RundownViewEventBus'
-import { SegmentTimelinePartClass } from './Parts/SegmentTimelinePart'
+import { getPartDisplayDuration } from './Parts/SegmentTimelinePart'
 import {
 	PartUi,
 	withResolvedSegment,
@@ -76,6 +76,7 @@ interface IState {
 
 interface IProps extends IResolvedSegmentProps {
 	id: string
+	partHtmlRefs: React.MutableRefObject<HTMLDivElement | null>[]
 }
 
 export function SegmentTimelineContainer(props: Readonly<IProps>): JSX.Element {
@@ -456,7 +457,7 @@ const SegmentTimelineContainerContent = withResolvedSegment(
 
 				if (zoomInToFit) {
 					// display dur in ms
-					const displayDur = SegmentTimelinePartClass.getPartDisplayDuration(part, this.context?.durations) || 1
+					const displayDur = getPartDisplayDuration(part, this.context?.durations) || 1
 					// is the padding is larger than the width of the resulting size?
 					const tooSmallTimeline = timelineWidth < TIMELINE_RIGHT_PADDING * 3
 					// width in px, pad on both sides
@@ -671,6 +672,7 @@ const SegmentTimelineContainerContent = withResolvedSegment(
 						<SegmentTimeline
 							id={this.props.id}
 							segmentRef={this.segmentRef}
+							partHtmlRefs={this.props.partHtmlRefs}
 							key={unprotectString(this.props.segmentui._id)}
 							segment={this.props.segmentui}
 							studio={this.props.studio}

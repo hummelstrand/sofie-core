@@ -1,5 +1,5 @@
 import { PartUi } from '../../SegmentTimeline/SegmentTimelineContainer'
-import { SegmentTimelinePartClass } from '../../SegmentTimeline/Parts/SegmentTimelinePart'
+import { getPartDisplayDuration } from '../../SegmentTimeline/Parts/SegmentTimelinePart'
 import { RundownTimingContext } from '../../../lib/rundownTiming'
 
 export interface TimeEventArgs {
@@ -44,8 +44,5 @@ export namespace RundownTiming {
 }
 
 export function computeSegmentDisplayDuration(timingDurations: RundownTimingContext, parts: PartUi[]): number {
-	return parts.reduce(
-		(memo, part) => memo + SegmentTimelinePartClass.getPartDisplayDuration(part, timingDurations),
-		0
-	)
+	return parts.reduce((memo, part) => memo + getPartDisplayDuration(part, timingDurations), 0)
 }
