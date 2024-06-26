@@ -256,6 +256,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 		const segmentsToRegenerate: IngestSegment[] = []
 		const segmentExternalIdChanges: Record<string, string> = {}
+		const segmentsUpdatedRanks: Record<string, number> = {}
 
 		const usedSegmentIds = new Set<string>()
 		const usedPartIds = new Set<string>()
@@ -289,20 +290,33 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 			changedCacheObjects.push(...segmentInfo.changedCacheObjects)
 			allCacheObjectIds.push(...segmentInfo.allCacheObjectIds)
 
-			if (segmentInfo.segmentHasChanges) {
+			// Check for any changes to the rank
+			const oldRank =
+				(segment.originalExternalId ? this.#originalSegmentRanks.get(segment.originalExternalId) : null) ??
+				this.#originalSegmentRanks.get(segment.externalId)
+			const rankChanged = ingestSegment.rank !== oldRank
+			if (rankChanged) {
+				segmentsUpdatedRanks[segment.externalId] = ingestSegment.rank
+			}
+
+			// Check for any changes to the externalId
+			const externalIdChanged = segmentInfo.originalExternalId !== segment.externalId
+			if (externalIdChanged) {
+				segmentExternalIdChanges[segmentInfo.originalExternalId] = segment.externalId
+			}
+
+			// Update ingest cache if there are changes
+			if (segmentInfo.segmentHasChanges || rankChanged || externalIdChanged) {
 				changedCacheObjects.push(ingestObjectGenerator.generateSegmentObject(ingestSegment))
 			}
 
+			// Regenerate the segment if there are substantial changes
 			if (
 				segmentInfo.segmentHasChanges ||
 				segmentInfo.partOrderHasChanged ||
 				segmentInfo.partIdsWithChanges.length > 0
 			) {
 				segmentsToRegenerate.push(ingestSegment)
-			}
-
-			if (segmentInfo.originalExternalId !== segment.externalId) {
-				segmentExternalIdChanges[segmentInfo.originalExternalId] = segment.externalId
 			}
 		})
 
@@ -311,15 +325,6 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		const removedSegmentIds = Array.from(this.#originalSegmentRanks.keys()).filter(
 			(id) => !newSegmentIds.has(id) && !segmentExternalIdChanges[id]
 		)
-
-		// Find any with updated ranks
-		const segmentsUpdatedRanks: Record<string, number> = {}
-		ingestSegments.forEach((segment) => {
-			const oldRank = this.#originalSegmentRanks.get(segment.externalId)
-			if (oldRank !== segment.rank) {
-				segmentsUpdatedRanks[segment.externalId] = segment.rank
-			}
-		})
 
 		// Check if this rundown object has changed
 		if (this.#hasChangesToRundown) {
