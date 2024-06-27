@@ -33,7 +33,7 @@ import { MeteorCall } from '../../lib/api/methods'
 
 const DEFAULT_SEGMENT_VIEW_MODE = SegmentViewMode.Timeline
 
-const DropTarget = ({ children, onDrop }) => {
+const DropSegmentTarget = ({ children, onDrop }) => {
 	const [{ isOver }, drop] = useDrop({
 		accept: 'ITEM',
 		drop: (item, monitor) => {
@@ -108,9 +108,14 @@ export function RenderSegments({
 		return <React.Fragment />
 	}
 
-	const segmentRefs: React.MutableRefObject<HTMLDivElement | null>[] = []
+	const segmentHtmlRefs: React.MutableRefObject<HTMLDivElement | null>[] = []
+	const segmentPartHtmlRefs: React.MutableRefObject<HTMLDivElement | null>[][] = [[]]
 
-	const handleDrop = (draggedSegmentId: string, monitor: DropTargetMonitor<unknown, unknown>) => {
+	const handleSegmentDrop = (draggedSegmentId: string, monitor: DropTargetMonitor<unknown, unknown>) => {
+		// ToDo - handle multiple rundowns in playlist
+		// matchedSegments.length > 1
+		// ......
+
 		const clientOffset = monitor.getClientOffset()
 
 		// Debugging:
@@ -126,7 +131,7 @@ export function RenderSegments({
 
 		// Find the segment that the dragged item is dropped after
 		const segmentDroppedAfterIndex = matchedSegments[0].segments.findIndex((segment) => {
-			const segmentRef = segmentRefs.find((ref) => ref.current?.getAttribute('data-key') === segment.externalId)
+			const segmentRef = segmentHtmlRefs.find((ref) => ref.current?.getAttribute('data-key') === segment.externalId)
 			if (!segmentRef?.current) return false
 
 			const segmentRect = segmentRef.current.getBoundingClientRect()
@@ -192,7 +197,7 @@ export function RenderSegments({
 	const rundowns = matchedSegments.map((m) => m.rundown._id)
 
 	return (
-		<DropTarget onDrop={handleDrop}>
+		<DropSegmentTarget onDrop={handleSegmentDrop}>
 			<DndProvider backend={HTML5Backend}>
 				{matchedSegments.map((rundownAndSegments, rundownIndex, rundownArray) => {
 					let currentSegmentIndex = -1
@@ -231,16 +236,18 @@ export function RenderSegments({
 									const isLastSegment =
 										rundownIndex === rundownArray.length - 1 && segmentIndex === segmentArray.length - 1
 
-									const segmentRef: React.MutableRefObject<HTMLDivElement | null> = React.createRef<HTMLDivElement>()
-									segmentRefs[segmentIndex] = segmentRef
+									const segmentHtmlRef: React.MutableRefObject<HTMLDivElement | null> =
+										React.createRef<HTMLDivElement>()
+									segmentHtmlRefs[segmentIndex] = segmentHtmlRef
 									globalIndex++
 
 									return (
 										<RenderSegmentComponent
 											key={unprotectString(segment._id)}
+											partHtmlRefs={segmentPartHtmlRefs[segmentIndex]}
 											_index={segmentIndex}
 											globalIndex={globalIndex}
-											segmentRef={segmentRef}
+											segmentHtmlRef={segmentHtmlRef}
 											segment={segment}
 											studio={studio}
 											showStyleBase={showStyleBase}
@@ -276,14 +283,15 @@ export function RenderSegments({
 					)
 				})}
 			</DndProvider>
-		</DropTarget>
+		</DropSegmentTarget>
 	)
 }
 
 interface SegmentComponentProps extends SegmentsParseProps {
 	segment: DBSegment
 	globalIndex: number
-	segmentRef: React.MutableRefObject<HTMLDivElement | null>
+	segmentHtmlRef: React.MutableRefObject<HTMLDivElement | null>
+	partHtmlRefs: React.MutableRefObject<HTMLDivElement | null>[]
 	_index: number
 	rundownAndSegments: MatchedSegment
 	isLastSegment: boolean
@@ -296,7 +304,8 @@ interface SegmentComponentProps extends SegmentsParseProps {
 function RenderSegmentComponent({
 	_index,
 	globalIndex,
-	segmentRef,
+	segmentHtmlRef,
+	partHtmlRefs,
 	segment,
 	studio,
 	showStyleBase,
@@ -339,8 +348,12 @@ function RenderSegmentComponent({
 		? new Set<ISourceLayer['_id']>(rundownViewLayout?.showDurationSourceLayers)
 		: undefined
 
-	const resolvedSegmentProps: IResolvedSegmentProps & { id: string } = {
+	const resolvedSegmentProps: IResolvedSegmentProps & {
+		id: string
+		partHtmlRefs: React.MutableRefObject<HTMLDivElement | null>[]
+	} = {
 		id: SEGMENT_TIMELINE_ELEMENT_ID + segment._id,
+		partHtmlRefs: partHtmlRefs,
 		studio: studio,
 		showStyleBase: showStyleBase,
 		followLiveSegments: followLiveSegments,
@@ -376,7 +389,7 @@ function RenderSegmentComponent({
 			ref={(node) => {
 				drag(node)
 				if (node && node !== null) {
-					segmentRef.current = node
+					segmentHtmlRef.current = node
 					//segmentRefs.current[segmentIndex] = node
 					// return setSegmentRef(node, segmentIndex)
 				}

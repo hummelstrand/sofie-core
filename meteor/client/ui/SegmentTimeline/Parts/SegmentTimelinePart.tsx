@@ -23,7 +23,7 @@ import { InvalidPartCover } from './InvalidPartCover'
 import { ISourceLayer } from '@sofie-automation/blueprints-integration'
 import { UIStudio } from '../../../../lib/api/studios'
 import { CalculateTimingsPiece } from '@sofie-automation/corelib/dist/playout/timings'
-import { getCurrentTime } from '../../../../lib/lib'
+import { getCurrentTime, unprotectString } from '../../../../lib/lib'
 import { RundownUtils } from '../../../lib/rundown'
 
 export const SegmentTimelineLineElementId = 'rundown__segment__line__'
@@ -484,63 +484,114 @@ export const SegmentTimelinePart: React.FC<WithTiming<IProps>> = (props) => {
 			}
 		}
 	}
+	// const [{ isDragging }, drag] = useDrag(() => ({
+	// 	type: 'ITEM',
+	// 	item: { id: props.part.partId },
+	// 	collect: (monitor) => ({
+	// 		isDragging: !!monitor.isDragging(),
+	// 	}),
+	// }))
+	const partHtmlRef: React.MutableRefObject<HTMLDivElement | null> = React.createRef<HTMLDivElement>()
+	//props.partHtmlRefs[index] = partHtmlRef
 
 	if (state.isInsideViewport && (!state.isTooSmallForDisplay || state.isLive || state.isNext || props.isBudgetGap)) {
 		return (
 			<div
-				className={ClassNames(
-					'segment-timeline__part',
-					{
-						live: state.isLive,
-						next: (state.isNext || props.isAfterLastValidInSegmentAndItsLive) && !innerPart.invalid,
-						invalid: innerPart.invalid && !innerPart.gap,
-						floated: innerPart.floated,
-						gap: innerPart.gap,
-						'invert-flash': state.highlight,
-
-						'duration-settling': state.isDurationSettling,
-						'budget-gap': props.isBudgetGap,
-					},
-					props.className
-				)}
-				data-obj-id={props.part.instance._id}
-				id={SegmentTimelinePartElementId + props.part.instance._id}
-				style={{ ...getPartStyle(), ...invalidReasonColorVars }}
-				role="region"
-				aria-roledescription={t('part')}
-				aria-label={props.part.instance.part.title}
+				key={unprotectString(props.part.partId)}
+				ref={(node) => {
+					//drag(node)
+					if (node && node !== null) {
+						partHtmlRef.current = node
+					}
+				}}
+				data-key={props.part.partId}
+				//style={{ opacity: isDragging ? 0.5 : 1 }}
 			>
-				{DEBUG_MODE && (
-					<div className="segment-timeline__debug-info">
-						{props.livePosition} / {props.part.startsAt} /{' '}
+				<div
+					className={ClassNames(
+						'segment-timeline__part',
 						{
-							((props.timingDurations || { partStartsAt: {} }).partStartsAt || {})[
-								getPartInstanceTimingId(props.part.instance)
-							]
-						}
-					</div>
-				)}
-				{renderTimelineOutputGroups(props.part)}
-				{innerPart.invalid ? (
-					<InvalidPartCover className="segment-timeline__part__invalid-cover" part={innerPart} />
-				) : null}
-				{innerPart.floated ? <div className="segment-timeline__part__floated-cover"></div> : null}
+							live: state.isLive,
+							next: (state.isNext || props.isAfterLastValidInSegmentAndItsLive) && !innerPart.invalid,
+							invalid: innerPart.invalid && !innerPart.gap,
+							floated: innerPart.floated,
+							gap: innerPart.gap,
+							'invert-flash': state.highlight,
 
-				{props.playlist.nextTimeOffset &&
-					state.isNext && ( // This is the off-set line
+							'duration-settling': state.isDurationSettling,
+							'budget-gap': props.isBudgetGap,
+						},
+						props.className
+					)}
+					data-obj-id={props.part.instance._id}
+					id={SegmentTimelinePartElementId + props.part.instance._id}
+					style={{ ...getPartStyle(), ...invalidReasonColorVars }}
+					role="region"
+					aria-roledescription={t('part')}
+					aria-label={props.part.instance.part.title}
+				>
+					{DEBUG_MODE && (
+						<div className="segment-timeline__debug-info">
+							{props.livePosition} / {props.part.startsAt} /{' '}
+							{
+								((props.timingDurations || { partStartsAt: {} }).partStartsAt || {})[
+									getPartInstanceTimingId(props.part.instance)
+								]
+							}
+						</div>
+					)}
+					{renderTimelineOutputGroups(props.part)}
+					{innerPart.invalid ? (
+						<InvalidPartCover className="segment-timeline__part__invalid-cover" part={innerPart} />
+					) : null}
+					{innerPart.floated ? <div className="segment-timeline__part__floated-cover"></div> : null}
+
+					{props.playlist.nextTimeOffset &&
+						state.isNext && ( // This is the off-set line
+							<div
+								className={ClassNames('segment-timeline__part__nextline', {
+									// This is the base, basic line
+									'auto-next':
+										!innerPart.invalid &&
+										!innerPart.gap &&
+										((state.isNext && props.autoNextPart) || (!state.isNext && props.part.willProbablyAutoNext)),
+									invalid: innerPart.invalid && !innerPart.gap,
+									floated: innerPart.floated,
+								})}
+								style={{
+									left: Math.round(props.playlist.nextTimeOffset * props.timeToPixelRatio) + 'px',
+								}}
+							>
+								<div
+									className={ClassNames('segment-timeline__part__nextline__label', {
+										'segment-timeline__part__nextline__label--thin':
+											(props.autoNextPart || props.part.willProbablyAutoNext) && !state.isNext,
+									})}
+								>
+									{innerPart.invalid && !innerPart.gap ? null : (
+										<React.Fragment>
+											{props.autoNextPart || props.part.willProbablyAutoNext
+												? t('Auto')
+												: state.isNext
+												? t('Next')
+												: null}
+										</React.Fragment>
+									)}
+								</div>
+							</div>
+						)}
+					{state.isLive && !props.autoNextPart && !innerPart.autoNext && (
+						<div className="segment-timeline__part__future-shade" style={getFutureShadeStyle()}></div>
+					)}
+					{!props.isBudgetGap && (
 						<div
 							className={ClassNames('segment-timeline__part__nextline', {
 								// This is the base, basic line
-								'auto-next':
-									!innerPart.invalid &&
-									!innerPart.gap &&
-									((state.isNext && props.autoNextPart) || (!state.isNext && props.part.willProbablyAutoNext)),
+								'auto-next': (state.isNext && props.autoNextPart) || (!state.isNext && props.part.willProbablyAutoNext),
 								invalid: innerPart.invalid && !innerPart.gap,
 								floated: innerPart.floated,
+								offset: !!props.playlist.nextTimeOffset,
 							})}
-							style={{
-								left: Math.round(props.playlist.nextTimeOffset * props.timeToPixelRatio) + 'px',
-							}}
 						>
 							<div
 								className={ClassNames('segment-timeline__part__nextline__label', {
@@ -550,53 +601,23 @@ export const SegmentTimelinePart: React.FC<WithTiming<IProps>> = (props) => {
 							>
 								{innerPart.invalid && !innerPart.gap ? null : (
 									<React.Fragment>
-										{props.autoNextPart || props.part.willProbablyAutoNext
+										{(state.isNext && props.autoNextPart) || (!state.isNext && props.part.willProbablyAutoNext)
 											? t('Auto')
-											: state.isNext
+											: state.isNext || props.isAfterLastValidInSegmentAndItsLive
 											? t('Next')
 											: null}
 									</React.Fragment>
 								)}
+								{props.isAfterLastValidInSegmentAndItsLive && !props.playlist.loop && <SegmentEnd />}
+								{props.isAfterLastValidInSegmentAndItsLive && props.playlist.loop && <LoopingIcon />}
 							</div>
+							{!props.isPreview && props.part.instance.part.identifier && (
+								<div className="segment-timeline__identifier">{props.part.instance.part.identifier}</div>
+							)}
 						</div>
 					)}
-				{state.isLive && !props.autoNextPart && !innerPart.autoNext && (
-					<div className="segment-timeline__part__future-shade" style={getFutureShadeStyle()}></div>
-				)}
-				{!props.isBudgetGap && (
-					<div
-						className={ClassNames('segment-timeline__part__nextline', {
-							// This is the base, basic line
-							'auto-next': (state.isNext && props.autoNextPart) || (!state.isNext && props.part.willProbablyAutoNext),
-							invalid: innerPart.invalid && !innerPart.gap,
-							floated: innerPart.floated,
-							offset: !!props.playlist.nextTimeOffset,
-						})}
-					>
-						<div
-							className={ClassNames('segment-timeline__part__nextline__label', {
-								'segment-timeline__part__nextline__label--thin':
-									(props.autoNextPart || props.part.willProbablyAutoNext) && !state.isNext,
-							})}
-						>
-							{innerPart.invalid && !innerPart.gap ? null : (
-								<React.Fragment>
-									{(state.isNext && props.autoNextPart) || (!state.isNext && props.part.willProbablyAutoNext)
-										? t('Auto')
-										: state.isNext || props.isAfterLastValidInSegmentAndItsLive
-										? t('Next')
-										: null}
-								</React.Fragment>
-							)}
-							{props.isAfterLastValidInSegmentAndItsLive && !props.playlist.loop && <SegmentEnd />}
-							{props.isAfterLastValidInSegmentAndItsLive && props.playlist.loop && <LoopingIcon />}
-						</div>
-						{!props.isPreview && props.part.instance.part.identifier && (
-							<div className="segment-timeline__identifier">{props.part.instance.part.identifier}</div>
-						)}
-					</div>
-				)}
-				{renderEndOfSegment(t, innerPart, isEndOfShow, isEndOfLoopingShow)}
+					{renderEndOfSegment(t, innerPart, isEndOfShow, isEndOfLoopingShow)}
+				</div>
 			</div>
 		)
 	} else {
