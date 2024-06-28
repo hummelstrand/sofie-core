@@ -35,6 +35,9 @@ export interface IBlueprintSegment<TPrivateData = unknown, TPublicData = unknown
 	/** Contains properties related to the timing of the segment */
 	segmentTiming?: SegmentTimingInfo
 
+	/** If true, the segment is protected/locked from user edits */
+	protectFromUserEdits?: boolean
+
 	/**
 	 * User editing definitions for this segment
 	 */

@@ -27,7 +27,8 @@ export interface IBlueprintRundown<TPrivateData = unknown, TPublicData = unknown
 	 * Allows the Next Break timer in the Rundown Header to time to the end of this rundown when looking for the next break.
 	 */
 	endOfRundownIsShowBreak?: boolean
-
+	/** If true, the segment is protected/locked from user edits */
+	protectFromUserEdits?: boolean
 	/**
 	 * User editing definitions for this rundown
 	 */

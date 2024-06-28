@@ -385,6 +385,7 @@ export class PartAndPieceInstanceActionService {
 			invalidReason: undefined,
 			floated: false,
 			expectedDurationWithPreroll: undefined, // Filled in later
+			protectFromUserEdits: false,
 			userEdits: [],
 		}
 

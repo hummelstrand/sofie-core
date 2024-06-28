@@ -31,6 +31,9 @@ export interface IBlueprintPiece<TPrivateData = unknown, TPublicData = unknown>
 	/** Whether the piece affects the output of the Studio or is describing an invisible state within the Studio */
 	notInVision?: boolean
 
+	/** If true, the segment is protected/locked from user edits */
+	protectFromUserEdits?: boolean
+
 	/**
 	 * User editing definitions for this piece
 	 */

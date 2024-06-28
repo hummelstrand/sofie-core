@@ -95,6 +95,7 @@ export const IBlueprintPieceObjectsSampleKeys = allKeysOfObject<IBlueprintPiece>
 	allowDirectPlay: true,
 	notInVision: true,
 	abSessions: true,
+	protectFromUserEdits: true,
 	userEdits: true,
 })
 
@@ -119,6 +120,7 @@ export const IBlueprintMutatablePartSampleKeys = allKeysOfObject<IBlueprintMutat
 	displayDuration: true,
 	identifier: true,
 	hackListenToMediaObjectUpdates: true,
+	protectFromUserEdits: true,
 	userEdits: true,
 })
 
@@ -238,6 +240,7 @@ export function convertPieceToBlueprints(piece: ReadonlyDeep<PieceInstancePiece>
 		pieceType: piece.pieceType,
 		extendOnHold: piece.extendOnHold,
 		notInVision: piece.notInVision,
+		protectFromUserEdits: piece.protectFromUserEdits,
 		userEdits: translateUserEditsToBlueprint(piece.userEdits),
 	}
 
@@ -280,6 +283,7 @@ export function convertPartToBlueprints(part: ReadonlyDeep<DBPart>): IBlueprintP
 		hackListenToMediaObjectUpdates: clone<HackPartMediaObjectSubscription[] | undefined>(
 			part.hackListenToMediaObjectUpdates
 		),
+		protectFromUserEdits: part.protectFromUserEdits,
 		userEdits: translateUserEditsToBlueprint(part.userEdits),
 	}
 
@@ -348,6 +352,7 @@ export function convertSegmentToBlueprints(segment: ReadonlyDeep<DBSegment>): IB
 		displayAs: segment.displayAs,
 		showShelf: segment.showShelf,
 		segmentTiming: segment.segmentTiming,
+		protectFromUserEdits: segment.protectFromUserEdits,
 		userEdits: translateUserEditsToBlueprint(segment.userEdits),
 	}
 
@@ -373,6 +378,7 @@ export function convertRundownToBlueprints(rundown: ReadonlyDeep<DBRundown>): IB
 		showStyleVariantId: unprotectString(rundown.showStyleVariantId),
 		playlistId: unprotectString(rundown.playlistId),
 		airStatus: rundown.airStatus,
+		protectFromUserEdits: rundown.protectFromUserEdits,
 		userEdits: translateUserEditsToBlueprint(rundown.userEdits),
 	}
 
