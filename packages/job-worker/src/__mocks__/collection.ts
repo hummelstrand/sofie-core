@@ -6,7 +6,10 @@ import { BucketAdLib } from '@sofie-automation/corelib/dist/dataModel/BucketAdLi
 import { CollectionName } from '@sofie-automation/corelib/dist/dataModel/Collections'
 import { ExpectedPackageDB } from '@sofie-automation/corelib/dist/dataModel/ExpectedPackages'
 import { ExpectedPlayoutItem } from '@sofie-automation/corelib/dist/dataModel/ExpectedPlayoutItem'
-import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import {
+	NrcsIngestDataCacheObj,
+	SofieIngestDataCacheObj,
+} from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
 import { PeripheralDevice } from '@sofie-automation/corelib/dist/dataModel/PeripheralDevice'
@@ -283,8 +286,8 @@ export function getMockCollections(): {
 			BucketAdLibPieces: new MockMongoCollection<BucketAdLib>(CollectionName.BucketAdLibPieces),
 			ExpectedMediaItems: new MockMongoCollection(CollectionName.ExpectedMediaItems),
 			ExpectedPlayoutItems: new MockMongoCollection<ExpectedPlayoutItem>(CollectionName.ExpectedPlayoutItems),
-			SofieIngestDataCache: new MockMongoCollection<IngestDataCacheObj>(CollectionName.SofieIngestDataCache),
-			NrcsIngestDataCache: new MockMongoCollection<IngestDataCacheObj>(CollectionName.NrcsIngestDataCache),
+			SofieIngestDataCache: new MockMongoCollection<SofieIngestDataCacheObj>(CollectionName.SofieIngestDataCache),
+			NrcsIngestDataCache: new MockMongoCollection<NrcsIngestDataCacheObj>(CollectionName.NrcsIngestDataCache),
 			Parts: new MockMongoCollection<DBPart>(CollectionName.Parts),
 			PartInstances: new MockMongoCollection<DBPartInstance>(CollectionName.PartInstances),
 			PeripheralDevices: new MockMongoCollection<PeripheralDevice>(CollectionName.PeripheralDevices),
@@ -340,8 +343,8 @@ export interface IMockCollections {
 	BucketAdLibPieces: MockMongoCollection<BucketAdLib>
 	ExpectedMediaItems: MockMongoCollection<ExpectedMediaItem>
 	ExpectedPlayoutItems: MockMongoCollection<ExpectedPlayoutItem>
-	SofieIngestDataCache: MockMongoCollection<IngestDataCacheObj>
-	NrcsIngestDataCache: MockMongoCollection<IngestDataCacheObj>
+	SofieIngestDataCache: MockMongoCollection<SofieIngestDataCacheObj>
+	NrcsIngestDataCache: MockMongoCollection<NrcsIngestDataCacheObj>
 	Parts: MockMongoCollection<DBPart>
 	PartInstances: MockMongoCollection<DBPartInstance>
 	PeripheralDevices: MockMongoCollection<PeripheralDevice>

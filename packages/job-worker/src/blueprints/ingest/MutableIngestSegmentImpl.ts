@@ -9,13 +9,13 @@ import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { MutableIngestPartImpl } from './MutableIngestPartImpl'
 import { RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
-import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { SofieIngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { getSegmentId } from '../../ingest/lib'
 import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 
 export interface MutableIngestSegmentChanges {
 	ingestParts: IngestPart[]
-	changedCacheObjects: IngestDataCacheObj[]
+	changedCacheObjects: SofieIngestDataCacheObj[]
 	allCacheObjectIds: IngestDataCacheObjId[]
 	segmentHasChanges: boolean
 	partIdsWithChanges: string[]
@@ -159,6 +159,11 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		this.#segmentHasChanges = true
 	}
 
+	setprotectedFromNrcsUpdates(protect: boolean): void {
+		console.log('setprotectedFromNrcsUpdates', protect)
+		// ToDo: Implement
+	}
+
 	/**
 	 * Note: This is not exposed to blueprints
 	 */
@@ -199,7 +204,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 
 	intoChangesInfo(generator: RundownIngestDataCacheGenerator): MutableIngestSegmentChanges {
 		const ingestParts: IngestPart[] = []
-		const changedCacheObjects: IngestDataCacheObj[] = []
+		const changedCacheObjects: SofieIngestDataCacheObj[] = []
 		const allCacheObjectIds: IngestDataCacheObjId[] = []
 		const partIdsWithChanges: string[] = []
 
