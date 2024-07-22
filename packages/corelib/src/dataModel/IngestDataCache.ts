@@ -8,7 +8,7 @@ export enum IngestCacheType {
 }
 export type IngestCacheData = IngestRundown | IngestSegment | IngestPart
 
-export interface IngestDataCacheObjBase {
+interface IngestDataCacheObjBase {
 	_id: IngestDataCacheObjId
 	modified: number
 	type: IngestCacheType
