@@ -96,8 +96,8 @@ export interface Rundown {
 	playlistId: RundownPlaylistId
 	/** If the playlistId has ben set manually by a user in Sofie */
 	playlistIdIsSetInSofie?: boolean
-	/** If true, the segment is protected/locked from user edits */
-	protectFromUserEdits?: boolean
+	/** If true, updates from NRCS will be ignored */
+	protectedFromNrcsUpdates?: boolean
 	/**
 	 * User editing definitions for this rundown
 	 */

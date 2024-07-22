@@ -43,11 +43,10 @@ export const SegmentContextMenu = withTranslation()(
 				(part && this.props.playlist && part.instance._id === this.props.playlist.currentPartInfo?.partInstanceId) ||
 				undefined
 
-			const isSegmentEditAble = segment?._id !== this.props.playlist.queuedSegmentId && segment?.protectFromUserEdits
+			const isSegmentEditAble = segment?._id !== this.props.playlist.queuedSegmentId
 
 			const isPartEditAble =
 				isSegmentEditAble &&
-				part?.instance.part.protectFromUserEdits &&
 				part?.instance._id !== this.props.playlist.currentPartInfo?.partInstanceId &&
 				part?.instance._id !== this.props.playlist.nextPartInfo?.partInstanceId &&
 				part?.instance._id !== this.props.playlist.previousPartInfo?.partInstanceId

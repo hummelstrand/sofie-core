@@ -47,8 +47,8 @@ export interface DBSegment {
 	/** Holds notes (warnings / errors) thrown by the blueprints during creation */
 	notes?: Array<SegmentNote>
 
-	/** If true, the segment is protected/locked from user edits */
-	protectFromUserEdits?: boolean
+	/** If true, updates from NRCS will be ignored */
+	protectedFromNrcsUpdates?: boolean
 	/**
 	 * User editing definitions for this segment
 	 */
