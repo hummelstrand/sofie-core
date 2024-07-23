@@ -87,6 +87,9 @@ export interface IBlueprintMutatablePart<TPrivateData = unknown, TPublicData = u
 	/** MediaObjects that when created/updated, should cause the blueprint to be rerun for the Segment of this Part */
 	hackListenToMediaObjectUpdates?: HackPartMediaObjectSubscription[]
 
+	/** If true, updates from NRCS will be ignored */
+	protectedFromNrcsUpdates?: boolean
+
 	/**
 	 * User editing definitions for this part
 	 */

@@ -4,7 +4,7 @@ import { ExpectedMediaItem } from './dataModel/ExpectedMediaItem'
 import { ExpectedPackageDB } from './dataModel/ExpectedPackages'
 import { ExpectedPlayoutItem } from './dataModel/ExpectedPlayoutItem'
 import { RundownPlaylistId } from './dataModel/Ids'
-import { IngestDataCacheObj } from './dataModel/IngestDataCache'
+import { NrcsIngestDataCacheObj } from './dataModel/IngestDataCache'
 import { DBPart } from './dataModel/Part'
 import { DBPartInstance } from './dataModel/PartInstance'
 import { Piece } from './dataModel/Piece'
@@ -21,8 +21,8 @@ export interface CoreRundownPlaylistSnapshot {
 	playlistId: RundownPlaylistId
 	playlist: DBRundownPlaylist
 	rundowns: Array<DBRundown>
-	ingestData: Array<IngestDataCacheObj>
-	sofieIngestData: Array<IngestDataCacheObj> | undefined // Added in 1.51
+	ingestData: Array<NrcsIngestDataCacheObj>
+	sofieIngestData: Array<NrcsIngestDataCacheObj> | undefined // Added in 1.51
 	baselineObjs: Array<RundownBaselineObj>
 	baselineAdlibs: Array<RundownBaselineAdLibItem>
 	segments: Array<DBSegment>

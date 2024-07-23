@@ -73,6 +73,9 @@ export interface Piece extends PieceGeneric, Omit<IBlueprintPieceDB, '_id' | 'co
 	/** This is set when the part is invalid and these pieces should be ignored */
 	invalid: boolean
 
+	/** If true, updates from NRCS will be ignored */
+	protectedFromNrcsUpdates?: boolean
+
 	/**
 	 * User editing definitions for this piece
 	 */

@@ -28,6 +28,9 @@ export interface IBlueprintRundown<TPrivateData = unknown, TPublicData = unknown
 	 */
 	endOfRundownIsShowBreak?: boolean
 
+	/** If true, updates from NRCS will be ignored */
+	protectedFromNrcsUpdates?: boolean
+
 	/**
 	 * User editing definitions for this rundown
 	 */

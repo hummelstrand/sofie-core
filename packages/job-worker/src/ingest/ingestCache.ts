@@ -1,10 +1,10 @@
 import { RundownId, SegmentId, IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import {
-	IngestDataCacheObj,
+	NrcsIngestDataCacheObj,
 	IngestCacheType,
-	IngestDataCacheObjRundown,
-	IngestDataCacheObjSegment,
-	IngestDataCacheObjPart,
+	NrcsIngestDataCacheObjRundown,
+	NrcsIngestDataCacheObjSegment,
+	NrcsIngestDataCacheObjPart,
 } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { protectString, unprotectString } from '@sofie-automation/corelib/dist/protectedString'
 import _ = require('underscore')
@@ -23,14 +23,14 @@ export class RundownIngestDataCache {
 
 	private constructor(
 		private readonly context: JobContext,
-		private readonly collection: ICollection<IngestDataCacheObj>,
+		private readonly collection: ICollection<NrcsIngestDataCacheObj>,
 		private readonly rundownId: RundownId,
-		private documents: IngestDataCacheObj[]
+		private documents: NrcsIngestDataCacheObj[]
 	) {}
 
 	static async create(
 		context: JobContext,
-		collection: ICollection<IngestDataCacheObj>,
+		collection: ICollection<NrcsIngestDataCacheObj>,
 		rundownId: RundownId
 	): Promise<RundownIngestDataCache> {
 		const docs = await collection.findFetch({ rundownId })
@@ -51,7 +51,7 @@ export class RundownIngestDataCache {
 		const span = this.context.startSpan('ingest.ingestCache.loadCachedRundownData')
 
 		const cachedRundown = this.documents.find(
-			(e): e is IngestDataCacheObjRundown => e.type === IngestCacheType.RUNDOWN
+			(e): e is NrcsIngestDataCacheObjRundown => e.type === IngestCacheType.RUNDOWN
 		)
 		if (!cachedRundown) {
 			span?.end()
@@ -63,13 +63,17 @@ export class RundownIngestDataCache {
 			segments: [],
 		}
 
-		const hasSegmentId = (obj: IngestDataCacheObj): obj is IngestDataCacheObjSegment | IngestDataCacheObjPart => {
+		const hasSegmentId = (
+			obj: NrcsIngestDataCacheObj
+		): obj is NrcsIngestDataCacheObjSegment | NrcsIngestDataCacheObjPart => {
 			return !!obj.segmentId
 		}
 
 		const segmentMap = groupByToMap(this.documents.filter(hasSegmentId), 'segmentId')
 		for (const objs of segmentMap.values()) {
-			const segmentEntry = objs.find((e): e is IngestDataCacheObjSegment => e.type === IngestCacheType.SEGMENT)
+			const segmentEntry = objs.find(
+				(e): e is NrcsIngestDataCacheObjSegment => e.type === IngestCacheType.SEGMENT
+			)
 			if (segmentEntry) {
 				const ingestSegment: IngestSegment = {
 					...segmentEntry.data,
@@ -100,7 +104,7 @@ export class RundownIngestDataCache {
 	 */
 	replace(ingestRundown: IngestRundown): void {
 		const generator = new RundownIngestDataCacheGenerator(this.rundownId)
-		const cacheEntries: IngestDataCacheObj[] = generator.generateCacheForRundown(ingestRundown)
+		const cacheEntries: NrcsIngestDataCacheObj[] = generator.generateCacheForRundown(ingestRundown)
 
 		this.documents = diffAndReturnLatestObjects(this.#changedDocumentIds, this.documents, cacheEntries)
 	}
@@ -124,7 +128,7 @@ export class RundownIngestDataCache {
 	removeAllOtherDocuments(documentIdsToKeep: IngestDataCacheObjId[]): void {
 		const documentIdsToKeepSet = new Set<IngestDataCacheObjId>(documentIdsToKeep)
 
-		const newDocuments: IngestDataCacheObj[] = []
+		const newDocuments: NrcsIngestDataCacheObj[] = []
 		for (const document of this.documents) {
 			if (!documentIdsToKeepSet.has(document._id)) {
 				this.#changedDocumentIds.add(document._id)
@@ -141,7 +145,7 @@ export class RundownIngestDataCache {
 	 * This does not diff the documents, it assumes that has already been done prior to calling this method
 	 * @param changedCacheObjects Documents to store in the cache
 	 */
-	replaceDocuments(changedCacheObjects: IngestDataCacheObj[]): void {
+	replaceDocuments(changedCacheObjects: NrcsIngestDataCacheObj[]): void {
 		const newDocumentsMap = normalizeArrayToMap(this.documents, '_id')
 
 		for (const newDocument of changedCacheObjects) {
@@ -162,7 +166,7 @@ export class RundownIngestDataCache {
 
 		const modifiedTime = getCurrentTime()
 
-		const updates: AnyBulkWriteOperation<IngestDataCacheObj>[] = []
+		const updates: AnyBulkWriteOperation<NrcsIngestDataCacheObj>[] = []
 		const removedIds: IngestDataCacheObjId[] = []
 		for (const changedId of this.#changedDocumentIds) {
 			const newDoc = documentsMap.get(changedId)
@@ -211,7 +215,7 @@ export class RundownIngestDataCacheGenerator {
 		return protectString<IngestDataCacheObjId>(unprotectString(this.rundownId))
 	}
 
-	generatePartObject(segmentId: SegmentId, part: IngestPart): IngestDataCacheObjPart {
+	generatePartObject(segmentId: SegmentId, part: IngestPart): NrcsIngestDataCacheObjPart {
 		return {
 			_id: this.getPartObjectId(part.externalId),
 			type: IngestCacheType.PART,
@@ -223,7 +227,7 @@ export class RundownIngestDataCacheGenerator {
 		}
 	}
 
-	generateSegmentObject(ingestSegment: SetOptional<IngestSegment, 'parts'>): IngestDataCacheObjSegment {
+	generateSegmentObject(ingestSegment: SetOptional<IngestSegment, 'parts'>): NrcsIngestDataCacheObjSegment {
 		return {
 			_id: this.getSegmentObjectId(ingestSegment.externalId),
 			type: IngestCacheType.SEGMENT,
@@ -237,7 +241,7 @@ export class RundownIngestDataCacheGenerator {
 		}
 	}
 
-	generateRundownObject(ingestRundown: SetOptional<IngestRundown, 'segments'>): IngestDataCacheObjRundown {
+	generateRundownObject(ingestRundown: SetOptional<IngestRundown, 'segments'>): NrcsIngestDataCacheObjRundown {
 		return {
 			_id: this.getRundownObjectId(),
 			type: IngestCacheType.RUNDOWN,
@@ -250,8 +254,8 @@ export class RundownIngestDataCacheGenerator {
 		}
 	}
 
-	generateCacheForRundown(ingestRundown: IngestRundown): IngestDataCacheObj[] {
-		const cacheEntries: IngestDataCacheObj[] = []
+	generateCacheForRundown(ingestRundown: IngestRundown): NrcsIngestDataCacheObj[] {
+		const cacheEntries: NrcsIngestDataCacheObj[] = []
 
 		const rundown = this.generateRundownObject(ingestRundown)
 		cacheEntries.push(rundown)
@@ -263,8 +267,8 @@ export class RundownIngestDataCacheGenerator {
 		return cacheEntries
 	}
 
-	private generateCacheForSegment(ingestSegment: IngestSegment): IngestDataCacheObj[] {
-		const cacheEntries: Array<IngestDataCacheObjSegment | IngestDataCacheObjPart> = []
+	private generateCacheForSegment(ingestSegment: IngestSegment): NrcsIngestDataCacheObj[] {
+		const cacheEntries: Array<NrcsIngestDataCacheObjSegment | NrcsIngestDataCacheObjPart> = []
 
 		const segment = this.generateSegmentObject(ingestSegment)
 		cacheEntries.push(segment)

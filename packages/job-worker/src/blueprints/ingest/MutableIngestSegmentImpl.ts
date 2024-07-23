@@ -9,13 +9,13 @@ import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { MutableIngestPartImpl } from './MutableIngestPartImpl'
 import { RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
-import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { SofieIngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { getSegmentId } from '../../ingest/lib'
 import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 
 export interface MutableIngestSegmentChanges {
 	ingestParts: IngestPart[]
-	changedCacheObjects: IngestDataCacheObj[]
+	changedCacheObjects: SofieIngestDataCacheObj[]
 	allCacheObjectIds: IngestDataCacheObjId[]
 	segmentHasChanges: boolean
 	partIdsWithChanges: string[]
@@ -65,6 +65,10 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 
 	get payload(): ReadonlyDeep<TSegmentPayload> | undefined {
 		return this.#ingestSegment.payload
+	}
+
+	get userEditStates(): Record<string, boolean> | undefined {
+		return this.#ingestSegment.userEditStates
 	}
 
 	getPart(partExternalId: string): MutableIngestPart<TPartPayload> | undefined {
@@ -159,6 +163,19 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		this.#segmentHasChanges = true
 	}
 
+	#setUserEditState(key: string, protect: boolean): boolean {
+		console.log('setProtectFromNrcsUpdates', protect)
+		if (this.#ingestSegment.userEditStates !== undefined) {
+			this.#ingestSegment.userEditStates[key] = protect
+			this.#segmentHasChanges = true
+		}
+		return true
+	}
+
+	setUserEditState(key: string, protect: boolean): boolean {
+		return this.#setUserEditState(key, protect)
+	}
+
 	/**
 	 * Note: This is not exposed to blueprints
 	 */
@@ -197,9 +214,18 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		}
 	}
 
+	/**
+	 * setUserEditState
+	 */
+	setPartUserEditState(segmentExternalId: string, key: string, protect: boolean): void {
+		const part = this.#parts.find((s) => s.externalId === segmentExternalId)
+		if (!part) throw new Error(`Segment "${segmentExternalId}" not found`)
+		part.setUserEditState(key, protect)
+	}
+
 	intoChangesInfo(generator: RundownIngestDataCacheGenerator): MutableIngestSegmentChanges {
 		const ingestParts: IngestPart[] = []
-		const changedCacheObjects: IngestDataCacheObj[] = []
+		const changedCacheObjects: SofieIngestDataCacheObj[] = []
 		const allCacheObjectIds: IngestDataCacheObjId[] = []
 		const partIdsWithChanges: string[] = []
 
@@ -211,6 +237,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 				rank,
 				name: part.name,
 				payload: part.payload,
+				userEditStates: {},
 			}
 
 			allCacheObjectIds.push(generator.getPartObjectId(ingestPart.externalId))
