@@ -49,6 +49,19 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 		}
 	}
 
+	#setUserEditState(key: string, protect: boolean): boolean {
+		console.log('setProtectFromNrcsUpdates', protect)
+		if (this.#ingestPart.userEditStates !== undefined) {
+			this.#ingestPart.userEditStates[key] = protect
+			this.#hasChanges = true
+		}
+		return true
+	}
+
+	setUserEditState(key: string, protect: boolean): boolean {
+		return this.#setUserEditState(key, protect)
+	}
+
 	/**
 	 * Check if the part has changes and clear any changes flags
 	 * Note: this is not visible to blueprints

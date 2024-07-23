@@ -253,6 +253,11 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	 * @param value the new value
 	 */
 	setPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
+
+	/**
+	 * setUserEditState
+	 */
+	setSegmentUserEditState(segmentExternalId: string, key: string, protect: boolean): void
 }
 
 export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = unknown> {
@@ -333,6 +338,11 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	 * @param value the new value
 	 */
 	setPayloadProperty<TKey extends keyof TSegmentPayload>(key: TKey, value: TSegmentPayload[TKey]): void
+
+	/**
+	 * setUserEditState
+	 */
+	setPartUserEditState(segmentExternalId: string, key: string, protect: boolean): void
 }
 
 export interface MutableIngestPart<TPartPayload = unknown> {

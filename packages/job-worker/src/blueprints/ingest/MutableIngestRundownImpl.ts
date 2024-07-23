@@ -248,6 +248,15 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		// this.#segmentOrderChanged = true
 	}
 
+	/**
+	 * setUserEditState
+	 */
+	setSegmentUserEditState(segmentExternalId: string, key: string, protect: boolean): void {
+		const segment = this.#segments.find((s) => s.externalId === segmentExternalId)
+		if (!segment) throw new Error(`Segment "${segmentExternalId}" not found`)
+		segment.setUserEditState(key, protect)
+	}
+
 	/** Note: This is NOT exposed to blueprints */
 	intoIngestRundown(ingestObjectGenerator: RundownIngestDataCacheGenerator): MutableIngestRundownChanges {
 		const ingestSegments: IngestSegment[] = []
@@ -282,6 +291,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 				name: segment.name,
 				payload: segment.payload,
 				parts: segmentInfo.ingestParts,
+				userEditStates: { ...segment.userEditStates },
 			}
 
 			ingestSegments.push(ingestSegment)

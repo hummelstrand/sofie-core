@@ -67,6 +67,10 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		return this.#ingestSegment.payload
 	}
 
+	get userEditStates(): Record<string, boolean> | undefined {
+		return this.#ingestSegment.userEditStates
+	}
+
 	getPart(partExternalId: string): MutableIngestPart<TPartPayload> | undefined {
 		return this.#parts.find((part) => part.externalId === partExternalId)
 	}
@@ -159,9 +163,17 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		this.#segmentHasChanges = true
 	}
 
-	setprotectedFromNrcsUpdates(protect: boolean): void {
-		console.log('setprotectedFromNrcsUpdates', protect)
-		// ToDo: Implement
+	#setUserEditState(key: string, protect: boolean): boolean {
+		console.log('setProtectFromNrcsUpdates', protect)
+		if (this.#ingestSegment.userEditStates !== undefined) {
+			this.#ingestSegment.userEditStates[key] = protect
+			this.#segmentHasChanges = true
+		}
+		return true
+	}
+
+	setUserEditState(key: string, protect: boolean): boolean {
+		return this.#setUserEditState(key, protect)
 	}
 
 	/**
@@ -202,6 +214,15 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		}
 	}
 
+	/**
+	 * setUserEditState
+	 */
+	setPartUserEditState(segmentExternalId: string, key: string, protect: boolean): void {
+		const part = this.#parts.find((s) => s.externalId === segmentExternalId)
+		if (!part) throw new Error(`Segment "${segmentExternalId}" not found`)
+		part.setUserEditState(key, protect)
+	}
+
 	intoChangesInfo(generator: RundownIngestDataCacheGenerator): MutableIngestSegmentChanges {
 		const ingestParts: IngestPart[] = []
 		const changedCacheObjects: SofieIngestDataCacheObj[] = []
@@ -216,6 +237,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 				rank,
 				name: part.name,
 				payload: part.payload,
+				userEditStates: {},
 			}
 
 			allCacheObjectIds.push(generator.getPartObjectId(ingestPart.externalId))

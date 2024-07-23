@@ -278,6 +278,7 @@ async function updateSofieIngestRundown(
 						type: nrcsIngestRundown.type,
 						segments: [],
 						payload: undefined,
+						userEditStates: {},
 					} satisfies Complete<IngestRundown>,
 					false
 			  )
