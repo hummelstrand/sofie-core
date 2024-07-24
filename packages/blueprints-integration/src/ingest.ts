@@ -264,7 +264,7 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	/**
 	 * getUserEditState
 	 */
-	getSegmentUserEditState(segmentExternalId: string, key: string, protect: boolean): boolean
+	getSegmentUserEditState(segmentExternalId: string, key: string): boolean
 
 	/**
 	 * setUserEditState
@@ -354,7 +354,7 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	/**
 	 * getUserEditState
 	 */
-	getPartUserEditState(segmentExternalId: string, key: string, protect: boolean): boolean
+	getPartUserEditState(partExternalId: string, key: string): boolean
 	/**
 	 * setUserEditState
 	 */
