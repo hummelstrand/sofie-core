@@ -35,8 +35,11 @@ export interface IBlueprintSegment<TPrivateData = unknown, TPublicData = unknown
 	/** Contains properties related to the timing of the segment */
 	segmentTiming?: SegmentTimingInfo
 
-	/** If true, updates from NRCS will be ignored */
-	protectedFromNrcsUpdates?: boolean
+	/** States for UserEdits, could be lock from NRCS updates,
+	 * lock from user changes,
+	 * or removedByUser
+	 * */
+	userEditStates?: Record<string, boolean>
 
 	/**
 	 * User editing definitions for this segment

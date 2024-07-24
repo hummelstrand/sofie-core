@@ -31,8 +31,11 @@ export interface IBlueprintPiece<TPrivateData = unknown, TPublicData = unknown>
 	/** Whether the piece affects the output of the Studio or is describing an invisible state within the Studio */
 	notInVision?: boolean
 
-	/** If true, updates from NRCS will be ignored */
-	protectedFromNrcsUpdates?: boolean
+	/** States for UserEdits, could be lock from NRCS updates,
+	 * lock from user changes,
+	 * or removedByUser
+	 * */
+	userEditStates?: Record<string, boolean>
 
 	/**
 	 * User editing definitions for this piece

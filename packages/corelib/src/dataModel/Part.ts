@@ -33,8 +33,11 @@ export interface DBPart extends Omit<IBlueprintPart, 'userEdits'> {
 	/** A modified expectedDuration with the planned preroll and other timings factored in */
 	expectedDurationWithPreroll: number | undefined
 
-	/** If true, updates from NRCS will be ignored */
-	protectedFromNrcsUpdates?: boolean
+	/** States for UserEdits, could be lock from NRCS updates,
+	 * lock from user changes,
+	 * or removedByUser
+	 * */
+	userEditStates?: Record<string, boolean>
 
 	/**
 	 * User editing definitions for this part
