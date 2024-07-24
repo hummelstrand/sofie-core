@@ -16,6 +16,7 @@ export function RenderUserEditOperations(
 	rundownId: RundownId,
 	targetName: string,
 	userEdits: CoreUserEditingDefinition[] | undefined,
+	userEditStates: Record<string, boolean> | undefined,
 	operationTarget: UserOperationTarget
 ): React.JSX.Element {
 	const t = i18nTranslator
@@ -37,6 +38,12 @@ export function RenderUserEditOperations(
 									)
 								}}
 							>
+								{
+									// ToDo: use CSS to Style state instead of asterix
+									userEditStates && userEditStates[userEdit.id] ? (
+										<span className="action-protected">{userEditStates[userEdit.id].valueOf() ? '*' : ''}</span>
+									) : null
+								}
 								<span>{translateMessage(userEdit.label, i18nTranslator)}</span>
 							</MenuItem>
 						)
