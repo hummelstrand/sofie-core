@@ -358,7 +358,7 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	/**
 	 * setUserEditState
 	 */
-	setPartUserEditState(segmentExternalId: string, key: string, protect: boolean): void
+	setPartUserEditState(partExternalId: string, key: string, protect: boolean): void
 }
 
 export interface MutableIngestPart<TPartPayload = unknown> {
