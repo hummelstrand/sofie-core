@@ -67,10 +67,6 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		return this.ingestRundown.payload
 	}
 
-	get userEditStates(): Record<string, boolean> | undefined {
-		return this.ingestRundown.userEditStates
-	}
-
 	setName(name: string): void {
 		if (this.ingestRundown.name !== name) {
 			this.ingestRundown.name = name
@@ -252,6 +248,14 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		// this.#segmentOrderChanged = true
 	}
 
+	/**
+	 * getUserEditState
+	 */
+	getSegmentUserEditState(segmentExternalId: string, key: string): boolean {
+		const segment = this.#segments.find((s) => s.externalId === segmentExternalId)
+		if (!segment) throw new Error(`Segment "${segmentExternalId}" not found`)
+		return segment.userEditStates?.[key] ?? false
+	}
 	/**
 	 * setUserEditState
 	 */

@@ -157,11 +157,6 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	/** Array of segments in this rundown */
 	readonly segments: ReadonlyArray<MutableIngestSegment<TSegmentPayload, TPartPayload>>
 
-	/** States for UserEdits, could be lock from NRCS updates,
-	 * lock from user changes, or removed
-	 */
-	readonly userEditStates: Record<string, boolean> | undefined
-
 	/**
 	 * Search for a Part through the whole IngestRundown
 	 * @param partExternalId externalId of the Part
@@ -267,6 +262,11 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	setPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
 
 	/**
+	 * getUserEditState
+	 */
+	getSegmentUserEditState(segmentExternalId: string, key: string, protect: boolean): void
+
+	/**
 	 * setUserEditState
 	 */
 	setSegmentUserEditState(segmentExternalId: string, key: string, protect: boolean): void
@@ -356,6 +356,10 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	 */
 	setPayloadProperty<TKey extends keyof TSegmentPayload>(key: TKey, value: TSegmentPayload[TKey]): void
 
+	/**
+	 * getUserEditState
+	 */
+	getPartUserEditState(segmentExternalId: string, key: string, protect: boolean): boolean
 	/**
 	 * setUserEditState
 	 */
