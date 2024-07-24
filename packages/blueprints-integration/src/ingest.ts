@@ -157,6 +157,11 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	/** Array of segments in this rundown */
 	readonly segments: ReadonlyArray<MutableIngestSegment<TSegmentPayload, TPartPayload>>
 
+	/** States for UserEdits, could be lock from NRCS updates,
+	 * lock from user changes, or removed
+	 */
+	readonly userEditStates: Record<string, boolean> | undefined
+
 	/**
 	 * Search for a Part through the whole IngestRundown
 	 * @param partExternalId externalId of the Part
@@ -282,6 +287,11 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	/** Array of parts in this segment */
 	readonly parts: ReadonlyArray<MutableIngestPart<TPartPayload>>
 
+	/** States for UserEdits, could be lock from NRCS updates,
+	 * lock from user changes, or removed
+	 */
+	readonly userEditStates: Record<string, boolean> | undefined
+
 	/**
 	 * Get a Part from the Segment
 	 * @param partExternalId externalId of the Part
@@ -360,6 +370,11 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 
 	/** Payload of the part. For use by other blueprints methods */
 	readonly payload: ReadonlyDeep<TPartPayload> | undefined
+
+	/** States for UserEdits, could be lock from NRCS updates,
+	 * lock from user changes, or removed
+	 */
+	readonly userEditStates: Record<string, boolean> | undefined
 
 	/**
 	 * Set the name of the Part
