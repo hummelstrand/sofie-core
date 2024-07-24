@@ -54,7 +54,6 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 	}
 
 	#setUserEditState(key: string, protect: boolean): boolean {
-		console.log('setProtectFromNrcsUpdates', protect)
 		if (this.#ingestPart.userEditStates !== undefined) {
 			this.#ingestPart.userEditStates[key] = protect
 			this.#hasChanges = true

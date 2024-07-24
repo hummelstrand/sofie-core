@@ -215,11 +215,21 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	}
 
 	/**
+	 * getUserEditState
+	 *
+	 */
+	getPartUserEditState(partExternalId: string, key: string): boolean {
+		const part = this.#parts.find((s) => s.externalId === partExternalId)
+		if (!part) throw new Error(`Segment "${partExternalId}" not found`)
+		return part.userEditStates?.[key] ?? false
+	}
+
+	/**
 	 * setUserEditState
 	 */
-	setPartUserEditState(segmentExternalId: string, key: string, protect: boolean): void {
-		const part = this.#parts.find((s) => s.externalId === segmentExternalId)
-		if (!part) throw new Error(`Segment "${segmentExternalId}" not found`)
+	setPartUserEditState(partExternalId: string, key: string, protect: boolean): void {
+		const part = this.#parts.find((s) => s.externalId === partExternalId)
+		if (!part) throw new Error(`Segment "${partExternalId}" not found`)
 		part.setUserEditState(key, protect)
 	}
 
