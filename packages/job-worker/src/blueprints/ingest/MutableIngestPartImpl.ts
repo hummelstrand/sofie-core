@@ -24,6 +24,10 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 		return this.#ingestPart.payload
 	}
 
+	get userEditStates(): Record<string, boolean> | undefined {
+		return this.#ingestPart.userEditStates
+	}
+
 	setName(name: string): void {
 		if (this.#ingestPart.name !== name) {
 			this.#ingestPart.name = name

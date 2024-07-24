@@ -67,6 +67,10 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		return this.ingestRundown.payload
 	}
 
+	get userEditStates(): Record<string, boolean> | undefined {
+		return this.ingestRundown.userEditStates
+	}
+
 	setName(name: string): void {
 		if (this.ingestRundown.name !== name) {
 			this.ingestRundown.name = name
