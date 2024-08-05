@@ -41,7 +41,7 @@ export function RenderUserEditOperations(
 								{
 									// ToDo: use CSS to Style state instead of asterix
 									userEditStates && userEditStates[userEdit.id] ? (
-										<span className="action-protected">{userEditStates[userEdit.id].valueOf() ? '*' : ''}</span>
+										<span className="action-protected">{userEditStates[userEdit.id].valueOf() ? '• ' : ''}</span>
 									) : null
 								}
 								<span>{translateMessage(userEdit.label, i18nTranslator)}</span>
