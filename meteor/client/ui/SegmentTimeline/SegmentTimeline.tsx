@@ -1108,20 +1108,12 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 						{this.props.segment.userEditStates &&
 							Object.keys(this.props.segment.userEditStates).map((key) =>
 								this.props.segment.userEditStates?.[key] ? (
-									<div key={key}>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											viewBox="0 0 16 16"
-											fill="none"
-											stroke="currentColor"
-											strokeWidth="1.5"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-										>
-											<rect x="3" y="7" width="10" height="7" rx="1" ry="1" />
-											<path d="M5 7V5a3 3 0 0 1 6 0v2" />
-										</svg>
-									</div>
+									<div
+										key={key}
+										dangerouslySetInnerHTML={{
+											__html: this.props.segment.userEdits?.filter((i) => i.id === key)[0]?.svgIcon ?? '',
+										}}
+									></div>
 								) : null
 							)}
 					</div>
