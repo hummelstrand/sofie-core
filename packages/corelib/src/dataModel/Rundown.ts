@@ -116,6 +116,7 @@ export interface CoreUserEditingDefinitionAction {
 	type: UserEditingType.ACTION
 	id: string
 	label: ITranslatableMessage
+	svgIcon?: string
 }
 
 export interface CoreUserEditingDefinitionForm {

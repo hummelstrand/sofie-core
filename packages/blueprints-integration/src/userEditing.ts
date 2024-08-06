@@ -8,6 +8,7 @@ export interface UserEditingDefinitionAction {
 	type: UserEditingType.ACTION
 	id: string
 	label: ITranslatableMessage
+	svgIcon?: string
 }
 
 export interface UserEditingDefinitionForm {

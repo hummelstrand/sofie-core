@@ -515,6 +515,7 @@ function translateUserEditsToBlueprint(
 						type: UserEditingType.ACTION,
 						id: userEdit.id,
 						label: omit(userEdit.label, 'namespaces'),
+						svgIcon: userEdit.svgIcon,
 					} satisfies Complete<UserEditingDefinitionAction>
 				case UserEditingType.FORM:
 					return {
@@ -546,6 +547,7 @@ export function translateUserEditsFromBlueprint(
 						type: UserEditingType.ACTION,
 						id: userEdit.id,
 						label: wrapTranslatableMessageFromBlueprints(userEdit.label, blueprintIds),
+						svgIcon: userEdit.svgIcon,
 					} satisfies Complete<CoreUserEditingDefinitionAction>
 				case UserEditingType.FORM:
 					return {
