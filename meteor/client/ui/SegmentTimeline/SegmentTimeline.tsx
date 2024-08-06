@@ -1109,6 +1109,7 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 							Object.keys(this.props.segment.userEditStates).map((key) =>
 								this.props.segment.userEditStates?.[key] ? (
 									<div
+										className="segment-timeline__title__user-edit-state"
 										key={key}
 										dangerouslySetInnerHTML={{
 											__html: this.props.segment.userEdits?.filter((i) => i.id === key)[0]?.svgIcon ?? '',
