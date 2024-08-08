@@ -225,10 +225,7 @@ function applyChangesForSingleSegment<TRundownPayload, TSegmentPayload, TPartPay
 	switch (change) {
 		case NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated: {
 			if (!nrcsSegment) throw new Error(`Segment ${segmentId} not found in nrcs rundown`)
-			//@ts-expect-error this is not correctly defined in the types
-			if (!nrcsSegment.dontUpdate) {
-				segmentsToInsert.push(nrcsSegment)
-			}
+			segmentsToInsert.push(nrcsSegment)
 
 			break
 		}
