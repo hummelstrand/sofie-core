@@ -27,7 +27,7 @@ export function RenderUserEditOperations(
 			{userEdits.map((userEdit, i) => {
 				switch (userEdit.type) {
 					case UserEditingType.ACTION:
-						return (
+						return translateMessage(userEdit.label, i18nTranslator) !== '' ? (
 							<MenuItem
 								key={`${userEdit.id}_${i}`}
 								onClick={(e) => {
@@ -46,7 +46,7 @@ export function RenderUserEditOperations(
 								}
 								<span>{translateMessage(userEdit.label, i18nTranslator)}</span>
 							</MenuItem>
-						)
+						) : null
 					case UserEditingType.FORM:
 						return (
 							<MenuItem
