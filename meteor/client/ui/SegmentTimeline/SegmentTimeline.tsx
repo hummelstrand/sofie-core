@@ -57,7 +57,6 @@ interface IProps {
 	id: string
 	key: string
 	segment: SegmentUi
-	partHtmlRefs: React.MutableRefObject<HTMLDivElement | null>[]
 	playlist: DBRundownPlaylist
 	followLiveSegments: boolean
 	studio: UIStudio

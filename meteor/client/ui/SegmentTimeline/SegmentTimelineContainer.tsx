@@ -53,28 +53,6 @@ Meteor.startup(() => {
 		parseInt(localStorage.getItem('EXP_timeline_min_time_scale')!) ||
 		MAGIC_TIME_SCALE_FACTOR * Settings.defaultTimeScale
 })
-
-// const DropPartTarget = ({ children, onDrop }) => {
-// 	const [{ isOver }, drop] = useDrop({
-// 		accept: 'ITEM',
-// 		drop: (item, monitor) => {
-// 			const didDrop = monitor.didDrop()
-// 			if (!didDrop) {
-// 				onDrop(item.id, monitor)
-// 			}
-// 		},
-// 		collect: (monitor) => ({
-// 			isOver: !!monitor.isOver(),
-// 		}),
-// 	})
-
-// 	return (
-// 		<div ref={drop} style={{ backgroundColor: isOver ? 'grey' : 'transparent' }}>
-// 			{children}
-// 		</div>
-// 	)
-// }
-
 interface IState {
 	scrollLeft: number
 	collapsedOutputs: {
@@ -97,7 +75,6 @@ interface IState {
 
 interface IProps extends IResolvedSegmentProps {
 	id: string
-	partHtmlRefs: React.MutableRefObject<HTMLDivElement | null>[]
 }
 
 export function SegmentTimelineContainer(props: Readonly<IProps>): JSX.Element {
@@ -163,94 +140,7 @@ export function SegmentTimelineContainer(props: Readonly<IProps>): JSX.Element {
 	// past infinites subscription
 	useSubscription(CorelibPubSub.piecesInfiniteStartingBefore, props.rundownId, sortedSegmentIds, sortedRundownIds)
 
-	// const handlePartDrop = (draggedPartId: string, monitor: DropTargetMonitor<unknown, unknown>) => {
-	// 	// ToDo - handle multiple rundowns in playlist
-	// 	// matchedSegments.length > 1
-	// 	// ......
-
-	// 	const clientOffset = monitor.getClientOffset()
-
-	// 	// // Debugging:
-	// 	// const draggedSegmentName =
-	// 	// 	matchedSegments[0].segments[
-	// 	// 		matchedSegments[0].segments.findIndex((segment) => segment.externalId === draggedPartId)
-	// 	// 	].name
-
-	// 	// // Debugging:
-	// 	// const draggedSegmentIndex = matchedSegments[0].segments.findIndex(
-	// 	// 	(segment) => segment.externalId === draggedPartId
-	// 	// )
-
-	// 	// Find the segment that the dragged item is dropped after
-	// 	// const segmentDroppedAfterIndex = matchedSegments[0].segments.findIndex((segment) => {
-	// 	// 	const segmentRef = segmentRefs.find((ref) => ref.current?.getAttribute('data-key') === segment.externalId)
-	// 	// 	if (!segmentRef?.current) return false
-
-	// 	// 	const segmentRect = segmentRef.current.getBoundingClientRect()
-	// 	// 	if (!clientOffset || !segmentRect) {
-	// 	// 		return false
-	// 	// 	}
-	// 	// 	return (
-	// 	// 		clientOffset.y >= segmentRect.top &&
-	// 	// 		clientOffset.y < segmentRect.bottom &&
-	// 	// 		clientOffset.x >= segmentRect.left &&
-	// 	// 		clientOffset.x < segmentRect.right
-	// 	// 	)
-	// 	// })
-
-	// 	// if (segmentDroppedAfterIndex === -1) return
-
-	// 	// const segmentDroppedAfterId = matchedSegments[0].segments[segmentDroppedAfterIndex].externalId
-
-	// 	// Debugging:
-	// 	// const segmentDroppedAfterName = matchedSegments[0].segments[segmentDroppedAfterIndex].name
-	// 	// doModalDialog({
-	// 	// 	title: t('Reorder Segments'),
-	// 	// 	message: t(
-	// 	// 		`Index: ${draggedSegmentIndex} - ${draggedSegmentName} ${
-	// 	// 			draggedPartId.split(';')[1]
-	// 	// 		} is moved to after index: ${segmentDroppedAfterIndex} - ${segmentDroppedAfterName} ${
-	// 	// 			segmentDroppedAfterId.split(';')[1]
-	// 	// 		}`,
-	// 	// 		//`Are you sure you want to move this segment to this position? This will affect the order of the segments in the playlist.`,
-	// 	// 		{
-	// 	// 			draggedSegmentId: draggedPartId,
-	// 	// 		}
-	// 	// 	),
-	// 	// 	yes: t('Reorder Segments'),
-	// 	// 	no: t('Cancel'),
-	// 	// 	actions: [],
-	// 	// 	warning: true,
-	// 	// 	onAccept: (e) => {
-	// 	// 		doUserAction(t, e, UserAction.EXECUTE_USER_OPERATION, (e, ts) =>
-	// 	// 			MeteorCall.userAction.executeUserChangeOperation(
-	// 	// 				e,
-	// 	// 				ts,
-	// 	// 				matchedSegments[0].rundown._id,
-	// 	// 				{
-	// 	// 					segmentExternalId: draggedPartId,
-	// 	// 					partExternalId: undefined,
-	// 	// 					pieceExternalId: undefined,
-	// 	// 				},
-	// 	// 				{
-	// 	// 					id: '__sofie-move-segment',
-	// 	// 					payload: {
-	// 	// 						moveId: draggedPartId,
-	// 	// 						afterId: segmentDroppedAfterId,
-	// 	// 					},
-	// 	// 				}
-	// 	// 			)
-	// 	// 		)
-	// 	// 	},
-	// 	// })
-	// }
-	return (
-		//<DropPartTarget onDrop={handlePartDrop}>
-		//<DndProvider backend={HTML5Backend}>
-		<SegmentTimelineContainerContent {...props} />
-		//</DndProvider>
-		//</DropPartTarget>
-	)
+	return <SegmentTimelineContainerContent {...props} />
 }
 
 const SegmentTimelineContainerContent = withResolvedSegment(
@@ -780,7 +670,6 @@ const SegmentTimelineContainerContent = withResolvedSegment(
 						<SegmentTimeline
 							id={this.props.id}
 							segmentRef={this.segmentRef}
-							partHtmlRefs={this.props.partHtmlRefs}
 							key={unprotectString(this.props.segmentui._id)}
 							segment={this.props.segmentui}
 							studio={this.props.studio}
