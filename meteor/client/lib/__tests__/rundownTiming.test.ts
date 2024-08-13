@@ -5,9 +5,8 @@ import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { DBRundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { literal, protectString } from '../../../lib/lib'
 import { RundownTimingCalculator, RundownTimingContext } from '../rundownTiming'
-import { IBlueprintPieceType, PlaylistTimingType } from '@sofie-automation/blueprints-integration'
+import { PlaylistTimingType } from '@sofie-automation/blueprints-integration'
 import { PartId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { CalculateTimingsPiece } from '@sofie-automation/corelib/dist/playout/timings'
 
 const DEFAULT_DURATION = 0
 const DEFAULT_NONZERO_DURATION = 4000
@@ -51,7 +50,7 @@ function makeMockPart(
 		_rank: rank,
 		rundownId: protectString(rundownId),
 		...durations,
-		expectedDurationWithPreroll: durations.expectedDuration,
+		expectedDurationWithTransition: durations.expectedDuration,
 	})
 }
 
@@ -87,12 +86,15 @@ function makeMockRundown(id: string, playlist: DBRundownPlaylist) {
 		studioId: protectString('studio0'),
 		showStyleBaseId: protectString(''),
 		showStyleVariantId: protectString('variant0'),
-		peripheralDeviceId: protectString(''),
 		created: 0,
 		modified: 0,
 		importVersions: {} as any,
 		name: 'test',
-		externalNRCSName: 'mockNRCS',
+		source: {
+			type: 'nrcs',
+			peripheralDeviceId: protectString(''),
+			nrcsName: 'mockNRCS',
+		},
 		organizationId: protectString(''),
 		playlistId: playlist._id,
 	})
@@ -117,7 +119,6 @@ describe('rundown Timing Calculator', () => {
 			undefined,
 			partInstances,
 			partInstancesMap,
-			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
 			[]
@@ -180,7 +181,6 @@ describe('rundown Timing Calculator', () => {
 			undefined,
 			partInstances,
 			partInstancesMap,
-			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
 			[]
@@ -282,7 +282,6 @@ describe('rundown Timing Calculator', () => {
 			undefined,
 			partInstances,
 			partInstancesMap,
-			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
 			[]
@@ -386,7 +385,6 @@ describe('rundown Timing Calculator', () => {
 			undefined,
 			partInstances,
 			partInstancesMap,
-			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
 			[]
@@ -515,7 +513,6 @@ describe('rundown Timing Calculator', () => {
 				undefined,
 				partInstances,
 				partInstancesMap,
-				new Map(),
 				segmentsMap,
 				DEFAULT_DURATION,
 				[]
@@ -670,7 +667,6 @@ describe('rundown Timing Calculator', () => {
 				rundown,
 				partInstances,
 				partInstancesMap,
-				new Map(),
 				segmentsMap,
 				DEFAULT_DURATION,
 				[]
@@ -826,7 +822,6 @@ describe('rundown Timing Calculator', () => {
 				rundown,
 				partInstances,
 				partInstancesMap,
-				new Map(),
 				segmentsMap,
 				DEFAULT_DURATION,
 				[]
@@ -931,7 +926,6 @@ describe('rundown Timing Calculator', () => {
 				undefined,
 				partInstances,
 				partInstancesMap,
-				new Map(),
 				segmentsMap,
 				DEFAULT_NONZERO_DURATION,
 				[]
@@ -1062,7 +1056,6 @@ describe('rundown Timing Calculator', () => {
 				undefined,
 				partInstances,
 				partInstancesMap,
-				new Map(),
 				segmentsMap,
 				DEFAULT_NONZERO_DURATION,
 				[]
@@ -1190,7 +1183,6 @@ describe('rundown Timing Calculator', () => {
 			undefined,
 			partInstances,
 			partInstancesMap,
-			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
 			[]
@@ -1460,7 +1452,6 @@ describe('rundown Timing Calculator', () => {
 			rundown,
 			partInstances,
 			partInstancesMap,
-			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
 			[]
@@ -1609,7 +1600,6 @@ describe('rundown Timing Calculator', () => {
 			rundown,
 			partInstances,
 			partInstancesMap,
-			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
 			[]
@@ -1764,7 +1754,6 @@ describe('rundown Timing Calculator', () => {
 			rundown,
 			partInstances,
 			partInstancesMap,
-			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
 			[]
@@ -1913,7 +1902,6 @@ describe('rundown Timing Calculator', () => {
 			rundown,
 			partInstances,
 			partInstancesMap,
-			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
 			[]
@@ -2062,7 +2050,6 @@ describe('rundown Timing Calculator', () => {
 			rundown,
 			partInstances,
 			partInstancesMap,
-			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
 			[]
@@ -2217,7 +2204,6 @@ describe('rundown Timing Calculator', () => {
 			rundown,
 			partInstances,
 			partInstancesMap,
-			new Map(),
 			segmentsMap,
 			DEFAULT_DURATION,
 			[]

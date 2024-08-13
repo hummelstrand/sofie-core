@@ -3,18 +3,13 @@ import React, { ReactNode } from 'react'
 import { withTiming, WithTiming } from './withTiming'
 import { RundownUtils } from '../../../lib/rundown'
 import { PartUi } from '../../SegmentTimeline/SegmentTimelineContainer'
-import {
-	calculatePartInstanceExpectedDurationWithPreroll,
-	CalculateTimingsPiece,
-} from '@sofie-automation/corelib/dist/playout/timings'
-import { PartId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { calculatePartInstanceExpectedDurationWithTransition } from '@sofie-automation/corelib/dist/playout/timings'
 import { getPartInstanceTimingId } from '../../../lib/rundownTiming'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 
 interface ISegmentDurationProps {
 	segment: DBSegment
 	parts: PartUi[]
-	pieces: Map<PartId, CalculateTimingsPiece[]>
 	label?: ReactNode
 	className?: string
 	/** If set, the timer will display just the played out duration */
@@ -48,7 +43,7 @@ export const SegmentDuration = withTiming<ISegmentDurationProps, {}>()(function 
 				budget +=
 					part.instance.orphaned || part.instance.part.untimed
 						? 0
-						: calculatePartInstanceExpectedDurationWithPreroll(part.instance, props.pieces.get(part.partId) ?? []) || 0
+						: calculatePartInstanceExpectedDurationWithTransition(part.instance) || 0
 			})
 		}
 		props.parts.forEach((part) => {

@@ -15,6 +15,7 @@ import { CountdownType } from '@sofie-automation/blueprints-integration'
 
 function makeEmptyTestPartInstances(): SelectedPartInstances {
 	return {
+		previous: undefined,
 		current: undefined,
 		firstInSegmentPlayout: undefined,
 		inCurrentSegment: [],
@@ -80,8 +81,8 @@ describe('ActivePlaylistTopic', () => {
 		const part1: Partial<DBPart> = {
 			_id: protectString('PART_1'),
 			title: 'Test Part',
-			segmentId: segment1id,
-			expectedDurationWithPreroll: 10000,
+			segmentId: protectString('SEGMENT_1'),
+			expectedDurationWithTransition: 10000,
 			expectedDuration: 10000,
 			publicData: { b: 'c' },
 		}
