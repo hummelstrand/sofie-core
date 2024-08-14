@@ -34,7 +34,7 @@ export function groupMosPartsIntoIngestSegments(
 	return groupedParts.map(
 		(partGroup, i) =>
 			({
-				externalId: `${rundownExternalId}_${partGroup.name}_${partGroup.parts[0].externalId}`,
+				externalId: `${rundownExternalId}_${partGroup.parts[0].externalId}`,
 				name: partGroup.name,
 				rank: i,
 				parts: partGroup.parts.map((part, i) => ({ ...part, rank: i })),
