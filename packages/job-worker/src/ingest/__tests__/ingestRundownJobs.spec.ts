@@ -177,7 +177,6 @@ describe('handleUserUnsyncRundown', () => {
 			studioId: context.studioId,
 			showStyleBaseId: protectString('showStyleBase0'),
 			showStyleVariantId: protectString('showStyleVariant0'),
-			peripheralDeviceId: undefined,
 			created: 0,
 			modified: 0,
 			importVersions: {} as any,
@@ -185,7 +184,10 @@ describe('handleUserUnsyncRundown', () => {
 			name: 'Rundown',
 			timing: {} as any,
 			playlistId: protectString('playlist0'),
-			externalNRCSName: 'NRCS',
+			source: {
+				type: 'testing',
+				showStyleVariantId: protectString('showStyleVariant0'),
+			},
 			...fragment,
 		})
 		context.mockCollections.Rundowns.clearOpLog()
