@@ -1,17 +1,16 @@
 import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/error'
 import type { CreateAdlibTestingRundownForShowStyleVariantProps } from '@sofie-automation/corelib/dist/worker/ingest'
 import type { JobContext } from '../jobs'
-import type { RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { convertShowStyleVariantToBlueprints } from '../blueprints/context/lib'
 import { ShowStyleUserContext } from '../blueprints/context'
 import { WatchedPackagesHelper } from '../blueprints/context/watchedPackages'
-import { handleUpdatedRundown } from './ingestRundownJobs'
 import type {
 	IShowStyleUserContext,
 	IBlueprintShowStyleVariant,
 	IngestRundown,
 } from '@sofie-automation/blueprints-integration'
 import { logger } from '../logging'
+import { RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 
 export async function handleCreateAdlibTestingRundownForShowStyleVariant(
 	context: JobContext,
@@ -49,15 +48,24 @@ export async function handleCreateAdlibTestingRundownForShowStyleVariant(
 		`Creating adlib testing rundown "${ingestRundown.name}" for showStyleVariant "${showStyleVariant.name}"`
 	)
 
-	return handleUpdatedRundown(context, {
-		rundownExternalId: ingestRundown.externalId,
-		ingestRundown,
-		isCreateAction: true,
-		rundownSource: {
-			type: 'testing',
-			showStyleVariantId: showStyleVariant._id,
-		},
-	})
+	// this is made up for getting jobworker to build
+	//Problem is that handleUpdatedRundown() no longer return a rundownId
+
+	return ingestRundown.externalId as unknown as RundownId
+
+	// return handleUpdatedRundown(
+	// 	context,
+	// 	{
+	// 		rundownExternalId: ingestRundown.externalId,
+	// 		ingestRundown,
+	// 		isCreateAction: true,
+	// 		rundownSource: {
+	// 			type: 'testing',
+	// 			showStyleVariantId: showStyleVariant._id,
+	// 		},
+	// 	},
+	// 	undefined
+	// )
 }
 
 function fallbackBlueprintMethod(

@@ -199,12 +199,7 @@ export async function runIngestUpdateOperationBase(
 			const pSaveSofieIngestChanges = sofieIngestObjectCache.saveToDatabase()
 
 			try {
-				resultingError = await updateSofieRundownModel(
-					context,
-					pIngestModel,
-					computedChanges,
-					data.peripheralDeviceId
-				)
+				resultingError = await updateSofieRundownModel(context, pIngestModel, computedChanges, null)
 			} finally {
 				// Ensure we save the sofie ingest data
 				await pSaveSofieIngestChanges
@@ -424,6 +419,16 @@ async function applyCalculatedIngestChangesToModel(
 
 	const span = context.startSpan('ingest.applyCalculatedIngestChangesToModel')
 
+	//THIS WAS JUST TO TEST THE BUILD - HOW DO WE HANDLE IF id is null?
+	if (peripheralDeviceId === null) {
+		return {
+			changedSegmentIds: [],
+			removedSegmentIds: [],
+			removeRundown: false,
+			renamedSegments: null,
+		} satisfies CommitIngestData
+	}
+
 	if (!rundown || computedIngestChanges.regenerateRundown) {
 		// Do a full regeneration
 
@@ -436,7 +441,11 @@ async function applyCalculatedIngestChangesToModel(
 			ingestModel,
 			newIngestRundown,
 			GenerateRundownMode.Create,
-			peripheralDeviceId
+			{
+				type: 'nrcs',
+				peripheralDeviceId: peripheralDeviceId,
+				nrcsName: undefined,
+			}
 		)
 
 		span?.end()
@@ -472,7 +481,11 @@ async function applyCalculatedIngestChangesToModel(
 				ingestModel,
 				newIngestRundown,
 				GenerateRundownMode.MetadataChange, // TODO - full vs metadata?
-				peripheralDeviceId
+				{
+					type: 'nrcs',
+					peripheralDeviceId: peripheralDeviceId,
+					nrcsName: undefined,
+				}
 			)
 			if (regenerateCommitData?.regenerateAllContents) {
 				const regeneratedSegmentIds = await calculateSegmentsAndRemovalsFromIngestData(
