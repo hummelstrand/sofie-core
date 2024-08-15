@@ -19,6 +19,7 @@ import {
 	NrcsIngestRundownChangeDetails,
 } from '@sofie-automation/blueprints-integration'
 import { wrapGenericIngestJob } from './jobWrappers'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 
 /**
  * Attempt to remove a rundown, or orphan it
@@ -82,12 +83,15 @@ export async function handleUserRemoveRundown(context: JobContext, data: UserRem
 export function handleUpdatedRundown(
 	_context: JobContext,
 	data: IngestUpdateRundownProps,
-	ingestRundown: IngestRundown | undefined
+	ingestRundown: IngestRundownWithSource | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown && !data.isCreateAction) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
 	return {
-		ingestRundown: data.ingestRundown,
+		ingestRundown: {
+			...data.ingestRundown,
+			rundownSource: data.rundownSource,
+		},
 		changes: {
 			source: IngestChangeType.Ingest,
 			rundownChanges: NrcsIngestRundownChangeDetails.Regenerate,
@@ -101,13 +105,14 @@ export function handleUpdatedRundown(
 export function handleUpdatedRundownMetaData(
 	_context: JobContext,
 	data: IngestUpdateRundownMetaDataProps,
-	ingestRundown: IngestRundown | undefined
+	ingestRundown: IngestRundownWithSource | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
 	return {
 		ingestRundown: {
 			...data.ingestRundown,
+			rundownSource: data.rundownSource,
 			segments: ingestRundown.segments,
 		},
 		changes: {
@@ -123,7 +128,7 @@ export function handleUpdatedRundownMetaData(
 export function handleRegenerateRundown(
 	_context: JobContext,
 	data: IngestRegenerateRundownProps,
-	ingestRundown: IngestRundown | undefined
+	ingestRundown: IngestRundownWithSource | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 

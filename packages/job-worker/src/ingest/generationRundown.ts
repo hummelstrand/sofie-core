@@ -22,10 +22,11 @@ import { CommitIngestData } from './lock'
 import { SelectedShowStyleVariant, selectShowStyleVariant } from './selectShowStyleVariant'
 import { updateExpectedPackagesForRundownBaseline } from './expectedPackages'
 import { ReadonlyDeep } from 'type-fest'
-import { BlueprintResultRundown, ExtendedIngestRundown, IngestRundown } from '@sofie-automation/blueprints-integration'
+import { BlueprintResultRundown, ExtendedIngestRundown } from '@sofie-automation/blueprints-integration'
 import { wrapTranslatableMessageFromBlueprints } from '@sofie-automation/corelib/dist/TranslatableMessage'
 import { convertRundownToBlueprintSegmentRundown, translateUserEditsFromBlueprint } from '../blueprints/context/lib'
 import { calculateSegmentsAndRemovalsFromIngestData } from './generationSegment'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 
 export enum GenerateRundownMode {
 	Create = 'create',
@@ -49,9 +50,8 @@ export interface CommitIngestDataExt extends CommitIngestData {
 export async function updateRundownFromIngestData(
 	context: JobContext,
 	ingestModel: IngestModel,
-	ingestRundown: IngestRundown,
-	generateMode: GenerateRundownMode,
-	rundownSource: RundownSource
+	ingestRundown: IngestRundownWithSource,
+	generateMode: GenerateRundownMode
 ): Promise<CommitIngestDataExt | null> {
 	const span = context.startSpan('ingest.rundownInput.updateRundownFromIngestData')
 
@@ -59,8 +59,7 @@ export async function updateRundownFromIngestData(
 		context,
 		ingestModel,
 		ingestRundown,
-		generateMode,
-		rundownSource
+		generateMode
 	)
 
 	if (!regenerateAllContents) return null
@@ -96,9 +95,8 @@ export interface UpdateRundownInnerResult {
 export async function updateRundownFromIngestDataInner(
 	context: JobContext,
 	ingestModel: IngestModel,
-	ingestRundown: IngestRundown,
-	generateMode: GenerateRundownMode,
-	rundownSource: RundownSource
+	ingestRundown: IngestRundownWithSource,
+	generateMode: GenerateRundownMode
 ): Promise<UpdateRundownInnerResult | null> {
 	if (!canRundownBeUpdated(ingestModel.rundown, generateMode === GenerateRundownMode.Create)) return null
 
@@ -128,7 +126,7 @@ export async function updateRundownFromIngestDataInner(
 		context,
 		selectShowStyleContext,
 		extendedIngestRundown,
-		rundownSource
+		ingestRundown.rundownSource
 	)
 	if (!showStyle) {
 		logger.debug('Blueprint rejected the rundown')
@@ -145,7 +143,7 @@ export async function updateRundownFromIngestDataInner(
 		context,
 		ingestModel,
 		extendedIngestRundown,
-		rundownSource,
+		ingestRundown.rundownSource,
 		showStyle,
 		showStyleBlueprint,
 		allRundownWatchedPackages

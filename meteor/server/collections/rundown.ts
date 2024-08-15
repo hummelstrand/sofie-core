@@ -1,7 +1,10 @@
 import { AdLibAction } from '@sofie-automation/corelib/dist/dataModel/AdlibAction'
 import { AdLibPiece } from '@sofie-automation/corelib/dist/dataModel/AdLibPiece'
 import { CollectionName } from '@sofie-automation/corelib/dist/dataModel/Collections'
-import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import {
+	NrcsIngestDataCacheObj,
+	SofieIngestDataCacheObj,
+} from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { Piece } from '@sofie-automation/corelib/dist/dataModel/Piece'
 import { PieceInstance } from '@sofie-automation/corelib/dist/dataModel/PieceInstance'
 import { DBRundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
@@ -28,14 +31,14 @@ registerIndex(AdLibPieces, {
 	_rank: 1,
 })
 
-export const NrcsIngestDataCache = createAsyncOnlyReadOnlyMongoCollection<IngestDataCacheObj>(
+export const NrcsIngestDataCache = createAsyncOnlyReadOnlyMongoCollection<NrcsIngestDataCacheObj>(
 	CollectionName.NrcsIngestDataCache
 )
 registerIndex(NrcsIngestDataCache, {
 	rundownId: 1,
 })
 
-export const SofieIngestDataCache = createAsyncOnlyReadOnlyMongoCollection<IngestDataCacheObj>(
+export const SofieIngestDataCache = createAsyncOnlyReadOnlyMongoCollection<SofieIngestDataCacheObj>(
 	CollectionName.SofieIngestDataCache
 )
 registerIndex(SofieIngestDataCache, {

@@ -1,7 +1,8 @@
 import { JobContext } from '../jobs'
 import { IngestRemovePartProps, IngestUpdatePartProps } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UpdateIngestRundownChange } from './runOperation'
-import { IngestChangeType, IngestRundown, NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
+import { IngestChangeType, NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 
 /**
  * Remove a Part from a Segment
@@ -9,7 +10,7 @@ import { IngestChangeType, IngestRundown, NrcsIngestPartChangeDetails } from '@s
 export function handleRemovedPart(
 	_context: JobContext,
 	data: IngestRemovePartProps,
-	ingestRundown: IngestRundown | undefined
+	ingestRundown: IngestRundownWithSource | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
@@ -54,7 +55,7 @@ export function handleRemovedPart(
 export function handleUpdatedPart(
 	_context: JobContext,
 	data: IngestUpdatePartProps,
-	ingestRundown: IngestRundown | undefined
+	ingestRundown: IngestRundownWithSource | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 

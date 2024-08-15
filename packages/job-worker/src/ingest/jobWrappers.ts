@@ -8,7 +8,7 @@ import {
 } from './runOperation'
 import { CommitIngestData } from './lock'
 import { IngestModel } from './model/IngestModel'
-import { IngestRundown } from '@sofie-automation/blueprints-integration'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 
 /**
  * Wrap a mos specific ingest job to be an ingest update operation, with a provided function which runs a precheck and returns the final ingestRundown mutator
@@ -36,7 +36,11 @@ export function wrapMosIngestJob<TData extends IngestPropsBase>(
  * @param fcn Function to mutate the ingestRundown
  */
 export function wrapGenericIngestJob<TData extends IngestPropsBase>(
-	fcn: (context: JobContext, data: TData, oldIngestRundown: IngestRundown | undefined) => UpdateIngestRundownResult
+	fcn: (
+		context: JobContext,
+		data: TData,
+		oldIngestRundown: IngestRundownWithSource | undefined
+	) => UpdateIngestRundownResult
 ): (context: JobContext, data: TData) => Promise<void> {
 	return async (context, data) => {
 		await runIngestUpdateOperation(context, data, (ingestRundown) => fcn(context, data, ingestRundown))
@@ -67,7 +71,7 @@ export function wrapCustomIngestJob<TData extends IngestPropsBase>(
 		context: JobContext,
 		data: TData,
 		ingestModel: IngestModel,
-		ingestRundown: IngestRundown
+		ingestRundown: IngestRundownWithSource
 	) => Promise<CommitIngestData | null>
 ): (context: JobContext, data: TData) => Promise<void> {
 	return async (context, data) => {
