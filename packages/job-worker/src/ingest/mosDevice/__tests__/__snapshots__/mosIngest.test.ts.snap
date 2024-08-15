@@ -26,7 +26,6 @@ exports[`Test recieved mos ingest payloads mosRoCreate 2`] = `
   "_id": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -38,7 +37,6 @@ exports[`Test recieved mos ingest payloads mosRoCreate 2`] = `
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "payload": {
@@ -161,6 +159,11 @@ exports[`Test recieved mos ingest payloads mosRoCreate 2`] = `
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "studioId": "mockStudio4",
   "timing": {
     "type": "none",
@@ -316,7 +319,6 @@ exports[`Test recieved mos ingest payloads mosRoCreate: replace existing 2`] = `
   "_id": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -328,7 +330,6 @@ exports[`Test recieved mos ingest payloads mosRoCreate: replace existing 2`] = `
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "payload": {
@@ -451,6 +452,11 @@ exports[`Test recieved mos ingest payloads mosRoCreate: replace existing 2`] = `
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "studioId": "mockStudio4",
   "timing": {
     "type": "none",
@@ -599,7 +605,6 @@ exports[`Test recieved mos ingest payloads mosRoFullStory: Valid data 2`] = `
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -611,7 +616,6 @@ exports[`Test recieved mos ingest payloads mosRoFullStory: Valid data 2`] = `
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -735,6 +739,11 @@ exports[`Test recieved mos ingest payloads mosRoFullStory: Valid data 2`] = `
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -902,7 +911,6 @@ exports[`Test recieved mos ingest payloads mosRoReadyToAir: Update ro 2`] = `
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -914,7 +922,6 @@ exports[`Test recieved mos ingest payloads mosRoReadyToAir: Update ro 2`] = `
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -1038,6 +1045,11 @@ exports[`Test recieved mos ingest payloads mosRoReadyToAir: Update ro 2`] = `
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -1194,7 +1206,6 @@ exports[`Test recieved mos ingest payloads mosRoStatus: Update ro 2`] = `
   "_id": "5meLdE_m5k28xXw1vtX2JX8mSYQ_",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -1206,7 +1217,6 @@ exports[`Test recieved mos ingest payloads mosRoStatus: Update ro 2`] = `
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "payload": {
@@ -1329,6 +1339,11 @@ exports[`Test recieved mos ingest payloads mosRoStatus: Update ro 2`] = `
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -1486,7 +1501,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryDelete: Remove segment 2`] 
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -1498,7 +1512,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryDelete: Remove segment 2`] 
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -1622,6 +1635,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryDelete: Remove segment 2`] 
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -1745,7 +1763,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryInsert: Into segment 2`] = 
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -1757,7 +1774,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryInsert: Into segment 2`] = 
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -1881,6 +1897,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryInsert: Into segment 2`] = 
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -2049,7 +2070,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryInsert: New segment 2`] = `
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -2061,7 +2081,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryInsert: New segment 2`] = `
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -2185,6 +2204,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryInsert: New segment 2`] = `
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -2361,7 +2385,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Move whole segment to
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -2373,7 +2396,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Move whole segment to
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -2497,6 +2519,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Move whole segment to
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -2656,7 +2683,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Within segment 2`] = 
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -2668,7 +2694,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Within segment 2`] = 
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -2792,6 +2817,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Within segment 2`] = 
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -2951,7 +2981,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryReplace: Same segment 2`] =
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -2963,7 +2992,6 @@ exports[`Test recieved mos ingest payloads mosRoStoryReplace: Same segment 2`] =
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -3087,6 +3115,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryReplace: Same segment 2`] =
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -3245,7 +3278,6 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments 
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -3257,7 +3289,6 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments 
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -3381,6 +3412,11 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments 
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -3532,7 +3568,6 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments2
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -3544,7 +3579,6 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments2
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -3668,6 +3702,11 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments2
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -3851,7 +3890,6 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: With first in same se
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -3863,7 +3901,6 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: With first in same se
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -3987,6 +4024,11 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: With first in same se
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {
@@ -4146,7 +4188,6 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Within same segment 2
   "airStatus": "READY",
   "created": 0,
   "externalId": "SLENPS01;P_NDSL\\W;68E40DE6-2D08-487D-aaaaa",
-  "externalNRCSName": "JEST-NRCS",
   "importVersions": {
     "blueprint": "0.0.0",
     "core": "0.0.0-test",
@@ -4158,7 +4199,6 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Within same segment 2
   "name": "All effect1 into clip combinations",
   "notes": [],
   "organizationId": null,
-  "peripheralDeviceId": "mockDevice0",
   "playlistId": "rnTv7Yo4GAIL0Ye3r29Xi1jKvS0_",
   "privateData": {
     "airStatus": "READY",
@@ -4282,6 +4322,11 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Within same segment 2
   },
   "showStyleBaseId": "mockShowStyleBase0",
   "showStyleVariantId": "mockShowStyleVariant0",
+  "source": {
+    "nrcsName": "JEST-NRCS",
+    "peripheralDeviceId": "mockDevice0",
+    "type": "nrcs",
+  },
   "status": "BUSY",
   "studioId": "mockStudio4",
   "timing": {

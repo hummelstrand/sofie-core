@@ -46,6 +46,7 @@ import {
 	wrapGenericIngestJobWithPrecheck,
 	wrapMosIngestJob,
 } from '../../ingest/jobWrappers'
+import { handleCreateAdlibTestingRundownForShowStyleVariant } from '../../ingest/createAdlibTestingRundown'
 
 type ExecutableFunction<T extends keyof IngestJobFunc> = (
 	context: JobContext,
@@ -95,4 +96,6 @@ export const ingestJobHandlers: IngestJobHandlers = {
 	[IngestJobs.BucketRemoveAdlibPiece]: handleBucketRemoveAdlibPiece,
 	[IngestJobs.BucketRemoveAdlibAction]: handleBucketRemoveAdlibAction,
 	[IngestJobs.BucketEmpty]: handleBucketEmpty,
+
+	[IngestJobs.CreateAdlibTestingRundownForShowStyleVariant]: handleCreateAdlibTestingRundownForShowStyleVariant,
 }

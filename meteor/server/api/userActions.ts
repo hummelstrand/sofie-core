@@ -43,6 +43,7 @@ import {
 	RundownPlaylistId,
 	SegmentId,
 	ShowStyleBaseId,
+	ShowStyleVariantId,
 	StudioId,
 } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { NrcsIngestDataCache, Parts, Pieces, Rundowns } from '../collections'
@@ -1199,7 +1200,7 @@ class ServerUserActionAPI
 		)
 	}
 
-	async activateScratchpadMode(
+	async activateAdlibTestingMode(
 		userEvent: string,
 		eventTime: number,
 		playlistId: RundownPlaylistId,
@@ -1214,7 +1215,7 @@ class ServerUserActionAPI
 				check(playlistId, String)
 				check(rundownId, String)
 			},
-			StudioJobs.ActivateScratchpad,
+			StudioJobs.ActivateAdlibTesting,
 			{
 				playlistId: playlistId,
 				rundownId: rundownId,
@@ -1241,9 +1242,32 @@ class ServerUserActionAPI
 
 				await runIngestOperation(access.rundown.studioId, IngestJobs.UserExecuteChangeOperation, {
 					rundownExternalId: access.rundown.externalId,
-					peripheralDeviceId: null,
 					operationTarget,
 					operation,
+				})
+			}
+		)
+	}
+	async createAdlibTestingRundownForShowStyleVariant(
+		userEvent: string,
+		eventTime: number,
+		studioId: StudioId,
+		showStyleVariantId: ShowStyleVariantId
+	) {
+		const jobName = IngestJobs.CreateAdlibTestingRundownForShowStyleVariant
+		return ServerClientAPI.runUserActionInLog(
+			this,
+			userEvent,
+			eventTime,
+			`worker.ingest.${jobName}`,
+			[showStyleVariantId],
+			async (_credentials) => {
+				check(studioId, String)
+				check(showStyleVariantId, String)
+
+				// TODO - checkAccessToStudio?
+				return runIngestOperation(studioId, IngestJobs.CreateAdlibTestingRundownForShowStyleVariant, {
+					showStyleVariantId,
 				})
 			}
 		)

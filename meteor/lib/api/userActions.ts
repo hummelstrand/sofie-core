@@ -22,6 +22,7 @@ import {
 	RundownPlaylistId,
 	SegmentId,
 	ShowStyleBaseId,
+	ShowStyleVariantId,
 	SnapshotId,
 	StudioId,
 } from '@sofie-automation/corelib/dist/dataModel/Ids'
@@ -321,7 +322,7 @@ export interface NewUserActionAPI extends MethodContext {
 		subDeviceId: string,
 		disable: boolean
 	): Promise<ClientAPI.ClientResponse<void>>
-	activateScratchpadMode(
+	activateAdlibTestingMode(
 		userEvent: string,
 		eventTime: number,
 		playlistId: RundownPlaylistId,
@@ -334,6 +335,13 @@ export interface NewUserActionAPI extends MethodContext {
 		operationTarget: UserOperationTarget,
 		operation: { id: string; [key: string]: any }
 	): Promise<ClientAPI.ClientResponse<void>>
+
+	createAdlibTestingRundownForShowStyleVariant(
+		userEvent: string,
+		eventTime: Time,
+		studioId: StudioId,
+		showStyleVariantId: ShowStyleVariantId
+	): Promise<ClientAPI.ClientResponse<RundownId>>
 }
 
 export enum UserActionAPIMethods {
@@ -413,8 +421,10 @@ export enum UserActionAPIMethods {
 
 	'disablePeripheralSubDevice' = 'userAction.system.disablePeripheralSubDevice',
 
-	'activateScratchpadMode' = 'userAction.activateScratchpadMode',
 	'executeUserChangeOperation' = 'userAction.executeUserChangeOperation',
+	'activateAdlibTestingMode' = 'userAction.activateAdlibTestingMode',
+
+	'createAdlibTestingRundownForShowStyleVariant' = 'userAction.createAdlibTestingRundownForShowStyleVariant',
 }
 
 export interface ReloadRundownPlaylistResponse {
