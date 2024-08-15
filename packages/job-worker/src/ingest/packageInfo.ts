@@ -45,7 +45,7 @@ export async function handleUpdatedPackageInfoForRundown(
 		return
 	}
 
-	return runCustomIngestUpdateOperation(context, data, async (context, ingestModel, ingestRundown) => {
+	await runCustomIngestUpdateOperation(context, data, async (context, ingestModel, ingestRundown) => {
 		if (!ingestRundown) throw new Error('onUpdatedPackageInfoForRundown called but ingestData is undefined')
 
 		/** All segments that need updating */

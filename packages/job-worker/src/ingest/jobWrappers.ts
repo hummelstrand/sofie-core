@@ -21,7 +21,7 @@ export function wrapMosIngestJob<TData extends IngestPropsBase>(
 		const executeFcn = fcn(context, data)
 		if (!executeFcn) return
 
-		return runIngestUpdateOperation(context, data, (ingestRundown) => {
+		await runIngestUpdateOperation(context, data, (ingestRundown) => {
 			if (ingestRundown && ingestRundown.type !== 'mos') {
 				throw new Error(`Rundown "${data.rundownExternalId}" is not a MOS rundown`)
 			}
@@ -39,7 +39,7 @@ export function wrapGenericIngestJob<TData extends IngestPropsBase>(
 	fcn: (context: JobContext, data: TData, oldIngestRundown: IngestRundown | undefined) => UpdateIngestRundownResult
 ): (context: JobContext, data: TData) => Promise<void> {
 	return async (context, data) => {
-		return runIngestUpdateOperation(context, data, (ingestRundown) => fcn(context, data, ingestRundown))
+		await runIngestUpdateOperation(context, data, (ingestRundown) => fcn(context, data, ingestRundown))
 	}
 }
 
@@ -54,7 +54,7 @@ export function wrapGenericIngestJobWithPrecheck<TData extends IngestPropsBase>(
 		const executeFcn = fcn(context, data)
 		if (!executeFcn) return
 
-		return runIngestUpdateOperation(context, data, (ingestRundown) => executeFcn(ingestRundown))
+		await runIngestUpdateOperation(context, data, (ingestRundown) => executeFcn(ingestRundown))
 	}
 }
 
@@ -71,7 +71,7 @@ export function wrapCustomIngestJob<TData extends IngestPropsBase>(
 	) => Promise<CommitIngestData | null>
 ): (context: JobContext, data: TData) => Promise<void> {
 	return async (context, data) => {
-		return runCustomIngestUpdateOperation(context, data, async (_context, ingestModel, ingestRundown) => {
+		await runCustomIngestUpdateOperation(context, data, async (_context, ingestModel, ingestRundown) => {
 			return fcn(context, data, ingestModel, ingestRundown)
 		})
 	}

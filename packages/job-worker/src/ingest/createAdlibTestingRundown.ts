@@ -1,5 +1,8 @@
 import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/error'
-import type { CreateAdlibTestingRundownForShowStyleVariantProps } from '@sofie-automation/corelib/dist/worker/ingest'
+import type {
+	CreateAdlibTestingRundownForShowStyleVariantProps,
+	IngestUpdateRundownProps,
+} from '@sofie-automation/corelib/dist/worker/ingest'
 import type { JobContext } from '../jobs'
 import { convertShowStyleVariantToBlueprints } from '../blueprints/context/lib'
 import { ShowStyleUserContext } from '../blueprints/context'
@@ -11,6 +14,8 @@ import type {
 } from '@sofie-automation/blueprints-integration'
 import { logger } from '../logging'
 import { RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { handleUpdatedRundown } from './ingestRundownJobs'
+import { runIngestUpdateOperation } from './runOperation'
 
 export async function handleCreateAdlibTestingRundownForShowStyleVariant(
 	context: JobContext,
@@ -48,24 +53,18 @@ export async function handleCreateAdlibTestingRundownForShowStyleVariant(
 		`Creating adlib testing rundown "${ingestRundown.name}" for showStyleVariant "${showStyleVariant.name}"`
 	)
 
-	// this is made up for getting jobworker to build
-	//Problem is that handleUpdatedRundown() no longer return a rundownId
-
-	return ingestRundown.externalId as unknown as RundownId
-
-	// return handleUpdatedRundown(
-	// 	context,
-	// 	{
-	// 		rundownExternalId: ingestRundown.externalId,
-	// 		ingestRundown,
-	// 		isCreateAction: true,
-	// 		rundownSource: {
-	// 			type: 'testing',
-	// 			showStyleVariantId: showStyleVariant._id,
-	// 		},
-	// 	},
-	// 	undefined
-	// )
+	const updateData: IngestUpdateRundownProps = {
+		rundownExternalId: ingestRundown.externalId,
+		ingestRundown,
+		isCreateAction: true,
+		rundownSource: {
+			type: 'testing',
+			showStyleVariantId: showStyleVariant._id,
+		},
+	}
+	return runIngestUpdateOperation(context, updateData, (ingestRundown) =>
+		handleUpdatedRundown(context, updateData, ingestRundown)
+	)
 }
 
 function fallbackBlueprintMethod(

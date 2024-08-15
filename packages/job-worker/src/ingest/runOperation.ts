@@ -63,7 +63,7 @@ export async function runCustomIngestUpdateOperation(
 		ingestModel: IngestModel,
 		ingestRundown: IngestRundown
 	) => Promise<CommitIngestData | null>
-): Promise<void> {
+): Promise<RundownId> {
 	if (!data.rundownExternalId) {
 		throw new Error(`Job is missing rundownExternalId`)
 	}
@@ -115,6 +115,8 @@ export async function runCustomIngestUpdateOperation(
 		}
 
 		if (resultingError) throw resultingError
+
+		return rundownId
 	})
 }
 
@@ -131,7 +133,7 @@ export async function runIngestUpdateOperation(
 	context: JobContext,
 	data: IngestPropsBase,
 	updateNrcsIngestModelFcn: IngestUpdateOperationFunction
-): Promise<void> {
+): Promise<RundownId> {
 	return runIngestUpdateOperationBase(context, data, async (nrcsIngestObjectCache) =>
 		updateNrcsIngestObjects(context, nrcsIngestObjectCache, updateNrcsIngestModelFcn)
 	)
@@ -148,7 +150,7 @@ export async function runIngestUpdateOperationBase(
 	context: JobContext,
 	data: IngestPropsBase,
 	executeFcn: (nrcsIngestObjectCache: RundownIngestDataCache) => Promise<UpdateIngestRundownResult>
-): Promise<void> {
+): Promise<RundownId> {
 	if (!data.rundownExternalId) {
 		throw new Error(`Job is missing rundownExternalId`)
 	}
@@ -212,6 +214,8 @@ export async function runIngestUpdateOperationBase(
 		}
 
 		if (resultingError) throw resultingError
+
+		return rundownId
 	})
 }
 
