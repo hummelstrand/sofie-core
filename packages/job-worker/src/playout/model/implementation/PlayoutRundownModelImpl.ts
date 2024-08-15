@@ -73,7 +73,6 @@ export class PlayoutRundownModelImpl implements PlayoutRundownModel {
 					_id: segmentId,
 					_rank: calculateRankForAdlibTestingSegment(this.#segments),
 					externalId: '__adlib-testing__',
-					externalModified: getCurrentTime(),
 					rundownId: this.rundown._id,
 					orphaned: SegmentOrphanedReason.ADLIB_TESTING,
 					name: '',

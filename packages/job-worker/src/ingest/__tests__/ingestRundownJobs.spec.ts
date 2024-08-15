@@ -69,7 +69,6 @@ describe('handleRemovedRundown', () => {
 			handleRemovedRundown(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					// forceDelete: false,
 				},
@@ -85,7 +84,6 @@ describe('handleRemovedRundown', () => {
 			handleRemovedRundown(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					forceDelete: true,
 				},
@@ -103,7 +101,6 @@ describe('handleRemovedRundown', () => {
 			handleRemovedRundown(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					forceDelete: false,
 				},
@@ -121,7 +118,6 @@ describe('handleRemovedRundown', () => {
 			handleRemovedRundown(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					forceDelete: true,
 				},
@@ -141,7 +137,6 @@ describe('handleRegenerateRundown', () => {
 			handleRegenerateRundown(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 				},
 				undefined
@@ -157,7 +152,6 @@ describe('handleRegenerateRundown', () => {
 		const changes = handleRegenerateRundown(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 			},
 			clone(ingestRundown)
@@ -300,10 +294,10 @@ describe('handleUpdatedRundown', () => {
 		const changes = handleUpdatedRundown(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				ingestRundown: clone(ingestRundown),
 				isCreateAction: true,
+				rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
 			},
 			undefined
 		)
@@ -326,10 +320,10 @@ describe('handleUpdatedRundown', () => {
 			handleUpdatedRundown(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					ingestRundown: clone(ingestRundown),
 					isCreateAction: false,
+					rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
 				},
 				undefined
 			)
@@ -344,10 +338,10 @@ describe('handleUpdatedRundown', () => {
 		const changes = handleUpdatedRundown(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				ingestRundown: clone(newIngestRundown),
 				isCreateAction: false,
+				rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
 			},
 			clone(ingestRundown)
 		)
@@ -380,9 +374,9 @@ describe('handleUpdatedRundownMetaData', () => {
 			handleUpdatedRundownMetaData(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					ingestRundown: clone(newIngestRundown),
+					rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
 				},
 				undefined
 			)
@@ -397,9 +391,9 @@ describe('handleUpdatedRundownMetaData', () => {
 		const changes = handleUpdatedRundownMetaData(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				ingestRundown: clone(newIngestRundown),
+				rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
 			},
 			clone(ingestRundown)
 		)

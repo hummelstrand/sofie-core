@@ -140,6 +140,6 @@ export async function handleMosRundownReadyToAir(
 		ingestModel,
 		ingestRundown,
 		GenerateRundownMode.MetadataChange,
-		data.peripheralDeviceId
+		ingestModel.rundown.source
 	)
 }

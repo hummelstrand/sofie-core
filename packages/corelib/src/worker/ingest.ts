@@ -291,7 +291,7 @@ export interface CreateAdlibTestingRundownForShowStyleVariantProps {
  */
 export type IngestJobFunc = {
 	[IngestJobs.RemoveRundown]: (data: IngestRemoveRundownProps) => void
-	[IngestJobs.UpdateRundown]: (data: IngestUpdateRundownProps) => RundownId
+	[IngestJobs.UpdateRundown]: (data: IngestUpdateRundownProps) => void
 	[IngestJobs.UpdateRundownMetaData]: (data: IngestUpdateRundownMetaDataProps) => void
 	[IngestJobs.RemoveSegment]: (data: IngestRemoveSegmentProps) => void
 	[IngestJobs.UpdateSegment]: (data: IngestUpdateSegmentProps) => void
