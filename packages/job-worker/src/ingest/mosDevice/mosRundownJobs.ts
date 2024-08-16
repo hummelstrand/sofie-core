@@ -1,9 +1,4 @@
-import {
-	NrcsIngestRundownChangeDetails,
-	IngestPart,
-	IngestRundown,
-	IngestChangeType,
-} from '@sofie-automation/blueprints-integration'
+import { NrcsIngestRundownChangeDetails, IngestPart, IngestChangeType } from '@sofie-automation/blueprints-integration'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import {
 	MosRundownProps,
@@ -18,6 +13,7 @@ import { mosStoryToIngestSegment, parseMosString, updateRanksBasedOnOrder } from
 import { GenerateRundownMode, updateRundownFromIngestData } from '../generationRundown'
 import { IngestUpdateOperationFunction } from '../runOperation'
 import { IngestModel } from '../model/IngestModel'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 
 /**
  * Insert or update a mos rundown
@@ -56,12 +52,13 @@ export function handleMosRundownData(
 			}
 		}
 
-		const newIngestRundown = literal<IngestRundown>({
+		const newIngestRundown = literal<IngestRundownWithSource>({
 			externalId: data.rundownExternalId,
 			name: parseMosString(data.mosRunningOrder.Slug),
 			type: 'mos',
 			segments: ingestSegments,
 			payload: data.mosRunningOrder,
+			rundownSource: data.rundownSource,
 		})
 		updateRanksBasedOnOrder(newIngestRundown)
 
@@ -126,7 +123,7 @@ export async function handleMosRundownReadyToAir(
 	context: JobContext,
 	data: MosRundownReadyToAirProps,
 	ingestModel: IngestModel,
-	ingestRundown: IngestRundown
+	ingestRundown: IngestRundownWithSource
 ): Promise<CommitIngestData | null> {
 	if (!ingestModel.rundown || ingestModel.rundown.airStatus === data.status) return null
 
@@ -135,11 +132,5 @@ export async function handleMosRundownReadyToAir(
 
 	ingestModel.setRundownAirStatus(data.status)
 
-	return updateRundownFromIngestData(
-		context,
-		ingestModel,
-		ingestRundown,
-		GenerateRundownMode.MetadataChange,
-		data.peripheralDeviceId
-	)
+	return updateRundownFromIngestData(context, ingestModel, ingestRundown, GenerateRundownMode.MetadataChange)
 }

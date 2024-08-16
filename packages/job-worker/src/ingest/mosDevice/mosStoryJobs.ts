@@ -16,7 +16,6 @@ import {
 } from './lib'
 import {
 	IngestChangeType,
-	IngestRundown,
 	IngestSegment,
 	MOS,
 	NrcsIngestPartChangeDetails,
@@ -25,6 +24,7 @@ import {
 } from '@sofie-automation/blueprints-integration'
 import { IngestUpdateOperationFunction } from '../runOperation'
 import { normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 
 /**
  * Update the payload of a mos story
@@ -37,7 +37,7 @@ export function handleMosFullStory(
 
 	const partExternalId = parseMosString(data.story.ID)
 
-	return (ingestRundown: IngestRundown | undefined) => {
+	return (ingestRundown: IngestRundownWithSource | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
@@ -85,7 +85,7 @@ export function handleMosDeleteStory(
 ): IngestUpdateOperationFunction | null {
 	if (data.stories.length === 0) return null
 
-	return (ingestRundown: IngestRundown | undefined) => {
+	return (ingestRundown: IngestRundownWithSource | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
@@ -134,7 +134,7 @@ export function handleMosInsertStories(
 ): IngestUpdateOperationFunction | null {
 	if (data.newStories.length === 0) return null
 
-	return (ingestRundown: IngestRundown | undefined) => {
+	return (ingestRundown: IngestRundownWithSource | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
@@ -200,7 +200,7 @@ export function handleMosSwapStories(
 	// If the stories are the same, we don't need to do anything
 	if (story0Str === story1Str) return null
 
-	return (ingestRundown: IngestRundown | undefined) => {
+	return (ingestRundown: IngestRundownWithSource | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}
@@ -247,7 +247,7 @@ export function handleMosMoveStories(
 ): IngestUpdateOperationFunction | null {
 	if (data.stories.length === 0) return null
 
-	return (ingestRundown: IngestRundown | undefined) => {
+	return (ingestRundown: IngestRundownWithSource | undefined) => {
 		if (!ingestRundown) {
 			throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 		}

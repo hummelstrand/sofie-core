@@ -17,6 +17,7 @@ import {
 	NrcsIngestSegmentChangeDetailsEnum,
 } from '@sofie-automation/blueprints-integration'
 import { IngestModel } from './model/IngestModel'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 
 /**
  * Regnerate a Segment from the cached IngestSegment
@@ -24,7 +25,7 @@ import { IngestModel } from './model/IngestModel'
 export function handleRegenerateSegment(
 	_context: JobContext,
 	data: IngestRegenerateSegmentProps,
-	ingestRundown: IngestRundown | undefined
+	ingestRundown: IngestRundownWithSource | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
@@ -56,7 +57,7 @@ export function handleRegenerateSegment(
 export function handleRemovedSegment(
 	_context: JobContext,
 	data: IngestRemoveSegmentProps,
-	ingestRundown: IngestRundown | undefined
+	ingestRundown: IngestRundownWithSource | undefined
 ): UpdateIngestRundownChange {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
@@ -120,7 +121,7 @@ export function handleUpdatedSegment(
 export function handleUpdatedSegmentRanks(
 	_context: JobContext,
 	data: IngestUpdateSegmentRanksProps,
-	ingestRundown: IngestRundown | undefined
+	ingestRundown: IngestRundownWithSource | undefined
 ): UpdateIngestRundownResult {
 	if (!ingestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 
@@ -158,7 +159,7 @@ export async function handleRemoveOrphanedSegemnts(
 	// We flag them for deletion again, and they will either be kept if they are somehow playing, or purged if they are not
 	const stillOrphanedSegments = ingestModel.getOrderedSegments().filter((s) => !!s.segment.orphaned)
 
-	// Note: scratchpad segments are ignored here, as they will never be in the ingestModel
+	// Note: AdlibTesting segments are ignored here, as they will never be in the ingestModel
 
 	const stillHiddenSegments = stillOrphanedSegments.filter(
 		(s) =>

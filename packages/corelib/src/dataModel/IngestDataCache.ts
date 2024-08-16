@@ -1,5 +1,6 @@
 import { IngestRundown, IngestSegment, IngestPart } from '@sofie-automation/blueprints-integration'
 import { IngestDataCacheObjId, RundownId, SegmentId, PartId } from './Ids'
+import { RundownSource } from './Rundown'
 
 export enum IngestCacheType {
 	RUNDOWN = 'rundown',
@@ -7,6 +8,10 @@ export enum IngestCacheType {
 	PART = 'part',
 }
 export type IngestCacheData = IngestRundown | IngestSegment | IngestPart
+
+export interface IngestRundownWithSource extends IngestRundown {
+	rundownSource: RundownSource
+}
 
 interface IngestDataCacheObjBase {
 	_id: IngestDataCacheObjId
@@ -24,7 +29,7 @@ interface IngestDataCacheObjBase {
 export interface NrcsIngestDataCacheObjRundown extends IngestDataCacheObjBase {
 	type: IngestCacheType.RUNDOWN
 	rundownId: RundownId
-	data: IngestRundown
+	data: IngestRundownWithSource
 }
 export interface NrcsIngestDataCacheObjSegment extends IngestDataCacheObjBase {
 	type: IngestCacheType.SEGMENT
@@ -53,10 +58,10 @@ export interface SofieIngestDataCache extends IngestDataCacheObjBase {
 	userEditStates?: Record<string, boolean>
 }
 
-export interface SofieIngestDataCacheObjRunown extends SofieIngestDataCache {
+export interface SofieIngestDataCacheObjRundown extends SofieIngestDataCache {
 	type: IngestCacheType.RUNDOWN
 	rundownId: RundownId
-	data: IngestRundown
+	data: IngestRundownWithSource
 }
 
 export interface SofieIngestDataCacheObjSegment extends SofieIngestDataCache {
@@ -75,6 +80,6 @@ export interface SofieIngestDataCacheObjPart extends SofieIngestDataCache {
 }
 
 export type SofieIngestDataCacheObj =
-	| SofieIngestDataCacheObjRunown
+	| SofieIngestDataCacheObjRundown
 	| SofieIngestDataCacheObjSegment
 	| SofieIngestDataCacheObjPart

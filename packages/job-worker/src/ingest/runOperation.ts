@@ -17,10 +17,11 @@ import {
 } from '@sofie-automation/blueprints-integration'
 import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
 import { ProcessIngestDataContext } from '../blueprints/context'
-import { PartId, PeripheralDeviceId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { PartId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromIngestDataInner } from './generationRundown'
 import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 
 export enum ComputedIngestChangeAction {
 	DELETE = 'delete',
@@ -28,14 +29,14 @@ export enum ComputedIngestChangeAction {
 }
 
 export interface UpdateIngestRundownChange {
-	ingestRundown: IngestRundown
+	ingestRundown: IngestRundownWithSource
 	changes: NrcsIngestChangeDetails | UserOperationChange
 }
 
 export type UpdateIngestRundownResult = UpdateIngestRundownChange | ComputedIngestChangeAction
 
 export interface ComputedIngestChangeObject {
-	ingestRundown: IngestRundown
+	ingestRundown: IngestRundownWithSource
 
 	// define what needs regenerating
 	segmentsToRemove: string[]
@@ -61,9 +62,9 @@ export async function runCustomIngestUpdateOperation(
 	doWorkFcn: (
 		context: JobContext,
 		ingestModel: IngestModel,
-		ingestRundown: IngestRundown
+		ingestRundown: IngestRundownWithSource
 	) => Promise<CommitIngestData | null>
-): Promise<void> {
+): Promise<RundownId> {
 	if (!data.rundownExternalId) {
 		throw new Error(`Job is missing rundownExternalId`)
 	}
@@ -115,10 +116,14 @@ export async function runCustomIngestUpdateOperation(
 		}
 
 		if (resultingError) throw resultingError
+
+		return rundownId
 	})
 }
 
-export type IngestUpdateOperationFunction = (oldIngestRundown: IngestRundown | undefined) => UpdateIngestRundownResult
+export type IngestUpdateOperationFunction = (
+	oldIngestRundown: IngestRundownWithSource | undefined
+) => UpdateIngestRundownResult
 
 /**
  * Perform an ingest update operation on a rundown
@@ -131,7 +136,7 @@ export async function runIngestUpdateOperation(
 	context: JobContext,
 	data: IngestPropsBase,
 	updateNrcsIngestModelFcn: IngestUpdateOperationFunction
-): Promise<void> {
+): Promise<RundownId> {
 	return runIngestUpdateOperationBase(context, data, async (nrcsIngestObjectCache) =>
 		updateNrcsIngestObjects(context, nrcsIngestObjectCache, updateNrcsIngestModelFcn)
 	)
@@ -148,7 +153,7 @@ export async function runIngestUpdateOperationBase(
 	context: JobContext,
 	data: IngestPropsBase,
 	executeFcn: (nrcsIngestObjectCache: RundownIngestDataCache) => Promise<UpdateIngestRundownResult>
-): Promise<void> {
+): Promise<RundownId> {
 	if (!data.rundownExternalId) {
 		throw new Error(`Job is missing rundownExternalId`)
 	}
@@ -175,9 +180,6 @@ export async function runIngestUpdateOperationBase(
 
 		const ingestRundownChanges = await executeFcn(nrcsIngestObjectCache)
 
-		// // Update the NRCS ingest view
-		// const ingestRundownChanges = updateNrcsIngestObjects(context, nrcsIngestObjectCache, updateNrcsIngestModelFcn)
-
 		// Start saving the nrcs ingest data
 		const pSaveNrcsIngestChanges = nrcsIngestObjectCache.saveToDatabase()
 		pSaveNrcsIngestChanges.catch(() => null) // Prevent unhandled promise rejection
@@ -199,12 +201,7 @@ export async function runIngestUpdateOperationBase(
 			const pSaveSofieIngestChanges = sofieIngestObjectCache.saveToDatabase()
 
 			try {
-				resultingError = await updateSofieRundownModel(
-					context,
-					pIngestModel,
-					computedChanges,
-					data.peripheralDeviceId
-				)
+				resultingError = await updateSofieRundownModel(context, pIngestModel, computedChanges)
 			} finally {
 				// Ensure we save the sofie ingest data
 				await pSaveSofieIngestChanges
@@ -217,13 +214,15 @@ export async function runIngestUpdateOperationBase(
 		}
 
 		if (resultingError) throw resultingError
+
+		return rundownId
 	})
 }
 
 function updateNrcsIngestObjects(
 	context: JobContext,
 	nrcsIngestObjectCache: RundownIngestDataCache,
-	updateNrcsIngestModelFcn: (oldIngestRundown: IngestRundown | undefined) => UpdateIngestRundownResult
+	updateNrcsIngestModelFcn: (oldIngestRundown: IngestRundownWithSource | undefined) => UpdateIngestRundownResult
 ): UpdateIngestRundownResult {
 	const updateNrcsIngestModelSpan = context.startSpan('ingest.calcFcn')
 	const oldNrcsIngestRundown = nrcsIngestObjectCache.fetchRundown()
@@ -279,7 +278,8 @@ async function updateSofieIngestRundown(
 						segments: [],
 						payload: undefined,
 						userEditStates: {},
-					} satisfies Complete<IngestRundown>,
+						rundownSource: nrcsIngestRundown.rundownSource,
+					} satisfies Complete<IngestRundownWithSource>,
 					false
 			  )
 
@@ -329,9 +329,11 @@ async function updateSofieIngestRundown(
 			throw new Error(`Blueprint missing processIngestData function`)
 		}
 
+		// Ensure the rundownSource is propogated
+		mutableIngestRundown.updateRundownSource(nrcsIngestRundown.rundownSource)
+
 		const ingestObjectGenerator = new RundownIngestDataCacheGenerator(rundownId)
 		const resultChanges = mutableIngestRundown.intoIngestRundown(ingestObjectGenerator)
-		//  const newSofieIngestRundown = resultChanges.ingestRundown
 
 		// Sync changes to the cache
 		sofieIngestObjectCache.replaceDocuments(resultChanges.changedCacheObjects)
@@ -351,8 +353,7 @@ function sortIngestRundown(rundown: IngestRundown): void {
 async function updateSofieRundownModel(
 	context: JobContext,
 	pIngestModel: Promise<IngestModel & DatabasePersistedModel>,
-	computedIngestChanges: ComputedIngestChanges | null,
-	peripheralDeviceId: PeripheralDeviceId | null
+	computedIngestChanges: ComputedIngestChanges | null
 ) {
 	const ingestModel = await pIngestModel
 
@@ -385,12 +386,7 @@ async function updateSofieRundownModel(
 		}
 	} else if (computedIngestChanges) {
 		const calcSpan = context.startSpan('ingest.calcFcn')
-		commitData = await applyCalculatedIngestChangesToModel(
-			context,
-			ingestModel,
-			computedIngestChanges,
-			peripheralDeviceId
-		)
+		commitData = await applyCalculatedIngestChangesToModel(context, ingestModel, computedIngestChanges)
 		calcSpan?.end()
 	}
 
@@ -412,8 +408,7 @@ async function updateSofieRundownModel(
 async function applyCalculatedIngestChangesToModel(
 	context: JobContext,
 	ingestModel: IngestModel,
-	computedIngestChanges: ComputedIngestChangeObject,
-	peripheralDeviceId: PeripheralDeviceId | null
+	computedIngestChanges: ComputedIngestChangeObject
 ): Promise<CommitIngestData | null> {
 	const newIngestRundown = computedIngestChanges.ingestRundown
 
@@ -435,8 +430,7 @@ async function applyCalculatedIngestChangesToModel(
 			context,
 			ingestModel,
 			newIngestRundown,
-			GenerateRundownMode.Create,
-			peripheralDeviceId
+			GenerateRundownMode.Create
 		)
 
 		span?.end()
@@ -471,8 +465,7 @@ async function applyCalculatedIngestChangesToModel(
 				context,
 				ingestModel,
 				newIngestRundown,
-				GenerateRundownMode.MetadataChange, // TODO - full vs metadata?
-				peripheralDeviceId
+				GenerateRundownMode.MetadataChange // TODO - full vs metadata?
 			)
 			if (regenerateCommitData?.regenerateAllContents) {
 				const regeneratedSegmentIds = await calculateSegmentsAndRemovalsFromIngestData(

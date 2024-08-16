@@ -7,7 +7,7 @@ export async function handleUserExecuteChangeOperation(
 	context: JobContext,
 	data: UserExecuteChangeOperationProps
 ): Promise<void> {
-	return runIngestUpdateOperationBase(context, data, async (nrcsIngestObjectCache) => {
+	await runIngestUpdateOperationBase(context, data, async (nrcsIngestObjectCache) => {
 		const nrcsIngestRundown = nrcsIngestObjectCache.fetchRundown()
 		if (!nrcsIngestRundown) throw new Error(`Rundown "${data.rundownExternalId}" not found`)
 

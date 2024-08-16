@@ -14,7 +14,12 @@ import {
 	PeripheralDeviceType,
 	PERIPHERAL_SUBTYPE_PROCESS,
 } from '@sofie-automation/corelib/dist/dataModel/PeripheralDevice'
-import { DBRundown, Rundown, RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import {
+	DBRundown,
+	Rundown,
+	RundownOrphanedReason,
+	RundownSource,
+} from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { DBSegment, SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { clone, getRandomString, literal } from '@sofie-automation/corelib/dist/lib'
@@ -90,6 +95,14 @@ const rundownData1: IngestRundown = {
 	],
 }
 
+function createRundownSource(peripheralDevice: PeripheralDevice): RundownSource {
+	return {
+		type: 'nrcs',
+		peripheralDeviceId: peripheralDevice._id,
+		nrcsName: peripheralDevice.nrcsName,
+	}
+}
+
 describe('Test ingest actions for rundowns and segments', () => {
 	let context: MockJobContext
 
@@ -160,10 +173,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		await context.clearAllRundownsAndPlaylists()
 
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: data.externalId,
 			ingestRundown: data,
 			isCreateAction: true,
+			rundownSource: createRundownSource(device),
 		})
 
 		const rundown = (await context.mockCollections.Rundowns.findOne({ externalId: data.externalId })) as DBRundown
@@ -184,10 +197,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		await expect(context.mockCollections.Rundowns.findOne()).resolves.toBeFalsy()
 
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: rundownData1.externalId,
 			ingestRundown: rundownData1,
 			isCreateAction: true,
+			rundownSource: createRundownSource(device),
 		})
 
 		const savedRundownData = await getRundownData()
@@ -219,10 +232,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		}
 
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: rundownData.externalId,
 			ingestRundown: rundownData,
 			isCreateAction: false,
+			rundownSource: createRundownSource(device),
 		})
 
 		await expect(context.mockCollections.RundownPlaylists.findFetch()).resolves.toHaveLength(1)
@@ -268,10 +281,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		})
 
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: rundownData.externalId,
 			ingestRundown: rundownData,
 			isCreateAction: false,
+			rundownSource: createRundownSource(device),
 		})
 
 		await expect(context.mockCollections.Rundowns.findFetch()).resolves.toHaveLength(1)
@@ -317,10 +330,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		})
 
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: rundownData.externalId,
 			ingestRundown: rundownData,
 			isCreateAction: false,
+			rundownSource: createRundownSource(device),
 		})
 
 		await expect(context.mockCollections.RundownPlaylists.findFetch()).resolves.toHaveLength(1)
@@ -365,10 +378,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		await recreateRundown(initialRundownData)
 
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: rundownData1.externalId,
 			ingestRundown: rundownData1,
 			isCreateAction: false,
+			rundownSource: createRundownSource(device),
 		})
 
 		await expect(context.mockCollections.RundownPlaylists.findFetch()).resolves.toHaveLength(1)
@@ -399,10 +412,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		expect(rundownData.segments[0].parts.shift()).toBeTruthy()
 
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: rundownData.externalId,
 			ingestRundown: rundownData,
 			isCreateAction: false,
+			rundownSource: createRundownSource(device),
 		})
 
 		await expect(context.mockCollections.Rundowns.findFetch()).resolves.toHaveLength(1)
@@ -436,9 +449,9 @@ describe('Test ingest actions for rundowns and segments', () => {
 		}
 
 		await handleUpdatedRundownMetaDataWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: rundownData.externalId,
 			ingestRundown: rundownData,
+			rundownSource: createRundownSource(device),
 		})
 
 		await expect(context.mockCollections.RundownPlaylists.findFetch()).resolves.toHaveLength(1)
@@ -469,7 +482,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		await recreateRundown(rundownData1)
 
 		await handleRemovedRundownWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 		})
 
@@ -483,7 +495,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleRemovedRundownWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: externalId,
 			})
 		).rejects.toThrow(/Rundown.*not found/i)
@@ -549,10 +560,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleUpdatedRundownWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: rundownData.externalId,
 				ingestRundown: rundownData,
 				isCreateAction: false,
+				rundownSource: createRundownSource(device),
 			})
 		).rejects.toThrow(/Rundown.*not found/)
 
@@ -591,10 +602,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		// Submit an update trying to remove a segment
 		await expect(
 			handleUpdatedRundownWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: rundownData.externalId,
 				ingestRundown: rundownData,
 				isCreateAction: false,
+				rundownSource: createRundownSource(device2),
 			})
 		).rejects.toThrow(/Rundown(.+)not found/)
 
@@ -610,10 +621,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		await setRundownsOrphaned()
 
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: rundownData1.externalId,
 			ingestRundown: rundownData1,
 			isCreateAction: true,
+			rundownSource: createRundownSource(device),
 		})
 
 		await expect(
@@ -639,7 +650,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleUpdatedSegmentWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: externalId,
 				ingestSegment: ingestSegment,
 				isCreateAction: true,
@@ -666,7 +676,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		}
 
 		await handleUpdatedSegmentWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			ingestSegment: ingestSegment,
 			isCreateAction: true,
@@ -705,7 +714,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		}
 
 		await handleUpdatedSegmentWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			ingestSegment: ingestSegment,
 			isCreateAction: true,
@@ -737,7 +745,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		}
 
 		await handleUpdatedSegmentWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			ingestSegment: ingestSegment,
 			isCreateAction: false,
@@ -790,7 +797,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleUpdatedSegmentWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: externalId,
 				ingestSegment: ingestSegment,
 				isCreateAction: false,
@@ -832,7 +838,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleUpdatedSegmentWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: externalId,
 				ingestSegment: ingestSegment,
 				isCreateAction: false,
@@ -861,7 +866,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleUpdatedSegmentWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: 'wibble',
 				ingestSegment: ingestSegment,
 				isCreateAction: false,
@@ -885,7 +889,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		const ingestSegment = rundownData1.segments[0]
 
 		await handleUpdatedSegmentWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			ingestSegment: ingestSegment,
 			isCreateAction: false,
@@ -917,7 +920,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		expect(partsBefore).toHaveLength(2)
 
 		await handleUpdatedSegmentWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			ingestSegment: ingestSegment,
 			isCreateAction: false,
@@ -942,7 +944,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleUpdatedSegmentWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: externalId,
 				ingestSegment: ingestSegment,
 				isCreateAction: false,
@@ -966,7 +967,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleRemovedSegmentWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: externalId,
 				segmentExternalId: segExternalId,
 			})
@@ -1023,10 +1023,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		}
 
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			ingestRundown: rundownData,
 			isCreateAction: true,
+			rundownSource: createRundownSource(device),
 		})
 
 		const rundown = (await context.mockCollections.Rundowns.findOne({ externalId: externalId })) as DBRundown
@@ -1043,7 +1043,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleRemovedSegmentWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: externalId,
 				segmentExternalId: segExternalId,
 			})
@@ -1059,7 +1058,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		const segExternalId = rundownData1.segments[1].externalId
 
 		await handleRemovedSegmentWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			segmentExternalId: segExternalId,
 		})
@@ -1076,7 +1074,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleRemovedSegmentWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: externalId,
 				segmentExternalId: segExternalId,
 			})
@@ -1091,7 +1088,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleRemovedSegmentWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: 'wibble',
 				segmentExternalId: segExternalId,
 			})
@@ -1110,7 +1106,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		}
 		await expect(
 			handleUpdatedSegmentWrapped(context, {
-				peripheralDeviceId: device._id,
 				rundownExternalId: 'wibble',
 				ingestSegment: ingestSegment,
 				isCreateAction: true,
@@ -1134,7 +1129,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		}
 
 		await handleUpdatedPartWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			segmentExternalId: segment.externalId,
 			ingestPart: ingestPart,
@@ -1165,7 +1159,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		ingestPart.name = 'My special part'
 
 		await handleUpdatedPartWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			segmentExternalId: segment.externalId,
 			ingestPart: ingestPart,
@@ -1199,7 +1192,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		).resolves.toHaveLength(1)
 
 		await handleRemovedPartWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			segmentExternalId: segment.externalId,
 			partExternalId: partExternalId,
@@ -1267,17 +1259,16 @@ describe('Test ingest actions for rundowns and segments', () => {
 			],
 		}
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			ingestRundown: rundownData,
 			isCreateAction: true,
+			rundownSource: createRundownSource(device),
 		})
 
 		const rundown = (await context.mockCollections.Rundowns.findOne({ externalId: externalId })) as DBRundown
 		expect(rundown).toBeTruthy()
 
 		await handleUpdatedSegmentRanksWrapped(context, {
-			peripheralDeviceId: device._id,
 			rundownExternalId: externalId,
 			newRanks: {
 				['segment0']: 6,
@@ -1302,10 +1293,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		await expect(context.mockCollections.Rundowns.findOne()).resolves.toBeFalsy()
 
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device2._id,
 			rundownExternalId: rundownData1.externalId,
 			ingestRundown: rundownData1,
 			isCreateAction: true,
+			rundownSource: createRundownSource(device2),
 		})
 
 		const rundown = (await context.mockCollections.Rundowns.findOne({ externalId: externalId })) as DBRundown
@@ -1328,10 +1319,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		const resyncRundown = async () => {
 			// simulate a resync. we don't have a gateway to call out to, but this is how it will respond
 			await handleUpdatedRundownWrapped(context, {
-				peripheralDeviceId: device2._id,
 				rundownExternalId: rundownData1.externalId,
 				ingestRundown: rundownData1,
 				isCreateAction: true,
+				rundownSource: createRundownSource(device2),
 			})
 		}
 
@@ -1350,7 +1341,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await expect(
 			handleRemovedRundownWrapped(context, {
-				peripheralDeviceId: device2._id,
 				rundownExternalId: rundownData1.externalId,
 			})
 		).rejects.toMatchUserError(UserErrorMessage.RundownRemoveWhileActive)
@@ -1368,7 +1358,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		expect(partInstance[0].segmentId).toEqual(segments[0]._id)
 
 		await handleRemovedSegmentWrapped(context, {
-			peripheralDeviceId: device2._id,
 			rundownExternalId: rundown.externalId,
 			segmentExternalId: segments[0].externalId,
 		})
@@ -1380,7 +1369,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		await expect(getSegmentOrphaned(segments[0]._id)).resolves.toBeUndefined()
 
 		await handleRemovedPartWrapped(context, {
-			peripheralDeviceId: device2._id,
 			rundownExternalId: rundown.externalId,
 			segmentExternalId: segments[0].externalId,
 			partExternalId: parts[0].externalId,
@@ -1465,10 +1453,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		await expect(context.mockCollections.Rundowns.findOne()).resolves.toBeFalsy()
 
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device2._id,
 			rundownExternalId: rundownData.externalId,
 			ingestRundown: rundownData,
 			isCreateAction: true,
+			rundownSource: createRundownSource(device2),
 		})
 
 		const rundown = (await context.mockCollections.Rundowns.findOne({ externalId: externalId })) as DBRundown
@@ -1525,7 +1513,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		updatedSegmentData.parts[1].externalId = 'new-part'
 
 		await handleUpdatedSegmentWrapped(context, {
-			peripheralDeviceId: device2._id,
 			rundownExternalId: rundownData.externalId,
 			ingestSegment: updatedSegmentData,
 			isCreateAction: false,
@@ -1652,9 +1639,9 @@ describe('Test ingest actions for rundowns and segments', () => {
 
 		await handleUpdatedRundownWrapped(context, {
 			rundownExternalId: rundownData.externalId,
-			peripheralDeviceId: device2._id,
 			ingestRundown: rundownData,
 			isCreateAction: true,
+			rundownSource: createRundownSource(device2),
 		})
 
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as DBRundown
@@ -1695,7 +1682,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 							_rank: 0,
 							externalId: `after_${currentPartInstance.partInstance._id}_externalId`,
 							title: 'New part',
-							expectedDurationWithPreroll: undefined,
+							expectedDurationWithTransition: undefined,
 						},
 						[],
 						undefined
@@ -1758,7 +1745,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		}
 
 		await handleUpdatedSegmentWrapped(context, {
-			peripheralDeviceId: device2._id,
 			rundownExternalId: rundownData.externalId,
 			ingestSegment: ingestSegment,
 			isCreateAction: false,
@@ -1836,7 +1822,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		}
 
 		await handleUpdatedSegmentWrapped(context, {
-			peripheralDeviceId: device2._id,
 			rundownExternalId: rundownData.externalId,
 			ingestSegment: ingestSegment,
 			isCreateAction: false,
@@ -1941,10 +1926,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		// Preparation: set up rundown
 		await expect(context.mockCollections.Rundowns.findOne()).resolves.toBeFalsy()
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device2._id,
 			rundownExternalId: rundownData.externalId,
 			ingestRundown: rundownData,
 			isCreateAction: true,
+			rundownSource: createRundownSource(device2),
 		})
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as Rundown
 		expect(rundown).toMatchObject({
@@ -1993,7 +1978,6 @@ describe('Test ingest actions for rundowns and segments', () => {
 		// Delete segment 0, while on air
 		const segmentExternalId = rundownData.segments[0].externalId
 		await handleRemovedSegmentWrapped(context, {
-			peripheralDeviceId: device2._id,
 			rundownExternalId: rundownData.externalId,
 			segmentExternalId: segmentExternalId,
 		})
@@ -2022,10 +2006,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		// Trigger an 'resync' of the rundown
 		rundownData.segments.splice(0, 1)
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device2._id,
 			rundownExternalId: rundownData.externalId,
 			ingestRundown: rundownData,
 			isCreateAction: false,
+			rundownSource: createRundownSource(device2),
 		})
 
 		// Make sure segment0 is still deleted
@@ -2108,10 +2092,10 @@ describe('Test ingest actions for rundowns and segments', () => {
 		// Preparation: set up rundown
 		await expect(context.mockCollections.Rundowns.findOne()).resolves.toBeFalsy()
 		await handleUpdatedRundownWrapped(context, {
-			peripheralDeviceId: device2._id,
 			rundownExternalId: rundownData.externalId,
 			ingestRundown: rundownData,
 			isCreateAction: true,
+			rundownSource: createRundownSource(device2),
 		})
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as Rundown
 		expect(rundown).toMatchObject({

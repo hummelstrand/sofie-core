@@ -21,8 +21,8 @@ import { IResolvedSegmentProps, PieceUi } from './SegmentContainer/withResolvedS
 import { UIStudio } from '../../lib/api/studios'
 import { RundownId, SegmentId, ShowStyleBaseId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { UIShowStyleBase } from '../../lib/api/showStyles'
-import { SegmentScratchpadContainer } from './SegmentScratchpad/SegmentScratchpadContainer'
 import { MatchedSegment } from './RundownView'
+import { SegmentAdlibTestingContainer } from './SegmentAdlibTesting/SegmentAdlibTestingContainer'
 
 const DEFAULT_SEGMENT_VIEW_MODE = SegmentViewMode.Timeline
 interface SegmentsParseProps {
@@ -262,8 +262,8 @@ function RenderSegmentComponent({
 				width="auto"
 			>
 				{((): React.ReactNode => {
-					if (segment.orphaned === SegmentOrphanedReason.SCRATCHPAD) {
-						return <SegmentScratchpadContainer {...resolvedSegmentProps} />
+					if (segment.orphaned === SegmentOrphanedReason.ADLIB_TESTING) {
+						return <SegmentAdlibTestingContainer {...resolvedSegmentProps} />
 					}
 
 					switch (displayMode) {

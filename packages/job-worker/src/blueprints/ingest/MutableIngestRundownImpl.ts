@@ -1,6 +1,5 @@
 import type {
 	IngestSegment,
-	IngestRundown,
 	MutableIngestRundown,
 	MutableIngestSegment,
 	MutableIngestPart,
@@ -11,8 +10,12 @@ import _ = require('underscore')
 import { MutableIngestSegmentImpl } from './MutableIngestSegmentImpl'
 import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
-import { NrcsIngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import {
+	IngestRundownWithSource,
+	NrcsIngestDataCacheObj,
+} from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import type { ComputedIngestChangeObject } from '../../ingest/runOperation'
+import { RundownSource } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 
 export interface MutableIngestRundownChanges {
 	// define what needs regenerating
@@ -26,7 +29,7 @@ export interface MutableIngestRundownChanges {
 export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown>
 	implements MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>
 {
-	readonly ingestRundown: Omit<IngestRundown, 'segments'>
+	readonly ingestRundown: Omit<IngestRundownWithSource, 'segments'>
 	#hasChangesToRundown = false
 	// #segmentOrderChanged = false
 
@@ -34,7 +37,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 	readonly #originalSegmentRanks = new Map<string, number>()
 
-	constructor(ingestRundown: IngestRundown, isExistingRundown: boolean) {
+	constructor(ingestRundown: IngestRundownWithSource, isExistingRundown: boolean) {
 		this.ingestRundown = omit(ingestRundown, 'segments')
 		this.#segments = ingestRundown.segments
 			.slice() // shallow copy
@@ -65,6 +68,16 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 	get payload(): ReadonlyDeep<TRundownPayload> | undefined {
 		return this.ingestRundown.payload
+	}
+
+	/**
+	 * Internal method to propogate the rundown source
+	 */
+	updateRundownSource(source: RundownSource): void {
+		if (!_.isEqual(source, this.ingestRundown.rundownSource)) {
+			this.ingestRundown.rundownSource = source
+			this.#hasChangesToRundown = true
+		}
 	}
 
 	setName(name: string): void {

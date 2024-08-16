@@ -3,7 +3,6 @@ import {
 	BucketAdLibActionId,
 	BucketId,
 	ExpectedPackageId,
-	PeripheralDeviceId,
 	PieceId,
 	RundownId,
 	SegmentId,
@@ -20,6 +19,7 @@ import {
 	UserOperationTarget,
 } from '@sofie-automation/blueprints-integration'
 import { BucketAdLibAction } from '../dataModel/BucketAdLibAction'
+import { RundownSource } from '../dataModel/Rundown'
 
 export enum IngestJobs {
 	/**
@@ -137,11 +137,15 @@ export enum IngestJobs {
 	BucketRemoveAdlibPiece = 'bucketRemoveAdlibPiece',
 	BucketRemoveAdlibAction = 'bucketRemoveAdlibAction',
 	BucketEmpty = 'bucketEmpty',
+
+	/**
+	 * Create a testing rundown for the specified ShowStyleVariant
+	 */
+	CreateAdlibTestingRundownForShowStyleVariant = 'createAdlibTestingRundownForShowStyleVariant',
 }
 
 export interface IngestPropsBase {
 	rundownExternalId: string
-	peripheralDeviceId: PeripheralDeviceId | null
 }
 export interface IngestRemoveRundownProps extends IngestPropsBase {
 	forceDelete?: boolean
@@ -149,9 +153,13 @@ export interface IngestRemoveRundownProps extends IngestPropsBase {
 export interface IngestUpdateRundownProps extends IngestPropsBase {
 	ingestRundown: IngestRundown
 	isCreateAction: boolean // TODO: Document what isCreateAction means
+
+	rundownSource: RundownSource
 }
 export interface IngestUpdateRundownMetaDataProps extends IngestPropsBase {
 	ingestRundown: Omit<IngestRundown, 'segments'>
+
+	rundownSource: RundownSource
 }
 export interface IngestRemoveSegmentProps extends IngestPropsBase {
 	segmentExternalId: string
@@ -189,9 +197,12 @@ export interface MosRundownProps extends IngestPropsBase {
 	 * If true, it will fail if the Rundown does not already exist
 	 */
 	isUpdateOperation: boolean
+
+	rundownSource: RundownSource
 }
 export interface MosRundownMetadataProps extends IngestPropsBase {
 	mosRunningOrderBase: MOS.IMOSRunningOrderBase
+	rundownSource: RundownSource
 }
 export interface MosRundownStatusProps extends IngestPropsBase {
 	status: string
@@ -270,6 +281,10 @@ export interface BucketEmptyProps {
 	bucketId: BucketId
 }
 
+export interface CreateAdlibTestingRundownForShowStyleVariantProps {
+	showStyleVariantId: ShowStyleVariantId
+}
+
 /**
  * Set of valid functions, of form:
  * `id: (data) => return`
@@ -313,6 +328,10 @@ export type IngestJobFunc = {
 	[IngestJobs.BucketRemoveAdlibPiece]: (data: BucketRemoveAdlibPieceProps) => void
 	[IngestJobs.BucketRemoveAdlibAction]: (data: BucketRemoveAdlibActionProps) => void
 	[IngestJobs.BucketEmpty]: (data: BucketEmptyProps) => void
+
+	[IngestJobs.CreateAdlibTestingRundownForShowStyleVariant]: (
+		data: CreateAdlibTestingRundownForShowStyleVariantProps
+	) => RundownId
 }
 
 // Future: there should probably be a queue per rundown or something. To be improved later

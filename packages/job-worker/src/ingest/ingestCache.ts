@@ -5,10 +5,11 @@ import {
 	NrcsIngestDataCacheObjRundown,
 	NrcsIngestDataCacheObjSegment,
 	NrcsIngestDataCacheObjPart,
+	IngestRundownWithSource,
 } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { protectString, unprotectString } from '@sofie-automation/corelib/dist/protectedString'
 import _ = require('underscore')
-import { IngestPart, IngestRundown, IngestSegment } from '@sofie-automation/blueprints-integration'
+import { IngestPart, IngestSegment } from '@sofie-automation/blueprints-integration'
 import { JobContext } from '../jobs'
 import { getPartId, getSegmentId } from './lib'
 import { SetOptional } from 'type-fest'
@@ -47,7 +48,7 @@ export class RundownIngestDataCache {
 	 * Fetch the IngestRundown contained in the cache
 	 * Note: This does not deep clone the objects, so the returned object should not be modified
 	 */
-	fetchRundown(): IngestRundown | undefined {
+	fetchRundown(): IngestRundownWithSource | undefined {
 		const span = this.context.startSpan('ingest.ingestCache.loadCachedRundownData')
 
 		const cachedRundown = this.documents.find(
@@ -58,7 +59,7 @@ export class RundownIngestDataCache {
 			return undefined
 		}
 
-		const ingestRundown: IngestRundown = {
+		const ingestRundown: IngestRundownWithSource = {
 			...cachedRundown.data,
 			segments: [],
 		}
@@ -102,7 +103,7 @@ export class RundownIngestDataCache {
 	 * This will diff and replace the documents in the cache
 	 * @param ingestRundown The new IngestRundown to store in the cache
 	 */
-	replace(ingestRundown: IngestRundown): void {
+	replace(ingestRundown: IngestRundownWithSource): void {
 		const generator = new RundownIngestDataCacheGenerator(this.rundownId)
 		const cacheEntries: NrcsIngestDataCacheObj[] = generator.generateCacheForRundown(ingestRundown)
 
@@ -241,7 +242,9 @@ export class RundownIngestDataCacheGenerator {
 		}
 	}
 
-	generateRundownObject(ingestRundown: SetOptional<IngestRundown, 'segments'>): NrcsIngestDataCacheObjRundown {
+	generateRundownObject(
+		ingestRundown: SetOptional<IngestRundownWithSource, 'segments'>
+	): NrcsIngestDataCacheObjRundown {
 		return {
 			_id: this.getRundownObjectId(),
 			type: IngestCacheType.RUNDOWN,
@@ -254,7 +257,7 @@ export class RundownIngestDataCacheGenerator {
 		}
 	}
 
-	generateCacheForRundown(ingestRundown: IngestRundown): NrcsIngestDataCacheObj[] {
+	generateCacheForRundown(ingestRundown: IngestRundownWithSource): NrcsIngestDataCacheObj[] {
 		const cacheEntries: NrcsIngestDataCacheObj[] = []
 
 		const rundown = this.generateRundownObject(ingestRundown)

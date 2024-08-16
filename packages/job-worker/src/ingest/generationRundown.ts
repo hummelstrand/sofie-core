@@ -1,8 +1,8 @@
 import { ExpectedPackageDBType } from '@sofie-automation/corelib/dist/dataModel/ExpectedPackages'
-import { BlueprintId, PeripheralDeviceId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { BlueprintId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { RundownNote } from '@sofie-automation/corelib/dist/dataModel/Notes'
 import { serializePieceTimelineObjectsBlob } from '@sofie-automation/corelib/dist/dataModel/Piece'
-import { DBRundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import { DBRundown, RundownSource } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import { stringifyError } from '@sofie-automation/shared-lib/dist/lib/stringifyError'
 import { WrappedShowStyleBlueprint } from '../blueprints/cache'
@@ -20,13 +20,13 @@ import { extendIngestRundownCore, canRundownBeUpdated } from './lib'
 import { JobContext } from '../jobs'
 import { CommitIngestData } from './lock'
 import { SelectedShowStyleVariant, selectShowStyleVariant } from './selectShowStyleVariant'
-import { PeripheralDevice } from '@sofie-automation/corelib/dist/dataModel/PeripheralDevice'
 import { updateExpectedPackagesForRundownBaseline } from './expectedPackages'
 import { ReadonlyDeep } from 'type-fest'
-import { BlueprintResultRundown, ExtendedIngestRundown, IngestRundown } from '@sofie-automation/blueprints-integration'
+import { BlueprintResultRundown, ExtendedIngestRundown } from '@sofie-automation/blueprints-integration'
 import { wrapTranslatableMessageFromBlueprints } from '@sofie-automation/corelib/dist/TranslatableMessage'
 import { convertRundownToBlueprintSegmentRundown, translateUserEditsFromBlueprint } from '../blueprints/context/lib'
 import { calculateSegmentsAndRemovalsFromIngestData } from './generationSegment'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 
 export enum GenerateRundownMode {
 	Create = 'create',
@@ -44,15 +44,14 @@ export interface CommitIngestDataExt extends CommitIngestData {
  * @param ingestModel The ingest model of the rundown
  * @param ingestRundown The rundown to regenerate
  * @param isCreateAction Whether this operation is to create the Rundown or update it
- * @param peripheralDeviceId Id of the PeripheralDevice the Rundown originated from
+ * @param rundownSource Source of this Rundown
  * @returns CommitIngestData describing the change
  */
 export async function updateRundownFromIngestData(
 	context: JobContext,
 	ingestModel: IngestModel,
-	ingestRundown: IngestRundown,
-	generateMode: GenerateRundownMode,
-	peripheralDeviceId: PeripheralDeviceId | null
+	ingestRundown: IngestRundownWithSource,
+	generateMode: GenerateRundownMode
 ): Promise<CommitIngestDataExt | null> {
 	const span = context.startSpan('ingest.rundownInput.updateRundownFromIngestData')
 
@@ -60,8 +59,7 @@ export async function updateRundownFromIngestData(
 		context,
 		ingestModel,
 		ingestRundown,
-		generateMode,
-		peripheralDeviceId
+		generateMode
 	)
 
 	if (!regenerateAllContents) return null
@@ -97,9 +95,8 @@ export interface UpdateRundownInnerResult {
 export async function updateRundownFromIngestDataInner(
 	context: JobContext,
 	ingestModel: IngestModel,
-	ingestRundown: IngestRundown,
-	generateMode: GenerateRundownMode,
-	peripheralDeviceId: PeripheralDeviceId | null
+	ingestRundown: IngestRundownWithSource,
+	generateMode: GenerateRundownMode
 ): Promise<UpdateRundownInnerResult | null> {
 	if (!canRundownBeUpdated(ingestModel.rundown, generateMode === GenerateRundownMode.Create)) return null
 
@@ -107,11 +104,6 @@ export async function updateRundownFromIngestDataInner(
 	if (!existingRundown && generateMode === GenerateRundownMode.MetadataChange) {
 		throw new Error(`Rundown "${ingestRundown.externalId}" does not exist`)
 	}
-
-	const pPeripheralDevice = peripheralDeviceId
-		? context.directCollections.PeripheralDevices.findOne(peripheralDeviceId)
-		: undefined
-	pPeripheralDevice?.catch(() => null) // Ensure no uncaught promise rejections
 
 	logger.info(`${ingestModel.rundown ? 'Updating' : 'Adding'} rundown ${ingestModel.rundownId}`)
 
@@ -130,7 +122,12 @@ export async function updateRundownFromIngestDataInner(
 	)
 
 	// TODO-CONTEXT save any user notes from selectShowStyleContext
-	const showStyle = await selectShowStyleVariant(context, selectShowStyleContext, extendedIngestRundown)
+	const showStyle = await selectShowStyleVariant(
+		context,
+		selectShowStyleContext,
+		extendedIngestRundown,
+		ingestRundown.rundownSource
+	)
 	if (!showStyle) {
 		logger.debug('Blueprint rejected the rundown')
 		throw new Error('Blueprint rejected the rundown')
@@ -146,7 +143,7 @@ export async function updateRundownFromIngestDataInner(
 		context,
 		ingestModel,
 		extendedIngestRundown,
-		pPeripheralDevice,
+		ingestRundown.rundownSource,
 		showStyle,
 		showStyleBlueprint,
 		allRundownWatchedPackages
@@ -166,7 +163,6 @@ export async function updateRundownFromIngestDataInner(
 				convertRundownToBlueprintSegmentRundown(existingRundown, true),
 				convertRundownToBlueprintSegmentRundown(dbRundown, true)
 			)
-
 		if (regenerateAllContents) {
 			logger.info(`MetaData of rundown ${dbRundown.externalId} has been modified, regenerating segments`)
 		}
@@ -193,7 +189,7 @@ export async function regenerateRundownAndBaselineFromIngestData(
 	context: JobContext,
 	ingestModel: IngestModel,
 	extendedIngestRundown: ExtendedIngestRundown,
-	pPeripheralDevice: Promise<PeripheralDevice | undefined> | undefined,
+	rundownSource: RundownSource,
 	showStyle: SelectedShowStyleVariant,
 	showStyleBlueprint: ReadonlyDeep<WrappedShowStyleBlueprint>,
 	allRundownWatchedPackages: WatchedPackagesHelper
@@ -269,14 +265,12 @@ export async function regenerateRundownAndBaselineFromIngestData(
 		})
 	)
 
-	const peripheralDevice = await pPeripheralDevice
-
 	ingestModel.setRundownData(
 		rundownRes.rundown,
 		showStyle.base,
 		showStyle.variant,
 		showStyleBlueprint,
-		peripheralDevice,
+		rundownSource,
 		rundownNotes,
 		translateUserEditsFromBlueprint(rundownRes.rundown.userEdits, translationNamespaces)
 	)
