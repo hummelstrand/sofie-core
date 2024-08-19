@@ -105,75 +105,90 @@ export function getAllCurrentItemsFromOverrides<T extends object>(
 
 type SaveOverridesFunction = (newOps: SomeObjectOverrideOp[]) => void
 
-export interface OverrideOpHelperForItemContents {
+export type OverrideOpHelperForItemContents = () => OverrideOpHelperForItemContentsBatcher
+
+export interface OverrideOpHelperForItemContentsBatcher {
 	/**
 	 * Clear all of the overrides for an value inside of an item
 	 * This acts as a reset of property of its child properties
 	 * Has no effect if there are no `overrideOps` on the `WrappedOverridableItemNormal`
 	 */
-	clearItemOverrides(itemId: string, subPath: string): void
+	clearItemOverrides(itemId: string, subPath: string): this
 
 	/**
 	 * Set the value of a property of an item.
 	 * Note: the id cannot be changed in this way
 	 */
-	setItemValue(itemId: string, subPath: string, value: unknown): void
+	setItemValue(itemId: string, subPath: string, value: unknown): this
+
+	/**
+	 * Finish the batch operation
+	 */
+	commit(): void
 }
 
-export interface OverrideOpHelper extends OverrideOpHelperForItemContents {
+export interface OverrideOpHelperBatcher extends OverrideOpHelperForItemContentsBatcher {
 	/**
 	 * Clear all of the overrides for an item
 	 * This acts as a reset to defaults or undelete
 	 * Has no effect if there are no `overrideOps` on the `WrappedOverridableItemNormal`
 	 */
-	resetItem(itemId: string): void
+	resetItem(itemId: string): this
 
 	/**
 	 * Delete an item from the object
 	 */
-	deleteItem(itemId: string): void
+	deleteItem(itemId: string): this
 
 	/**
 	 * Change the id of an item.
 	 * This is only possible for ones which were created by an override, and does not exist in the defaults
 	 * Only possible when the item being renamed does not exist in the defaults
 	 */
-	changeItemId(oldItemId: string, newItemId: string): void
+	changeItemId(oldItemId: string, newItemId: string): this
 
 	/**
 	 * Replace a whole item with a new object
 	 * Note: the id cannot be changed in this way
 	 */
-	replaceItem(itemId: string, value: any): void
+	replaceItem(itemId: string, value: any): this
+
+	/**
+	 * Finish the batch operation
+	 */
+	commit(): void
 }
-export class OverrideOpHelperImpl implements OverrideOpHelper {
+
+export type OverrideOpHelper = () => OverrideOpHelperBatcher
+
+export class OverrideOpHelperImpl implements OverrideOpHelperBatcher {
 	readonly #saveOverrides: SaveOverridesFunction
 	readonly #objectWithOverrides: { current: ObjectWithOverrides<any> }
 
 	constructor(saveOverrides: SaveOverridesFunction, objectWithOverridesRef: { current: ObjectWithOverrides<any> }) {
 		this.#saveOverrides = saveOverrides
-		this.#objectWithOverrides = objectWithOverridesRef
+		this.#objectWithOverrides = { ...objectWithOverridesRef }
 	}
 
-	clearItemOverrides = (itemId: string, subPath: string): void => {
-		if (!this.#objectWithOverrides.current) return
-
+	clearItemOverrides = (itemId: string, subPath: string): this => {
 		const opPath = `${itemId}.${subPath}`
 
 		const newOps = this.#objectWithOverrides.current.overrides.filter((op) => op.path !== opPath)
 
-		this.#saveOverrides(newOps)
+		this.#objectWithOverrides.current.overrides = newOps
+
+		return this
 	}
 
-	resetItem = (itemId: string): void => {
-		if (!this.#objectWithOverrides.current) return
-
+	resetItem = (itemId: string): this => {
 		const newOps = filterOverrideOpsForPrefix(this.#objectWithOverrides.current.overrides, itemId).otherOps
 
-		this.#saveOverrides(newOps)
+		this.#objectWithOverrides.current.overrides = newOps
+
+		return this
 	}
 
-	deleteItem = (itemId: string): void => {
+	deleteItem = (itemId: string): this => {
 		const newOps = filterOverrideOpsForPrefix(this.#objectWithOverrides.current.overrides, itemId).otherOps
 		if (this.#objectWithOverrides.current.defaults[itemId]) {
 			// If it was from the defaults, we need to mark it deleted
@@ -185,12 +200,12 @@ export class OverrideOpHelperImpl implements OverrideOpHelper {
 			)
 		}
 
-		this.#saveOverrides(newOps)
+		this.#objectWithOverrides.current.overrides = newOps
+
+		return this
 	}
 
-	changeItemId = (oldItemId: string, newItemId: string): void => {
-		if (!this.#objectWithOverrides.current) return
-
+	changeItemId = (oldItemId: string, newItemId: string): this => {
 		const { otherOps: newOps, opsForPrefix: opsForId } = filterOverrideOpsForPrefix(
 			this.#objectWithOverrides.current.overrides,
 			oldItemId
@@ -223,13 +238,13 @@ export class OverrideOpHelperImpl implements OverrideOpHelper {
 				}
 			}
 
-			this.#saveOverrides(newOps)
+			this.#objectWithOverrides.current.overrides = newOps
+
+			return this
 		}
 	}
 
-	setItemValue = (itemId: string, subPath: string, value: unknown): void => {
-		if (!this.#objectWithOverrides.current) return
-
+	setItemValue = (itemId: string, subPath: string, value: unknown): this => {
 		if (subPath === '_id') {
 			throw new Error('Item id cannot be changed through this helper')
 		} else {
@@ -277,13 +292,13 @@ export class OverrideOpHelperImpl implements OverrideOpHelper {
 				}
 			}
 
-			this.#saveOverrides(newOps)
+			this.#objectWithOverrides.current.overrides = newOps
+
+			return this
 		}
 	}
 
-	replaceItem = (itemId: string, value: unknown): void => {
-		if (!this.#objectWithOverrides.current) return
-
+	replaceItem = (itemId: string, value: unknown): this => {
 		// Set a property
 		const { otherOps: newOps } = filterOverrideOpsForPrefix(this.#objectWithOverrides.current.overrides, itemId)
 
@@ -297,7 +312,13 @@ export class OverrideOpHelperImpl implements OverrideOpHelper {
 			})
 		)
 
-		this.#saveOverrides(newOps)
+		this.#objectWithOverrides.current.overrides = newOps
+
+		return this
+	}
+
+	commit = (): void => {
+		this.#saveOverrides(this.#objectWithOverrides.current.overrides)
 	}
 }
 
@@ -307,6 +328,6 @@ export class OverrideOpHelperImpl implements OverrideOpHelper {
 export function useOverrideOpHelperBackend<T extends object>(
 	saveOverrides: (newOps: SomeObjectOverrideOp[]) => void,
 	objectWithOverrides: ObjectWithOverrides<T>
-): OverrideOpHelper {
+): OverrideOpHelperBatcher {
 	return new OverrideOpHelperImpl(saveOverrides, { current: objectWithOverrides })
 }

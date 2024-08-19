@@ -38,7 +38,7 @@ import {
 	WrappedOverridableItemNormal,
 	getAllCurrentAndDeletedItemsFromOverrides,
 	useOverrideOpHelper,
-} from '../../util/OverrideOpHelper'
+} from '../util/OverrideOpHelper'
 import {
 	ObjectOverrideSetOp,
 	SomeObjectOverrideOp,

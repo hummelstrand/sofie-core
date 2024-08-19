@@ -7,7 +7,7 @@ import {
 	WrappedOverridableItemNormal,
 	OverrideOpHelperForItemContents,
 	getAllCurrentAndDeletedItemsFromOverrides,
-} from '../../../ui/util/OverrideOpHelper'
+} from '../../../ui/Settings/util/OverrideOpHelper'
 import { useToggleExpandHelper } from '../../../ui/util/useToggleExpandHelper'
 import { doModalDialog } from '../../ModalDialog'
 import {

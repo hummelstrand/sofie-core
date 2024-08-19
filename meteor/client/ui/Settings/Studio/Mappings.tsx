@@ -15,7 +15,7 @@ import {
 	OverrideOpHelper,
 	useOverrideOpHelper,
 	WrappedOverridableItemNormal,
-} from '../../util/OverrideOpHelper'
+} from '../util/OverrideOpHelper'
 import {
 	applyAndValidateOverrides,
 	ObjectOverrideSetOp,
