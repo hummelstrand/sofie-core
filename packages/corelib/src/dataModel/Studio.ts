@@ -69,8 +69,8 @@ export interface IStudioSettings {
 	 */
 	minimumTakeSpan: number
 
-	/** Whether to allow scratchpad mode, before a Part is playing in a Playlist */
-	allowScratchpad?: boolean
+	/** Whether to allow adlib testing mode, before a Part is playing in a Playlist */
+	allowAdlibTestingSegment?: boolean
 }
 
 export type StudioLight = Omit<DBStudio, 'mappingsWithOverrides' | 'blueprintConfigWithOverrides'>
