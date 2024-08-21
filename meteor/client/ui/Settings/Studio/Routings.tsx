@@ -34,6 +34,7 @@ import {
 } from '../../../lib/Components/LabelAndOverrides'
 import {
 	OverrideOpHelper,
+	OverrideOpHelperForItemContents,
 	WrappedOverridableItem,
 	WrappedOverridableItemDeleted,
 	WrappedOverridableItemNormal,
@@ -263,7 +264,7 @@ function RenderRouteSet({
 			yes: t('Remove'),
 			no: t('Cancel'),
 			onAccept: () => {
-				overrideHelper.deleteItem(routeSetId)
+				overrideHelper().deleteItem(routeSetId).commit()
 			},
 			message: (
 				<React.Fragment>
@@ -284,7 +285,7 @@ function RenderRouteSet({
 			routeType: StudioRouteType.REROUTE,
 		})
 
-		overrideHelper.setItemValue(routeId, 'routes', newRoutes)
+		overrideHelper().setItemValue(routeId, 'routes', newRoutes).commit()
 	}
 
 	const addNewAbPlayerInSet = (routeId: string) => {
@@ -295,12 +296,12 @@ function RenderRouteSet({
 			playerId: '',
 		})
 
-		overrideHelper.setItemValue(routeId, 'abPlayers', newAbPlayers)
+		overrideHelper().setItemValue(routeId, 'abPlayers', newAbPlayers).commit()
 	}
 
 	const updateRouteSetId = React.useCallback(
 		(newRouteSetId: string) => {
-			overrideHelper.changeItemId(routeSet.id, newRouteSetId)
+			overrideHelper().changeItemId(routeSet.id, newRouteSetId).commit()
 			toggleExpanded(newRouteSetId, true)
 		},
 		[overrideHelper, toggleExpanded, routeSet.id]
@@ -325,13 +326,13 @@ function RenderRouteSet({
 	}
 
 	const resyncRoutesTable = React.useCallback(
-		() => overrideHelper.clearItemOverrides(routeSet.id, 'routes'),
+		() => overrideHelper().clearItemOverrides(routeSet.id, 'routes').commit(),
 		[overrideHelper, routeSet.id]
 	)
 	const routesIsOverridden = hasOpWithPath(routeSet.overrideOps, routeSet.id, 'routes')
 
 	const resyncAbPlayerTable = React.useCallback(
-		() => overrideHelper.clearItemOverrides(routeSet.id, 'abPlayers'),
+		() => overrideHelper().clearItemOverrides(routeSet.id, 'abPlayers').commit(),
 		[overrideHelper, routeSet.id]
 	)
 	const abPlayerIsOverridden = hasOpWithPath(routeSet.overrideOps, routeSet.id, 'abPlayers')
@@ -516,7 +517,10 @@ interface IRenderRouteSetDeletedProps {
 }
 
 function RenderRouteSetDeletedEntry({ routeSet, overrideHelper }: Readonly<IRenderRouteSetDeletedProps>) {
-	const doUndeleteItem = React.useCallback(() => overrideHelper.resetItem(routeSet.id), [overrideHelper, routeSet.id])
+	const doUndeleteItem = React.useCallback(
+		() => overrideHelper().resetItem(routeSet.id).commit(),
+		[overrideHelper, routeSet.id]
+	)
 
 	return (
 		<tr>
@@ -551,8 +555,8 @@ function RenderRoutes({
 
 	const routesBuffer = routeSet.computed.routes
 
-	const tableOverrideHelper = React.useMemo(
-		() => new OverrideOpHelperArrayTable(overrideHelper, routeSet.id, routesBuffer, 'routes'),
+	const tableOverrideHelper = React.useCallback(
+		() => new OverrideOpHelperArrayTable(overrideHelper(), routeSet.id, routesBuffer, 'routes'),
 		[overrideHelper, routeSet.id, routesBuffer]
 	)
 
@@ -563,7 +567,7 @@ function RenderRoutes({
 				yes: t('Remove'),
 				no: t('Cancel'),
 				onAccept: () => {
-					tableOverrideHelper.deleteRow(route.id)
+					tableOverrideHelper().deleteRow(route.id).commit()
 				},
 				message: (
 					<>
@@ -606,7 +610,7 @@ function RenderRoutes({
 interface RenderRoutesRowProps {
 	manifest: MappingsSettingsManifests
 	translationNamespaces: string[]
-	tableOverrideHelper: OverrideOpHelperArrayTable
+	tableOverrideHelper: OverrideOpHelperForItemContents
 	studioMappings: ReadonlyDeep<MappingsExt>
 	rawRoute: RouteMapping
 	routeIndex: number
@@ -812,7 +816,7 @@ interface IDeviceMappingSettingsProps {
 	translationNamespaces: string[]
 	manifest: MappingsSettingsManifest | undefined
 	mappedLayer: ReadonlyDeep<MappingExt> | undefined
-	overrideHelper: OverrideOpHelperArrayTable
+	overrideHelper: OverrideOpHelperForItemContents
 	route: WrappedOverridableItemNormal<RouteMapping>
 }
 
@@ -860,8 +864,8 @@ function RenderAbPlayers({ routeSet, overrideHelper }: Readonly<IRenderAbPlayers
 
 	const abPlayersBuffer = routeSet.computed.abPlayers
 
-	const tableOverrideHelper = React.useMemo(
-		() => new OverrideOpHelperArrayTable(overrideHelper, routeSet.id, abPlayersBuffer, 'abPlayers'),
+	const tableOverrideHelper = React.useCallback(
+		() => new OverrideOpHelperArrayTable(overrideHelper(), routeSet.id, abPlayersBuffer, 'abPlayers'),
 		[overrideHelper, routeSet.id, abPlayersBuffer]
 	)
 
@@ -872,7 +876,7 @@ function RenderAbPlayers({ routeSet, overrideHelper }: Readonly<IRenderAbPlayers
 				yes: t('Remove'),
 				no: t('Cancel'),
 				onAccept: () => {
-					tableOverrideHelper.deleteRow(route.id)
+					tableOverrideHelper().deleteRow(route.id).commit()
 				},
 				message: (
 					<>
@@ -910,7 +914,7 @@ function RenderAbPlayers({ routeSet, overrideHelper }: Readonly<IRenderAbPlayers
 }
 
 interface RenderAbPlayerRowProps {
-	tableOverrideHelper: OverrideOpHelperArrayTable
+	tableOverrideHelper: OverrideOpHelperForItemContents
 	abPlayers: StudioAbPlayerDisabling[]
 	rawRoute: StudioAbPlayerDisabling
 	routeIndex: number
@@ -1071,7 +1075,7 @@ function RenderExclusivityGroup({
 	const { t } = useTranslation()
 
 	const removeExclusivityGroup = (eGroupId: string) => {
-		exclusivityOverrideHelper.deleteItem(eGroupId)
+		exclusivityOverrideHelper().deleteItem(eGroupId).commit()
 	}
 
 	const confirmRemoveEGroup = () => {
@@ -1099,7 +1103,7 @@ function RenderExclusivityGroup({
 	}
 	const updateExclusivityGroupId = React.useCallback(
 		(newGroupId: string) => {
-			exclusivityOverrideHelper.changeItemId(exclusivityGroup.id, newGroupId)
+			exclusivityOverrideHelper().changeItemId(exclusivityGroup.id, newGroupId).commit()
 			toggleExpanded(newGroupId, true)
 		},
 		[exclusivityOverrideHelper, toggleExpanded, exclusivityGroup.id]
@@ -1184,7 +1188,7 @@ function RenderExclusivityDeletedGroup({
 	exlusivityOverrideHelper: overrideHelper,
 }: Readonly<IRenderExclusivityDeletedGroupProps>): React.JSX.Element {
 	const doUndeleteItem = React.useCallback(
-		() => overrideHelper.resetItem(exclusivityGroup.id),
+		() => overrideHelper().resetItem(exclusivityGroup.id).commit(),
 		[overrideHelper, exclusivityGroup.id]
 	)
 

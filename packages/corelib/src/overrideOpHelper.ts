@@ -7,12 +7,7 @@ import {
 	applyAndValidateOverrides,
 	filterOverrideOpsForPrefix,
 	findParentOpToUpdate,
-<<<<<<< HEAD:packages/corelib/src/overrideOpHelper.ts
 } from './settings/objectWithOverrides'
-=======
-} from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
-import { useRef, useEffect, useCallback } from 'react'
->>>>>>> release51:meteor/client/ui/Settings/util/OverrideOpHelper.tsx
 import { ReadonlyDeep } from 'type-fest'
 
 export interface WrappedOverridableItemDeleted<T extends object> {
@@ -46,7 +41,6 @@ export function getAllCurrentAndDeletedItemsFromOverrides<T extends object>(
 		| ((a: [id: string, obj: T | ReadonlyDeep<T>], b: [id: string, obj: T | ReadonlyDeep<T>]) => number)
 		| null
 ): WrappedOverridableItem<T>[] {
-	// Sort and wrap in the return type
 	const sortedItems = getAllCurrentItemsFromOverrides(rawObject, comparitor)
 
 	const removedItems: WrappedOverridableItemDeleted<T>[] = []
@@ -156,25 +150,6 @@ export interface OverrideOpHelperBatcher extends OverrideOpHelperForItemContents
 	 * Replace a whole item with a new object
 	 * Note: the id cannot be changed in this way
 	 */
-<<<<<<< HEAD:packages/corelib/src/overrideOpHelper.ts
-	replaceItem(itemId: string, value: any): void
-}
-export class OverrideOpHelperImpl implements OverrideOpHelper {
-	readonly #saveOverrides: SaveOverridesFunction
-	readonly #objectWithOverrides: { current: ObjectWithOverrides<any> }
-
-	constructor(saveOverrides: SaveOverridesFunction, objectWithOverridesRef: { current: ObjectWithOverrides<any> }) {
-		this.#saveOverrides = saveOverrides
-		this.#objectWithOverrides = objectWithOverridesRef
-	}
-
-	clearItemOverrides = (itemId: string, subPath: string): void => {
-		if (!this.#objectWithOverrides.current) return
-
-		const opPath = `${itemId}.${subPath}`
-
-		const newOps = this.#objectWithOverrides.current.overrides.filter((op) => op.path !== opPath)
-=======
 	replaceItem(itemId: string, value: any): this
 
 	/**
@@ -185,7 +160,7 @@ export class OverrideOpHelperImpl implements OverrideOpHelper {
 
 export type OverrideOpHelper = () => OverrideOpHelperBatcher
 
-class OverrideOpHelperImpl implements OverrideOpHelperBatcher {
+export class OverrideOpHelperImpl implements OverrideOpHelperBatcher {
 	readonly #saveOverrides: SaveOverridesFunction
 	readonly #object: ObjectWithOverrides<any>
 
@@ -198,37 +173,23 @@ class OverrideOpHelperImpl implements OverrideOpHelperBatcher {
 		const opPath = `${itemId}.${subPath}`
 
 		const newOps = filterOverrideOpsForPrefix(this.#object.overrides, opPath).otherOps
->>>>>>> release51:meteor/client/ui/Settings/util/OverrideOpHelper.tsx
 
 		this.#object.overrides = newOps
 
 		return this
 	}
 
-<<<<<<< HEAD:packages/corelib/src/overrideOpHelper.ts
-	resetItem = (itemId: string): void => {
-		if (!this.#objectWithOverrides.current) return
-
-		const newOps = filterOverrideOpsForPrefix(this.#objectWithOverrides.current.overrides, itemId).otherOps
-=======
 	resetItem = (itemId: string): this => {
 		const newOps = filterOverrideOpsForPrefix(this.#object.overrides, itemId).otherOps
 
 		this.#object.overrides = newOps
->>>>>>> release51:meteor/client/ui/Settings/util/OverrideOpHelper.tsx
 
 		return this
 	}
 
-<<<<<<< HEAD:packages/corelib/src/overrideOpHelper.ts
-	deleteItem = (itemId: string): void => {
-		const newOps = filterOverrideOpsForPrefix(this.#objectWithOverrides.current.overrides, itemId).otherOps
-		if (this.#objectWithOverrides.current.defaults[itemId]) {
-=======
 	deleteItem = (itemId: string): this => {
 		const newOps = filterOverrideOpsForPrefix(this.#object.overrides, itemId).otherOps
 		if (this.#object.defaults[itemId]) {
->>>>>>> release51:meteor/client/ui/Settings/util/OverrideOpHelper.tsx
 			// If it was from the defaults, we need to mark it deleted
 			newOps.push(
 				literal<ObjectOverrideDeleteOp>({
@@ -243,34 +204,17 @@ class OverrideOpHelperImpl implements OverrideOpHelperBatcher {
 		return this
 	}
 
-<<<<<<< HEAD:packages/corelib/src/overrideOpHelper.ts
-	changeItemId = (oldItemId: string, newItemId: string): void => {
-		if (!this.#objectWithOverrides.current) return
-
+	changeItemId = (oldItemId: string, newItemId: string): this => {
 		const { otherOps: newOps, opsForPrefix: opsForId } = filterOverrideOpsForPrefix(
-			this.#objectWithOverrides.current.overrides,
+			this.#object.overrides,
 			oldItemId
 		)
-
-		if (
-			!newItemId ||
-			newOps.find((op) => op.path === newItemId) ||
-			this.#objectWithOverrides.current.defaults[newItemId]
-		) {
-			throw new Error('Id is invalid or already in use')
-		}
-
-		if (this.#objectWithOverrides.current.defaults[oldItemId]) {
-=======
-	changeItemId = (oldItemId: string, newItemId: string): this => {
-		const { otherOps: newOps, opsForPrefix: opsForId } = filterOverrideOpsForPrefix(this.#object.overrides, oldItemId)
 
 		if (!newItemId || newOps.find((op) => op.path === newItemId) || this.#object.defaults[newItemId]) {
 			throw new Error('Id is invalid or already in use')
 		}
 
 		if (this.#object.defaults[oldItemId]) {
->>>>>>> release51:meteor/client/ui/Settings/util/OverrideOpHelper.tsx
 			// Future: should we be able to handle this?
 			throw new Error("Can't change id of object with defaults")
 		} else {
@@ -295,25 +239,15 @@ class OverrideOpHelperImpl implements OverrideOpHelperBatcher {
 		return this
 	}
 
-<<<<<<< HEAD:packages/corelib/src/overrideOpHelper.ts
-	setItemValue = (itemId: string, subPath: string, value: unknown): void => {
-		if (!this.#objectWithOverrides.current) return
-
-=======
 	setItemValue = (itemId: string, subPath: string, value: unknown): this => {
->>>>>>> release51:meteor/client/ui/Settings/util/OverrideOpHelper.tsx
 		if (subPath === '_id') {
 			throw new Error('Item id cannot be changed through this helper')
 		} else {
 			// Set a property
-<<<<<<< HEAD:packages/corelib/src/overrideOpHelper.ts
 			const { otherOps: newOps, opsForPrefix: opsForId } = filterOverrideOpsForPrefix(
-				this.#objectWithOverrides.current.overrides,
+				this.#object.overrides,
 				itemId
 			)
-=======
-			const { otherOps: newOps, opsForPrefix: opsForId } = filterOverrideOpsForPrefix(this.#object.overrides, itemId)
->>>>>>> release51:meteor/client/ui/Settings/util/OverrideOpHelper.tsx
 
 			const setRootOp = opsForId.find((op) => op.path === itemId)
 			if (setRootOp && setRootOp.op === 'set') {
@@ -359,17 +293,9 @@ class OverrideOpHelperImpl implements OverrideOpHelperBatcher {
 		return this
 	}
 
-<<<<<<< HEAD:packages/corelib/src/overrideOpHelper.ts
-	replaceItem = (itemId: string, value: unknown): void => {
-		if (!this.#objectWithOverrides.current) return
-
-		// Set a property
-		const { otherOps: newOps } = filterOverrideOpsForPrefix(this.#objectWithOverrides.current.overrides, itemId)
-=======
 	replaceItem = (itemId: string, value: unknown): this => {
 		// Set a property
 		const { otherOps: newOps } = filterOverrideOpsForPrefix(this.#object.overrides, itemId)
->>>>>>> release51:meteor/client/ui/Settings/util/OverrideOpHelper.tsx
 
 		// TODO - is this too naive?
 
@@ -386,31 +312,7 @@ class OverrideOpHelperImpl implements OverrideOpHelperBatcher {
 		return this
 	}
 
-	commit = () => {
+	commit = (): void => {
 		this.#saveOverrides(this.#object.overrides)
 	}
-}
-
-/**
- * A helper to work with modifying an ObjectWithOverrides<T>
- */
-export function useOverrideOpHelperBackend<T extends object>(
-	saveOverrides: (newOps: SomeObjectOverrideOp[]) => void,
-	objectWithOverrides: ObjectWithOverrides<T>
-): OverrideOpHelper {
-<<<<<<< HEAD:packages/corelib/src/overrideOpHelper.ts
-	return new OverrideOpHelperImpl(saveOverrides, { current: objectWithOverrides })
-=======
-	const objectWithOverridesRef = useRef(objectWithOverrides)
-
-	// Use a ref to minimise reactivity when it changes
-	useEffect(() => {
-		objectWithOverridesRef.current = objectWithOverrides
-	}, [objectWithOverrides])
-
-	return useCallback(() => {
-		if (!objectWithOverridesRef.current) throw new Error('No current object!')
-		return new OverrideOpHelperImpl(saveOverrides, objectWithOverridesRef.current)
-	}, [saveOverrides, objectWithOverridesRef])
->>>>>>> release51:meteor/client/ui/Settings/util/OverrideOpHelper.tsx
 }
