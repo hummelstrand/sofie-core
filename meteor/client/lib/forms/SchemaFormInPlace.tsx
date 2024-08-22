@@ -1,9 +1,6 @@
 import { literal, objectPathSet } from '@sofie-automation/corelib/dist/lib'
 import React, { useCallback, useMemo, useState } from 'react'
-import {
-	WrappedOverridableItemNormal,
-	OverrideOpHelperForItemContentsBatcher,
-} from '../../ui/Settings/util/OverrideOpHelper'
+import { WrappedOverridableItemNormal, OverrideOpHelperForItemContentsBatcher } from '../../ui/util/OverrideOpHelper'
 import { SchemaFormCommonProps } from './schemaFormUtil'
 import { SchemaFormWithOverrides } from './SchemaFormWithOverrides'
 

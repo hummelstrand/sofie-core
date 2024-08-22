@@ -2992,8 +2992,7 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 									onToggleSupportPanel={this.onToggleSupportPanel}
 									isStudioMode={this.state.studioMode}
 									onTake={this.onTake}
-									studioRouteSets={studio.routeSets}
-									studioRouteSetExclusivityGroups={studio.routeSetExclusivityGroups}
+									studio={studio}
 									onStudioRouteSetSwitch={this.onStudioRouteSetSwitch}
 									onSegmentViewMode={this.onSegmentViewModeChange}
 								/>
@@ -3204,6 +3203,7 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 						this.props.studio &&
 						this.props.showStyleBase && (
 							<TriggersHandler
+								studioId={this.props.studio._id}
 								rundownPlaylistId={this.props.rundownPlaylistId}
 								showStyleBaseId={this.props.showStyleBase._id}
 								currentRundownId={this.props.currentRundown?._id || null}

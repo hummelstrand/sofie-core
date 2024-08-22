@@ -187,6 +187,12 @@ export enum StudioJobs {
 	 * Activate AdlibTesting (Rehearsal Mode) mode for the Rundown containing the nexted Part.
 	 */
 	ActivateAdlibTesting = 'activateAdlibTesting',
+
+	/**
+	 * Switch the route of the studio
+	 * for use in ad.lib actions and other triggers
+	 */
+	SwitchRouteSet = 'switchRouteSet',
 }
 
 export interface RundownPlayoutPropsBase {
@@ -334,6 +340,11 @@ export interface ActivateAdlibTestingProps extends RundownPlayoutPropsBase {
 	rundownId: RundownId
 }
 
+export interface SwitchRouteSetProps {
+	routeSetId: string
+	state: boolean | 'toggle'
+}
+
 /**
  * Set of valid functions, of form:
  * `id: (data) => return`
@@ -385,6 +396,7 @@ export type StudioJobFunc = {
 	[StudioJobs.BlueprintIgnoreFixUpConfigForStudio]: () => void
 
 	[StudioJobs.ActivateAdlibTesting]: (data: ActivateAdlibTestingProps) => void
+	[StudioJobs.SwitchRouteSet]: (data: SwitchRouteSetProps) => void
 }
 
 export function getStudioQueueName(id: StudioId): string {

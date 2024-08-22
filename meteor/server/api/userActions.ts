@@ -1113,7 +1113,7 @@ class ServerUserActionAPI
 		eventTime: Time,
 		studioId: StudioId,
 		routeSetId: string,
-		state: boolean
+		state: boolean | 'toggle'
 	): Promise<ClientAPI.ClientResponse<void>> {
 		return ServerClientAPI.runUserActionInLog(
 			this,
