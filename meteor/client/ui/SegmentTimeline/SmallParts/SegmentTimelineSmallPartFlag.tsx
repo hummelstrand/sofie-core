@@ -9,7 +9,7 @@ import { SegmentTimelinePartHoverPreview } from './SegmentTimelinePartHoverPrevi
 import RundownViewEventBus, { RundownViewEvents } from '../../../../lib/api/triggers/RundownViewEventBus'
 import { UIStudio } from '../../../../lib/api/studios'
 import { TimingDataResolution, TimingTickResolution, withTiming } from '../../RundownView/RundownTiming/withTiming'
-import { SegmentTimelinePartClass } from '../Parts/SegmentTimelinePart'
+import { getLiveLineTimePadding } from '../Parts/SegmentTimelinePart'
 import { PartExtended } from '../../../lib/RundownResolver'
 import { getPartInstanceTimingId } from '../../../lib/rundownTiming'
 
@@ -92,7 +92,7 @@ export const SegmentTimelineSmallPartFlag = withTiming<
 			/**
 			 * The maximum amount of live line time padding to add, in milliseconds.
 			 */
-			const maxPadding = SegmentTimelinePartClass.getLiveLineTimePadding(timeToPixelRatio)
+			const maxPadding = getLiveLineTimePadding(timeToPixelRatio)
 
 			/**
 			 * The amount of live line time padding to add, based on some simple math, in milliseconds.

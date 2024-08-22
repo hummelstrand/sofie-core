@@ -654,7 +654,6 @@ export async function setupDefaultRundown(
 		externalId: 'MOCK_SEGMENT_0',
 		rundownId: rundown._id,
 		name: 'Segment 0',
-		externalModified: 1,
 	}
 	await Segments.mutableCollection.insertAsync(segment0)
 	/* tslint:disable:ter-indent*/
@@ -764,7 +763,6 @@ export async function setupDefaultRundown(
 		externalId: 'MOCK_SEGMENT_2',
 		rundownId: rundown._id,
 		name: 'Segment 1',
-		externalModified: 1,
 	}
 	await Segments.mutableCollection.insertAsync(segment1)
 
@@ -807,7 +805,6 @@ export async function setupDefaultRundown(
 		externalId: 'MOCK_SEGMENT_2',
 		rundownId: rundown._id,
 		name: 'Segment 2',
-		externalModified: 1,
 	}
 	await Segments.mutableCollection.insertAsync(segment2)
 

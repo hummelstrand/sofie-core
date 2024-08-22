@@ -8,7 +8,7 @@ import { ContextMenuTrigger } from '@jstarpl/react-contextmenu'
 import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { SegmentUi, PartUi, IOutputLayerUi, PieceUi } from './SegmentTimelineContainer'
 import { TimelineGrid } from './TimelineGrid'
-import { SegmentTimelinePart, SegmentTimelinePartClass } from './Parts/SegmentTimelinePart'
+import { SegmentTimelinePart, getPartDisplayDuration } from './Parts/SegmentTimelinePart'
 import { SegmentTimelineZoomControls } from './SegmentTimelineZoomControls'
 import { SegmentDuration } from '../RundownView/RundownTiming/SegmentDuration'
 import { PartCountdown } from '../RundownView/RundownTiming/PartCountdown'
@@ -760,6 +760,7 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 						/>
 					)}
 					<SegmentTimelinePart
+						timingDurations={this.props.timingDurations}
 						segment={this.props.segment}
 						playlist={this.props.playlist}
 						studio={this.props.studio}
@@ -838,6 +839,7 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 			<SegmentTimelinePart
 				segment={this.props.segment}
 				playlist={this.props.playlist}
+				timingDurations={this.props.timingDurations}
 				studio={this.props.studio}
 				collapsedOutputs={this.props.collapsedOutputs}
 				scrollLeft={this.props.scrollLeft}
@@ -971,7 +973,9 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 	}
 
 	private calcLivePartDisplayDuration(livePart: PartUi | undefined | null): number {
-		return livePart ? SegmentTimelinePartClass.getPartDisplayDuration(livePart, this.props.timingDurations) : 0
+		let debug = 0
+		if (livePart) debug = getPartDisplayDuration(livePart, this.props.timingDurations)
+		return debug
 	}
 
 	render(): JSX.Element {
@@ -1093,6 +1097,20 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 							))}
 						</div>
 					)}
+					<div className="segment-timeline__title__user-edit-states">
+						{this.props.segment.userEditStates &&
+							Object.keys(this.props.segment.userEditStates).map((key) =>
+								this.props.segment.userEditStates?.[key] ? (
+									<div
+										className="segment-timeline__title__user-edit-state"
+										key={key}
+										dangerouslySetInnerHTML={{
+											__html: this.props.segment.userEdits?.filter((i) => i.id === key)[0]?.svgIcon ?? '',
+										}}
+									></div>
+								) : null
+							)}
+					</div>
 				</ContextMenuTrigger>
 				<div className="segment-timeline__duration" tabIndex={0}>
 					{this.props.playlist &&

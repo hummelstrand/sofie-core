@@ -10,7 +10,7 @@ import {
 	useSubscriptions,
 	useTracker,
 } from '../lib/ReactMeteorData/react-meteor-data'
-import { VTContent, TSR, NoteSeverity, ISourceLayer } from '@sofie-automation/blueprints-integration'
+import { VTContent, TSR, NoteSeverity } from '@sofie-automation/blueprints-integration'
 import { withTranslation, WithTranslation } from 'react-i18next'
 import timer from 'react-timer-hoc'
 import CoreIcon from '@nrk/core-icons/jsx'
@@ -24,7 +24,7 @@ import Tooltip from 'rc-tooltip'
 import { NavLink, Route, Prompt } from 'react-router-dom'
 import { DBRundownPlaylist, RundownHoldState } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { Rundown, getRundownNrcsName } from '@sofie-automation/corelib/dist/dataModel/Rundown'
-import { DBSegment, SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
+import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { StudioRouteSet } from '@sofie-automation/corelib/dist/dataModel/Studio'
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from '@jstarpl/react-contextmenu'
@@ -32,7 +32,7 @@ import { RundownTimingProvider } from './RundownView/RundownTiming/RundownTiming
 import { withTiming, WithTiming } from './RundownView/RundownTiming/withTiming'
 import { CurrentPartRemaining } from './RundownView/RundownTiming/CurrentPartRemaining'
 import { AutoNextStatus } from './RundownView/RundownTiming/AutoNextStatus'
-import { SegmentTimelineContainer, PieceUi, PartUi, SegmentUi } from './SegmentTimeline/SegmentTimelineContainer'
+import { PieceUi, PartUi, SegmentUi } from './SegmentTimeline/SegmentTimelineContainer'
 import { SegmentContextMenu } from './SegmentTimeline/SegmentContextMenu'
 import { Shelf, ShelfTabs } from './Shelf/Shelf'
 import { RundownSystemStatus } from './RundownView/RundownSystemStatus'
@@ -77,8 +77,6 @@ import {
 	RundownLayoutRundownHeader,
 	RundownLayoutFilterBase,
 } from '../../lib/collections/RundownLayouts'
-import { VirtualElement } from '../lib/VirtualElement'
-import { SEGMENT_TIMELINE_ELEMENT_ID } from './SegmentTimeline/SegmentTimeline'
 import { NoraPreviewRenderer } from './FloatingInspectors/NoraFloatingInspector'
 import { Bucket } from '../../lib/collections/Buckets'
 import { contextMenuHoldToDisplayTime, isEventInInputField } from '../lib/lib'
@@ -88,7 +86,6 @@ import { Settings } from '../../lib/Settings'
 import { PointerLockCursor } from '../lib/PointerLockCursor'
 import { documentTitle } from '../lib/DocumentTitleProvider'
 import { PartInstance } from '../../lib/collections/PartInstances'
-import { RundownDividerHeader } from './RundownView/RundownDividerHeader'
 import { PlaylistLoopingHeader } from './RundownView/PlaylistLoopingHeader'
 import { memoizedIsolatedAutorun } from '../../lib/memoizedIsolatedAutorun'
 import RundownViewEventBus, {
@@ -104,7 +101,6 @@ import { TriggersHandler } from '../lib/triggers/TriggersHandler'
 import { SorensenContext } from '../lib/SorensenContext'
 import { PlaylistTiming } from '@sofie-automation/corelib/dist/playout/rundownTiming'
 import { DEFAULT_TSR_ACTION_TIMEOUT_TIME } from '@sofie-automation/shared-lib/dist/core/constants'
-import { BreakSegment } from './SegmentTimeline/BreakSegment'
 import { PlaylistStartTiming } from './RundownView/RundownTiming/PlaylistStartTiming'
 import { RundownName } from './RundownView/RundownTiming/RundownName'
 import { TimeOfDay } from './RundownView/RundownTiming/TimeOfDay'
@@ -115,16 +111,13 @@ import { BucketAdLibItem } from './Shelf/RundownViewBuckets'
 import { IAdLibListItem } from './Shelf/AdLibListItem'
 import { ShelfDashboardLayout } from './Shelf/ShelfDashboardLayout'
 import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/error'
-import { SegmentStoryboardContainer } from './SegmentStoryboard/SegmentStoryboardContainer'
 import { SegmentViewMode } from './SegmentContainer/SegmentViewModes'
 import { UIStateStorage } from '../lib/UIStateStorage'
 import { AdLibPieceUi, AdlibSegmentUi, ShelfDisplayOptions } from '../lib/shelf'
 import { fetchAndFilter } from './Shelf/AdLibPanel'
 import { matchFilter } from './Shelf/AdLibListView'
 import { ExecuteActionResult } from '@sofie-automation/corelib/dist/worker/studio'
-import { SegmentListContainer } from './SegmentList/SegmentListContainer'
 import { getNextMode as getNextSegmentViewMode } from './SegmentContainer/SwitchViewModeButton'
-import { IResolvedSegmentProps } from './SegmentContainer/withResolvedSegment'
 import { UIShowStyleBases, UIStudios } from './Collections'
 import { UIStudio } from '../../lib/api/studios'
 import {
@@ -147,20 +140,18 @@ import {
 } from '../collections'
 import { UIShowStyleBase } from '../../lib/api/showStyles'
 import { RundownPlaylistCollectionUtil } from '../../lib/collections/rundownPlaylistUtil'
-import { SegmentAdlibTestingContainer } from './SegmentAdlibTesting/SegmentAdlibTestingContainer'
 import { PromiseButton } from '../lib/Components/PromiseButton'
 import { logger } from '../../lib/logging'
 import { isTranslatableMessage, translateMessage } from '@sofie-automation/corelib/dist/TranslatableMessage'
 import { i18nTranslator } from './i18n'
 import { CorelibPubSub } from '@sofie-automation/corelib/dist/pubsub'
 import { useRundownAndShowStyleIdsForPlaylist } from './util/useRundownAndShowStyleIdsForPlaylist'
+import { RenderSegments } from './Segments'
 
 export const MAGIC_TIME_SCALE_FACTOR = 0.03
 
 const REHEARSAL_MARGIN = 1 * 60 * 1000
 const HIDE_NOTIFICATIONS_AFTER_MOUNT: number | undefined = 5000
-
-const DEFAULT_SEGMENT_VIEW_MODE = SegmentViewMode.Timeline
 
 interface ITimingWarningProps {
 	playlist: DBRundownPlaylist
@@ -1179,7 +1170,7 @@ interface IState {
 
 export type MinimalRundown = Pick<Rundown, '_id' | 'name' | 'timing' | 'showStyleBaseId' | 'endOfRundownIsShowBreak'>
 
-type MatchedSegment = {
+export type MatchedSegment = {
 	rundown: MinimalRundown
 	segments: DBSegment[]
 	segmentIdsBeforeEachSegment: Set<SegmentId>[]
@@ -2482,167 +2473,6 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 			return pieceToQueue
 		}
 
-		renderSegments() {
-			if (!this.props.matchedSegments) {
-				return null
-			}
-
-			let globalIndex = 0
-			const rundowns = this.props.matchedSegments.map((m) => m.rundown._id)
-
-			return this.props.matchedSegments.map((rundownAndSegments, rundownIndex, rundownArray) => {
-				let currentSegmentIndex = -1
-				const rundownIdsBefore = rundowns.slice(0, rundownIndex)
-				return (
-					<React.Fragment key={unprotectString(rundownAndSegments.rundown._id)}>
-						{this.props.matchedSegments.length > 1 && !this.state.rundownViewLayout?.hideRundownDivider && (
-							<RundownDividerHeader
-								key={`rundown_${rundownAndSegments.rundown._id}`}
-								rundown={rundownAndSegments.rundown}
-								playlist={this.props.playlist!}
-							/>
-						)}
-						{rundownAndSegments.segments.map((segment, segmentIndex, segmentArray) => {
-							if (this.props.studio && this.props.playlist && this.props.showStyleBase) {
-								const ownCurrentPartInstance =
-									// feed the currentPartInstance into the SegmentTimelineContainer component, if the currentPartInstance
-									// is a part of the segment
-									(this.props.currentPartInstance && this.props.currentPartInstance.segmentId === segment._id) ||
-									// or the nextPartInstance is a part of this segment, and the currentPartInstance is autoNext
-									(this.props.nextPartInstance &&
-										this.props.nextPartInstance.segmentId === segment._id &&
-										this.props.currentPartInstance &&
-										this.props.currentPartInstance.part.autoNext)
-										? this.props.currentPartInstance
-										: undefined
-								const ownNextPartInstance =
-									this.props.nextPartInstance && this.props.nextPartInstance.segmentId === segment._id
-										? this.props.nextPartInstance
-										: undefined
-
-								if (ownCurrentPartInstance) {
-									currentSegmentIndex = segmentIndex
-								}
-
-								const isFollowingOnAirSegment = segmentIndex === currentSegmentIndex + 1
-
-								const isLastSegment =
-									rundownIndex === rundownArray.length - 1 && segmentIndex === segmentArray.length - 1
-
-								return (
-									<ErrorBoundary key={unprotectString(segment._id)}>
-										<VirtualElement
-											className={ClassNames({
-												'segment-timeline-wrapper--hidden': segment.isHidden,
-												'segment-timeline-wrapper--shelf': segment.showShelf,
-											})}
-											id={SEGMENT_TIMELINE_ELEMENT_ID + segment._id}
-											margin={'100% 0px 100% 0px'}
-											initialShow={globalIndex++ < window.innerHeight / 260}
-											placeholderHeight={260}
-											placeholderClassName="placeholder-shimmer-element segment-timeline-placeholder"
-											width="auto"
-										>
-											{this.renderSegmentComponent(
-												segment,
-												segmentIndex,
-												rundownAndSegments,
-												this.props.playlist,
-												this.props.studio,
-												this.props.showStyleBase,
-												isLastSegment,
-												isFollowingOnAirSegment,
-												ownCurrentPartInstance,
-												ownNextPartInstance,
-												rundownAndSegments.segmentIdsBeforeEachSegment[segmentIndex],
-												rundownIdsBefore
-											)}
-										</VirtualElement>
-									</ErrorBoundary>
-								)
-							}
-						})}
-						{this.state.rundownViewLayout?.showBreaksAsSegments &&
-							rundownAndSegments.rundown.endOfRundownIsShowBreak && (
-								<BreakSegment breakTime={PlaylistTiming.getExpectedEnd(rundownAndSegments.rundown.timing)} />
-							)}
-					</React.Fragment>
-				)
-			})
-		}
-
-		renderSegmentComponent(
-			segment: DBSegment,
-			_index: number,
-			rundownAndSegments: MatchedSegment,
-			rundownPlaylist: DBRundownPlaylist,
-			studio: UIStudio,
-			showStyleBase: UIShowStyleBase,
-			isLastSegment: boolean,
-			isFollowingOnAirSegment: boolean,
-			ownCurrentPartInstance: PartInstance | undefined,
-			ownNextPartInstance: PartInstance | undefined,
-			segmentIdsBeforeSegment: Set<SegmentId>,
-			rundownIdsBefore: RundownId[]
-		) {
-			const userSegmentViewMode = this.state.segmentViewModes[unprotectString(segment._id)] as
-				| SegmentViewMode
-				| undefined
-			const userRundownSegmentViewMode = this.state.rundownDefaultSegmentViewMode
-			const displayMode =
-				userSegmentViewMode ?? userRundownSegmentViewMode ?? segment.displayAs ?? DEFAULT_SEGMENT_VIEW_MODE
-
-			const showDurationSourceLayers = this.state.rundownViewLayout?.showDurationSourceLayers
-				? new Set<ISourceLayer['_id']>(this.state.rundownViewLayout?.showDurationSourceLayers)
-				: undefined
-
-			const resolvedSegmentProps: IResolvedSegmentProps & { id: string } = {
-				id: SEGMENT_TIMELINE_ELEMENT_ID + segment._id,
-				studio: studio,
-				showStyleBase: showStyleBase,
-				followLiveSegments: this.state.followLiveSegments,
-				rundownViewLayout: this.state.rundownViewLayout,
-				rundownId: rundownAndSegments.rundown._id,
-				segmentId: segment._id,
-				playlist: rundownPlaylist,
-				rundown: rundownAndSegments.rundown,
-				timeScale: this.state.timeScale,
-				onContextMenu: this.onContextMenu,
-				onSegmentScroll: this.onSegmentScroll,
-				segmentsIdsBefore: segmentIdsBeforeSegment,
-				rundownIdsBefore: rundownIdsBefore,
-				rundownsToShowstyles: this.props.rundownsToShowstyles,
-				isLastSegment: isLastSegment,
-				onPieceClick: this.onSelectPiece,
-				onPieceDoubleClick: this.onPieceDoubleClick,
-				onHeaderNoteClick: this.onHeaderNoteClick,
-				onSwitchViewMode: (viewMode) => this.onSwitchViewMode(segment._id, viewMode),
-				ownCurrentPartInstance: ownCurrentPartInstance,
-				ownNextPartInstance: ownNextPartInstance,
-				isFollowingOnAirSegment: isFollowingOnAirSegment,
-				miniShelfFilter: this.state.miniShelfFilter,
-				countdownToSegmentRequireLayers: this.state.rundownViewLayout?.countdownToSegmentRequireLayers,
-				fixedSegmentDuration: this.state.rundownViewLayout?.fixedSegmentDuration,
-				studioMode: this.state.studioMode,
-				adLibSegmentUi: this.state.uiSegmentMap.get(segment._id),
-				showDurationSourceLayers: showDurationSourceLayers,
-			}
-
-			if (segment.orphaned === SegmentOrphanedReason.ADLIB_TESTING) {
-				return <SegmentAdlibTestingContainer {...resolvedSegmentProps} />
-			}
-
-			switch (displayMode) {
-				case SegmentViewMode.Storyboard:
-					return <SegmentStoryboardContainer {...resolvedSegmentProps} />
-				case SegmentViewMode.List:
-					return <SegmentListContainer {...resolvedSegmentProps} />
-				case SegmentViewMode.Timeline:
-				default:
-					return <SegmentTimelineContainer {...resolvedSegmentProps} />
-			}
-		}
-
 		renderSegmentsList() {
 			if (!this.props.playlist || !this.props.rundowns.length) {
 				return (
@@ -2658,7 +2488,29 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 						<PlaylistLoopingHeader position="start" multiRundown={this.props.matchedSegments.length > 1} />
 					)}
 					<div className="segment-timeline-container" role="main" aria-labelledby="rundown-playlist-name">
-						{this.renderSegments()}
+						<RenderSegments
+							studio={this.props.studio}
+							showStyleBase={this.props.showStyleBase}
+							playlist={this.props.playlist}
+							matchedSegments={this.props.matchedSegments}
+							rundownViewLayout={this.state.rundownViewLayout}
+							currentPartInstance={this.props.currentPartInstance}
+							nextPartInstance={this.props.nextPartInstance}
+							rundownPlaylist={this.props.playlist}
+							studioMode={this.state.studioMode}
+							segmentViewModes={this.state.segmentViewModes}
+							rundownDefaultSegmentViewMode={this.state.rundownDefaultSegmentViewMode}
+							followLiveSegments={this.state.followLiveSegments}
+							timeScale={this.state.timeScale}
+							rundownsToShowstyles={this.props.rundownsToShowstyles}
+							onContextMenu={this.onContextMenu}
+							onSegmentScroll={this.onSegmentScroll}
+							onSelectPiece={this.onSelectPiece}
+							onPieceDoubleClick={this.onPieceDoubleClick}
+							onHeaderNoteClick={this.onHeaderNoteClick}
+							onSwitchViewMode={this.onSwitchViewMode}
+							miniShelfFilter={this.state.miniShelfFilter}
+						/>
 					</div>
 					{this.props.playlist?.loop && (
 						<PlaylistLoopingHeader

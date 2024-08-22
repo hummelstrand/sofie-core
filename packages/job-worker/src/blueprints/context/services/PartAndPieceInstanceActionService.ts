@@ -385,6 +385,8 @@ export class PartAndPieceInstanceActionService {
 			invalidReason: undefined,
 			floated: false,
 			expectedDurationWithTransition: undefined, // Filled in later
+			userEditStates: {},
+			userEdits: [],
 		}
 
 		const pieces = postProcessPieces(

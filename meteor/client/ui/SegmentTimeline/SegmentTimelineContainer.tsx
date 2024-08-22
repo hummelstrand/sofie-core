@@ -17,7 +17,7 @@ import RundownViewEventBus, {
 	GoToPartEvent,
 	GoToPartInstanceEvent,
 } from '../../../lib/api/triggers/RundownViewEventBus'
-import { SegmentTimelinePartClass } from './Parts/SegmentTimelinePart'
+import { getPartDisplayDuration } from './Parts/SegmentTimelinePart'
 import {
 	PartUi,
 	withResolvedSegment,
@@ -53,7 +53,6 @@ Meteor.startup(() => {
 		parseInt(localStorage.getItem('EXP_timeline_min_time_scale')!) ||
 		MAGIC_TIME_SCALE_FACTOR * Settings.defaultTimeScale
 })
-
 interface IState {
 	scrollLeft: number
 	collapsedOutputs: {
@@ -456,7 +455,7 @@ const SegmentTimelineContainerContent = withResolvedSegment(
 
 				if (zoomInToFit) {
 					// display dur in ms
-					const displayDur = SegmentTimelinePartClass.getPartDisplayDuration(part, this.context?.durations) || 1
+					const displayDur = getPartDisplayDuration(part, this.context?.durations) || 1
 					// is the padding is larger than the width of the resulting size?
 					const tooSmallTimeline = timelineWidth < TIMELINE_RIGHT_PADDING * 3
 					// width in px, pad on both sides

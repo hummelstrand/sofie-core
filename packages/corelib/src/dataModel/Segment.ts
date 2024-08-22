@@ -1,6 +1,7 @@
 import { SegmentDisplayMode, SegmentTimingInfo } from '@sofie-automation/blueprints-integration'
 import { SegmentId, RundownId } from './Ids'
 import { SegmentNote } from './Notes'
+import { CoreUserEditingDefinitionAction } from './Rundown'
 
 export enum SegmentOrphanedReason {
 	/** Segment is deleted from the NRCS but we still need it */
@@ -18,8 +19,6 @@ export interface DBSegment {
 	_rank: number
 	/** ID of the source object in the gateway */
 	externalId: string
-	/** Timestamp when the externalData was last modified */
-	externalModified: number
 	/** The rundown this segment belongs to */
 	rundownId: RundownId
 
@@ -47,4 +46,14 @@ export interface DBSegment {
 
 	/** Holds notes (warnings / errors) thrown by the blueprints during creation */
 	notes?: Array<SegmentNote>
+
+	/** States for UserEdits, could be lock from NRCS updates,
+	 * lock from user changes,
+	 * or removedByUser
+	 * */
+	userEditStates?: Record<string, boolean>
+	/**
+	 * User editing definitions for this segment
+	 */
+	userEdits?: CoreUserEditingDefinitionAction[]
 }
