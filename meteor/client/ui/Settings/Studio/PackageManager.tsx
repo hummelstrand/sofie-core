@@ -206,7 +206,7 @@ function RenderPackageContainers({
 			yes: t('Remove'),
 			no: t('Cancel'),
 			onAccept: () => {
-				overrideHelper.deleteItem(containerId)
+				overrideHelper().deleteItem(containerId).commit()
 			},
 			message: (
 				<React.Fragment>
@@ -228,7 +228,7 @@ function RenderPackageContainers({
 				yes: t('Reset'),
 				no: t('Cancel'),
 				onAccept: () => {
-					overrideHelper.resetItem(packgageContainerId)
+					overrideHelper().resetItem(packgageContainerId).commit()
 				},
 				message: (
 					<React.Fragment>
@@ -313,7 +313,7 @@ function RenderPackageContainerDeletedEntry({
 	overrideHelper,
 }: Readonly<RenderPackageContainerDeletedProps>) {
 	const doUndeleteItem = React.useCallback(
-		() => overrideHelper.resetItem(packageContainer.id),
+		() => overrideHelper().resetItem(packageContainer.id).commit(),
 		[overrideHelper, packageContainer.id]
 	)
 
@@ -367,7 +367,7 @@ function RenderPackageContainer({
 
 	const updatePackageContainerId = React.useCallback(
 		(newPackageContainerId: string) => {
-			overrideHelper.changeItemId(packageContainer.id, newPackageContainerId)
+			overrideHelper().changeItemId(packageContainer.id, newPackageContainerId).commit()
 			toggleExpanded(newPackageContainerId, true)
 		},
 		[overrideHelper, toggleExpanded, packageContainer.id]
@@ -392,7 +392,7 @@ function RenderPackageContainer({
 			folderPath: '',
 		}
 
-		overrideHelper.setItemValue(packageContainer.id, `container.accessors.${accessorId}`, newAccessor)
+		overrideHelper().setItemValue(packageContainer.id, `container.accessors.${accessorId}`, newAccessor).commit()
 
 		setTimeout(() => {
 			toggleExpanded(accessorId, true)
@@ -532,7 +532,7 @@ function RenderAccessor({
 			yes: t('Remove'),
 			no: t('Cancel'),
 			onAccept: () => {
-				overrideHelper.setItemValue(packageContainer.id, `container.accessors.${accessorId}`, undefined)
+				overrideHelper().setItemValue(packageContainer.id, `container.accessors.${accessorId}`, undefined).commit()
 			},
 			message: (
 				<React.Fragment>
@@ -560,7 +560,7 @@ function RenderAccessor({
 			}
 
 			// Add a copy of accessor with the new ID
-			overrideHelper.setItemValue(packageContainer.id, `container.accessors.${newAccessorId}`, accessor)
+			overrideHelper().setItemValue(packageContainer.id, `container.accessors.${newAccessorId}`, accessor).commit()
 
 			// Remove the old accessor with the old ID
 			// Issue: For some reason the PacackageContainer is not updated in the overrideHelper.
@@ -568,7 +568,7 @@ function RenderAccessor({
 			// 1ms should be enough, but 100ms is used to be safe.
 			// This is a temporary solution until as a fix for this is about to be implemented in NRK corelib.
 			setTimeout(() => {
-				overrideHelper.setItemValue(packageContainer.id, `container.accessors.${oldAccessorId}`, undefined)
+				overrideHelper().setItemValue(packageContainer.id, `container.accessors.${oldAccessorId}`, undefined).commit()
 				toggleExpanded(oldAccessorId, false)
 				toggleExpanded(newAccessorId, true)
 			}, 100)
