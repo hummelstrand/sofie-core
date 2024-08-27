@@ -515,6 +515,10 @@ $identifier-area-width: 3em;
 	}
 }
 
+.segment-opl__muted {
+	opacity: 0.3;
+}
+
 .segment-opl__title {
 	display: grid;
 	grid-template-rows: auto;
