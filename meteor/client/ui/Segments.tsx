@@ -24,6 +24,7 @@ import { UIShowStyleBase } from '../../lib/api/showStyles'
 import { MatchedSegment } from './RundownView'
 import { SegmentAdlibTestingContainer } from './SegmentAdlibTesting/SegmentAdlibTestingContainer'
 import { SegmentMuteContainer } from './SegmentList/SegmentMuteContainer'
+import { isSegmentMuted } from '@sofie-automation/corelib/dist/dataModel/Segment'
 
 const DEFAULT_SEGMENT_VIEW_MODE = SegmentViewMode.Timeline
 interface SegmentsParseProps {
@@ -266,10 +267,7 @@ function RenderSegmentComponent({
 					if (segment.orphaned === SegmentOrphanedReason.ADLIB_TESTING) {
 						return <SegmentAdlibTestingContainer {...resolvedSegmentProps} />
 					}
-					const isSegmentMuted = Object.keys(segment.userEditStates || []).find(
-						(key) => key.includes('mute-segment') && segment.userEditStates?.['mute-segment'] === true
-					)
-					if (isSegmentMuted) {
+					if (isSegmentMuted(segment)) {
 						return <SegmentMuteContainer {...resolvedSegmentProps} />
 					}
 

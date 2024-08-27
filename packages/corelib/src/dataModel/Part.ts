@@ -49,6 +49,11 @@ export interface DBPart extends Omit<IBlueprintPart, 'userEdits'> {
 	userEdits?: CoreUserEditingDefinitionAction[]
 }
 
-export function isPartPlayable(part: Pick<ReadonlyDeep<DBPart>, 'invalid' | 'floated'>): boolean {
-	return !part.invalid && !part.floated
+export function isPartPlayable(part: Pick<ReadonlyDeep<DBPart>, 'userEditStates' | 'invalid' | 'floated'>): boolean {
+	return !part.invalid && !part.floated && !isPartMuted(part)
+}
+
+export function isPartMuted(part: Pick<ReadonlyDeep<DBPart>, 'userEditStates'>): boolean {
+	const mutedbyUser = part.userEditStates && part.userEditStates['mute-part']
+	return !!mutedbyUser
 }

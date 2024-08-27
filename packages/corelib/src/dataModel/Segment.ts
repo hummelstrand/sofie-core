@@ -2,6 +2,7 @@ import { SegmentDisplayMode, SegmentTimingInfo } from '@sofie-automation/bluepri
 import { SegmentId, RundownId } from './Ids'
 import { SegmentNote } from './Notes'
 import { CoreUserEditingDefinitionAction } from './Rundown'
+import { ReadonlyDeep } from 'type-fest'
 
 export enum SegmentOrphanedReason {
 	/** Segment is deleted from the NRCS but we still need it */
@@ -56,4 +57,9 @@ export interface DBSegment {
 	 * User editing definitions for this segment
 	 */
 	userEdits?: CoreUserEditingDefinitionAction[]
+}
+
+export function isSegmentMuted(segment: Pick<ReadonlyDeep<DBSegment>, 'userEditStates'>): boolean {
+	const mutedbyUser = segment.userEditStates && segment.userEditStates['mute-segment']
+	return !!mutedbyUser
 }
