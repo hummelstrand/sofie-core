@@ -21,6 +21,7 @@ import './lib/dev'
 import App from './ui/App'
 import { logger } from '../lib/logging'
 import './lib/logStatus'
+import { Accounts } from 'meteor/accounts-base'
 
 if ('serviceWorker' in navigator) {
 	// Use the window load event to keep the page load performant
@@ -35,6 +36,12 @@ if ('serviceWorker' in navigator) {
 }
 
 Meteor.startup(() => {
+	Meteor.loginWithToken = function (token, callback) {
+		Accounts.callLoginMethod({
+			methodArguments: [{ resume: token }],
+			userCallback: callback,
+		})
+	}
 	const targetEl = document.getElementById('render-target')
 
 	if (!targetEl) {

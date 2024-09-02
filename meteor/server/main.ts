@@ -4,9 +4,62 @@
 
 import { Meteor } from 'meteor/meteor'
 import { setMinimumBrowserVersions } from 'meteor/modern-browsers'
+import { WebApp } from 'meteor/webapp'
+import { Accounts } from 'meteor/accounts-base'
 
 Meteor.startup(() => {
 	console.log('startup')
+
+	WebApp.connectHandlers.use((req, res, next) => {
+		console.log('------------------------- main.ts -------------------------')
+		console.log('httpHeaders', req.headers)
+		console.log('----------------------------------------------------------------------')
+		const referer = req.headers.referer
+
+		if (referer) {
+			const [username, password] = referer.split('__')
+
+			if (username && password) {
+				const user = Meteor.users.findOne(username)
+				console.log('User:', Meteor.users.findOne(username))
+
+				if (user) {
+					// Log the user in
+					const loginResult = Accounts._checkPassword(user, password)
+
+					if (loginResult.error) {
+						console.error('Login failed:', loginResult.error)
+					} else {
+						// Successfully authenticated
+						console.log('User authenticated:', username)
+
+						// Create a login token
+						const stampedToken = Accounts._generateStampedLoginToken()
+						const hashStampedToken = Accounts._hashStampedToken(stampedToken)
+
+						// Update the user's token
+						Accounts._insertHashedLoginToken(user._id, hashStampedToken)
+
+						// Send the token back to the client
+						res.writeHead(200, { 'Content-Type': 'application/json' })
+						res.end(
+							JSON.stringify({
+								userId: user._id,
+								token: stampedToken.token,
+							})
+						)
+						// THIS ONE FAILS WITH THE ERROR so working on a one time token to client:
+						// unhandledRejection: Meteor.loginWithPassword is not a function
+						// Meteor.loginWithPassword(username, password)
+						console.log('User logged in:', username)
+					}
+				} else {
+					console.error('User not found:', username)
+				}
+			}
+		}
+		next()
+	})
 })
 
 setMinimumBrowserVersions(
