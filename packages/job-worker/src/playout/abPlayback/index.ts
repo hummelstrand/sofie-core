@@ -77,15 +77,19 @@ export async function applyAbPlaybackForTimeline(
 		const filteredPlayers = abPoolFilterDisabled(context, poolName, players, routeSetMembers)
 
 		const assingmentsToPlayer: Record<string, number> = {}
-		// If a player has been disabled in the pool, clear the old assignments
-		Object.values<ABSessionAssignment | undefined>(previousAbSessionAssignments[poolName]).forEach((assignment) => {
-			if (assignment) {
-				assingmentsToPlayer[assignment.playerId] = (assingmentsToPlayer[assignment.playerId] || 0) + 1
-			}
-			if (!filteredPlayers.find((player) => player.playerId === assignment?.playerId)) {
-				previousAbSessionAssignments[poolName] = {}
-			}
-		})
+		if (previousAbSessionAssignments[poolName] !== undefined) {
+			// If a player has been disabled in the pool, clear the old assignments
+			Object.values<ABSessionAssignment | undefined>(previousAbSessionAssignments[poolName]).forEach(
+				(assignment) => {
+					if (assignment) {
+						assingmentsToPlayer[assignment.playerId] = (assingmentsToPlayer[assignment.playerId] || 0) + 1
+					}
+					if (!filteredPlayers.find((player) => player.playerId === assignment?.playerId)) {
+						previousAbSessionAssignments[poolName] = {}
+					}
+				}
+			)
+		}
 		// If a player are free and multiple sessions are assigned to one player, clear the old assignments:
 		Object.values<number>(assingmentsToPlayer).forEach((numberOfAssingments) => {
 			if (numberOfAssingments > 1 && players.length >= numberOfAssingments) {
