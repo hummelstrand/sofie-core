@@ -26,7 +26,7 @@ export function RenderUserEditOperations(
 			{userEdits.map((userEdit, i) => {
 				switch (userEdit.type) {
 					case UserEditingType.ACTION:
-						return (
+						return translateMessage(userEdit.label, i18nTranslator) !== '' ? (
 							<MenuItem
 								key={`${userEdit.id}_${i}`}
 								onClick={(e) => {
@@ -39,9 +39,10 @@ export function RenderUserEditOperations(
 							>
 								<span>{translateMessage(userEdit.label, i18nTranslator)}</span>
 							</MenuItem>
-						)
+						) : null
+						break
 					case UserEditingType.FORM:
-						return (
+						return translateMessage(userEdit.label, i18nTranslator) !== '' ? (
 							<MenuItem
 								disabled={!isFormEditable}
 								key={`${userEdit.id}_${i}`}
@@ -75,7 +76,8 @@ export function RenderUserEditOperations(
 							>
 								<span>{translateMessage(userEdit.label, i18nTranslator)}</span>
 							</MenuItem>
-						)
+						) : null
+						break
 					default:
 						assertNever(userEdit)
 						return null
