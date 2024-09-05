@@ -14,7 +14,12 @@ import {
 	RundownPlaylistId,
 	SegmentId,
 } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { DBRundown, RundownOrphanedReason, RundownSource } from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import {
+	CoreUserEditingDefinition,
+	DBRundown,
+	RundownOrphanedReason,
+	RundownSource,
+} from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { RundownBaselineAdLibAction } from '@sofie-automation/corelib/dist/dataModel/RundownBaselineAdLibAction'
 import { RundownBaselineAdLibItem } from '@sofie-automation/corelib/dist/dataModel/RundownBaselineAdLibPiece'
 import { LazyInitialiseReadonly } from '../../lib/lazy'
@@ -109,7 +114,7 @@ export interface IngestModelReadonly {
 	 */
 	getSegment(id: SegmentId): IngestSegmentModelReadonly | undefined
 	/**
-	 * Get the Segments of this Rundown, in order
+	 * Get the Segments of this Rundown, in no particular order
 	 */
 	getAllSegments(): IngestSegmentModelReadonly[]
 
@@ -234,7 +239,8 @@ export interface IngestModel extends IngestModelReadonly, BaseModel {
 		showStyleVariant: ReadonlyDeep<ProcessedShowStyleVariant>,
 		showStyleBlueprint: ReadonlyDeep<WrappedShowStyleBlueprint>,
 		source: RundownSource,
-		rundownNotes: RundownNote[]
+		rundownNotes: RundownNote[],
+		userEdits: CoreUserEditingDefinition[] | undefined
 	): ReadonlyDeep<DBRundown>
 
 	/**

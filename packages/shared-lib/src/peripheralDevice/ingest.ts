@@ -16,14 +16,21 @@ export interface IngestRundown {
 	/** Raw payload of rundown metadata. Only used by the blueprints */
 	payload?: any
 
-	/** Array of segmsnts in this rundown */
+	/** Array of segments in this rundown */
 	segments: IngestSegment[]
+
+	/** States for UserEdits, could be lock from NRCS updates,
+	 * lock from user changes,
+	 * or removedByUser
+	 * */
+	userEditStates?: Record<string, boolean>
 }
 export interface IngestSegment {
 	/** Id of the segment as reported by the ingest gateway. Must be unique for each segment in the rundown */
 	externalId: string
 	/** Name of the segment */
 	name: string
+	/** Rank of the segment within the rundown */
 	rank: number
 
 	/** Raw payload of segment metadata. Only used by the blueprints */
@@ -31,17 +38,29 @@ export interface IngestSegment {
 
 	/** Array of parts in this segment */
 	parts: IngestPart[]
+
+	/** States for UserEdits, could be lock from NRCS updates,
+	 * lock from user changes,
+	 * or removedByUser
+	 * */
+	userEditStates?: Record<string, boolean>
 }
 export interface IngestPart {
 	/** Id of the part as reported by the ingest gateway. Must be unique for each part in the rundown */
 	externalId: string
 	/** Name of the part */
 	name: string
-	/** Rank of the part within the segmetn */
+	/** Rank of the part within the segment */
 	rank: number
 
 	/** Raw payload of the part. Only used by the blueprints */
 	payload?: any
+
+	/** States for UserEdits, could be lock from NRCS updates,
+	 * lock from user changes,
+	 * or removedByUser
+	 * */
+	userEditStates?: Record<string, boolean>
 }
 
 export interface IngestAdlib {
@@ -54,4 +73,10 @@ export interface IngestAdlib {
 	payloadType: string
 	/** Raw payload of the adlib. Only used by the blueprints */
 	payload?: any
+
+	/** States for UserEdits, could be lock from NRCS updates,
+	 * lock from user changes,
+	 * or removedByUser
+	 * */
+	userEditStates?: Record<string, boolean>
 }
