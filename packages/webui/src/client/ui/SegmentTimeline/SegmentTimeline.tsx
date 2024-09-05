@@ -1099,6 +1099,20 @@ export class SegmentTimelineClass extends React.Component<Translated<WithTiming<
 							))}
 						</div>
 					)}
+					<div className="segment-timeline__title__user-edit-states">
+						{this.props.segment.userEditStates &&
+							Object.keys(this.props.segment.userEditStates).map((key) =>
+								this.props.segment.userEditStates?.[key] ? (
+									<div
+										key={key}
+										className="segment-timeline__title__user-edit-state"
+										dangerouslySetInnerHTML={{
+											__html: this.props.segment.userEdits?.filter((i) => i.id === key)[0]?.svgIcon ?? '',
+										}}
+									></div>
+								) : null
+							)}
+					</div>
 				</ContextMenuTrigger>
 				<div className="segment-timeline__duration" tabIndex={0}>
 					{this.props.playlist &&
