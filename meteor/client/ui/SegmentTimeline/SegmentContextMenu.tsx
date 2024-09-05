@@ -80,11 +80,18 @@ export const SegmentContextMenu = withTranslation()(
 									</MenuItem>
 								)}
 								{segment &&
-									RenderUserEditOperations(isSegmentEditAble, segment.rundownId, segment.name, segment.userEdits, {
-										segmentExternalId: segment?.externalId,
-										partExternalId: undefined,
-										pieceExternalId: undefined,
-									})}
+									RenderUserEditOperations(
+										isSegmentEditAble,
+										segment.rundownId,
+										segment.name,
+										segment.userEdits,
+										segment.userEditStates,
+										{
+											segmentExternalId: segment?.externalId,
+											partExternalId: undefined,
+											pieceExternalId: undefined,
+										}
+									)}
 								<hr />
 							</>
 						)}
@@ -121,6 +128,7 @@ export const SegmentContextMenu = withTranslation()(
 									part.instance.rundownId,
 									part.instance.part.title,
 									part.instance.part.userEdits,
+									part.instance.part.userEditStates,
 									{
 										segmentExternalId: segment?.externalId,
 										partExternalId: part.instance.part.externalId,
