@@ -287,6 +287,7 @@ function updateModelWithGeneratedSegment(
 			externalId: ingestSegment.externalId,
 			_rank: ingestSegment.rank,
 			notes: segmentNotes,
+			userEditStates: ingestSegment.userEditStates,
 			userEdits:
 				(translateUserEditsFromBlueprint(blueprintSegment.segment.userEdits, [
 					blueprintId,
@@ -373,6 +374,7 @@ function updateModelWithGeneratedPart(
 					]),
 			  }
 			: undefined,
+		userEditStates: blueprintPart.part.userEditStates,
 		userEdits:
 			(translateUserEditsFromBlueprint(blueprintPart.part.userEdits, [
 				blueprintId,
