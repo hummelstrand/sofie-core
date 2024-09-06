@@ -94,6 +94,15 @@ describe('AbSessionHelper', () => {
 		sessionName: 'name2',
 	}
 
+	const unqiueSession0: TimelineObjectAbSessionInfo = {
+		...testSession0,
+		sessionNameIsGloballyUnique: true,
+	}
+	const unqiueSession1: TimelineObjectAbSessionInfo = {
+		...testSession1,
+		sessionNameIsGloballyUnique: true,
+	}
+
 	test('getPieceABSessionId - knownSessions basic', async () => {
 		const { rundownId } = await setupDefaultRundownPlaylist(jobContext)
 		const rundown = (await jobContext.mockCollections.Rundowns.findOne(rundownId)) as DBRundown
@@ -345,6 +354,50 @@ describe('AbSessionHelper', () => {
 		expect(abSessionHelper.knownSessions).toHaveLength(2)
 	})
 
+	test('getPieceABSessionId - unique session', async () => {
+		const { rundownId } = await setupDefaultRundownPlaylist(jobContext)
+		const rundown = (await jobContext.mockCollections.Rundowns.findOne(rundownId)) as DBRundown
+		expect(rundown).toBeTruthy()
+
+		const nextPartInstance = createPartInstance('abcdef', 'aaa', 1)
+		const currentPartInstance = createPartInstance('12345', 'bbb', 0)
+		const abSessionHelper = getSessionHelper([], currentPartInstance, nextPartInstance)
+
+		// Get the id
+		const piece0 = createPieceInstance(nextPartInstance._id)
+		const expectedSessions: ABSessionInfo[] = [
+			{
+				id: getSessionId(0),
+				name: 'pool0_name0',
+				isUniqueName: true,
+			},
+		]
+		expect(abSessionHelper.getPieceABSessionId(piece0, unqiueSession0)).toEqual(expectedSessions[0].id)
+		expect(getAllKnownSessions(abSessionHelper)).toEqual(expectedSessions)
+		expect(abSessionHelper.knownSessions).toHaveLength(1)
+
+		// Should get the same id again
+		expect(abSessionHelper.getPieceABSessionId(piece0, unqiueSession0)).toEqual(expectedSessions[0].id)
+		expect(getAllKnownSessions(abSessionHelper)).toEqual(expectedSessions)
+		expect(abSessionHelper.knownSessions).toHaveLength(1)
+
+		const piece1 = createPieceInstance(nextPartInstance._id)
+		expect(abSessionHelper.getPieceABSessionId(piece1, unqiueSession0)).toEqual(expectedSessions[0].id)
+		expect(getAllKnownSessions(abSessionHelper)).toEqual(expectedSessions)
+		expect(abSessionHelper.knownSessions).toHaveLength(1)
+
+		// Try for the other part
+		const piece2 = createPieceInstance(currentPartInstance._id)
+		expect(abSessionHelper.getPieceABSessionId(piece2, unqiueSession0)).toEqual(expectedSessions[0].id)
+		expect(abSessionHelper.knownSessions).toHaveLength(1)
+
+		// Or the non-unique version
+		expect(
+			abSessionHelper.getPieceABSessionId(piece1, { ...unqiueSession0, sessionNameIsGloballyUnique: false })
+		).not.toEqual(expectedSessions[0].id)
+		expect(abSessionHelper.knownSessions).toHaveLength(2)
+	})
+
 	test('getTimelineObjectAbSessionId - bad parameters', async () => {
 		const { rundownId } = await setupDefaultRundownPlaylist(jobContext)
 		const rundown = (await jobContext.mockCollections.Rundowns.findOne(rundownId)) as DBRundown
@@ -561,6 +614,52 @@ describe('AbSessionHelper', () => {
 		const obj3 = createTimelineObject(null, protectString('fake'))
 		expect(abSessionHelper.getTimelineObjectAbSessionId(obj3, testSession0)).toBeUndefined()
 		expect(abSessionHelper.knownSessions).toHaveLength(2)
+
+		// Ensure the sessions havent changed
+		expect(getAllKnownSessions(abSessionHelper)).toEqual(existingSessions)
+	})
+
+	test('getTimelineObjectAbSessionId - unique session', async () => {
+		const { rundownId } = await setupDefaultRundownPlaylist(jobContext)
+		const rundown = (await jobContext.mockCollections.Rundowns.findOne(rundownId)) as DBRundown
+		expect(rundown).toBeTruthy()
+
+		const nextPartInstance = createPartInstance('abcdef', 'aaa', 1)
+		const currentPartInstance = createPartInstance('12345', 'bbb', 10)
+
+		const existingSessions: ABSessionInfo[] = [
+			{
+				id: 'unique0',
+				name: 'pool0_name0',
+				isUniqueName: true,
+			},
+			{
+				id: 'unique1',
+				name: 'pool0_name1',
+				isUniqueName: true,
+			},
+			{
+				id: 'normal0',
+				name: 'pool0_name0',
+				isUniqueName: false,
+				partInstanceIds: [currentPartInstance._id],
+			},
+		]
+
+		const abSessionHelper = getSessionHelper(existingSessions, currentPartInstance, nextPartInstance)
+
+		// no session recorded for partInstance
+		const obj1 = createTimelineObject(nextPartInstance._id)
+		expect(abSessionHelper.getTimelineObjectAbSessionId(obj1, unqiueSession0)).toEqual('unique0')
+
+		// partInstance with session
+		const obj2 = createTimelineObject(currentPartInstance._id)
+		expect(abSessionHelper.getTimelineObjectAbSessionId(obj2, unqiueSession0)).toEqual('unique0')
+		expect(abSessionHelper.getTimelineObjectAbSessionId(obj2, unqiueSession1)).toEqual('unique1')
+
+		// Non unique sessions
+		expect(abSessionHelper.getTimelineObjectAbSessionId(obj2, testSession0)).toEqual('normal0')
+		expect(abSessionHelper.getTimelineObjectAbSessionId(obj1, testSession0)).toBeUndefined()
 
 		// Ensure the sessions havent changed
 		expect(getAllKnownSessions(abSessionHelper)).toEqual(existingSessions)
