@@ -423,10 +423,8 @@ function PresenterScreenContentDefaultLayout({
 	rundownIds,
 }: Readonly<WithTiming<PresenterScreenProps & PresenterScreenTrackedProps>>) {
 	if (playlist && playlistId && segments) {
-		let currentPartCountdown = 0
-		if (currentPartInstance) {
-			currentPartCountdown = timingDurations.remainingTimeOnCurrentPart || 0
-		}
+		const currentPartOrSegmentCountdown =
+			timingDurations.remainingBudgetOnCurrentSegment ?? timingDurations.remainingTimeOnCurrentPart ?? 0
 
 		const expectedStart = PlaylistTiming.getExpectedStart(playlist.timing)
 		const overUnderClock = getPlaylistTimingDiff(playlist, timingDurations) ?? 0
@@ -474,7 +472,7 @@ function PresenterScreenContentDefaultLayout({
 								/>
 							</div>
 							<div className="presenter-screen__part__part-countdown">
-								<Timediff time={currentPartCountdown} />
+								<Timediff time={currentPartOrSegmentCountdown} />
 							</div>
 						</>
 					) : expectedStart ? (
