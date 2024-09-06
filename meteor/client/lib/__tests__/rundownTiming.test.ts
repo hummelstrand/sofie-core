@@ -1304,25 +1304,7 @@ describe('rundown Timing Calculator', () => {
 		parts.push(makeMockPart('part3', 0, rundownId, segmentId2, { expectedDuration: 1000 }))
 		parts.push(makeMockPart('part4', 0, rundownId, segmentId2, { expectedDuration: 1000 }))
 		const partInstances = convertPartsToPartInstances(parts)
-		const piecesMap: Map<PartId, CalculateTimingsPiece[]> = new Map()
-		piecesMap.set(protectString('part1'), [
-			literal<CalculateTimingsPiece>({
-				enable: {
-					start: 0,
-				},
-				prerollDuration: 5000,
-				pieceType: IBlueprintPieceType.Normal,
-			}),
-		])
-		piecesMap.set(protectString('part2'), [
-			literal<CalculateTimingsPiece>({
-				enable: {
-					start: 0,
-				},
-				prerollDuration: 240,
-				pieceType: IBlueprintPieceType.Normal,
-			}),
-		])
+
 		const partInstancesMap: Map<PartId, PartInstance> = new Map()
 		const rundown = makeMockRundown(rundownId, playlist)
 		const rundowns = [rundown]
@@ -1334,10 +1316,9 @@ describe('rundown Timing Calculator', () => {
 			undefined,
 			partInstances,
 			partInstancesMap,
-			piecesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({

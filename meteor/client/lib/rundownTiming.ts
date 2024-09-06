@@ -87,7 +87,6 @@ export class RundownTimingCalculator {
 	 * @param {CalculateTimingsPartInstance[]} partInstances
 	 * @param {Map<PartId, CalculateTimingsPartInstance>} partInstancesMap
 	 * @param {number} [defaultDuration]
-	 * @param {CalculateTimingsPartInstance[]} segmentEntryPartInstances
 	 * @param {Record<TimingId, boolean>} partsInQuickLoop
 	 * @return {*}  {RundownTimingContext}
 	 * @memberof RundownTimingCalculator
@@ -103,13 +102,6 @@ export class RundownTimingCalculator {
 		segmentsMap: Map<SegmentId, DBSegment>,
 		/** Fallback duration for Parts that have no as-played duration of their own. */
 		defaultDuration: number = Settings.defaultDisplayDuration,
-		/** The first played-out PartInstance in the current playing segment and
-		 * optionally the first played-out PartInstance in the previously playing segment if the
-		 * previousPartInstance of the current RundownPlaylist is from a different Segment than
-		 * the currentPartInstance.
-		 *
-		 * This is being used for calculating Segment Duration Budget */
-		segmentEntryPartInstances: CalculateTimingsPartInstance[],
 		partsInQuickLoop: Record<TimingId, boolean>
 	): RundownTimingContext {
 		let totalRundownDuration = 0
@@ -132,7 +124,6 @@ export class RundownTimingCalculator {
 		let liveSegmentId: SegmentId | undefined
 
 		Object.keys(this.displayDurationGroups).forEach((key) => delete this.displayDurationGroups[key])
-		Object.keys(this.segmentStartedPlayback).forEach((key) => delete this.segmentStartedPlayback[key])
 		Object.keys(this.segmentAsPlayedDurations).forEach((key) => delete this.segmentAsPlayedDurations[key])
 		this.untimedSegments.clear()
 		this.linearParts.length = 0
@@ -155,12 +146,6 @@ export class RundownTimingCalculator {
 				this.nextSegmentId = undefined
 			}
 
-			segmentEntryPartInstances.forEach((partInstance) => {
-				if (partInstance.timings?.reportedStartedPlayback !== undefined)
-					this.segmentStartedPlayback[unprotectString(partInstance.segmentId)] =
-						partInstance.timings?.reportedStartedPlayback
-			})
-
 			partInstances.forEach((partInstance, itIndex) => {
 				const partId = partInstance.part._id
 				const partInstanceId = !partInstance.isTemporary ? partInstance._id : null
@@ -177,7 +162,7 @@ export class RundownTimingCalculator {
 
 						if (liveSegment?.segmentTiming?.countdownType === CountdownType.SEGMENT_BUDGET_DURATION) {
 							remainingBudgetOnCurrentSegment =
-								(this.segmentStartedPlayback[unprotectString(liveSegmentId)] ??
+								(playlist.segmentsStartedPlayback?.[unprotectString(liveSegmentId)] ??
 									lastStartedPlayback ??
 									now) +
 								(liveSegment.segmentTiming.budgetDuration ?? 0) -
