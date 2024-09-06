@@ -385,7 +385,6 @@ async function getTimelineRundown(
 					context.getShowStyleBlueprintConfig(showStyle),
 					playoutModel.playlist,
 					activeRundown.rundown,
-					activeRundown.segments.map((s) => s.segment._id),
 					previousPartInstance?.partInstance,
 					currentPartInstance?.partInstance,
 					nextPartInstance?.partInstance,
