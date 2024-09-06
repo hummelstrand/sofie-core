@@ -47,10 +47,7 @@ export function applyAbPlayerObjectAssignments(
 		if (obj.abSessions && obj.pieceInstanceId) {
 			for (const session of obj.abSessions) {
 				if (session.poolName === poolName) {
-					const sessionId = abSessionHelper.getTimelineObjectAbSessionId(
-						obj,
-						abSessionHelper.validateSessionName(obj.pieceInstanceId, session)
-					)
+					const sessionId = abSessionHelper.getTimelineObjectAbSessionId(obj, session)
 					if (sessionId) {
 						const existing = groupedObjectsMap.get(sessionId)
 						groupedObjectsMap.set(sessionId, existing ? [...existing, obj] : [obj])
