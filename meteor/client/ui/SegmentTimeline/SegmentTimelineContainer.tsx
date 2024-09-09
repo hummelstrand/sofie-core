@@ -28,11 +28,11 @@ import {
 import { computeSegmentDuration, getPartInstanceTimingId, RundownTimingContext } from '../../lib/rundownTiming'
 import { RundownViewShelf } from '../RundownView/RundownViewShelf'
 import { PartInstanceId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { PartInstances, Parts } from '../../collections'
 import { catchError, useDebounce } from '../../lib/lib'
 import { CorelibPubSub } from '@sofie-automation/corelib/dist/pubsub'
 import { useSubscription, useTracker } from '../../lib/ReactMeteorData/ReactMeteorData'
 import { logger } from '../../../lib/logging'
+import { UIPartInstances, UIParts } from '../Collections'
 
 // Kept for backwards compatibility
 export { SegmentUi, PartUi, PieceUi, ISourceLayerUi, IOutputLayerUi } from '../SegmentContainer/withResolvedSegment'
@@ -81,7 +81,7 @@ interface IProps extends IResolvedSegmentProps {
 export function SegmentTimelineContainer(props: Readonly<IProps>): JSX.Element {
 	const partIds = useTracker(
 		() =>
-			Parts.find(
+			UIParts.find(
 				{
 					segmentId: props.segmentId,
 				},
@@ -98,7 +98,7 @@ export function SegmentTimelineContainer(props: Readonly<IProps>): JSX.Element {
 
 	const partInstanceIds = useTracker(
 		() =>
-			PartInstances.find(
+			UIPartInstances.find(
 				{
 					segmentId: props.segmentId,
 					reset: {

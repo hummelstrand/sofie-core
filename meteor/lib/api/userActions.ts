@@ -26,6 +26,7 @@ import {
 	SnapshotId,
 	StudioId,
 } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { QuickLoopMarker } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 
 export interface NewUserActionAPI extends MethodContext {
 	take(
@@ -255,8 +256,8 @@ export interface NewUserActionAPI extends MethodContext {
 		playlistId: RundownPlaylistId
 	): Promise<ClientAPI.ClientResponse<void>>
 	restartCore(userEvent: string, eventTime: Time, token: string): Promise<ClientAPI.ClientResponse<string>>
-	guiFocused(userEvent: string, eventTime: Time, viewInfo?: any[]): Promise<ClientAPI.ClientResponse<void>>
-	guiBlurred(userEvent: string, eventTime: Time, viewInfo?: any[]): Promise<ClientAPI.ClientResponse<void>>
+	guiFocused(userEvent: string, eventTime: Time, viewInfo?: unknown): Promise<ClientAPI.ClientResponse<void>>
+	guiBlurred(userEvent: string, eventTime: Time, viewInfo?: unknown): Promise<ClientAPI.ClientResponse<void>>
 	bucketsRemoveBucket(userEvent: string, eventTime: Time, id: BucketId): Promise<ClientAPI.ClientResponse<void>>
 	bucketsModifyBucket(
 		userEvent: string,
@@ -342,6 +343,19 @@ export interface NewUserActionAPI extends MethodContext {
 		studioId: StudioId,
 		showStyleVariantId: ShowStyleVariantId
 	): Promise<ClientAPI.ClientResponse<RundownId>>
+
+	setQuickLoopStart(
+		userEvent: string,
+		eventTime: Time,
+		rundownPlaylistId: RundownPlaylistId,
+		marker: QuickLoopMarker | null
+	): Promise<ClientAPI.ClientResponse<void>>
+	setQuickLoopEnd(
+		userEvent: string,
+		eventTime: Time,
+		rundownPlaylistId: RundownPlaylistId,
+		marker: QuickLoopMarker | null
+	): Promise<ClientAPI.ClientResponse<void>>
 }
 
 export enum UserActionAPIMethods {
@@ -425,6 +439,9 @@ export enum UserActionAPIMethods {
 	'activateAdlibTestingMode' = 'userAction.activateAdlibTestingMode',
 
 	'createAdlibTestingRundownForShowStyleVariant' = 'userAction.createAdlibTestingRundownForShowStyleVariant',
+
+	'setQuickLoopStart' = 'userAction.setQuickLoopStart',
+	'setQuickLoopEnd' = 'userAction.setQuickLoopEnd',
 }
 
 export interface ReloadRundownPlaylistResponse {

@@ -18,11 +18,12 @@ import { calculatePartInstanceExpectedDurationWithTransition } from '@sofie-auto
 import { unprotectString } from '@sofie-automation/corelib/dist/protectedString'
 import { PartInstance } from '../../lib/collections/PartInstances'
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
-import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import { DBRundownPlaylist, QuickLoopMarkerType } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { getCurrentTime, objectFromEntries } from '../../lib/lib'
 import { Settings } from '../../lib/Settings'
 import { Rundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
+import { isLoopDefined, isEntirePlaylistLooping, isLoopRunning } from '../lib/RundownResolver'
 import { CountdownType } from '@sofie-automation/blueprints-integration'
 
 // Minimum duration that a part can be assigned. Used by gap parts to allow them to "compress" to indicate time running out.
@@ -86,7 +87,7 @@ export class RundownTimingCalculator {
 	 * @param {CalculateTimingsPartInstance[]} partInstances
 	 * @param {Map<PartId, CalculateTimingsPartInstance>} partInstancesMap
 	 * @param {number} [defaultDuration]
-	 * @param {CalculateTimingsPartInstance[]} segmentEntryPartInstances
+	 * @param {Record<TimingId, boolean>} partsInQuickLoop
 	 * @return {*}  {RundownTimingContext}
 	 * @memberof RundownTimingCalculator
 	 */
@@ -101,13 +102,7 @@ export class RundownTimingCalculator {
 		segmentsMap: Map<SegmentId, DBSegment>,
 		/** Fallback duration for Parts that have no as-played duration of their own. */
 		defaultDuration: number = Settings.defaultDisplayDuration,
-		/** The first played-out PartInstance in the current playing segment and
-		 * optionally the first played-out PartInstance in the previously playing segment if the
-		 * previousPartInstance of the current RundownPlaylist is from a different Segment than
-		 * the currentPartInstance.
-		 *
-		 * This is being used for calculating Segment Duration Budget */
-		segmentEntryPartInstances: CalculateTimingsPartInstance[]
+		partsInQuickLoop: Record<TimingId, boolean>
 	): RundownTimingContext {
 		let totalRundownDuration = 0
 		let remainingRundownDuration = 0
@@ -129,7 +124,6 @@ export class RundownTimingCalculator {
 		let liveSegmentId: SegmentId | undefined
 
 		Object.keys(this.displayDurationGroups).forEach((key) => delete this.displayDurationGroups[key])
-		Object.keys(this.segmentStartedPlayback).forEach((key) => delete this.segmentStartedPlayback[key])
 		Object.keys(this.segmentAsPlayedDurations).forEach((key) => delete this.segmentAsPlayedDurations[key])
 		this.untimedSegments.clear()
 		this.linearParts.length = 0
@@ -152,12 +146,6 @@ export class RundownTimingCalculator {
 				this.nextSegmentId = undefined
 			}
 
-			segmentEntryPartInstances.forEach((partInstance) => {
-				if (partInstance.timings?.reportedStartedPlayback !== undefined)
-					this.segmentStartedPlayback[unprotectString(partInstance.segmentId)] =
-						partInstance.timings?.reportedStartedPlayback
-			})
-
 			partInstances.forEach((partInstance, itIndex) => {
 				const partId = partInstance.part._id
 				const partInstanceId = !partInstance.isTemporary ? partInstance._id : null
@@ -174,7 +162,7 @@ export class RundownTimingCalculator {
 
 						if (liveSegment?.segmentTiming?.countdownType === CountdownType.SEGMENT_BUDGET_DURATION) {
 							remainingBudgetOnCurrentSegment =
-								(this.segmentStartedPlayback[unprotectString(liveSegmentId)] ??
+								(playlist.segmentsStartedPlayback?.[unprotectString(liveSegmentId)] ??
 									lastStartedPlayback ??
 									now) +
 								(liveSegment.segmentTiming.budgetDuration ?? 0) -
@@ -293,7 +281,8 @@ export class RundownTimingCalculator {
 					partDisplayDuration = Math.max(partDisplayDurationNoPlayback, now - lastStartedPlayback)
 					this.partPlayed[partInstanceOrPartId] = now - lastStartedPlayback
 					const segmentStartedPlayback =
-						this.segmentStartedPlayback[unprotectString(partInstance.segmentId)] || lastStartedPlayback
+						playlist.segmentsStartedPlayback?.[unprotectString(partInstance.segmentId)] ??
+						lastStartedPlayback
 
 					// NOTE: displayDurationGroups are ignored here, when using budgetDuration
 					if (segmentUsesBudget) {
@@ -494,7 +483,7 @@ export class RundownTimingCalculator {
 					// this is a line before next line
 					localAccum = this.linearParts[i][1] || 0
 					// only null the values if not looping, if looping, these will be offset by the countdown for the last part
-					if (!playlist.loop) {
+					if (!partsInQuickLoop[unprotectString(this.linearParts[i][0])]) {
 						this.linearParts[i][1] = null // we use null to express 'will not probably be played out, if played in order'
 					}
 				} else if (i === currentAIndex) {
@@ -536,8 +525,9 @@ export class RundownTimingCalculator {
 				}
 			}
 			// contiunation of linearParts calculations for looping playlists
-			if (playlist.loop) {
+			if (isLoopRunning(playlist)) {
 				for (let i = 0; i < nextAIndex; i++) {
+					if (!partsInQuickLoop[unprotectString(this.linearParts[i][0])]) continue
 					// offset the parts before the on air line by the countdown for the end of the rundown
 					this.linearParts[i][1] =
 						(this.linearParts[i][1] || 0) + waitAccumulator - localAccum + currentRemaining
@@ -571,7 +561,7 @@ export class RundownTimingCalculator {
 				let valToAddToRundownAsPlayedDuration = 0
 				let valToAddToRundownRemainingDuration = 0
 				if (segment._id === liveSegmentId) {
-					const startedPlayback = this.segmentStartedPlayback[unprotectString(segment._id)]
+					const startedPlayback = playlist.segmentsStartedPlayback?.[unprotectString(segment._id)]
 					valToAddToRundownRemainingDuration = Math.max(
 						0,
 						segmentBudgetDuration - (startedPlayback ? now - startedPlayback : 0)
@@ -647,6 +637,7 @@ export class RundownTimingCalculator {
 			breakIsLastRundown,
 			isLowResolution,
 			nextRundownAnchor,
+			partsInQuickLoop,
 		})
 	}
 
@@ -710,6 +701,8 @@ export interface RundownTimingContext {
 	partCountdown?: Record<string, number | null>
 	/** The calculated durations of each of the Parts: as-planned/as-run depending on state. */
 	partDurations?: Record<string, number>
+	/** Whether a Part (or Part Instance) is within the QuickLoop */
+	partsInQuickLoop?: Record<string, boolean>
 	/** The offset of each of the Parts from the beginning of the Playlist. */
 	partStartsAt?: Record<string, number>
 	/** Same as partStartsAt, but will include display duration overrides
@@ -891,4 +884,66 @@ function getSegmentRundownAnchorFromPart(
 	}
 
 	return nextRundownAnchor
+}
+
+export type MinimalPartInstance = Pick<
+	PartInstance,
+	| '_id'
+	| 'isTemporary'
+	| 'rundownId'
+	| 'segmentId'
+	| 'segmentPlayoutId'
+	| 'takeCount'
+	| 'part'
+	| 'timings'
+	| 'orphaned'
+>
+
+export function findPartInstancesInQuickLoop(
+	playlist: DBRundownPlaylist,
+	sortedPartInstances: MinimalPartInstance[]
+): Record<TimingId, boolean> {
+	if (!isLoopDefined(playlist) || isEntirePlaylistLooping(playlist)) {
+		return {}
+	}
+
+	const partsInQuickLoop: Record<TimingId, boolean> = {}
+	let isInQuickLoop = playlist.quickLoop?.start?.type === QuickLoopMarkerType.PLAYLIST
+	let previousPartInstance: MinimalPartInstance | undefined = undefined
+	for (const partInstance of sortedPartInstances) {
+		if (
+			previousPartInstance &&
+			((playlist.quickLoop?.end?.type === QuickLoopMarkerType.PART &&
+				playlist.quickLoop.end.id === previousPartInstance.part._id) ||
+				(playlist.quickLoop?.end?.type === QuickLoopMarkerType.SEGMENT &&
+					playlist.quickLoop.end.id === previousPartInstance.segmentId) ||
+				(playlist.quickLoop?.end?.type === QuickLoopMarkerType.RUNDOWN &&
+					playlist.quickLoop.end.id === previousPartInstance.rundownId))
+		) {
+			isInQuickLoop = false
+			if (
+				playlist.quickLoop.start?.type !== QuickLoopMarkerType.PART ||
+				playlist.quickLoop.start?.id !== playlist.quickLoop.end?.id
+			) {
+				// when looping over a single part we need to include the three instances of that part shown at once, otherwise, we can break
+				break
+			}
+		}
+		if (
+			!isInQuickLoop &&
+			((playlist.quickLoop?.start?.type === QuickLoopMarkerType.PART &&
+				playlist.quickLoop.start.id === partInstance.part._id) ||
+				(playlist.quickLoop?.start?.type === QuickLoopMarkerType.SEGMENT &&
+					playlist.quickLoop.start.id === partInstance.segmentId) ||
+				(playlist.quickLoop?.start?.type === QuickLoopMarkerType.RUNDOWN &&
+					playlist.quickLoop.start.id === partInstance.rundownId))
+		) {
+			isInQuickLoop = true
+		}
+		if (isInQuickLoop) {
+			partsInQuickLoop[getPartInstanceTimingId(partInstance)] = true
+		}
+		previousPartInstance = partInstance
+	}
+	return partsInQuickLoop
 }

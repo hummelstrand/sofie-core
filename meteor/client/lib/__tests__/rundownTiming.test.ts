@@ -1,10 +1,14 @@
-import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import {
+	DBRundownPlaylist,
+	ForceQuickLoopAutoNext,
+	QuickLoopMarkerType,
+} from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { PartInstance, wrapPartToTemporaryInstance } from '../../../lib/collections/PartInstances'
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { DBRundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
-import { literal, protectString } from '../../../lib/lib'
-import { RundownTimingCalculator, RundownTimingContext } from '../rundownTiming'
+import { literal, protectString, unprotectString } from '../../../lib/lib'
+import { RundownTimingCalculator, RundownTimingContext, findPartInstancesInQuickLoop } from '../rundownTiming'
 import { PlaylistTimingType } from '@sofie-automation/blueprints-integration'
 import { PartId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 
@@ -103,6 +107,23 @@ function convertPartsToPartInstances(parts: DBPart[]): PartInstance[] {
 	return parts.map((part) => wrapPartToTemporaryInstance(protectString(''), part))
 }
 
+function makeMockPartsForQuickLoopTest() {
+	const rundownId = 'rundown1'
+	const segmentId1 = 'segment1'
+	const segmentId2 = 'segment2'
+	const segmentsMap: Map<SegmentId, DBSegment> = new Map()
+	segmentsMap.set(protectString<SegmentId>(segmentId1), makeMockSegment(segmentId1, 0, rundownId))
+	segmentsMap.set(protectString<SegmentId>(segmentId2), makeMockSegment(segmentId2, 0, rundownId))
+	const parts: DBPart[] = []
+	parts.push(makeMockPart('part1', 0, rundownId, segmentId1, { expectedDuration: 1000 }))
+	parts.push(makeMockPart('part2', 0, rundownId, segmentId1, { expectedDuration: 1000 }))
+	parts.push(makeMockPart('part3', 0, rundownId, segmentId2, { expectedDuration: 1000 }))
+	parts.push(makeMockPart('part4', 0, rundownId, segmentId2, { expectedDuration: 1000 }))
+	parts.push(makeMockPart('part5', 0, rundownId, segmentId2, { expectedDuration: 1000 }))
+	const partInstances = convertPartsToPartInstances(parts)
+	return { parts, partInstances }
+}
+
 describe('rundown Timing Calculator', () => {
 	it('Provides output for empty playlist', () => {
 		const timing = new RundownTimingCalculator()
@@ -120,7 +141,7 @@ describe('rundown Timing Calculator', () => {
 			partInstancesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -139,6 +160,7 @@ describe('rundown Timing Calculator', () => {
 				partExpectedDurations: {},
 				partPlayed: {},
 				partStartsAt: {},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 0,
 				totalPlaylistDuration: 0,
 				breakIsLastRundown: undefined,
@@ -182,7 +204,7 @@ describe('rundown Timing Calculator', () => {
 			partInstancesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -240,6 +262,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 4000,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: undefined,
@@ -283,7 +306,7 @@ describe('rundown Timing Calculator', () => {
 			partInstancesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -341,6 +364,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 4000,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: undefined,
@@ -386,7 +410,7 @@ describe('rundown Timing Calculator', () => {
 			partInstancesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -446,6 +470,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 4000,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: undefined,
@@ -514,7 +539,7 @@ describe('rundown Timing Calculator', () => {
 				partInstancesMap,
 				segmentsMap,
 				DEFAULT_DURATION,
-				[]
+				{}
 			)
 			expect(result).toEqual(
 				literal<RundownTimingContext>({
@@ -572,6 +597,7 @@ describe('rundown Timing Calculator', () => {
 						part3: 2000,
 						part4: 3000,
 					},
+					partsInQuickLoop: {},
 					remainingPlaylistDuration: 4000,
 					totalPlaylistDuration: 4000,
 					breakIsLastRundown: undefined,
@@ -668,7 +694,7 @@ describe('rundown Timing Calculator', () => {
 				partInstancesMap,
 				segmentsMap,
 				DEFAULT_DURATION,
-				[]
+				{}
 			)
 			expect(result).toEqual(
 				literal<RundownTimingContext>({
@@ -726,6 +752,7 @@ describe('rundown Timing Calculator', () => {
 						part3: 3000,
 						part4: 3500,
 					},
+					partsInQuickLoop: {},
 					remainingPlaylistDuration: 3500,
 					totalPlaylistDuration: 7000,
 					breakIsLastRundown: false,
@@ -823,7 +850,7 @@ describe('rundown Timing Calculator', () => {
 				partInstancesMap,
 				segmentsMap,
 				DEFAULT_DURATION,
-				[]
+				{}
 			)
 			expect(result).toEqual(
 				literal<RundownTimingContext>({
@@ -881,6 +908,7 @@ describe('rundown Timing Calculator', () => {
 						part3: 3000,
 						part4: 10000,
 					},
+					partsInQuickLoop: {},
 					remainingPlaylistDuration: 1000,
 					totalPlaylistDuration: 7000,
 					breakIsLastRundown: false,
@@ -927,7 +955,7 @@ describe('rundown Timing Calculator', () => {
 				partInstancesMap,
 				segmentsMap,
 				DEFAULT_NONZERO_DURATION,
-				[]
+				{}
 			)
 			expect(result).toEqual(
 				literal<RundownTimingContext>({
@@ -985,6 +1013,7 @@ describe('rundown Timing Calculator', () => {
 						part3: 2000,
 						part4: 3000,
 					},
+					partsInQuickLoop: {},
 					remainingPlaylistDuration: 4000,
 					totalPlaylistDuration: 4000,
 					breakIsLastRundown: undefined,
@@ -1057,7 +1086,7 @@ describe('rundown Timing Calculator', () => {
 				partInstancesMap,
 				segmentsMap,
 				DEFAULT_NONZERO_DURATION,
-				[]
+				{}
 			)
 			expect(result).toEqual(
 				literal<RundownTimingContext>({
@@ -1122,6 +1151,7 @@ describe('rundown Timing Calculator', () => {
 						part4: 3000,
 						part5: 4000,
 					},
+					partsInQuickLoop: {},
 					remainingPlaylistDuration: 5000,
 					totalPlaylistDuration: 5000,
 					breakIsLastRundown: undefined,
@@ -1184,7 +1214,7 @@ describe('rundown Timing Calculator', () => {
 			partInstancesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1242,6 +1272,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 8000,
 				totalPlaylistDuration: 8000,
 				breakIsLastRundown: undefined,
@@ -1272,25 +1303,7 @@ describe('rundown Timing Calculator', () => {
 		parts.push(makeMockPart('part3', 0, rundownId, segmentId2, { expectedDuration: 1000 }))
 		parts.push(makeMockPart('part4', 0, rundownId, segmentId2, { expectedDuration: 1000 }))
 		const partInstances = convertPartsToPartInstances(parts)
-		const piecesMap: Map<PartId, CalculateTimingsPiece[]> = new Map()
-		piecesMap.set(protectString('part1'), [
-			literal<CalculateTimingsPiece>({
-				enable: {
-					start: 0,
-				},
-				prerollDuration: 5000,
-				pieceType: IBlueprintPieceType.Normal,
-			}),
-		])
-		piecesMap.set(protectString('part2'), [
-			literal<CalculateTimingsPiece>({
-				enable: {
-					start: 0,
-				},
-				prerollDuration: 240,
-				pieceType: IBlueprintPieceType.Normal,
-			}),
-		])
+
 		const partInstancesMap: Map<PartId, PartInstance> = new Map()
 		const rundown = makeMockRundown(rundownId, playlist)
 		const rundowns = [rundown]
@@ -1302,10 +1315,9 @@ describe('rundown Timing Calculator', () => {
 			undefined,
 			partInstances,
 			partInstancesMap,
-			piecesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1453,7 +1465,7 @@ describe('rundown Timing Calculator', () => {
 			partInstancesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1511,6 +1523,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 2500,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,
@@ -1601,7 +1614,7 @@ describe('rundown Timing Calculator', () => {
 			partInstancesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1659,6 +1672,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 3500,
 					part4: 4500,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 2000,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,
@@ -1755,7 +1769,7 @@ describe('rundown Timing Calculator', () => {
 			partInstancesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1813,6 +1827,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 1500,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,
@@ -1903,7 +1918,7 @@ describe('rundown Timing Calculator', () => {
 			partInstancesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -1961,6 +1976,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 2500,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,
@@ -2051,7 +2067,7 @@ describe('rundown Timing Calculator', () => {
 			partInstancesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -2109,6 +2125,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 3500,
 					part4: 4500,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 2000,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,
@@ -2205,7 +2222,7 @@ describe('rundown Timing Calculator', () => {
 			partInstancesMap,
 			segmentsMap,
 			DEFAULT_DURATION,
-			[]
+			{}
 		)
 		expect(result).toEqual(
 			literal<RundownTimingContext>({
@@ -2263,6 +2280,7 @@ describe('rundown Timing Calculator', () => {
 					part3: 2000,
 					part4: 3000,
 				},
+				partsInQuickLoop: {},
 				remainingPlaylistDuration: 1500,
 				totalPlaylistDuration: 4000,
 				breakIsLastRundown: false,
@@ -2272,5 +2290,177 @@ describe('rundown Timing Calculator', () => {
 				nextRundownAnchor: 3000,
 			})
 		)
+	})
+
+	it('Passes partsInQuickLoop', () => {
+		const timing = new RundownTimingCalculator()
+		const playlist: DBRundownPlaylist = makeMockPlaylist()
+		const rundownId = 'rundown1'
+		const segmentId1 = 'segment1'
+		const segmentId2 = 'segment2'
+		const segmentsMap: Map<SegmentId, DBSegment> = new Map()
+		segmentsMap.set(protectString<SegmentId>(segmentId1), makeMockSegment(segmentId1, 0, rundownId))
+		segmentsMap.set(protectString<SegmentId>(segmentId2), makeMockSegment(segmentId2, 0, rundownId))
+		const parts: DBPart[] = []
+		parts.push(makeMockPart('part1', 0, rundownId, segmentId1, { expectedDuration: 1000 }))
+		parts.push(makeMockPart('part2', 0, rundownId, segmentId1, { expectedDuration: 1000 }))
+		parts.push(makeMockPart('part3', 0, rundownId, segmentId2, { expectedDuration: 1000 }))
+		parts.push(makeMockPart('part4', 0, rundownId, segmentId2, { expectedDuration: 1000 }))
+		const partInstances = convertPartsToPartInstances(parts)
+		const partInstancesMap: Map<PartId, PartInstance> = new Map()
+		const rundown = makeMockRundown(rundownId, playlist)
+		const rundowns = [rundown]
+		const result = timing.updateDurations(
+			0,
+			false,
+			playlist,
+			rundowns,
+			undefined,
+			partInstances,
+			partInstancesMap,
+			segmentsMap,
+			DEFAULT_DURATION,
+			{
+				part2: true,
+				part3: true,
+			}
+		)
+		expect(result).toMatchObject(
+			literal<Partial<RundownTimingContext>>({
+				partsInQuickLoop: {
+					part2: true,
+					part3: true,
+				},
+			})
+		)
+	})
+})
+
+describe('findPartInstancesInQuickLoop', () => {
+	it('Returns no parts when QuickLoop is not defined', () => {
+		const { partInstances } = makeMockPartsForQuickLoopTest()
+		const playlist = makeMockPlaylist()
+
+		const result = findPartInstancesInQuickLoop(playlist, partInstances)
+
+		expect(result).toEqual({})
+	})
+
+	it('Returns parts between QuickLoop Part Markers when loop is not running', () => {
+		const { parts, partInstances } = makeMockPartsForQuickLoopTest()
+
+		const playlist = makeMockPlaylist()
+		playlist.quickLoop = {
+			start: {
+				type: QuickLoopMarkerType.PART,
+				id: parts[1]._id,
+			},
+			end: {
+				type: QuickLoopMarkerType.PART,
+				id: parts[3]._id,
+			},
+			running: false,
+			forceAutoNext: ForceQuickLoopAutoNext.DISABLED,
+			locked: false,
+		}
+
+		const result = findPartInstancesInQuickLoop(playlist, partInstances)
+
+		expect(result).toEqual({
+			[unprotectString(parts[1]._id)]: true,
+			[unprotectString(parts[2]._id)]: true,
+			[unprotectString(parts[3]._id)]: true,
+		})
+	})
+
+	it('Returns parts between QuickLoop Part Markers when loop is running', () => {
+		const { parts, partInstances } = makeMockPartsForQuickLoopTest()
+
+		const playlist = makeMockPlaylist()
+		playlist.quickLoop = {
+			start: {
+				type: QuickLoopMarkerType.PART,
+				id: parts[1]._id,
+			},
+			end: {
+				type: QuickLoopMarkerType.PART,
+				id: parts[3]._id,
+			},
+			running: true,
+			forceAutoNext: ForceQuickLoopAutoNext.DISABLED,
+			locked: false,
+		}
+
+		const result = findPartInstancesInQuickLoop(playlist, partInstances)
+
+		expect(result).toEqual({
+			[unprotectString(parts[1]._id)]: true,
+			[unprotectString(parts[2]._id)]: true,
+			[unprotectString(parts[3]._id)]: true,
+		})
+	})
+
+	it('Returns no parts when the entire Playlist is looping', () => {
+		// this may need to change if setting other than Part markers is allowed by the users
+		const { partInstances } = makeMockPartsForQuickLoopTest()
+
+		const playlist = makeMockPlaylist()
+		playlist.quickLoop = {
+			start: {
+				type: QuickLoopMarkerType.PLAYLIST,
+			},
+			end: {
+				type: QuickLoopMarkerType.PLAYLIST,
+			},
+			running: false,
+			forceAutoNext: ForceQuickLoopAutoNext.DISABLED,
+			locked: false,
+		}
+
+		const result = findPartInstancesInQuickLoop(playlist, partInstances)
+
+		expect(result).toEqual({})
+	})
+
+	it('Returns no parts when QuickLoop Part Markers are in the wrong order', () => {
+		const { parts, partInstances } = makeMockPartsForQuickLoopTest()
+
+		const playlist = makeMockPlaylist()
+		playlist.quickLoop = {
+			start: {
+				type: QuickLoopMarkerType.PART,
+				id: parts[3]._id,
+			},
+			end: {
+				type: QuickLoopMarkerType.PART,
+				id: parts[1]._id,
+			},
+			running: false,
+			forceAutoNext: ForceQuickLoopAutoNext.DISABLED,
+			locked: false,
+		}
+
+		const result = findPartInstancesInQuickLoop(playlist, partInstances)
+
+		expect(result).toEqual({})
+	})
+
+	it('Returns no parts when QuickLoop End Marker is not defined', () => {
+		const { parts, partInstances } = makeMockPartsForQuickLoopTest()
+
+		const playlist = makeMockPlaylist()
+		playlist.quickLoop = {
+			start: {
+				type: QuickLoopMarkerType.PART,
+				id: parts[3]._id,
+			},
+			running: false,
+			forceAutoNext: ForceQuickLoopAutoNext.DISABLED,
+			locked: false,
+		}
+
+		const result = findPartInstancesInQuickLoop(playlist, partInstances)
+
+		expect(result).toEqual({})
 	})
 })

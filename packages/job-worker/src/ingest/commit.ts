@@ -10,7 +10,6 @@ import { unprotectString, protectString } from '@sofie-automation/corelib/dist/p
 import { logger } from '../logging'
 import { PlayoutModel } from '../playout/model/PlayoutModel'
 import { PlayoutRundownModel } from '../playout/model/PlayoutRundownModel'
-import { isTooCloseToAutonext } from '../playout/lib'
 import { allowedToMoveRundownOutOfPlaylist } from '../rundown'
 import { updatePartInstanceRanksAndOrphanedState } from '../updatePartInstanceRanksAndOrphanedState'
 import {
@@ -263,10 +262,7 @@ function canRemoveSegment(
 	nextPartInstance: ReadonlyDeep<DBPartInstance> | undefined,
 	segmentId: SegmentId
 ): boolean {
-	if (
-		currentPartInstance?.segmentId === segmentId ||
-		(nextPartInstance?.segmentId === segmentId && isTooCloseToAutonext(currentPartInstance, false))
-	) {
+	if (currentPartInstance?.segmentId === segmentId || nextPartInstance?.segmentId === segmentId) {
 		// Don't allow removing an active rundown
 		logger.warn(`Not allowing removal of current playing segment "${segmentId}", making segment unsynced instead`)
 		return false

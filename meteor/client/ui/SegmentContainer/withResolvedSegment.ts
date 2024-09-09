@@ -36,6 +36,7 @@ import {
 import { PieceInstances, Segments } from '../../collections'
 import { RundownPlaylistCollectionUtil } from '../../../lib/collections/rundownPlaylistUtil'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
+import { RundownPlaylistClientUtil } from '../../lib/rundownPlaylistUtil'
 
 export interface SegmentUi extends SegmentExtended {
 	/** Output layers available in the installation used by this segment */
@@ -169,7 +170,7 @@ export function withResolvedSegment<T extends IResolvedSegmentProps, IState = {}
 						memoizedIsolatedAutorun(
 							(_playlistId: RundownPlaylistId) =>
 								(
-									RundownPlaylistCollectionUtil.getSegmentsAndPartsSync(
+									RundownPlaylistClientUtil.getSegmentsAndPartsSync(
 										props.playlist,
 										undefined,
 										undefined,
@@ -184,7 +185,7 @@ export function withResolvedSegment<T extends IResolvedSegmentProps, IState = {}
 						),
 						memoizedIsolatedAutorun(
 							(_playlistId: RundownPlaylistId, _currentPartInstanceId, _nextPartInstanceId) =>
-								RundownPlaylistCollectionUtil.getSelectedPartInstances(props.playlist),
+								RundownPlaylistClientUtil.getSelectedPartInstances(props.playlist),
 							'playlist.getSelectedPartInstances',
 							props.playlist._id,
 							props.playlist.currentPartInfo?.partInstanceId,
@@ -360,6 +361,8 @@ export function withResolvedSegment<T extends IResolvedSegmentProps, IState = {}
 				props.playlist.holdState !== nextProps.playlist.holdState ||
 				props.playlist.nextTimeOffset !== nextProps.playlist.nextTimeOffset ||
 				props.playlist.activationId !== nextProps.playlist.activationId ||
+				!_.isEqual(props.playlist.quickLoop?.start, nextProps.playlist.quickLoop?.start) ||
+				!_.isEqual(props.playlist.quickLoop?.end, nextProps.playlist.quickLoop?.end) ||
 				PlaylistTiming.getExpectedStart(props.playlist.timing) !==
 					PlaylistTiming.getExpectedStart(nextProps.playlist.timing)
 			) {

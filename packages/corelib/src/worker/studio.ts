@@ -18,6 +18,7 @@ import { JSONBlob } from '@sofie-automation/shared-lib/dist/lib/JSONBlob'
 import { CoreRundownPlaylistSnapshot } from '../snapshots'
 import { NoteSeverity } from '@sofie-automation/blueprints-integration'
 import { ITranslatableMessage } from '../TranslatableMessage'
+import { QuickLoopMarker } from '../dataModel/RundownPlaylist'
 
 /** List of all Jobs performed by the Worker related to a certain Studio */
 export enum StudioJobs {
@@ -193,6 +194,10 @@ export enum StudioJobs {
 	 * for use in ad.lib actions and other triggers
 	 */
 	SwitchRouteSet = 'switchRouteSet',
+	/**
+	 * Set QuickLoop marker
+	 */
+	SetQuickLoopMarker = 'setQuickLoopMarker',
 }
 
 export interface RundownPlayoutPropsBase {
@@ -344,6 +349,10 @@ export interface SwitchRouteSetProps {
 	routeSetId: string
 	state: boolean | 'toggle'
 }
+export interface SetQuickLoopMarkerProps extends RundownPlayoutPropsBase {
+	type: 'start' | 'end'
+	marker: QuickLoopMarker | null
+}
 
 /**
  * Set of valid functions, of form:
@@ -397,6 +406,8 @@ export type StudioJobFunc = {
 
 	[StudioJobs.ActivateAdlibTesting]: (data: ActivateAdlibTestingProps) => void
 	[StudioJobs.SwitchRouteSet]: (data: SwitchRouteSetProps) => void
+
+	[StudioJobs.SetQuickLoopMarker]: (data: SetQuickLoopMarkerProps) => void
 }
 
 export function getStudioQueueName(id: StudioId): string {

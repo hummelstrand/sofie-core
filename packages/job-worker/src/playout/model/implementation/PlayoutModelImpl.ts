@@ -14,6 +14,7 @@ import {
 	ABSessionAssignments,
 	ABSessionInfo,
 	DBRundownPlaylist,
+	QuickLoopMarker,
 	RundownHoldState,
 	SelectedPartInstance,
 } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
@@ -55,6 +56,9 @@ import { ExpectedPackageDBFromStudioBaselineObjects } from '@sofie-automation/co
 import { ExpectedPlayoutItemStudio } from '@sofie-automation/corelib/dist/dataModel/ExpectedPlayoutItem'
 import { StudioBaselineHelper } from '../../../studio/model/StudioBaselineHelper'
 import { EventsJobs } from '@sofie-automation/corelib/dist/worker/events'
+import { QuickLoopService } from '../services/QuickLoopService'
+import { calculatePartTimings, PartCalculatedTimings } from '@sofie-automation/corelib/dist/playout/timings'
+import { PieceInstanceWithTimings } from '@sofie-automation/corelib/dist/playout/processAndPrune'
 import { stringifyError } from '@sofie-automation/shared-lib/dist/lib/stringifyError'
 
 export class PlayoutModelReadonlyImpl implements PlayoutModelReadonly {
@@ -79,7 +83,9 @@ export class PlayoutModelReadonlyImpl implements PlayoutModelReadonly {
 		return this.timelineImpl
 	}
 
-	protected allPartInstances: Map<PartInstanceId, PlayoutPartInstanceModelImpl | null>
+	protected allPartInstances: Map<PartInstanceId, PlayoutPartInstanceModelImpl | null> = new Map()
+
+	protected quickLoopService: QuickLoopService
 
 	public constructor(
 		protected readonly context: JobContext,
@@ -87,7 +93,8 @@ export class PlayoutModelReadonlyImpl implements PlayoutModelReadonly {
 		playlistId: RundownPlaylistId,
 		peripheralDevices: ReadonlyDeep<PeripheralDevice[]>,
 		playlist: DBRundownPlaylist,
-		partInstances: PlayoutPartInstanceModelImpl[],
+		partInstances: DBPartInstance[],
+		groupedPieceInstances: Map<PartInstanceId, PieceInstance[]>,
 		rundowns: PlayoutRundownModelImpl[],
 		timeline: TimelineComplete | undefined
 	) {
@@ -97,11 +104,34 @@ export class PlayoutModelReadonlyImpl implements PlayoutModelReadonly {
 		this.peripheralDevices = peripheralDevices
 		this.playlistImpl = playlist
 
+		this.quickLoopService = new QuickLoopService(context, this)
+
+		this.allPartInstances = normalizeArrayToMapFunc(
+			this.createPartInstanceModelImpls(partInstances, groupedPieceInstances),
+			(p) => p.partInstance._id
+		)
+
 		this.rundownsImpl = rundowns
 
 		this.timelineImpl = timeline ?? null
+	}
 
-		this.allPartInstances = normalizeArrayToMapFunc(partInstances, (p) => p.partInstance._id)
+	private createPartInstanceModelImpls(
+		partInstances: DBPartInstance[],
+		groupedPieceInstances: Map<PartInstanceId, PieceInstance[]>
+	) {
+		const allPartInstances: PlayoutPartInstanceModelImpl[] = []
+		for (const partInstance of partInstances) {
+			const wrappedPartInstance = new PlayoutPartInstanceModelImpl(
+				partInstance,
+				groupedPieceInstances.get(partInstance._id) ?? [],
+				false,
+				this.quickLoopService
+			)
+			allPartInstances.push(wrappedPartInstance)
+		}
+
+		return allPartInstances
 	}
 
 	public get olderPartInstances(): PlayoutPartInstanceModel[] {
@@ -256,11 +286,22 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 		playlistId: RundownPlaylistId,
 		peripheralDevices: ReadonlyDeep<PeripheralDevice[]>,
 		playlist: DBRundownPlaylist,
-		partInstances: PlayoutPartInstanceModelImpl[],
+		partInstances: DBPartInstance[],
+		groupedPieceInstances: Map<PartInstanceId, PieceInstance[]>,
 		rundowns: PlayoutRundownModelImpl[],
 		timeline: TimelineComplete | undefined
 	) {
-		super(context, playlistLock, playlistId, peripheralDevices, playlist, partInstances, rundowns, timeline)
+		super(
+			context,
+			playlistLock,
+			playlistId,
+			peripheralDevices,
+			playlist,
+			partInstances,
+			groupedPieceInstances,
+			rundowns,
+			timeline
+		)
 		context.trackCache(this)
 
 		this.#baselineHelper = new StudioBaselineHelper(context)
@@ -289,6 +330,20 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 		delete this.playlistImpl.queuedSegmentId
 
 		this.#playlistHasChanged = true
+	}
+
+	calculatePartTimings(
+		fromPartInstance: PlayoutPartInstanceModel | null,
+		toPartInstance: PlayoutPartInstanceModel,
+		toPieceInstances: PieceInstanceWithTimings[]
+	): PartCalculatedTimings {
+		return calculatePartTimings(
+			this.playlist.holdState,
+			fromPartInstance?.getPartInstanceWithQuickLoopOverrides()?.part,
+			fromPartInstance?.pieceInstances.map((p) => p.pieceInstance.piece) ?? [],
+			toPartInstance?.getPartInstanceWithQuickLoopOverrides()?.part,
+			toPieceInstances.filter((p) => !p.infinite || p.infinite.infiniteInstanceIndex === 0).map((p) => p.piece)
+		)
 	}
 
 	#fixupPieceInstancesForPartInstance(partInstance: DBPartInstance, pieceInstances: PieceInstance[]): void {
@@ -326,7 +381,12 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 
 		this.#fixupPieceInstancesForPartInstance(newPartInstance, infinitePieceInstances)
 
-		const partInstance = new PlayoutPartInstanceModelImpl(newPartInstance, infinitePieceInstances, true)
+		const partInstance = new PlayoutPartInstanceModelImpl(
+			newPartInstance,
+			infinitePieceInstances,
+			true,
+			this.quickLoopService
+		)
 
 		for (const piece of pieces) {
 			partInstance.insertAdlibbedPiece(piece, fromAdlibId)
@@ -367,7 +427,12 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 
 		this.#fixupPieceInstancesForPartInstance(newPartInstance, pieceInstances)
 
-		const partInstance = new PlayoutPartInstanceModelImpl(newPartInstance, pieceInstances, true)
+		const partInstance = new PlayoutPartInstanceModelImpl(
+			newPartInstance,
+			pieceInstances,
+			true,
+			this.quickLoopService
+		)
 		partInstance.recalculateExpectedDurationWithTransition()
 
 		this.allPartInstances.set(newPartInstance._id, partInstance)
@@ -406,7 +471,7 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 			},
 		}
 
-		const partInstance = new PlayoutPartInstanceModelImpl(newPartInstance, [], true)
+		const partInstance = new PlayoutPartInstanceModelImpl(newPartInstance, [], true, this.quickLoopService)
 		partInstance.recalculateExpectedDurationWithTransition()
 
 		this.allPartInstances.set(newPartInstance._id, partInstance)
@@ -437,6 +502,7 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 		delete this.playlistImpl.activationId
 
 		this.clearSelectedPartInstances()
+		this.playlistImpl.quickLoop = this.quickLoopService.getUpdatedPropsByClearingMarkers()
 
 		this.#playlistHasChanged = true
 	}
@@ -671,7 +737,28 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 		this.#playlistHasChanged = true
 	}
 
-	setTimeline(timelineObjs: TimelineObjGeneric[], generationVersions: TimelineCompleteGenerationVersions): void {
+	setSegmentStartedPlayback(segmentId: SegmentId, timestamp: number): void {
+		const segmentIdsToKeep: string[] = []
+		if (this.previousPartInstance) {
+			segmentIdsToKeep.push(unprotectString(this.previousPartInstance.partInstance.segmentId))
+		}
+		if (this.currentPartInstance) {
+			segmentIdsToKeep.push(unprotectString(this.currentPartInstance.partInstance.segmentId))
+		}
+
+		this.playlistImpl.segmentsStartedPlayback = this.playlistImpl.segmentsStartedPlayback
+			? _.pick(this.playlistImpl.segmentsStartedPlayback, segmentIdsToKeep)
+			: {}
+
+		const segmentIdStr = unprotectString(segmentId)
+		this.playlistImpl.segmentsStartedPlayback[segmentIdStr] = timestamp
+		this.#playlistHasChanged = true
+	}
+
+	setTimeline(
+		timelineObjs: TimelineObjGeneric[],
+		generationVersions: TimelineCompleteGenerationVersions
+	): ReadonlyDeep<TimelineComplete> {
 		this.timelineImpl = {
 			_id: this.context.studioId,
 			timelineHash: getRandomId(), // randomized on every timeline change
@@ -680,6 +767,8 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 			generationVersions: generationVersions,
 		}
 		this.#timelineHasChanged = true
+
+		return this.timelineImpl
 	}
 
 	setExpectedPackagesForStudioBaseline(packages: ExpectedPackageDBFromStudioBaselineObjects[]): void {
@@ -687,6 +776,17 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 	}
 	setExpectedPlayoutItemsForStudioBaseline(playoutItems: ExpectedPlayoutItemStudio[]): void {
 		this.#baselineHelper.setExpectedPlayoutItems(playoutItems)
+	}
+
+	setQuickLoopMarker(type: 'start' | 'end', marker: QuickLoopMarker | null): void {
+		this.playlistImpl.quickLoop = this.quickLoopService.getUpdatedPropsBySettingAMarker(type, marker)
+		this.playlistImpl.quickLoop = this.quickLoopService.getUpdatedProps(type)
+		this.#playlistHasChanged = true
+	}
+
+	updateQuickLoopState(): void {
+		this.playlistImpl.quickLoop = this.quickLoopService.getUpdatedProps()
+		this.#playlistHasChanged = true
 	}
 
 	/** Lifecycle */
