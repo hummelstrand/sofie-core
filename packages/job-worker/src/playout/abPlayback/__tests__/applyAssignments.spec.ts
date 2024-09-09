@@ -10,7 +10,7 @@ import { applyAbPlayerObjectAssignments } from '../applyAssignments'
 const POOL_NAME = 'clip'
 
 describe('applyMediaPlayersAssignments', () => {
-	const abSessionHelper = new AbSessionHelper([], [], [])
+	const abSessionHelper = new AbSessionHelper([], [])
 
 	const mockGetPieceSessionId: jest.MockedFunction<typeof abSessionHelper.getPieceABSessionId> = jest.fn()
 	const mockGetObjectSessionId: jest.MockedFunction<typeof abSessionHelper.getTimelineObjectAbSessionId> = jest.fn()
@@ -75,7 +75,9 @@ describe('applyMediaPlayersAssignments', () => {
 		const pieceInstanceId = 'piece0'
 		const partInstanceId = protectString('part0')
 
-		mockGetObjectSessionId.mockImplementation((obj, name) => `${obj.pieceInstanceId}_${name}`)
+		mockGetObjectSessionId.mockImplementation(
+			(obj, session) => `${obj.pieceInstanceId}_${session.poolName}_${session.sessionName}`
+		)
 
 		const objects = [
 			literal<OnGenerateTimelineObjExt>({
