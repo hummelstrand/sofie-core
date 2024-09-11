@@ -92,22 +92,21 @@ export async function applyAbPlaybackForTimeline(
 					}
 				}
 			)
-		}
-		// Check if a player has been added to the pool, and if so, clear the old assignments:
-		const emptyPlayers = filteredPlayers.filter(
-			(player) =>
+			// Check if a player has been added to the pool, and if so, clear the old assignments:
+			const emptyPlayers = filteredPlayers.filter((player) => {
 				!Object.values<ABPlayerDefinition | undefined>(previousAbSessionAssignments?.[poolName]).find(
 					(assignment) => assignment?.playerId === player.playerId
 				)
-		)
-		const multipleAssignments = Object.values<number>(assingmentsToPlayer).filter((count) => count > 1)
-		if (emptyPlayers.length > 0 && multipleAssignments.length > 0) {
-			// Check if some players have more than one assignment
-			if (multipleAssignments.length > 0) {
-				logger.warn(
-					'ABPlayback: Clearing old assignments due to a player has been added to the pool, and some players have more than one assignment'
-				)
-				previousAbSessionAssignments[poolName] = {}
+			})
+			const multipleAssignments = Object.values<number>(assingmentsToPlayer).filter((count) => count > 1)
+			if (emptyPlayers.length > 0 && multipleAssignments.length > 0) {
+				// Check if some players have more than one assignment
+				if (multipleAssignments.length > 0) {
+					logger.warn(
+						'ABPlayback: Clearing old assignments due to a player has been added to the pool, and some players have more than one assignment'
+					)
+					previousAbSessionAssignments[poolName] = {}
+				}
 			}
 		}
 
