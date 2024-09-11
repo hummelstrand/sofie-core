@@ -88,25 +88,6 @@ export async function applyAbPlaybackForTimeline(
 
 		const assingmentsToPlayer: Record<string, number> = {}
 		if (previousAbSessionAssignments[poolName] !== undefined) {
-			// Check if previous assignments AB is conflicting:
-			if (filteredPlayers.length > 0) {
-				let previousPlayerId: string | number = ''
-				Object.values<ABSessionAssignment | undefined>(previousAbSessionAssignments[poolName]).forEach(
-					(assignment) => {
-						if (assignment) {
-							if (assignment.playerId === previousPlayerId) {
-								logger.warn(
-									`ABPlayback: Clearing old assignments due to conflicting assignments for player "${assignment.playerId}"`
-								)
-								previousAbSessionAssignments[poolName] = {}
-							} else {
-								previousPlayerId = assignment.playerId
-							}
-						}
-					}
-				)
-			}
-
 			// If a player has been disabled in the pool, clear the old assignments
 			Object.values<ABSessionAssignment | undefined>(previousAbSessionAssignments[poolName]).forEach(
 				(assignment) => {
@@ -157,7 +138,7 @@ export async function applyAbPlaybackForTimeline(
 
 		Object.values<SessionRequest>(assignments.requests).forEach((assignment) => {
 			logger.silly(
-				`ABPlayback resolved session for "${poolName}" - ${assignment.id}" to player "${assignment.playerId}"`
+				`ABPlayback resolved session for "${poolName}" - ${assignment.id}" Start : ${assignment.start} to player "${assignment.playerId}"`
 			)
 		})
 		if (assignments.failedRequired.length > 0) {

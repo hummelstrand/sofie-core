@@ -73,6 +73,23 @@ export function resolveAbAssignmentsFromRequests(
 		return res
 	}
 
+	// Check if requests has been inserted since last calculation:
+	let resetRemainingAssigments = false
+	res.requests.forEach((req, index) => {
+		// If the next item is assigned, then we assume that this item has been inserted since last calculation:
+		if (req.playerId === undefined && res.requests[index + 1]?.playerId !== undefined) {
+			delete res.requests[index].playerId
+			// reset previous assignments:
+			if (index > 0) {
+				delete res.requests[index - 1].playerId
+			}
+			// reset remaining assignments:
+			resetRemainingAssigments = true
+		} else if (resetRemainingAssigments) {
+			delete res.requests[index].playerId
+		}
+	})
+
 	let grouped = _.groupBy(res.requests, (r) => r.playerId ?? 'undefined')
 	let pendingRequests = grouped[undefined as any]
 	if (!pendingRequests) {
@@ -81,7 +98,7 @@ export function resolveAbAssignmentsFromRequests(
 	}
 
 	const originalLookaheadAssignments: Record<string, number | string> = {}
-	for (const req of rawRequests) {
+	for (const req of res.requests) {
 		if (req.lookaheadRank !== undefined && req.playerId !== undefined) {
 			originalLookaheadAssignments[req.id] = req.playerId
 			delete req.playerId
