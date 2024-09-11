@@ -62,6 +62,16 @@ export async function applyAbPlaybackForTimeline(
 	)
 
 	const previousAbSessionAssignments: Record<string, ABSessionAssignments> = playlist.assignedAbSessions || {}
+	logger.silly(`---------------------------- ABPlayback: Starting AB playback resolver ----------------------------`)
+	Object.values<ABSessionAssignments>(previousAbSessionAssignments).forEach((assignments) => {
+		Object.values<ABSessionAssignment | undefined>(assignments).forEach((assignment) => {
+			if (assignment) {
+				logger.silly(
+					`ABPlayback: Previous assignment "${assignment.sessionId}" to player "${assignment.playerId}"`
+				)
+			}
+		})
+	})
 	const newAbSessionsResult: Record<string, ABSessionAssignments> = {}
 
 	const span = context.startSpan('blueprint.abPlaybackResolver')
@@ -78,6 +88,25 @@ export async function applyAbPlaybackForTimeline(
 
 		const assingmentsToPlayer: Record<string, number> = {}
 		if (previousAbSessionAssignments[poolName] !== undefined) {
+			// Check if previous assignments AB is conflicting:
+			if (filteredPlayers.length > 0) {
+				let previousPlayerId: string | number = ''
+				Object.values<ABSessionAssignment | undefined>(previousAbSessionAssignments[poolName]).forEach(
+					(assignment) => {
+						if (assignment) {
+							if (assignment.playerId === previousPlayerId) {
+								logger.warn(
+									`ABPlayback: Clearing old assignments due to conflicting assignments for player "${assignment.playerId}"`
+								)
+								previousAbSessionAssignments[poolName] = {}
+							} else {
+								previousPlayerId = assignment.playerId
+							}
+						}
+					}
+				)
+			}
+
 			// If a player has been disabled in the pool, clear the old assignments
 			Object.values<ABSessionAssignment | undefined>(previousAbSessionAssignments[poolName]).forEach(
 				(assignment) => {
