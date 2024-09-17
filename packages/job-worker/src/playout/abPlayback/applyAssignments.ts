@@ -105,9 +105,12 @@ export function applyAbPlayerObjectAssignments(
 		logger.debug(`Unexpected sessions are: ${unexpectedSessions.join(', ')}`)
 	}
 
-	Object.values<ABSessionAssignment | undefined>(newAssignments).forEach((assignment) => {
-		logger.silly(`ABPlayback: Assigned session "${assignment?.sessionId}" to player "${assignment?.playerId}"`)
-	})
+	for (const assignment of Object.values<ABSessionAssignment | undefined>(newAssignments)) {
+		if (!assignment) continue
+		logger.silly(
+			`ABPlayback: Assigned session "${poolName}"-"${assignment.sessionId}" to player "${assignment.playerId}" (lookahead: ${assignment.lookahead})`
+		)
+	}
 
 	return newAssignments
 }

@@ -1,5 +1,9 @@
 import { ResolvedPieceInstance } from '@sofie-automation/corelib/dist/dataModel/PieceInstance'
-import { ABSessionAssignments, DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import {
+	ABSessionAssignment,
+	ABSessionAssignments,
+	DBRundownPlaylist,
+} from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { OnGenerateTimelineObjExt } from '@sofie-automation/corelib/dist/dataModel/Timeline'
 import { endTrace, sendTrace, startTrace } from '@sofie-automation/corelib/dist/influxdb'
 import { WrappedShowStyleBlueprint } from '../../blueprints/cache'
@@ -58,16 +62,17 @@ export async function applyAbPlaybackForTimeline(
 	)
 
 	const previousAbSessionAssignments: Record<string, ABSessionAssignments> = playlist.assignedAbSessions || {}
-	logger.silly(`---------------------------- ABPlayback: Starting AB playback resolver ----------------------------`)
-	Object.values<ABSessionAssignments>(previousAbSessionAssignments).forEach((assignments) => {
-		Object.values<ABSessionAssignment | undefined>(assignments).forEach((assignment) => {
+	logger.silly(`ABPlayback: Starting AB playback resolver ----------------------------`)
+	for (const [pool, assignments] of Object.entries<ABSessionAssignments>(previousAbSessionAssignments)) {
+		for (const assignment of Object.values<ABSessionAssignment | undefined>(assignments)) {
 			if (assignment) {
 				logger.silly(
-					`ABPlayback: Previous assignment "${assignment.sessionId}" to player "${assignment.playerId}"`
+					`ABPlayback: Previous assignment "${pool}"-"${assignment.sessionId}" to player "${assignment.playerId}"`
 				)
 			}
-		})
-	})
+		}
+	}
+
 	const newAbSessionsResult: Record<string, ABSessionAssignments> = {}
 
 	const span = context.startSpan('blueprint.abPlaybackResolver')
@@ -98,11 +103,13 @@ export async function applyAbPlaybackForTimeline(
 			now
 		)
 
-		Object.values<SessionRequest>(assignments.requests).forEach((assignment) => {
+		for (const assignment of Object.values<SessionRequest>(assignments.requests)) {
 			logger.silly(
-				`ABPlayback resolved session for "${poolName}" - ${assignment.id}" Start : ${assignment.start} to player "${assignment.playerId}"`
+				`ABPlayback resolved session "${poolName}"-"${assignment.id}" to player "${
+					assignment.playerId
+				}" (${JSON.stringify(assignment)})`
 			)
-		})
+		}
 		if (assignments.failedRequired.length > 0) {
 			logger.warn(
 				`ABPlayback failed to assign sessions for "${poolName}": ${JSON.stringify(assignments.failedRequired)}`
