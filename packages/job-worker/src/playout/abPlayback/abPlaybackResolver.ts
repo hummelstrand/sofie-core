@@ -2,6 +2,8 @@ import { ABResolverOptions } from '@sofie-automation/blueprints-integration'
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import * as _ from 'underscore'
 
+type PlayerId = number | string
+
 export interface SessionRequest {
 	readonly id: string
 	readonly start: number
@@ -59,6 +61,22 @@ export function resolveAbAssignmentsFromRequests(
 	rawRequests: SessionRequest[],
 	now: number // Current time
 ): AssignmentResult {
+	// Check that the player assigned still exists
+	const validPlayerIdsSet = new Set(playerIds)
+	for (const req of rawRequests) {
+		if (req.playerId !== undefined && !validPlayerIdsSet.has(req.playerId)) {
+			delete req.playerId
+		}
+	}
+
+	const originalLookaheadAssignments: Record<string, PlayerId> = {}
+	for (const req of rawRequests) {
+		if (req.lookaheadRank !== undefined && req.playerId !== undefined) {
+			originalLookaheadAssignments[req.id] = req.playerId
+			delete req.playerId
+		}
+	}
+
 	const res: AssignmentResult = {
 		requests: _.sortBy(rawRequests, (r) => r.start).map((v) => clone(v)),
 		failedRequired: [],
@@ -95,14 +113,6 @@ export function resolveAbAssignmentsFromRequests(
 	if (!pendingRequests) {
 		// Nothing pending, result must be ok
 		return res
-	}
-
-	const originalLookaheadAssignments: Record<string, number | string> = {}
-	for (const req of res.requests) {
-		if (req.lookaheadRank !== undefined && req.playerId !== undefined) {
-			originalLookaheadAssignments[req.id] = req.playerId
-			delete req.playerId
-		}
 	}
 
 	const safeNow = now + resolverOptions.nowWindow // Treat now + nowWindow as now, as it is likely that anything changed within that window will be late to air
