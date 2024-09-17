@@ -1,9 +1,5 @@
 import { ResolvedPieceInstance } from '@sofie-automation/corelib/dist/dataModel/PieceInstance'
-import {
-	ABSessionAssignment,
-	ABSessionAssignments,
-	DBRundownPlaylist,
-} from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import { ABSessionAssignments, DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { OnGenerateTimelineObjExt } from '@sofie-automation/corelib/dist/dataModel/Timeline'
 import { endTrace, sendTrace, startTrace } from '@sofie-automation/corelib/dist/influxdb'
 import { WrappedShowStyleBlueprint } from '../../blueprints/cache'
@@ -75,40 +71,6 @@ export async function applyAbPlaybackForTimeline(
 	for (const [poolName, players] of Object.entries<ABPlayerDefinition[]>(abConfiguration.pools)) {
 		// Filter out offline devices
 		const filteredPlayers = abPoolFilterDisabled(context, poolName, players, routeSetMembers)
-
-		const assingmentsToPlayer: Record<string, number> = {}
-		if (previousAbSessionAssignments[poolName] !== undefined) {
-			// If a player has been disabled in the pool, clear the old assignments
-			Object.values<ABSessionAssignment | undefined>(previousAbSessionAssignments[poolName]).forEach(
-				(assignment) => {
-					if (assignment) {
-						assingmentsToPlayer[assignment.playerId] = (assingmentsToPlayer[assignment.playerId] || 0) + 1
-					}
-					if (!filteredPlayers.find((player) => player.playerId === assignment?.playerId)) {
-						logger.info(
-							'ABPlayback: Clearing old assignments due to a player has been taken out of the pool'
-						)
-						previousAbSessionAssignments[poolName] = {}
-					}
-				}
-			)
-			// Check if a player has been added to the pool, and if so, clear the old assignments:
-			const emptyPlayers = filteredPlayers.filter((player) => {
-				!Object.values<ABPlayerDefinition | undefined>(previousAbSessionAssignments?.[poolName]).find(
-					(assignment) => assignment?.playerId === player.playerId
-				)
-			})
-			const multipleAssignments = Object.values<number>(assingmentsToPlayer).filter((count) => count > 1)
-			if (emptyPlayers.length > 0 && multipleAssignments.length > 0) {
-				// Check if some players have more than one assignment
-				if (multipleAssignments.length > 0) {
-					logger.warn(
-						'ABPlayback: Clearing old assignments due to a player has been added to the pool, and some players have more than one assignment'
-					)
-					previousAbSessionAssignments[poolName] = {}
-				}
-			}
-		}
 
 		const previousAssignmentMap: ABSessionAssignments = previousAbSessionAssignments[poolName] || {}
 		const sessionRequests = calculateSessionTimeRanges(
