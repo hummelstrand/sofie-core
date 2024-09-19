@@ -1,530 +1,41 @@
 import ClassNames from 'classnames'
 import * as React from 'react'
 import { Meteor } from 'meteor/meteor'
-import * as _ from 'underscore'
-import { DBStudio, StudioPackageContainer } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import { EditAttribute } from '../../../lib/EditAttribute'
-import { doModalDialog } from '../../../lib/ModalDialog'
+import { StudioPackageContainer } from '@sofie-automation/corelib/dist/dataModel/Studio'
+import { doModalDialog } from '../../../../lib/ModalDialog'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faPencilAlt, faCheck, faPlus, faSync } from '@fortawesome/free-solid-svg-icons'
+import { faTrash, faPencilAlt, faCheck } from '@fortawesome/free-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
 import { Accessor } from '@sofie-automation/blueprints-integration'
-import { Studios } from '../../../collections'
-import {
-	ObjectOverrideSetOp,
-	SomeObjectOverrideOp,
-	applyAndValidateOverrides,
-} from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 import {
 	LabelActual,
 	LabelAndOverrides,
 	LabelAndOverridesForCheckbox,
 	LabelAndOverridesForDropdown,
-	LabelAndOverridesForMultiSelect,
-} from '../../../lib/Components/LabelAndOverrides'
-import { useToggleExpandHelper } from '../../util/useToggleExpandHelper'
-import { literal } from '@sofie-automation/corelib/dist/lib'
-import { TextInputControl } from '../../../lib/Components/TextInput'
-import {
-	DropdownInputControl,
-	DropdownInputOption,
-	getDropdownInputOptions,
-} from '../../../lib/Components/DropdownInput'
-import { MultiSelectInputControl } from '../../../lib/Components/MultiSelectInput'
-import {
-	OverrideOpHelper,
-	WrappedOverridableItem,
-	WrappedOverridableItemNormal,
-	getAllCurrentAndDeletedItemsFromOverrides,
-	useOverrideOpHelper,
-} from '../util/OverrideOpHelper'
-import { CheckboxControl } from '../../../lib/Components/Checkbox'
+} from '../../../../lib/Components/LabelAndOverrides'
+import { TextInputControl } from '../../../../lib/Components/TextInput'
+import { DropdownInputControl, getDropdownInputOptions } from '../../../../lib/Components/DropdownInput'
+import { OverrideOpHelper, WrappedOverridableItemNormal } from '../../util/OverrideOpHelper'
+import { CheckboxControl } from '../../../../lib/Components/Checkbox'
 
-interface StudioPackageManagerSettingsProps {
-	studio: DBStudio
-}
-
-export function StudioPackageManagerSettings({ studio }: StudioPackageManagerSettingsProps): React.JSX.Element {
-	const { t } = useTranslation()
-
-	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
-
-	const packageContainersFromOverrides = React.useMemo(
-		() =>
-			getAllCurrentAndDeletedItemsFromOverrides(studio.packageContainersWithOverrides, (a, b) =>
-				a[0].localeCompare(b[0])
-			),
-		[studio.packageContainersWithOverrides]
-	)
-
-	const addNewPackageContainer = React.useCallback(() => {
-		const resolvedPackageContainers = applyAndValidateOverrides(studio.packageContainersWithOverrides).obj
-
-		// find free key name
-		const newKeyName = 'newContainer'
-		let iter = 0
-		while (resolvedPackageContainers[newKeyName + iter.toString()]) {
-			iter++
-		}
-
-		const newId = newKeyName + iter.toString()
-		const newPackageContainer: StudioPackageContainer = {
-			deviceIds: [],
-			container: {
-				label: 'New Package Container ' + iter.toString(),
-				accessors: {},
-			},
-		}
-
-		const addOp = literal<ObjectOverrideSetOp>({
-			op: 'set',
-			path: newId,
-			value: newPackageContainer,
-		})
-
-		Studios.update(studio._id, {
-			$push: {
-				'packageContainersWithOverrides.overrides': addOp,
-			},
-		})
-
-		setTimeout(() => {
-			toggleExpanded(newId, true)
-		}, 1)
-	}, [studio._id, studio.packageContainersWithOverrides])
-
-	const getAvailablePackageContainers = () => {
-		const arr: {
-			name: string
-			value: string
-		}[] = []
-
-		packageContainersFromOverrides.forEach((packageContainer) => {
-			let hasHttpAccessor = false
-			if (packageContainer.computed) {
-				for (const accessor of Object.values<Accessor.Any>(packageContainer.computed.container.accessors)) {
-					if (accessor.type === Accessor.AccessType.HTTP_PROXY) {
-						hasHttpAccessor = true
-						break
-					}
-				}
-				if (hasHttpAccessor) {
-					arr.push({
-						name: packageContainer.computed.container.label,
-						value: packageContainer.id,
-					})
-				}
-			}
-		})
-		return arr
-	}
-
-	return (
-		<div>
-			<h2 className="mhn mbs">{t('Package Manager')}</h2>
-
-			<div className="settings-studio-package-containers">
-				<h3 className="mhn">{t('Studio Settings')}</h3>
-
-				<div>
-					<div className="field mvs">
-						<label>{t('Package Containers to use for previews')}</label>
-						<div className="mdi">
-							<EditAttribute
-								attribute="previewContainerIds"
-								obj={studio}
-								options={getAvailablePackageContainers()}
-								label={t('Click to show available Package Containers')}
-								type="multiselect"
-								collection={Studios}
-							></EditAttribute>
-						</div>
-					</div>
-					<div className="field mvs">
-						<label>{t('Package Containers to use for thumbnails')}</label>
-						<div className="mdi">
-							<EditAttribute
-								attribute="thumbnailContainerIds"
-								obj={studio}
-								options={getAvailablePackageContainers()}
-								label={t('Click to show available Package Containers')}
-								type="multiselect"
-								collection={Studios}
-							></EditAttribute>
-						</div>
-					</div>
-				</div>
-
-				<h3 className="mhn">{t('Package Containers')}</h3>
-				<RenderPackageContainers
-					studio={studio}
-					packageContainersFromOverrides={packageContainersFromOverrides}
-					toggleExpanded={toggleExpanded}
-					isExpanded={isExpanded}
-				/>
-				<div className="mod mhs">
-					<button className="btn btn-primary" onClick={addNewPackageContainer}>
-						<FontAwesomeIcon icon={faPlus} />
-					</button>
-				</div>
-			</div>
-		</div>
-	)
-}
-
-interface RenderPackageContainersProps {
-	studio: DBStudio
-	packageContainersFromOverrides: WrappedOverridableItem<StudioPackageContainer>[]
-	toggleExpanded: (id: string, forceState?: boolean | undefined) => void
-	isExpanded: (id: string) => boolean
-}
-
-function RenderPackageContainers({
-	studio,
-	packageContainersFromOverrides,
-	toggleExpanded,
-	isExpanded,
-}: RenderPackageContainersProps): React.JSX.Element {
-	const { t } = useTranslation()
-
-	const saveOverrides = React.useCallback(
-		(newOps: SomeObjectOverrideOp[]) => {
-			Studios.update(studio._id, {
-				$set: {
-					'packageContainersWithOverrides.overrides': newOps,
-				},
-			})
-		},
-		[studio._id]
-	)
-
-	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.packageContainersWithOverrides)
-
-	const confirmRemovePackageContainer = (containerId: string) => {
-		doModalDialog({
-			title: t('Remove this Package Container?'),
-			yes: t('Remove'),
-			no: t('Cancel'),
-			onAccept: () => {
-				overrideHelper().deleteItem(containerId).commit()
-			},
-			message: (
-				<React.Fragment>
-					<p>
-						{t('Are you sure you want to remove the Package Container "{{containerId}}"?', {
-							containerId: containerId,
-						})}
-					</p>
-					<p>{t('Please note: This action is irreversible!')}</p>
-				</React.Fragment>
-			),
-		})
-	}
-
-	const confirmReset = React.useCallback(
-		(packgageContainerId: string) => {
-			doModalDialog({
-				title: t('Reset this Package Container?'),
-				yes: t('Reset'),
-				no: t('Cancel'),
-				onAccept: () => {
-					overrideHelper().resetItem(packgageContainerId).commit()
-				},
-				message: (
-					<React.Fragment>
-						<p>
-							{t('Are you sure you want to reset all overrides for Packing Container "{{id}}"?', {
-								id: packgageContainerId,
-							})}
-						</p>
-						<p>{t('Please note: This action is irreversible!')}</p>
-					</React.Fragment>
-				),
-			})
-		},
-		[t, packageContainersFromOverrides, overrideHelper]
-	)
-
-	return (
-		<table className="table expando settings-studio-package-containers-table">
-			{packageContainersFromOverrides.map(
-				(packageContainer: WrappedOverridableItem<StudioPackageContainer>): React.JSX.Element => {
-					return (
-						<React.Fragment key={packageContainer.id}>
-							{packageContainer.type == 'normal' ? (
-								<React.Fragment>
-									<tr
-										className={ClassNames({
-											hl: isExpanded(packageContainer.id),
-										})}
-									>
-										<th className="settings-studio-package-container__id c2">{packageContainer.id}</th>
-										<td className="settings-studio-package-container__name c2">
-											{packageContainer.computed.container.label}
-										</td>
-
-										<td className="settings-studio-package-container__actions table-item-actions c3">
-											{packageContainer.defaults && packageContainer.overrideOps.length > 0 && (
-												<button
-													className="action-btn"
-													onClick={() => confirmReset(packageContainer.id)}
-													title={t('Reset Package Container to default values')}
-												>
-													<FontAwesomeIcon icon={faSync} />
-												</button>
-											)}
-											<button className="action-btn" onClick={() => toggleExpanded(packageContainer.id)}>
-												<FontAwesomeIcon icon={faPencilAlt} />
-											</button>
-											<button className="action-btn" onClick={() => confirmRemovePackageContainer(packageContainer.id)}>
-												<FontAwesomeIcon icon={faTrash} />
-											</button>
-										</td>
-									</tr>
-									<RenderPackageContainer
-										studio={studio}
-										packageContainer={packageContainer}
-										overrideHelper={overrideHelper}
-										toggleExpanded={toggleExpanded}
-										isExpanded={isExpanded}
-									/>
-								</React.Fragment>
-							) : (
-								<RenderPackageContainerDeletedEntry
-									packageContainer={packageContainer}
-									overrideHelper={overrideHelper}
-								/>
-							)}
-						</React.Fragment>
-					)
-				}
-			)}
-		</table>
-	)
-}
-
-interface RenderPackageContainerDeletedProps {
-	packageContainer: WrappedOverridableItem<StudioPackageContainer>
-	overrideHelper: OverrideOpHelper
-}
-
-function RenderPackageContainerDeletedEntry({
-	packageContainer,
-	overrideHelper,
-}: Readonly<RenderPackageContainerDeletedProps>) {
-	const doUndeleteItem = React.useCallback(
-		() => overrideHelper().resetItem(packageContainer.id).commit(),
-		[overrideHelper, packageContainer.id]
-	)
-
-	return (
-		<tr>
-			<th className="settings-studio-device__name c3 notifications-s notifications-text">{packageContainer.id}</th>
-			<td className="settings-studio-device__id c2 deleted">{packageContainer.defaults?.container.label}</td>
-			<td className="settings-studio-device__id c2 deleted">{packageContainer.id}</td>
-			<td className="settings-studio-output-table__actions table-item-actions c3">
-				<button className="action-btn" onClick={doUndeleteItem} title="Restore to defaults">
-					<FontAwesomeIcon icon={faSync} />
-				</button>
-			</td>
-		</tr>
-	)
-}
-
-interface RenderPackageContainerProps {
-	studio: DBStudio
-	packageContainer: WrappedOverridableItemNormal<StudioPackageContainer>
-	overrideHelper: OverrideOpHelper
-	toggleExpanded: (id: string, forceState?: boolean | undefined) => void
-	isExpanded: (id: string) => boolean
-}
-
-function RenderPackageContainer({
-	studio,
-	packageContainer,
-	overrideHelper,
-	toggleExpanded,
-	isExpanded,
-}: RenderPackageContainerProps): React.JSX.Element {
-	const { t } = useTranslation()
-
-	const getPlayoutDeviceIds: DropdownInputOption<string>[] = React.useMemo(() => {
-		const playoutDevicesFromOverrrides = applyAndValidateOverrides(studio.peripheralDeviceSettings.playoutDevices).obj
-
-		const devices: {
-			name: string
-			value: string
-		}[] = []
-
-		for (const deviceId of Object.keys(playoutDevicesFromOverrrides)) {
-			devices.push({
-				name: deviceId,
-				value: deviceId,
-			})
-		}
-		return getDropdownInputOptions([...devices])
-	}, [studio.peripheralDeviceSettings.playoutDevices])
-
-	const updatePackageContainerId = React.useCallback(
-		(newPackageContainerId: string) => {
-			overrideHelper().changeItemId(packageContainer.id, newPackageContainerId).commit()
-			toggleExpanded(newPackageContainerId, true)
-		},
-		[overrideHelper, toggleExpanded, packageContainer.id]
-	)
-
-	const addNewAccessor = React.useCallback(() => {
-		const newKeyName = 'local'
-		let iter = 0
-		if (!packageContainer.id)
-			throw new Error(`Can't add an accessor to nonexistant Package Container "${packageContainer.id}"`)
-
-		while (packageContainer.computed?.container.accessors[newKeyName + iter]) {
-			iter++
-		}
-		const accessorId = newKeyName + iter
-
-		const newAccessor: Accessor.LocalFolder = {
-			type: Accessor.AccessType.LOCAL_FOLDER,
-			label: 'Local folder',
-			allowRead: true,
-			allowWrite: false,
-			folderPath: '',
-		}
-
-		overrideHelper().setItemValue(packageContainer.id, `container.accessors.${accessorId}`, newAccessor).commit()
-
-		setTimeout(() => {
-			toggleExpanded(accessorId, true)
-		}, 1)
-	}, [studio._id, studio.packageContainersWithOverrides])
-
-	if (!packageContainer.computed) throw new Error(`Package Container "${packageContainer.id}" not found`)
-
-	return (
-		<React.Fragment key={packageContainer.id}>
-			{isExpanded(packageContainer.id) && (
-				<tr className="expando-details hl">
-					<td colSpan={6}>
-						<div className="properties-grid">
-							<label className="field">
-								<LabelActual label={t('Package Container ID')} />
-								<TextInputControl
-									modifiedClassName="bghl"
-									classNames="input text-input input-l"
-									value={packageContainer.id}
-									handleUpdate={updatePackageContainerId}
-									disabled={!!packageContainer.defaults}
-								/>
-							</label>
-							<LabelAndOverrides
-								label={t('Label')}
-								item={packageContainer}
-								//@ts-expect-error can't be 2 levels deep
-								itemKey={'container.label'}
-								opPrefix={packageContainer.id}
-								overrideHelper={overrideHelper}
-							>
-								{(value, handleUpdate) => (
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
-							</LabelAndOverrides>
-							<LabelAndOverridesForMultiSelect
-								label={t('Playout devices which uses this package container')}
-								hint={t('Select which playout devices are using this package container')}
-								item={packageContainer}
-								itemKey={'deviceIds'}
-								opPrefix={packageContainer.id}
-								overrideHelper={overrideHelper}
-								options={getPlayoutDeviceIds}
-							>
-								{(value, handleUpdate, options) => (
-									<MultiSelectInputControl
-										classNames="input text-input input-l"
-										options={options}
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
-							</LabelAndOverridesForMultiSelect>
-							<div className="mdi"></div>
-						</div>
-						<div>
-							<div className="settings-studio-accessors">
-								<h3 className="mhn">{t('Accessors')}</h3>
-								<table className="expando settings-studio-package-containers-accessors-table">
-									<RenderAccessors packageContainer={packageContainer} overrideHelper={overrideHelper} />
-								</table>
-								<div className="mod mhs">
-									<button className="btn btn-primary" onClick={addNewAccessor}>
-										<FontAwesomeIcon icon={faPlus} />
-									</button>
-								</div>
-							</div>
-						</div>
-					</td>
-				</tr>
-			)}
-		</React.Fragment>
-	)
-}
-
-interface RenderAccessorsProps {
-	packageContainer: WrappedOverridableItemNormal<StudioPackageContainer>
-	overrideHelper: OverrideOpHelper
-}
-
-function RenderAccessors({ packageContainer, overrideHelper }: RenderAccessorsProps): React.JSX.Element {
-	const { t } = useTranslation()
-
-	const container = packageContainer.computed?.container
-
-	if (!container || Object.keys(container).length === 0) {
-		return (
-			<tr>
-				<td className="mhn dimmed">{t('There are no Accessors set up.')}</td>
-			</tr>
-		)
-	}
-
-	return (
-		<React.Fragment>
-			{_.map(container.accessors || {}, (accessor: Accessor.Any, accessorId: string) => {
-				return (
-					<React.Fragment key={accessorId}>
-						<RenderAccessor
-							accessorId={accessorId}
-							accessor={accessor}
-							packageContainer={packageContainer}
-							overrideHelper={overrideHelper}
-						/>
-					</React.Fragment>
-				)
-			})}
-		</React.Fragment>
-	)
-}
-
-interface RenderAccessorProps {
+interface AccessorTableRowProps {
 	packageContainer: WrappedOverridableItemNormal<StudioPackageContainer>
 	accessorId: string
 	accessor: Accessor.Any
 	overrideHelper: OverrideOpHelper
+	toggleExpanded: (exclusivityGroupId: string, force?: boolean) => void
+	isExpanded: boolean
 }
 
-function RenderAccessor({
+export function AccessorTableRow({
 	accessor,
 	accessorId,
 	packageContainer,
 	overrideHelper,
-}: RenderAccessorProps): React.JSX.Element {
+	toggleExpanded,
+	isExpanded,
+}: AccessorTableRowProps): React.JSX.Element {
 	const { t } = useTranslation()
-	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
 
 	const confirmRemoveAccessor = (accessorId: string) => {
 		doModalDialog({
@@ -585,7 +96,7 @@ function RenderAccessor({
 		<React.Fragment key={accessorId}>
 			<tr
 				className={ClassNames({
-					hl: isExpanded(accessorId),
+					hl: isExpanded,
 				})}
 			>
 				<th className="settings-studio-accessor__id c2">{accessorId}</th>
@@ -602,7 +113,7 @@ function RenderAccessor({
 					</button>
 				</td>
 			</tr>
-			{isExpanded(accessorId) && (
+			{isExpanded && (
 				<tr className="expando-details hl">
 					<td colSpan={6}>
 						<div className="properties-grid">
