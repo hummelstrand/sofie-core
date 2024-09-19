@@ -15,7 +15,7 @@ interface PackageContainersPickersProps {
 export function PackageContainersPickers({
 	studio,
 	packageContainersFromOverrides,
-}: PackageContainersPickersProps): React.ReactNode {
+}: PackageContainersPickersProps): JSX.Element {
 	const { t } = useTranslation()
 
 	const availablePackageContainerOptions = React.useMemo(() => {

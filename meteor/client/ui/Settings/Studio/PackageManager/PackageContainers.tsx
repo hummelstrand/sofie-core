@@ -19,7 +19,7 @@ import {
 import { useToggleExpandHelper } from '../../../util/useToggleExpandHelper'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import { TextInputControl } from '../../../../lib/Components/TextInput'
-import { DropdownInputOption, getDropdownInputOptions } from '../../../../lib/Components/DropdownInput'
+import { DropdownInputOption } from '../../../../lib/Components/DropdownInput'
 import { MultiSelectInputControl } from '../../../../lib/Components/MultiSelectInput'
 import {
 	OverrideOpHelper,
@@ -215,21 +215,19 @@ function PackageContainerRow({
 }: PackageContainerRowProps): React.JSX.Element {
 	const { t } = useTranslation()
 
-	const getPlayoutDeviceIds: DropdownInputOption<string>[] = React.useMemo(() => {
+	const availablePlayoutDevicesOptions: DropdownInputOption<string>[] = React.useMemo(() => {
 		const playoutDevicesFromOverrrides = applyAndValidateOverrides(studio.peripheralDeviceSettings.playoutDevices).obj
 
-		const devices: {
-			name: string
-			value: string
-		}[] = []
+		const devices: DropdownInputOption<string>[] = []
 
 		for (const deviceId of Object.keys(playoutDevicesFromOverrrides)) {
 			devices.push({
 				name: deviceId,
 				value: deviceId,
+				i: devices.length,
 			})
 		}
-		return getDropdownInputOptions([...devices])
+		return devices
 	}, [studio.peripheralDeviceSettings.playoutDevices])
 
 	const updatePackageContainerId = React.useCallback(
@@ -239,8 +237,6 @@ function PackageContainerRow({
 		},
 		[overrideHelper, toggleExpanded, packageContainer.id]
 	)
-
-	if (!packageContainer.computed) throw new Error(`Package Container "${packageContainer.id}" not found`)
 
 	return (
 		<React.Fragment key={packageContainer.id}>
@@ -308,7 +304,7 @@ function PackageContainerRow({
 								itemKey={'deviceIds'}
 								opPrefix={packageContainer.id}
 								overrideHelper={overrideHelper}
-								options={getPlayoutDeviceIds}
+								options={availablePlayoutDevicesOptions}
 							>
 								{(value, handleUpdate, options) => (
 									<MultiSelectInputControl
