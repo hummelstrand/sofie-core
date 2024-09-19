@@ -43,13 +43,13 @@ export function getAllCurrentAndDeletedItemsFromOverrides<T extends object>(
 ): WrappedOverridableItem<T>[] {
 	const sortedItems = getAllCurrentItemsFromOverrides(rawObject, comparitor)
 
-	const removedItems: WrappedOverridableItemDeleted<T>[] = []
+	const removedOutputLayers: WrappedOverridableItemDeleted<T>[] = []
 
 	// Find the items which have been deleted with an override
 	const computedOutputLayerIds = new Set(sortedItems.map((l) => l.id))
 	for (const [id, output] of Object.entries<ReadonlyDeep<T | undefined>>(rawObject.defaults)) {
 		if (!computedOutputLayerIds.has(id) && output) {
-			removedItems.push(
+			removedOutputLayers.push(
 				literal<WrappedOverridableItemDeleted<T>>({
 					type: 'deleted',
 					id: id,
@@ -61,9 +61,9 @@ export function getAllCurrentAndDeletedItemsFromOverrides<T extends object>(
 		}
 	}
 
-	if (comparitor) removedItems.sort((a, b) => comparitor([a.id, a.defaults], [b.id, b.defaults]))
+	if (comparitor) removedOutputLayers.sort((a, b) => comparitor([a.id, a.defaults], [b.id, b.defaults]))
 
-	return [...sortedItems, ...removedItems]
+	return [...sortedItems, ...removedOutputLayers]
 }
 
 /**
@@ -234,9 +234,9 @@ export class OverrideOpHelperImpl implements OverrideOpHelperBatcher {
 			}
 
 			this.#object.overrides = newOps
-		}
 
-		return this
+			return this
+		}
 	}
 
 	setItemValue = (itemId: string, subPath: string, value: unknown): this => {
@@ -288,9 +288,9 @@ export class OverrideOpHelperImpl implements OverrideOpHelperBatcher {
 			}
 
 			this.#object.overrides = newOps
-		}
 
-		return this
+			return this
+		}
 	}
 
 	replaceItem = (itemId: string, value: unknown): this => {

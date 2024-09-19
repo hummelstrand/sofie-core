@@ -1,7 +1,6 @@
 import ClassNames from 'classnames'
 import * as React from 'react'
 import {
-	DBStudio,
 	StudioRouteSet,
 	StudioRouteBehavior,
 	RouteMapping,
@@ -9,91 +8,69 @@ import {
 	StudioRouteType,
 	MappingsExt,
 	MappingExt,
-	StudioAbPlayerDisabling,
+	DBStudio,
 } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import { doModalDialog } from '../../../lib/ModalDialog'
+import { doModalDialog } from '../../../../lib/ModalDialog'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faPencilAlt, faCheck, faPlus, faSync } from '@fortawesome/free-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
 import { TSR } from '@sofie-automation/blueprints-integration'
 import { ReadonlyDeep } from 'type-fest'
-import { MappingsSettingsManifest, MappingsSettingsManifests } from './Mappings'
+import { MappingsSettingsManifest, MappingsSettingsManifests } from '../Mappings'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import {
 	DropdownInputControl,
 	DropdownInputOption,
 	getDropdownInputOptions,
-} from '../../../lib/Components/DropdownInput'
+} from '../../../../lib/Components/DropdownInput'
 import { JSONSchema } from '@sofie-automation/shared-lib/dist/lib/JSONSchemaTypes'
-import { Studios } from '../../../collections'
 import {
 	LabelActual,
 	LabelAndOverrides,
 	LabelAndOverridesForCheckbox,
 	LabelAndOverridesForDropdown,
-} from '../../../lib/Components/LabelAndOverrides'
+} from '../../../../lib/Components/LabelAndOverrides'
 import {
 	OverrideOpHelper,
 	OverrideOpHelperForItemContents,
+	useOverrideOpHelper,
 	WrappedOverridableItem,
 	WrappedOverridableItemDeleted,
 	WrappedOverridableItemNormal,
-	getAllCurrentAndDeletedItemsFromOverrides,
-	useOverrideOpHelper,
 } from '../../util/OverrideOpHelper'
+import { TextInputControl } from '../../../../lib/Components/TextInput'
+import { CheckboxControl } from '../../../../lib/Components/Checkbox'
+import { OverrideOpHelperArrayTable } from '../../../../lib/forms/SchemaFormTable/ArrayTableOpHelper'
+import { hasOpWithPath } from '../../../../lib/Components/util'
+import { SchemaFormWithOverrides } from '../../../../lib/forms/SchemaFormWithOverrides'
 import {
+	applyAndValidateOverrides,
 	ObjectOverrideSetOp,
 	SomeObjectOverrideOp,
-	applyAndValidateOverrides,
 } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
-import { useToggleExpandHelper } from '../../util/useToggleExpandHelper'
-import { TextInputControl } from '../../../lib/Components/TextInput'
-import { CheckboxControl } from '../../../lib/Components/Checkbox'
-import { OverrideOpHelperArrayTable } from '../../../lib/forms/SchemaFormTable/ArrayTableOpHelper'
-import { hasOpWithPath } from '../../../lib/Components/util'
-import { SchemaFormWithOverrides } from '../../../lib/forms/SchemaFormWithOverrides'
+import { Studios } from '../../../../collections'
+import { useToggleExpandHelper } from '../../../util/useToggleExpandHelper'
+import { RouteSetAbPlayers } from './RouteSetAbPlayers'
 
-interface IStudioRoutingsProps {
-	translationNamespaces: string[]
+interface RouteSetsTable {
 	studio: DBStudio
+	routeSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
+	exclusivityGroupsFromOverrides: WrappedOverridableItem<StudioRouteSetExclusivityGroup>[]
 	studioMappings: ReadonlyDeep<MappingsExt>
-	manifest: MappingsSettingsManifests | undefined
+	manifest: MappingsSettingsManifests
+	translationNamespaces: string[]
 }
 
-export function StudioRoutings({
-	translationNamespaces,
+export function RouteSetsTable({
 	studio,
+	routeSetsFromOverrides,
+	exclusivityGroupsFromOverrides,
 	studioMappings,
 	manifest,
-}: Readonly<IStudioRoutingsProps>): React.JSX.Element {
+	translationNamespaces,
+}: Readonly<RouteSetsTable>): React.JSX.Element {
 	const { t } = useTranslation()
 	const { toggleExpanded, isExpanded } = useToggleExpandHelper()
-
-	const routeSetsFromOverrides = React.useMemo(
-		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetsWithOverrides, (a, b) => a[0].localeCompare(b[0])),
-		[studio.routeSetsWithOverrides]
-	)
-
-	const exclusivityGroupsFromOverrides = React.useMemo(
-		() =>
-			getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetExclusivityGroupsWithOverrides, (a, b) =>
-				a[0].localeCompare(b[0])
-			),
-		[studio.routeSetExclusivityGroupsWithOverrides]
-	)
-
-	const saveOverrides = React.useCallback(
-		(newOps: SomeObjectOverrideOp[]) => {
-			Studios.update(studio._id, {
-				$set: {
-					'routeSetsWithOverrides.overrides': newOps,
-				},
-			})
-		},
-		[studio._id]
-	)
-
-	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSetsWithOverrides)
 
 	const addNewRouteSet = React.useCallback(() => {
 		const resolvedRouteSets = applyAndValidateOverrides(studio.routeSetsWithOverrides).obj
@@ -132,109 +109,58 @@ export function StudioRoutings({
 		}, 1)
 	}, [studio._id, studio.routeSetsWithOverrides])
 
-	const addNewExclusivityGroup = React.useCallback(() => {
-		const newGroupKeyName = 'exclusivityGroup'
-		const resolvedGroups = applyAndValidateOverrides(studio.routeSetExclusivityGroupsWithOverrides).obj
+	const saveOverrides = React.useCallback(
+		(newOps: SomeObjectOverrideOp[]) => {
+			Studios.update(studio._id, {
+				$set: {
+					'routeSetsWithOverrides.overrides': newOps,
+				},
+			})
+		},
+		[studio._id]
+	)
 
-		let iter = 0
-		while (resolvedGroups[newGroupKeyName + iter.toString()]) {
-			iter++
-		}
-
-		const newId = newGroupKeyName + iter.toString()
-		const newGroup: StudioRouteSetExclusivityGroup = {
-			name: 'New Exclusivity Group' + iter.toString(),
-		}
-		const addOp = literal<ObjectOverrideSetOp>({
-			op: 'set',
-			path: newId,
-			value: newGroup,
-		})
-
-		Studios.update(studio._id, {
-			$push: {
-				'routeSetExclusivityGroupsWithOverrides.overrides': addOp,
-			},
-		})
-
-		setTimeout(() => {
-			toggleExpanded(newId, true)
-		}, 1)
-	}, [studio._id, studio.routeSetExclusivityGroupsWithOverrides])
-
-	if (Object.keys(studio.routeSetsWithOverrides).length === 0) {
-		return (
-			<tr>
-				<td className="mhn dimmed">{t('There are no Route Sets set up.')}</td>
-			</tr>
-		)
-	}
+	const overrideHelper = useOverrideOpHelper(saveOverrides, studio.routeSetsWithOverrides)
 
 	return (
-		<div>
-			<h2 className="mhn mbs">{t('Route Sets')}</h2>
-			{!manifest && <span>{t('Add a playout device to the studio in order to configure the route sets')}</span>}
-			{manifest && (
-				<React.Fragment>
-					<p className="mhn mvs text-s dimmed field-hint">
-						{t(
-							'Controls for exposed Route Sets will be displayed to the producer within the Rundown View in the Switchboard.'
-						)}
-					</p>
-					<h3 className="mhn">{t('Exclusivity Groups')}</h3>
-					<table className="expando settings-studio-mappings-table">
-						<tbody>
-							<RenderExclusivityGroups
-								studio={studio}
-								routeSetsFromOverrides={routeSetsFromOverrides}
-								isExpanded={isExpanded}
-								toggleExpanded={toggleExpanded}
-								exclusivityGroupsFromOverrides={exclusivityGroupsFromOverrides}
-							/>
-						</tbody>
-					</table>
-					<div className="mod mhs">
-						<button className="btn btn-primary" onClick={addNewExclusivityGroup}>
-							<FontAwesomeIcon icon={faPlus} />
-						</button>
-					</div>
-					<h3 className="mhn">{t('Route Sets')}</h3>
-					<table className="expando settings-studio-mappings-table">
-						<tbody>
-							{routeSetsFromOverrides.map((routeSet: WrappedOverridableItem<StudioRouteSet>) => {
-								return (
-									<React.Fragment key={routeSet.id}>
-										{routeSet.type === 'normal' ? (
-											<RenderRouteSet
-												routeSet={routeSet}
-												manifest={manifest}
-												translationNamespaces={translationNamespaces}
-												studioMappings={studioMappings}
-												toggleExpanded={toggleExpanded}
-												isExpanded={isExpanded(routeSet.id)}
-												overrideHelper={overrideHelper}
-												exclusivityGroupsFromOverrides={exclusivityGroupsFromOverrides}
-											/>
-										) : (
-											<RenderRouteSetDeletedEntry routeSet={routeSet} overrideHelper={overrideHelper} />
-										)}
-									</React.Fragment>
-								)
-							})}
-						</tbody>
-					</table>
-					<div className="mod mhs">
-						<button className="btn btn-primary" onClick={addNewRouteSet}>
-							<FontAwesomeIcon icon={faPlus} />
-						</button>
-					</div>
-				</React.Fragment>
-			)}
-		</div>
+		<>
+			<table className="expando settings-studio-mappings-table">
+				<tbody>
+					{routeSetsFromOverrides.length === 0 ? (
+						<tr>
+							<td className="mhn dimmed">{t('There are no Route Sets set up.')}</td>
+						</tr>
+					) : (
+						routeSetsFromOverrides.map((routeSet: WrappedOverridableItem<StudioRouteSet>) =>
+							routeSet.type === 'normal' ? (
+								<RouteSetRow
+									key={routeSet.id}
+									routeSet={routeSet}
+									manifest={manifest}
+									translationNamespaces={translationNamespaces}
+									studioMappings={studioMappings}
+									toggleExpanded={toggleExpanded}
+									isExpanded={isExpanded(routeSet.id)}
+									overrideHelper={overrideHelper}
+									exclusivityGroupsFromOverrides={exclusivityGroupsFromOverrides}
+								/>
+							) : (
+								<RouteSetDeletedRow key={routeSet.id} routeSet={routeSet} overrideHelper={overrideHelper} />
+							)
+						)
+					)}
+				</tbody>
+			</table>
+			<div className="mod mhs">
+				<button className="btn btn-primary" onClick={addNewRouteSet}>
+					<FontAwesomeIcon icon={faPlus} />
+				</button>
+			</div>
+		</>
 	)
 }
 
-interface IRenderRouteSetProps {
+interface RouteSetRowProps {
 	routeSet: WrappedOverridableItemNormal<StudioRouteSet>
 	manifest: MappingsSettingsManifests
 	translationNamespaces: string[]
@@ -245,7 +171,7 @@ interface IRenderRouteSetProps {
 	exclusivityGroupsFromOverrides: WrappedOverridableItem<StudioRouteSetExclusivityGroup>[]
 }
 
-function RenderRouteSet({
+function RouteSetRow({
 	routeSet,
 	manifest,
 	translationNamespaces,
@@ -254,7 +180,7 @@ function RenderRouteSet({
 	studioMappings,
 	overrideHelper,
 	exclusivityGroupsFromOverrides,
-}: Readonly<IRenderRouteSetProps>): React.JSX.Element {
+}: Readonly<RouteSetRowProps>): React.JSX.Element {
 	const { t } = useTranslation()
 	const toggleEditRouteSet = React.useCallback(() => toggleExpanded(routeSet.id), [toggleExpanded, routeSet.id])
 
@@ -482,7 +408,7 @@ function RenderRouteSet({
 								</button>
 							)}
 						</div>
-						<RenderAbPlayers routeSet={routeSet} overrideHelper={overrideHelper} />
+						<RouteSetAbPlayers routeSet={routeSet} overrideHelper={overrideHelper} />
 						<div className="mod">
 							<button className="btn btn-primary right" onClick={() => toggleExpanded(routeSet.id)}>
 								<FontAwesomeIcon icon={faCheck} />
@@ -511,12 +437,12 @@ function RenderRouteSet({
 	)
 }
 
-interface IRenderRouteSetDeletedProps {
+interface RouteSetDeletedRowProps {
 	routeSet: WrappedOverridableItemDeleted<StudioRouteSet>
 	overrideHelper: OverrideOpHelper
 }
 
-function RenderRouteSetDeletedEntry({ routeSet, overrideHelper }: Readonly<IRenderRouteSetDeletedProps>) {
+function RouteSetDeletedRow({ routeSet, overrideHelper }: Readonly<RouteSetDeletedRowProps>) {
 	const doUndeleteItem = React.useCallback(
 		() => overrideHelper().resetItem(routeSet.id).commit(),
 		[overrideHelper, routeSet.id]
@@ -852,358 +778,4 @@ function DeviceMappingSettings({
 	} else {
 		return null
 	}
-}
-
-interface IRenderAbPlayersProps {
-	routeSet: WrappedOverridableItemNormal<StudioRouteSet>
-	overrideHelper: OverrideOpHelper
-}
-
-function RenderAbPlayers({ routeSet, overrideHelper }: Readonly<IRenderAbPlayersProps>): React.JSX.Element {
-	const { t } = useTranslation()
-
-	const abPlayersBuffer = routeSet.computed.abPlayers
-
-	const tableOverrideHelper = React.useCallback(
-		() => new OverrideOpHelperArrayTable(overrideHelper(), routeSet.id, abPlayersBuffer, 'abPlayers'),
-		[overrideHelper, routeSet.id, abPlayersBuffer]
-	)
-
-	const confirmRemoveAbPlayer = React.useCallback(
-		(route: WrappedOverridableItemNormal<StudioAbPlayerDisabling>) => {
-			doModalDialog({
-				title: t('Remove this AB PLayers from this Route Set?'),
-				yes: t('Remove'),
-				no: t('Cancel'),
-				onAccept: () => {
-					tableOverrideHelper().deleteRow(route.id).commit()
-				},
-				message: (
-					<>
-						<p>
-							{t('Are you sure you want to remove the AB Player "{{playerId}}"?', {
-								playerId: route.computed.playerId,
-							})}
-						</p>
-						<p>{t('Please note: This action is irreversible!')}</p>
-					</>
-				),
-			})
-		},
-		[tableOverrideHelper]
-	)
-
-	return (
-		<>
-			<h4 className="mod mhs">{t('AB Playout devices')}</h4>
-			{routeSet.computed?.abPlayers?.length === 0 ? (
-				<p className="text-s dimmed field-hint mhs">{t('There are no AB Playout devices set up yet')}</p>
-			) : null}
-			{abPlayersBuffer.map((route, index) => (
-				<RenderAbPlayerRow
-					key={index}
-					tableOverrideHelper={tableOverrideHelper}
-					abPlayers={routeSet.computed.abPlayers}
-					rawRoute={route}
-					routeIndex={index}
-					confirmRemoveAbPlayer={confirmRemoveAbPlayer}
-				/>
-			))}
-		</>
-	)
-}
-
-interface RenderAbPlayerRowProps {
-	tableOverrideHelper: OverrideOpHelperForItemContents
-	abPlayers: StudioAbPlayerDisabling[]
-	rawRoute: StudioAbPlayerDisabling
-	routeIndex: number
-	confirmRemoveAbPlayer: (route: WrappedOverridableItemNormal<any>) => void
-}
-
-function RenderAbPlayerRow({
-	tableOverrideHelper,
-	rawRoute,
-	routeIndex,
-	confirmRemoveAbPlayer,
-}: Readonly<RenderAbPlayerRowProps>): React.JSX.Element {
-	const { t } = useTranslation()
-
-	const player = React.useMemo(
-		() =>
-			literal<WrappedOverridableItemNormal<StudioAbPlayerDisabling>>({
-				type: 'normal',
-				id: routeIndex + '',
-				computed: rawRoute,
-				defaults: undefined,
-				overrideOps: [],
-			}),
-		[rawRoute, routeIndex]
-	)
-
-	const confirmRemoveRouteLocal = React.useCallback(
-		() => confirmRemoveAbPlayer(player),
-		[confirmRemoveAbPlayer, player]
-	)
-
-	return (
-		<div className="route-sets-editor mod pan mas">
-			<button className="action-btn right mod man pas" onClick={confirmRemoveRouteLocal}>
-				<FontAwesomeIcon icon={faTrash} />
-			</button>
-			<div className="properties-grid">
-				<LabelAndOverrides
-					label={t('Pool PlayerId')}
-					item={player}
-					itemKey={'playerId'}
-					opPrefix={player.id}
-					overrideHelper={tableOverrideHelper}
-				>
-					{(value, handleUpdate) => (
-						<TextInputControl
-							modifiedClassName="bghl"
-							classNames="input text-input input-l"
-							value={value}
-							handleUpdate={handleUpdate}
-						/>
-					)}
-				</LabelAndOverrides>
-				<LabelAndOverrides
-					label={t('Pool name')}
-					item={player}
-					itemKey={'poolName'}
-					opPrefix={player.id}
-					overrideHelper={tableOverrideHelper}
-				>
-					{(value, handleUpdate) => (
-						<TextInputControl
-							modifiedClassName="bghl"
-							classNames="input text-input input-l"
-							value={value}
-							handleUpdate={handleUpdate}
-						/>
-					)}
-				</LabelAndOverrides>
-			</div>
-		</div>
-	)
-}
-
-interface IRenderExclusivityGroupsProps {
-	studio: DBStudio
-	toggleExpanded: (exclusivityGroupId: string, force?: boolean) => void
-	isExpanded: (exclusivityGroupId: string) => boolean
-	routeSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
-	exclusivityGroupsFromOverrides: WrappedOverridableItem<StudioRouteSetExclusivityGroup>[]
-}
-
-function RenderExclusivityGroups({
-	studio,
-	toggleExpanded,
-	isExpanded,
-	routeSetsFromOverrides,
-	exclusivityGroupsFromOverrides,
-}: Readonly<IRenderExclusivityGroupsProps>): React.JSX.Element {
-	const { t } = useTranslation()
-
-	const saveExclusivityOverrides = React.useCallback(
-		(newOps: SomeObjectOverrideOp[]) => {
-			Studios.update(studio._id, {
-				$set: {
-					'routeSetExclusivityGroupsWithOverrides.overrides': newOps,
-				},
-			})
-		},
-		[studio._id]
-	)
-
-	const exclusivityOverrideHelper = useOverrideOpHelper(
-		saveExclusivityOverrides,
-		studio.routeSetExclusivityGroupsWithOverrides
-	)
-
-	if (exclusivityGroupsFromOverrides.length === 0) {
-		return (
-			<tr>
-				<td className="mhn dimmed">{t('There are no exclusivity groups set up.')}</td>
-			</tr>
-		)
-	}
-	return (
-		<React.Fragment>
-			{exclusivityGroupsFromOverrides.map(
-				(exclusivityGroup: WrappedOverridableItem<StudioRouteSetExclusivityGroup>) => {
-					return (
-						<React.Fragment key={exclusivityGroup.id}>
-							{exclusivityGroup.type === 'normal' ? (
-								<RenderExclusivityGroup
-									exclusivityGroup={exclusivityGroup}
-									toggleExpanded={toggleExpanded}
-									isExpanded={isExpanded(exclusivityGroup.id)}
-									routeSetsFromOverrides={routeSetsFromOverrides}
-									exclusivityOverrideHelper={exclusivityOverrideHelper}
-								/>
-							) : (
-								<RenderExclusivityDeletedGroup
-									exclusivityGroup={exclusivityGroup}
-									exlusivityOverrideHelper={exclusivityOverrideHelper}
-								/>
-							)}
-						</React.Fragment>
-					)
-				}
-			)}
-		</React.Fragment>
-	)
-}
-
-interface IRenderExclusivityGroupProps {
-	exclusivityGroup: WrappedOverridableItemNormal<StudioRouteSetExclusivityGroup>
-	toggleExpanded: (exclusivityGroupId: string, force?: boolean) => void
-	isExpanded: boolean
-	routeSetsFromOverrides: WrappedOverridableItem<StudioRouteSet>[]
-	exclusivityOverrideHelper: OverrideOpHelper
-}
-
-function RenderExclusivityGroup({
-	exclusivityGroup,
-	toggleExpanded,
-	isExpanded,
-	routeSetsFromOverrides,
-	exclusivityOverrideHelper,
-}: Readonly<IRenderExclusivityGroupProps>): React.JSX.Element {
-	const { t } = useTranslation()
-
-	const removeExclusivityGroup = (eGroupId: string) => {
-		exclusivityOverrideHelper().deleteItem(eGroupId).commit()
-	}
-
-	const confirmRemoveEGroup = () => {
-		doModalDialog({
-			title: t('Remove this Exclusivity Group?'),
-			yes: t('Remove'),
-			no: t('Cancel'),
-			onAccept: () => {
-				removeExclusivityGroup(exclusivityGroup.id)
-			},
-			message: (
-				<React.Fragment>
-					<p>
-						{t(
-							'Are you sure you want to remove exclusivity group "{{eGroupName}}"?\nRoute Sets assigned to this group will be reset to no group.',
-							{
-								eGroupName: exclusivityGroup.computed?.name,
-							}
-						)}
-					</p>
-					<p>{t('Please note: This action is irreversible!')}</p>
-				</React.Fragment>
-			),
-		})
-	}
-	const updateExclusivityGroupId = React.useCallback(
-		(newGroupId: string) => {
-			exclusivityOverrideHelper().changeItemId(exclusivityGroup.id, newGroupId).commit()
-			toggleExpanded(newGroupId, true)
-		},
-		[exclusivityOverrideHelper, toggleExpanded, exclusivityGroup.id]
-	)
-
-	return (
-		<React.Fragment>
-			<tr
-				className={ClassNames({
-					hl: isExpanded,
-				})}
-			>
-				<th className="settings-studio-device__name c3">{exclusivityGroup.id}</th>
-				<td className="settings-studio-device__id c5">{exclusivityGroup.computed?.name}</td>
-				<td className="settings-studio-device__id c3">
-					{
-						routeSetsFromOverrides.filter(
-							(routeSet) => routeSet.computed?.exclusivityGroup === exclusivityGroup.computed?.name
-						).length
-					}
-				</td>
-
-				<td className="settings-studio-device__actions table-item-actions c3">
-					<button className="action-btn" onClick={() => toggleExpanded(exclusivityGroup.id)}>
-						<FontAwesomeIcon icon={faPencilAlt} />
-					</button>
-					<button className="action-btn" onClick={confirmRemoveEGroup}>
-						<FontAwesomeIcon icon={faTrash} />
-					</button>
-				</td>
-			</tr>
-			{isExpanded && (
-				<tr className="expando-details hl">
-					<td colSpan={6}>
-						<div className="properties-grid">
-							<label className="field">
-								<LabelActual label={t('Exclusivity Group ID')} />
-								<TextInputControl
-									modifiedClassName="bghl"
-									classNames="input text-input input-l"
-									value={exclusivityGroup.id}
-									handleUpdate={updateExclusivityGroupId}
-									disabled={!!exclusivityGroup.defaults}
-								/>
-							</label>
-							<LabelAndOverrides
-								label={t('Exclusivity Group Name')}
-								item={exclusivityGroup}
-								itemKey={'name'}
-								opPrefix={exclusivityGroup.id}
-								overrideHelper={exclusivityOverrideHelper}
-							>
-								{(value, handleUpdate) => (
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
-							</LabelAndOverrides>
-						</div>
-						<div className="mod alright">
-							<button className="btn btn-primary" onClick={() => toggleExpanded(exclusivityGroup.id)}>
-								<FontAwesomeIcon icon={faCheck} />
-							</button>
-						</div>
-					</td>
-				</tr>
-			)}
-		</React.Fragment>
-	)
-}
-
-interface IRenderExclusivityDeletedGroupProps {
-	exclusivityGroup: WrappedOverridableItemDeleted<StudioRouteSetExclusivityGroup>
-	exlusivityOverrideHelper: OverrideOpHelper
-}
-
-function RenderExclusivityDeletedGroup({
-	exclusivityGroup,
-	exlusivityOverrideHelper: overrideHelper,
-}: Readonly<IRenderExclusivityDeletedGroupProps>): React.JSX.Element {
-	const doUndeleteItem = React.useCallback(
-		() => overrideHelper().resetItem(exclusivityGroup.id).commit(),
-		[overrideHelper, exclusivityGroup.id]
-	)
-
-	return (
-		<tr>
-			<th className="settings-studio-device__name c3 notifications-s notifications-text">
-				{exclusivityGroup.defaults?.name}
-			</th>
-			<td className="settings-studio-device__id c2 deleted">{exclusivityGroup.defaults?.name}</td>
-			<td className="settings-studio-device__id c2 deleted">{exclusivityGroup.id}</td>
-			<td className="settings-studio-output-table__actions table-item-actions c3">
-				<button className="action-btn" onClick={doUndeleteItem} title="Restore to defaults">
-					<FontAwesomeIcon icon={faSync} />
-				</button>
-			</td>
-		</tr>
-	)
 }

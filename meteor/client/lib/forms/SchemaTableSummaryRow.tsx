@@ -4,7 +4,7 @@ import { objectPathGet } from '@sofie-automation/corelib/dist/lib'
 import classNames from 'classnames'
 import React, { useCallback } from 'react'
 import { SchemaSummaryField } from './schemaFormUtil'
-import { WrappedOverridableItemNormal } from '../../ui/util/OverrideOpHelper'
+import { WrappedOverridableItemNormal } from '../../ui/Settings/util/OverrideOpHelper'
 import { useTranslation } from 'react-i18next'
 
 interface SchemaTableSummaryRowProps<T extends string | number> {
