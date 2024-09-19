@@ -20,6 +20,6 @@ export function useOverrideOpHelper<T extends object>(
 
 	return useCallback(() => {
 		if (!objectWithOverridesRef.current) throw new Error('No current object!')
-		return new OverrideOpHelperImpl(saveOverrides, objectWithOverridesRef)
+		return new OverrideOpHelperImpl(saveOverrides, objectWithOverridesRef.current)
 	}, [saveOverrides, objectWithOverridesRef])
 }
