@@ -1,5 +1,5 @@
 import { ResolvedPieceInstance } from '@sofie-automation/corelib/dist/dataModel/PieceInstance'
-import { ABSessionAssignments, DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import { ABSessionAssignments } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { OnGenerateTimelineObjExt } from '@sofie-automation/corelib/dist/dataModel/Timeline'
 import { endTrace, sendTrace, startTrace } from '@sofie-automation/corelib/dist/influxdb'
 import { WrappedShowStyleBlueprint } from '../../blueprints/cache'
@@ -44,7 +44,7 @@ export async function applyAbPlaybackForTimeline(
 	timelineObjects: OnGenerateTimelineObjExt[]
 ): Promise<Record<string, ABSessionAssignments>> {
 	if (!blueprint.blueprint.getAbResolverConfiguration) return {}
-	const playlist = playoutModel.playlist as DBRundownPlaylist
+	const playlist = playoutModel.playlist
 
 	const blueprintContext = new ShowStyleContext(
 		{
@@ -57,7 +57,6 @@ export async function applyAbPlaybackForTimeline(
 		context.getShowStyleBlueprintConfig(showStyle)
 	)
 
-	const previousAbSessionAssignments: Record<string, ABSessionAssignments> = playlist.assignedAbSessions || {}
 	const newAbSessionsResult: Record<string, ABSessionAssignments> = {}
 
 	const span = context.startSpan('blueprint.abPlaybackResolver')
@@ -72,7 +71,8 @@ export async function applyAbPlaybackForTimeline(
 		// Filter out offline devices
 		const filteredPlayers = abPoolFilterDisabled(context, poolName, players, routeSetMembers)
 
-		const previousAssignmentMap: ABSessionAssignments = previousAbSessionAssignments[poolName] || {}
+		const previousAssignmentMap: ReadonlyDeep<ABSessionAssignments> | undefined =
+			playlist.assignedAbSessions?.[poolName]
 		const sessionRequests = calculateSessionTimeRanges(
 			abSessionHelper,
 			resolvedPieces,
