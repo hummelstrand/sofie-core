@@ -4,7 +4,7 @@ import { objectPathGet } from '@sofie-automation/corelib/dist/lib'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ReadonlyDeep } from 'type-fest'
-import { OverrideOpHelperForItemContents, WrappedOverridableItemNormal } from '../../ui/util/OverrideOpHelper'
+import { OverrideOpHelperForItemContents, WrappedOverridableItemNormal } from '../../ui/Settings/util/OverrideOpHelper'
 import { DropdownInputOption, findOptionByValue } from './DropdownInput'
 import { hasOpWithPath } from './util'
 
@@ -17,7 +17,7 @@ export interface LabelAndOverridesProps<T extends object, TValue> {
 	overrideHelper: OverrideOpHelperForItemContents
 
 	showClearButton?: boolean
-	formatDefaultValue?: (value: any) => string
+	formatDefaultValue?: (value: any) => JSX.Element | string | null
 
 	children: (value: TValue, setValue: (value: TValue) => void) => React.ReactNode
 }
@@ -40,18 +40,18 @@ export function LabelAndOverrides<T extends object, TValue = any>({
 	const { t } = useTranslation()
 
 	const clearOverride = useCallback(() => {
-		overrideHelper.clearItemOverrides(opPrefix, String(itemKey))
+		overrideHelper().clearItemOverrides(opPrefix, String(itemKey)).commit()
 	}, [overrideHelper, opPrefix, itemKey])
 	const setValue = useCallback(
 		(newValue: any) => {
-			overrideHelper.setItemValue(opPrefix, String(itemKey), newValue)
+			overrideHelper().setItemValue(opPrefix, String(itemKey), newValue).commit()
 		},
 		[overrideHelper, opPrefix, itemKey]
 	)
 
 	const isOverridden = hasOpWithPath(item.overrideOps, opPrefix, String(itemKey))
 
-	let displayValue = '""'
+	let displayValue: JSX.Element | string | null = '""'
 	if (item.defaults) {
 		const defaultValue: any = objectPathGet(item.defaults, String(itemKey))
 		// Special cases for formatting of the default
@@ -184,6 +184,20 @@ export function LabelAndOverridesForInt<T extends object>(
 
 export function LabelActual(props: Readonly<LabelActualProps>): JSX.Element {
 	return <div className="label-actual">{props.label}</div>
+}
+
+export function LabelAndOverridesForBase64Image<T extends object>(
+	props: Readonly<Omit<LabelAndOverridesProps<T, string>, 'formatDefaultValue'>>
+): JSX.Element {
+	const formatter = useCallback((defaultValue: any) => {
+		if (defaultValue && defaultValue.startsWith('data:image/')) {
+			return <img className="form-image-preview" src={defaultValue} />
+		} else {
+			return '-'
+		}
+	}, [])
+
+	return <LabelAndOverrides<T, string> {...props} formatDefaultValue={formatter} />
 }
 
 export function LabelAndOverridesForMultiSelect<T extends object, TValue = any>(

@@ -109,7 +109,7 @@ export class StudioBaselineHelper {
 			throw new Error(`RouteSet "${routeSet.id}" is ACTIVATE_ONLY`)
 
 		logger.debug(`switchRouteSet "${studio._id}" "${routeSet.id}"=${isActive}`)
-		overrideHelper.setItemValue(routeSet.id, `active`, isActive)
+		overrideHelper.setItemValue(routeSet.id, `active`, isActive).commit()
 
 		// Deactivate other routeSets in the same exclusivity group:
 		if (routeSet.computed.exclusivityGroup && isActive === true) {
@@ -117,7 +117,7 @@ export class StudioBaselineHelper {
 				if (otherRouteSet.id === routeSet.id) continue
 				if (otherRouteSet.computed?.exclusivityGroup === routeSet.computed.exclusivityGroup) {
 					logger.debug(`switchRouteSet Other ID "${studio._id}" "${otherRouteSet.id}"=false`)
-					overrideHelper.setItemValue(otherRouteSet.id, `active`, false)
+					overrideHelper.setItemValue(otherRouteSet.id, `active`, false).commit()
 				}
 			}
 		}

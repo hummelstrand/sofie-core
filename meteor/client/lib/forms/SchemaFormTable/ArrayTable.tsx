@@ -3,7 +3,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { clone, objectPathGet } from '@sofie-automation/corelib/dist/lib'
 import React, { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { WrappedOverridableItemNormal, OverrideOpHelperForItemContents } from '../../../ui/util/OverrideOpHelper'
+import {
+	WrappedOverridableItemNormal,
+	OverrideOpHelperForItemContents,
+} from '../../../ui/Settings/util/OverrideOpHelper'
 import { useToggleExpandHelper } from '../../../ui/util/useToggleExpandHelper'
 import { doModalDialog } from '../../ModalDialog'
 import {
@@ -64,16 +67,16 @@ export const SchemaFormArrayTable = ({
 		newObj.push(getSchemaDefaultValues(schema.items))
 
 		// Send it onwards
-		overrideHelper.setItemValue(item.id, attr, newObj)
+		overrideHelper().setItemValue(item.id, attr, newObj).commit()
 	}, [schema.items, overrideHelper, rowsArray, item.id, attr])
 
 	const resyncTable = useCallback(
-		() => overrideHelper.clearItemOverrides(item.id, attr),
+		() => overrideHelper().clearItemOverrides(item.id, attr).commit(),
 		[overrideHelper, item.id, attr]
 	)
 
-	const tableOverrideHelper = useMemo(
-		() => new OverrideOpHelperArrayTable(overrideHelper, item.id, rowsArray, attr),
+	const tableOverrideHelper = useCallback(
+		() => new OverrideOpHelperArrayTable(overrideHelper(), item.id, rowsArray, attr),
 		[overrideHelper, item.id, rows, attr]
 	)
 
@@ -90,7 +93,9 @@ export const SchemaFormArrayTable = ({
 				no: t('Cancel'),
 				yes: t('Remove'),
 				onAccept: () => {
-					tableOverrideHelper.deleteRow(rowId + '')
+					tableOverrideHelper()
+						.deleteRow(rowId + '')
+						.commit()
 				},
 				message: (
 					<React.Fragment>
