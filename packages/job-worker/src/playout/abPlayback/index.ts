@@ -1,9 +1,5 @@
 import { ResolvedPieceInstance } from '@sofie-automation/corelib/dist/dataModel/PieceInstance'
-import {
-	ABSessionAssignment,
-	ABSessionAssignments,
-	DBRundownPlaylist,
-} from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import { ABSessionAssignment, ABSessionAssignments } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { OnGenerateTimelineObjExt } from '@sofie-automation/corelib/dist/dataModel/Timeline'
 import { endTrace, sendTrace, startTrace } from '@sofie-automation/corelib/dist/influxdb'
 import { WrappedShowStyleBlueprint } from '../../blueprints/cache'
@@ -38,7 +34,7 @@ interface MembersOfRouteSets {
  * @param timelineObjects The current timeline
  * @returns New AB assignments to be persisted on the playlist for the next call
  */
-export async function applyAbPlaybackForTimeline(
+export function applyAbPlaybackForTimeline(
 	context: JobContext,
 	abSessionHelper: AbSessionHelper,
 	blueprint: ReadonlyDeep<WrappedShowStyleBlueprint>,
@@ -46,9 +42,9 @@ export async function applyAbPlaybackForTimeline(
 	playoutModel: PlayoutModel,
 	resolvedPieces: ResolvedPieceInstance[],
 	timelineObjects: OnGenerateTimelineObjExt[]
-): Promise<Record<string, ABSessionAssignments>> {
+): Record<string, ABSessionAssignments> {
 	if (!blueprint.blueprint.getAbResolverConfiguration) return {}
-	const playlist = playoutModel.playlist as DBRundownPlaylist
+	const playlist = playoutModel.playlist
 
 	const blueprintContext = new ShowStyleContext(
 		{
@@ -61,9 +57,8 @@ export async function applyAbPlaybackForTimeline(
 		context.getShowStyleBlueprintConfig(showStyle)
 	)
 
-	const previousAbSessionAssignments: Record<string, ABSessionAssignments> = playlist.assignedAbSessions || {}
 	logger.silly(`ABPlayback: Starting AB playback resolver ----------------------------`)
-	for (const [pool, assignments] of Object.entries<ABSessionAssignments>(previousAbSessionAssignments)) {
+	for (const [pool, assignments] of Object.entries<ABSessionAssignments>(playlist.assignedAbSessions || {})) {
 		for (const assignment of Object.values<ABSessionAssignment | undefined>(assignments)) {
 			if (assignment) {
 				logger.silly(
@@ -87,7 +82,8 @@ export async function applyAbPlaybackForTimeline(
 		// Filter out offline devices
 		const filteredPlayers = abPoolFilterDisabled(context, poolName, players, routeSetMembers)
 
-		const previousAssignmentMap: ABSessionAssignments = previousAbSessionAssignments[poolName] || {}
+		const previousAssignmentMap: ReadonlyDeep<ABSessionAssignments> | undefined =
+			playlist.assignedAbSessions?.[poolName]
 		const sessionRequests = calculateSessionTimeRanges(
 			abSessionHelper,
 			resolvedPieces,

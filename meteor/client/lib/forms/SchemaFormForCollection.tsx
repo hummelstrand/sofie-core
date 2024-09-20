@@ -6,7 +6,10 @@ import {
 } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 import React, { useCallback, useMemo } from 'react'
 import { MongoCollection } from '../../../lib/collections/lib'
-import { WrappedOverridableItemNormal, OverrideOpHelperForItemContentsBatcher } from '../../ui/util/OverrideOpHelper'
+import {
+	WrappedOverridableItemNormal,
+	OverrideOpHelperForItemContentsBatcher,
+} from '../../ui/Settings/util/OverrideOpHelper'
 import { SchemaFormCommonProps } from './schemaFormUtil'
 import { SchemaFormWithOverrides } from './SchemaFormWithOverrides'
 import { MongoModifier } from '@sofie-automation/corelib/dist/mongo'

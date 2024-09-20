@@ -11,6 +11,7 @@ import { logger } from '../../logging'
 import * as _ from 'underscore'
 import { SessionRequest } from './abPlaybackResolver'
 import { AbSessionHelper } from './abSessionHelper'
+import { ReadonlyDeep } from 'type-fest'
 
 /**
  * Apply the ab assignments for a pool to the timeline
@@ -28,7 +29,7 @@ export function applyAbPlayerObjectAssignments(
 	blueprintContext: ICommonContext,
 	abConfiguration: Pick<ABResolverConfiguration, 'timelineObjectLayerChangeRules' | 'customApplyToObject'>,
 	timelineObjs: OnGenerateTimelineObjExt[],
-	previousAssignmentMap: ABSessionAssignments,
+	previousAssignmentMap: ReadonlyDeep<ABSessionAssignments> | undefined,
 	resolvedAssignments: Readonly<SessionRequest[]>,
 	poolName: string
 ): ABSessionAssignments {

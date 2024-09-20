@@ -1,5 +1,5 @@
 import { SomeObjectOverrideOp, ObjectWithOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
-import { useRef, useCallback, useEffect } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import { OverrideOpHelper, OverrideOpHelperImpl } from '@sofie-automation/corelib/dist/overrideOpHelper'
 
 export * from '@sofie-automation/corelib/dist/overrideOpHelper'
