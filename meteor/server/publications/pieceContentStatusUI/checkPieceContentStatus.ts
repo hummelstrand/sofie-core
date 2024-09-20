@@ -194,6 +194,7 @@ export async function checkPieceContentStatusAndDependencies(
 		packageInfos: [],
 		packageContainerPackageStatuses: [],
 	}
+	const packageContainers = applyAndValidateOverrides(studio.packageContainersWithOverrides).obj
 
 	const ignoreMediaStatus = piece.content && piece.content.ignoreMediaObjectStatus
 	if (!ignoreMediaStatus) {
@@ -234,6 +235,7 @@ export async function checkPieceContentStatusAndDependencies(
 				piece,
 				sourceLayer,
 				studio,
+				packageContainers,
 				getPackageInfos,
 				getPackageContainerPackageStatus
 			)
@@ -484,6 +486,7 @@ async function checkPieceContentExpectedPackageStatus(
 	piece: PieceContentStatusPiece,
 	sourceLayer: ISourceLayer,
 	studio: PieceContentStatusStudio,
+	packageContainers: Record<string, StudioPackageContainer>,
 	getPackageInfos: (packageId: ExpectedPackageId) => Promise<PackageInfoLight[]>,
 	getPackageContainerPackageStatus: (
 		packageContainerId: string,
@@ -514,7 +517,6 @@ async function checkPieceContentExpectedPackageStatus(
 		for (const expectedPackage of piece.expectedPackages) {
 			// Route the mappings
 			const routedDeviceIds = routeExpectedPackage(routes, studio.mappings, expectedPackage)
-			const packageContainers = applyAndValidateOverrides(studio.packageContainersWithOverrides).obj
 
 			const checkedPackageContainers = new Set<string>()
 
@@ -562,7 +564,7 @@ async function checkPieceContentExpectedPackageStatus(
 						const sideEffect = getSideEffect(expectedPackage, studio)
 
 						thumbnailUrl = await getAssetUrlFromPackageContainerStatus(
-							studio,
+							packageContainers,
 							getPackageContainerPackageStatus,
 							expectedPackageId,
 							sideEffect.thumbnailContainerId,
@@ -574,7 +576,7 @@ async function checkPieceContentExpectedPackageStatus(
 						const sideEffect = getSideEffect(expectedPackage, studio)
 
 						previewUrl = await getAssetUrlFromPackageContainerStatus(
-							studio,
+							packageContainers,
 							getPackageContainerPackageStatus,
 							expectedPackageId,
 							sideEffect.previewContainerId,
@@ -721,7 +723,7 @@ async function checkPieceContentExpectedPackageStatus(
 }
 
 async function getAssetUrlFromPackageContainerStatus(
-	studio: PieceContentStatusStudio,
+	packageContainers: Record<string, StudioPackageContainer>,
 	getPackageContainerPackageStatus: (
 		packageContainerId: string,
 		expectedPackageId: ExpectedPackageId
@@ -732,7 +734,7 @@ async function getAssetUrlFromPackageContainerStatus(
 ): Promise<string | undefined> {
 	if (!assetContainerId || !packageAssetPath) return
 
-	const assetPackageContainer = applyAndValidateOverrides(studio.packageContainersWithOverrides).obj[assetContainerId]
+	const assetPackageContainer = packageContainers[assetContainerId]
 	if (!assetPackageContainer) return
 
 	const previewPackageOnPackageContainer = await getPackageContainerPackageStatus(assetContainerId, expectedPackageId)
