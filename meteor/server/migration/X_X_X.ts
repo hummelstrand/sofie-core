@@ -58,7 +58,7 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 		id: `add abPlayers object`,
 		canBeRunAutomatically: true,
 		validate: async () => {
-			const studios = await Studios.findFetchAsync({ routeSets: { $exists: true } })
+			const studios = await Studios.findFetchAsync({ routeSetsWithOverrides: { $exists: true } })
 
 			for (const studio of studios) {
 				const routeSetsDefaults = studio.routeSetsWithOverrides.defaults as any as Record<
