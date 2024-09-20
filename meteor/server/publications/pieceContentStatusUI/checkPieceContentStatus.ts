@@ -176,12 +176,7 @@ export type PieceContentStatusPiece = Pick<PieceGeneric, '_id' | 'content' | 'ex
 export interface PieceContentStatusStudio
 	extends Pick<
 		DBStudio,
-		| '_id'
-		| 'settings'
-		| 'packageContainersWithOverrides'
-		| 'previewContainerIds'
-		| 'thumbnailContainerIds'
-		| 'routeSetsWithOverrides'
+		'_id' | 'settings' | 'packageContainersWithOverrides' | 'previewContainerIds' | 'thumbnailContainerIds'
 	> {
 	/** Mappings between the physical devices / outputs and logical ones */
 	mappings: MappingsExt
