@@ -299,7 +299,7 @@ describe('handleUpdatedRundown', () => {
 				rundownExternalId: 'rundown0',
 				ingestRundown: clone(ingestRundown),
 				isCreateAction: true,
-				rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
+				rundownSource: { type: 'http' },
 			},
 			undefined
 		)
@@ -325,7 +325,7 @@ describe('handleUpdatedRundown', () => {
 					rundownExternalId: 'rundown0',
 					ingestRundown: clone(ingestRundown),
 					isCreateAction: false,
-					rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
+					rundownSource: { type: 'http' },
 				},
 				undefined
 			)
@@ -343,7 +343,7 @@ describe('handleUpdatedRundown', () => {
 				rundownExternalId: 'rundown0',
 				ingestRundown: clone(newIngestRundown),
 				isCreateAction: false,
-				rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
+				rundownSource: { type: 'http' },
 			},
 			clone(ingestRundown)
 		)
@@ -378,7 +378,7 @@ describe('handleUpdatedRundownMetaData', () => {
 				{
 					rundownExternalId: 'rundown0',
 					ingestRundown: clone(newIngestRundown),
-					rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
+					rundownSource: { type: 'http' },
 				},
 				undefined
 			)
@@ -395,7 +395,7 @@ describe('handleUpdatedRundownMetaData', () => {
 			{
 				rundownExternalId: 'rundown0',
 				ingestRundown: clone(newIngestRundown),
-				rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
+				rundownSource: { type: 'http' },
 			},
 			clone(ingestRundown)
 		)
