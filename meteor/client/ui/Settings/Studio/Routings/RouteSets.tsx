@@ -410,9 +410,6 @@ function RouteSetRow({
 						</div>
 						<RouteSetAbPlayers routeSet={routeSet} overrideHelper={overrideHelper} />
 						<div className="mod">
-							<button className="btn btn-primary right" onClick={() => toggleExpanded(routeSet.id)}>
-								<FontAwesomeIcon icon={faCheck} />
-							</button>
 							<button className="btn btn-secondary" onClick={() => addNewAbPlayerInSet(routeSet.id)}>
 								<FontAwesomeIcon icon={faPlus} />
 							</button>
@@ -430,6 +427,9 @@ function RouteSetRow({
 								</button>
 							)}
 						</div>
+						<button className="btn btn-primary right" onClick={() => toggleExpanded(routeSet.id)}>
+							<FontAwesomeIcon icon={faCheck} />
+						</button>
 					</td>
 				</tr>
 			)}
