@@ -34,7 +34,7 @@ interface MembersOfRouteSets {
  * @param timelineObjects The current timeline
  * @returns New AB assignments to be persisted on the playlist for the next call
  */
-export async function applyAbPlaybackForTimeline(
+export function applyAbPlaybackForTimeline(
 	context: JobContext,
 	abSessionHelper: AbSessionHelper,
 	blueprint: ReadonlyDeep<WrappedShowStyleBlueprint>,
@@ -42,7 +42,7 @@ export async function applyAbPlaybackForTimeline(
 	playoutModel: PlayoutModel,
 	resolvedPieces: ResolvedPieceInstance[],
 	timelineObjects: OnGenerateTimelineObjExt[]
-): Promise<Record<string, ABSessionAssignments>> {
+): Record<string, ABSessionAssignments> {
 	if (!blueprint.blueprint.getAbResolverConfiguration) return {}
 	const playlist = playoutModel.playlist
 
