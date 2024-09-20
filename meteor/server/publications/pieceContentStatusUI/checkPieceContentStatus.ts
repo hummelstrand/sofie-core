@@ -514,13 +514,14 @@ async function checkPieceContentExpectedPackageStatus(
 		for (const expectedPackage of piece.expectedPackages) {
 			// Route the mappings
 			const routedDeviceIds = routeExpectedPackage(routes, studio.mappings, expectedPackage)
+			const packageContainers = applyAndValidateOverrides(studio.packageContainersWithOverrides).obj
 
 			const checkedPackageContainers = new Set<string>()
 
 			for (const routedDeviceId of routedDeviceIds) {
 				let packageContainerId: string | undefined
 				for (const [containerId, packageContainer] of Object.entries<ReadonlyDeep<StudioPackageContainer>>(
-					applyAndValidateOverrides(studio.packageContainersWithOverrides).obj
+					packageContainers
 				)) {
 					if (packageContainer.deviceIds.includes(unprotectString(routedDeviceId))) {
 						// TODO: how to handle if a device has multiple containers?
