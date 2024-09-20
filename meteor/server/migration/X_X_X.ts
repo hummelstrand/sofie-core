@@ -75,7 +75,7 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 			return false
 		},
 		migrate: async () => {
-			const studios = await Studios.findFetchAsync({ routeSets: { $exists: true } })
+			const studios = await Studios.findFetchAsync({ routeSetsWithOverrides: { $exists: true } })
 
 			for (const studio of studios) {
 				const newRouteSetswithOverrides = studio.routeSetsWithOverrides
