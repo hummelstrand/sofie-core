@@ -43,7 +43,6 @@ import {
 	PackageInfoLight,
 	PieceDependencies,
 } from './common'
-import { applyAndValidateOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 
 interface ScanInfoForPackages {
 	[packageId: string]: ScanInfoForPackage
@@ -174,19 +173,15 @@ export type PieceContentStatusPiece = Pick<PieceGeneric, '_id' | 'content' | 'ex
 	pieceInstanceId?: PieceInstanceId
 }
 export interface PieceContentStatusStudio
-	extends Pick<
-		DBStudio,
-		| '_id'
-		| 'settings'
-		| 'packageContainersWithOverrides'
-		| 'previewContainerIds'
-		| 'thumbnailContainerIds'
-		| 'routeSetsWithOverrides'
-	> {
+	extends Pick<DBStudio, '_id' | 'settings' | 'previewContainerIds' | 'thumbnailContainerIds'> {
 	/** Mappings between the physical devices / outputs and logical ones */
 	mappings: MappingsExt
 	/** Route sets with overrides */
 	routeSets: Record<string, StudioRouteSet>
+	/** Contains settings for which Package Containers are present in the studio.
+	 * (These are used by the Package Manager and the Expected Packages)
+	 */
+	packageContainers: Record<string, StudioPackageContainer>
 }
 
 export async function checkPieceContentStatusAndDependencies(
@@ -525,7 +520,7 @@ async function checkPieceContentExpectedPackageStatus(
 			for (const routedDeviceId of routedDeviceIds) {
 				let packageContainerId: string | undefined
 				for (const [containerId, packageContainer] of Object.entries<ReadonlyDeep<StudioPackageContainer>>(
-					applyAndValidateOverrides(studio.packageContainersWithOverrides).obj
+					studio.packageContainers
 				)) {
 					if (packageContainer.deviceIds.includes(unprotectString(routedDeviceId))) {
 						// TODO: how to handle if a device has multiple containers?
@@ -566,7 +561,7 @@ async function checkPieceContentExpectedPackageStatus(
 						const sideEffect = getSideEffect(expectedPackage, studio)
 
 						thumbnailUrl = await getAssetUrlFromPackageContainerStatus(
-							studio,
+							studio.packageContainers,
 							getPackageContainerPackageStatus,
 							expectedPackageId,
 							sideEffect.thumbnailContainerId,
@@ -578,7 +573,7 @@ async function checkPieceContentExpectedPackageStatus(
 						const sideEffect = getSideEffect(expectedPackage, studio)
 
 						previewUrl = await getAssetUrlFromPackageContainerStatus(
-							studio,
+							studio.packageContainers,
 							getPackageContainerPackageStatus,
 							expectedPackageId,
 							sideEffect.previewContainerId,
@@ -725,7 +720,7 @@ async function checkPieceContentExpectedPackageStatus(
 }
 
 async function getAssetUrlFromPackageContainerStatus(
-	studio: PieceContentStatusStudio,
+	packageContainers: Record<string, StudioPackageContainer>,
 	getPackageContainerPackageStatus: (
 		packageContainerId: string,
 		expectedPackageId: ExpectedPackageId
@@ -736,7 +731,7 @@ async function getAssetUrlFromPackageContainerStatus(
 ): Promise<string | undefined> {
 	if (!assetContainerId || !packageAssetPath) return
 
-	const assetPackageContainer = applyAndValidateOverrides(studio.packageContainersWithOverrides).obj[assetContainerId]
+	const assetPackageContainer = packageContainers[assetContainerId]
 	if (!assetPackageContainer) return
 
 	const previewPackageOnPackageContainer = await getPackageContainerPackageStatus(assetContainerId, expectedPackageId)

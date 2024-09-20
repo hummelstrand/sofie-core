@@ -69,8 +69,9 @@ async function manipulateExpectedPackagesPublicationData(
 
 	const packageContainers: { [containerId: string]: PackageContainer } = {}
 	if (studio) {
+		const studioPackageContainers = applyAndValidateOverrides(studio.packageContainersWithOverrides).obj
 		for (const [containerId, studioPackageContainer] of Object.entries<StudioPackageContainer>(
-			applyAndValidateOverrides(studio.packageContainersWithOverrides).obj
+			studioPackageContainers
 		)) {
 			packageContainers[containerId] = studioPackageContainer.container
 		}

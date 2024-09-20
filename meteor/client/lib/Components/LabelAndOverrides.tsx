@@ -199,6 +199,7 @@ export function LabelAndOverridesForBase64Image<T extends object>(
 
 	return <LabelAndOverrides<T, string> {...props} formatDefaultValue={formatter} />
 }
+
 export function LabelAndOverridesForMultiSelect<T extends object, TValue = any>(
 	props: Omit<LabelAndOverridesProps<T, TValue>, 'formatDefaultValue' | 'children'> & {
 		options: DropdownInputOption<TValue>[]
