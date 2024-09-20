@@ -1,11 +1,14 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { StudioRouteSet, StudioRouteBehavior } from '@sofie-automation/corelib/dist/dataModel/Studio'
+import {
+	StudioRouteSet,
+	StudioRouteBehavior,
+	StudioRouteSetExclusivityGroup,
+} from '@sofie-automation/corelib/dist/dataModel/Studio'
 import classNames from 'classnames'
 import { RouteSetOverrideIcon } from '../../lib/ui/icons/switchboard'
 import Tooltip from 'rc-tooltip'
 import { TOOLTIP_DEFAULT_DELAY } from '../../lib/lib'
-import { UIStudio } from '../../../lib/api/studios'
 
 interface IProps {
 	onStudioRouteSetSwitch?: (
@@ -15,7 +18,9 @@ interface IProps {
 		state: boolean
 	) => void
 	availableRouteSets: [string, StudioRouteSet][]
-	studio: UIStudio
+	studioRouteSetExclusivityGroups: {
+		[id: string]: StudioRouteSetExclusivityGroup
+	}
 }
 
 /**
@@ -38,8 +43,8 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 				<h2 className="mhn mvn">{t('Switchboard')}</h2>
 				{Object.entries<[string, StudioRouteSet][]>(exclusivityGroups).map(([key, routeSets]) => (
 					<div className="switchboard-pop-up-panel__group" key={key}>
-						{props.studio.routeSetExclusivityGroups[key]?.name && (
-							<p className="mhs mbs mtn">{props.studio.routeSetExclusivityGroups[key]?.name}</p>
+						{props.studioRouteSetExclusivityGroups[key]?.name && (
+							<p className="mhs mbs mtn">{props.studioRouteSetExclusivityGroups[key]?.name}</p>
 						)}
 						{routeSets.length === 2 &&
 						routeSets[0][1].behavior === StudioRouteBehavior.ACTIVATE_ONLY &&
@@ -159,7 +164,6 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 						)}
 					</div>
 				))}
-				{/* <AbPoolsDisabling studio={props.studio} onStudioAbPoolDisablingSwitch={props.onStudioAbPoolDisablingSwitch} /> */}
 			</div>
 		</div>
 	)
