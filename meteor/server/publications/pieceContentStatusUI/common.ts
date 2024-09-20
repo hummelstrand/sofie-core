@@ -113,10 +113,10 @@ export async function fetchStudio(studioId: StudioId): Promise<PieceContentStatu
 	return {
 		_id: studio._id,
 		settings: studio.settings,
-		packageContainersWithOverrides: studio.packageContainersWithOverrides,
 		previewContainerIds: studio.previewContainerIds,
 		thumbnailContainerIds: studio.thumbnailContainerIds,
 		mappings: applyAndValidateOverrides(studio.mappingsWithOverrides).obj,
 		routeSets: applyAndValidateOverrides(studio.routeSetsWithOverrides).obj,
+		packageContainers: applyAndValidateOverrides(studio.packageContainersWithOverrides).obj,
 	}
 }
