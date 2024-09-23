@@ -7,14 +7,14 @@ import { RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/I
 import { NrcsIngestDataCache } from '../../collections'
 import {
 	IngestCacheType,
-	IngestDataCacheObj,
-	IngestDataCacheObjRundown,
-	IngestDataCacheObjSegment,
+	NrcsIngestDataCacheObj,
+	NrcsIngestDataCacheObjRundown,
+	NrcsIngestDataCacheObjSegment,
 } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
 import { groupByToMap } from '@sofie-automation/corelib/dist/lib'
 
 export class RundownIngestDataCache {
-	private constructor(private readonly rundownId: RundownId, private readonly documents: IngestDataCacheObj[]) {}
+	private constructor(private readonly rundownId: RundownId, private readonly documents: NrcsIngestDataCacheObj[]) {}
 
 	static async create(rundownId: RundownId): Promise<RundownIngestDataCache> {
 		const docs = await NrcsIngestDataCache.findFetchAsync({ rundownId })
@@ -26,7 +26,7 @@ export class RundownIngestDataCache {
 		const span = profiler.startSpan('ingest.ingestCache.loadCachedRundownData')
 
 		const cachedRundown = this.documents.find(
-			(e): e is IngestDataCacheObjRundown => e.type === IngestCacheType.RUNDOWN
+			(e): e is NrcsIngestDataCacheObjRundown => e.type === IngestCacheType.RUNDOWN
 		)
 		if (!cachedRundown) {
 			span?.end()
@@ -37,7 +37,9 @@ export class RundownIngestDataCache {
 
 		const segmentMap = groupByToMap(this.documents, 'segmentId')
 		for (const objs of segmentMap.values()) {
-			const segmentEntry = objs.find((e): e is IngestDataCacheObjSegment => e.type === IngestCacheType.SEGMENT)
+			const segmentEntry = objs.find(
+				(e): e is NrcsIngestDataCacheObjSegment => e.type === IngestCacheType.SEGMENT
+			)
 			if (segmentEntry) {
 				const ingestSegment = segmentEntry.data
 
@@ -62,7 +64,7 @@ export class RundownIngestDataCache {
 		const cacheEntries = this.documents.filter((d) => d.segmentId && d.segmentId === segmentId)
 
 		const segmentEntries = cacheEntries.filter(
-			(e): e is IngestDataCacheObjSegment => e.type === IngestCacheType.SEGMENT
+			(e): e is NrcsIngestDataCacheObjSegment => e.type === IngestCacheType.SEGMENT
 		)
 		if (segmentEntries.length > 1)
 			logger.warn(

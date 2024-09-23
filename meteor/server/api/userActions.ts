@@ -1235,7 +1235,7 @@ class ServerUserActionAPI
 			userEvent,
 			eventTime,
 			'executeUserChangeOperation',
-			[operationTarget, operation],
+			{ operationTarget, operation },
 			async () => {
 				const access = await RundownPlaylistContentWriteAccess.rundown(this, rundownId)
 				if (!access.rundown) throw new Error(`Rundown "${rundownId}" not found`)
