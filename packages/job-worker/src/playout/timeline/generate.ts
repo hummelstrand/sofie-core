@@ -379,7 +379,7 @@ async function getTimelineRundown(
 						abHelper,
 						blueprint,
 						showStyle,
-						playoutModel,
+						playoutModel.playlist,
 						resolvedPieces,
 						timelineObjs
 					)
