@@ -278,8 +278,8 @@ export function RundownRightHandControls(props: Readonly<IProps>): JSX.Element {
 								{switchboardOpen && (
 									<SwitchboardPopUp
 										availableRouteSets={availableRouteSets}
-										studio={props.studio}
 										onStudioRouteSetSwitch={props.onStudioRouteSetSwitch}
+										studioRouteSetExclusivityGroups={props.studio.routeSetExclusivityGroups}
 									/>
 								)}
 							</VelocityReact.VelocityTransitionGroup>
