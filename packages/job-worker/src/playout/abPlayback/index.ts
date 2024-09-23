@@ -1,5 +1,5 @@
 import { ResolvedPieceInstance } from '@sofie-automation/corelib/dist/dataModel/PieceInstance'
-import { ABSessionAssignments } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import { ABSessionAssignments, DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { OnGenerateTimelineObjExt } from '@sofie-automation/corelib/dist/dataModel/Timeline'
 import { endTrace, sendTrace, startTrace } from '@sofie-automation/corelib/dist/influxdb'
 import { WrappedShowStyleBlueprint } from '../../blueprints/cache'
@@ -13,7 +13,6 @@ import { AbSessionHelper } from './abSessionHelper'
 import { ShowStyleContext } from '../../blueprints/context'
 import { logger } from '../../logging'
 import { ABPlayerDefinition } from '@sofie-automation/blueprints-integration'
-import { PlayoutModel } from '../model/PlayoutModel'
 import { applyAndValidateOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 import { StudioRouteSet } from '@sofie-automation/shared-lib/dist/core/model/StudioRouteSet'
 
@@ -39,12 +38,11 @@ export function applyAbPlaybackForTimeline(
 	abSessionHelper: AbSessionHelper,
 	blueprint: ReadonlyDeep<WrappedShowStyleBlueprint>,
 	showStyle: ReadonlyDeep<ProcessedShowStyleCompound>,
-	playoutModel: PlayoutModel,
+	playlist: ReadonlyDeep<DBRundownPlaylist>,
 	resolvedPieces: ResolvedPieceInstance[],
 	timelineObjects: OnGenerateTimelineObjExt[]
 ): Record<string, ABSessionAssignments> {
 	if (!blueprint.blueprint.getAbResolverConfiguration) return {}
-	const playlist = playoutModel.playlist
 
 	const blueprintContext = new ShowStyleContext(
 		{
