@@ -19,7 +19,7 @@ import type {
 	IOnTakeContext,
 	IOnSetAsNextContext,
 } from '../context'
-import type { IngestAdlib, ExtendedIngestRundown,  IngestRundown } from '../ingest'
+import type { IngestAdlib, ExtendedIngestRundown, IngestRundown } from '../ingest'
 import type { IBlueprintExternalMessageQueueObj } from '../message'
 import type { MigrationStepShowStyle } from '../migrations'
 import type {
@@ -46,7 +46,7 @@ import type { BlueprintConfigCoreConfig, BlueprintManifestBase, BlueprintManifes
 import type { IBlueprintTriggeredActions } from '../triggers'
 import type { ExpectedPackage } from '../package'
 import type { ABResolverConfiguration } from '../abPlayback'
-import { SofieIngestSegment } from '@sofie-automation/blueprints-integration/src/ingest-types'
+import type { SofieIngestSegment } from '../ingest-types'
 
 export type TimelinePersistentState = unknown
 

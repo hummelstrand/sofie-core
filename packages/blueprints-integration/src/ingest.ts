@@ -1,4 +1,4 @@
-import { IngestPart,  IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
+import { IngestPart, IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
 import { IBlueprintRundownDBData } from './documents'
 import { ReadonlyDeep } from 'type-fest'
 import { SofieIngestRundown } from './ingest-types'
