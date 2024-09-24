@@ -19,7 +19,7 @@ import {
 	NrcsIngestRundownChangeDetails,
 } from '@sofie-automation/blueprints-integration'
 import { wrapGenericIngestJob } from './jobWrappers'
-import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
 /**
  * Attempt to remove a rundown, or orphan it

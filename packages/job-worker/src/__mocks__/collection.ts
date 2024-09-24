@@ -9,7 +9,7 @@ import { ExpectedPlayoutItem } from '@sofie-automation/corelib/dist/dataModel/Ex
 import {
 	NrcsIngestDataCacheObj,
 	SofieIngestDataCacheObj,
-} from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+} from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
 import { PeripheralDevice } from '@sofie-automation/corelib/dist/dataModel/PeripheralDevice'

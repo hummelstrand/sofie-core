@@ -23,7 +23,7 @@ import { MongoQuery } from '../../../db'
 import { handleRemovedRundown } from '../../ingestRundownJobs'
 import { MOS } from '@sofie-automation/corelib'
 import { groupByToMap, literal, normalizeArrayToMap, omit } from '@sofie-automation/corelib/dist/lib'
-import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { NrcsIngestCacheType } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { getPartId } from '../../lib'
 import { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
 import { handleSetNextPart } from '../../../playout/setNextJobs'
@@ -458,7 +458,7 @@ describe('Test recieved mos ingest payloads', () => {
 		await context.mockCollections.Parts.remove({ _id: { $in: partsToRemove.map((p) => p._id) } })
 		await context.mockCollections.NrcsIngestDataCache.remove({
 			rundownId: rundown._id,
-			type: IngestCacheType.PART,
+			type: NrcsIngestCacheType.PART,
 			partId: { $in: partsToRemove.map((p) => p._id) },
 		})
 	})

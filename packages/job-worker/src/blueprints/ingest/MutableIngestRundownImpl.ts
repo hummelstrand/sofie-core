@@ -1,19 +1,20 @@
 import type {
-	IngestSegment,
 	MutableIngestRundown,
 	MutableIngestSegment,
 	MutableIngestPart,
+	IngestSegment,
+	SofieIngestSegment,
 } from '@sofie-automation/blueprints-integration'
 import { Complete, clone, omit } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { MutableIngestSegmentImpl } from './MutableIngestSegmentImpl'
-import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
+import { SofieIngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { SofieIngestRundownDataCacheGenerator } from '../../ingest/sofieIngestCache'
 import {
-	IngestRundownWithSource,
-	NrcsIngestDataCacheObj,
-} from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+	SofieIngestDataCacheObj,
+	SofieIngestRundownWithSource,
+} from '@sofie-automation/corelib/dist/dataModel/SofieIngestDataCache'
 import type { ComputedIngestChangeObject } from '../../ingest/runOperation'
 import { RundownSource } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 
@@ -22,14 +23,14 @@ export interface MutableIngestRundownChanges {
 	computedChanges: ComputedIngestChangeObject
 
 	// define what portions of the ingestRundown need saving
-	changedCacheObjects: NrcsIngestDataCacheObj[]
-	allCacheObjectIds: IngestDataCacheObjId[]
+	changedCacheObjects: SofieIngestDataCacheObj[]
+	allCacheObjectIds: SofieIngestDataCacheObjId[]
 }
 
 export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown>
 	implements MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>
 {
-	readonly ingestRundown: Omit<IngestRundownWithSource, 'segments'>
+	readonly ingestRundown: Omit<SofieIngestRundownWithSource, 'segments'>
 	#hasChangesToRundown = false
 	// #segmentOrderChanged = false
 
@@ -37,7 +38,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 	readonly #originalSegmentRanks = new Map<string, number>()
 
-	constructor(ingestRundown: IngestRundownWithSource, isExistingRundown: boolean) {
+	constructor(ingestRundown: SofieIngestRundownWithSource, isExistingRundown: boolean) {
 		this.ingestRundown = omit(ingestRundown, 'segments')
 		this.#segments = ingestRundown.segments
 			.slice() // shallow copy
@@ -185,7 +186,10 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
 		if (segment.externalId === beforeSegmentExternalId) throw new Error('Cannot insert Segment before itself')
 
-		const newSegment = new MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>(segment, true)
+		const newSegment = new MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>(
+			{ ...segment, userEditStates: {}, parts: segment.parts.map((p) => ({ ...p, userEditStates: {} })) },
+			true
+		)
 
 		const oldSegment = this.#segments.find((s) => s.externalId === segment.externalId)
 		if (oldSegment?.originalExternalId) {
@@ -274,12 +278,12 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	/** Note: This is NOT exposed to blueprints */
-	intoIngestRundown(ingestObjectGenerator: RundownIngestDataCacheGenerator): MutableIngestRundownChanges {
-		const ingestSegments: IngestSegment[] = []
-		const changedCacheObjects: NrcsIngestDataCacheObj[] = []
-		const allCacheObjectIds: IngestDataCacheObjId[] = []
+	intoIngestRundown(ingestObjectGenerator: SofieIngestRundownDataCacheGenerator): MutableIngestRundownChanges {
+		const ingestSegments: SofieIngestSegment[] = []
+		const changedCacheObjects: SofieIngestDataCacheObj[] = []
+		const allCacheObjectIds: SofieIngestDataCacheObjId[] = []
 
-		const segmentsToRegenerate: IngestSegment[] = []
+		const segmentsToRegenerate: SofieIngestSegment[] = []
 		const segmentExternalIdChanges: Record<string, string> = {}
 		const segmentsUpdatedRanks: Record<string, number> = {}
 
@@ -301,7 +305,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 				usedPartIds.add(part.externalId)
 			}
 
-			const ingestSegment: Complete<IngestSegment> = {
+			const ingestSegment: Complete<SofieIngestSegment> = {
 				externalId: segment.externalId,
 				rank,
 				name: segment.name,

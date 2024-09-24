@@ -1,13 +1,13 @@
-import type { IngestPart, MutableIngestPart } from '@sofie-automation/blueprints-integration'
+import type { SofieIngestPart, MutableIngestPart } from '@sofie-automation/blueprints-integration'
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 
 export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIngestPart<TPartPayload> {
-	readonly #ingestPart: Omit<IngestPart, 'rank'>
+	readonly #ingestPart: Omit<SofieIngestPart, 'rank'>
 	#hasChanges = false
 
-	constructor(ingestPart: Omit<IngestPart, 'rank'>, hasChanges = false) {
+	constructor(ingestPart: Omit<SofieIngestPart, 'rank'>, hasChanges = false) {
 		this.#ingestPart = ingestPart
 		this.#hasChanges = hasChanges
 	}

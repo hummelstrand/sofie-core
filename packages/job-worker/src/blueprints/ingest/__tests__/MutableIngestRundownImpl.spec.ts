@@ -1,11 +1,12 @@
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import { MutableIngestRundownChanges, MutableIngestRundownImpl } from '../MutableIngestRundownImpl'
-import { RundownIngestDataCacheGenerator } from '../../../ingest/ingestCache'
+import { SofieIngestRundownDataCacheGenerator } from '../../../ingest/sofieIngestCache'
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { getSegmentId } from '../../../ingest/lib'
-import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { SofieIngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { MutableIngestSegmentImpl } from '../MutableIngestSegmentImpl'
 import { IngestRundown, IngestSegment } from '@sofie-automation/blueprints-integration'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
 describe('MutableIngestRundownImpl', () => {
 	function getBasicIngestRundown(): IngestRundown {
@@ -77,10 +78,10 @@ describe('MutableIngestRundownImpl', () => {
 		}
 	}
 
-	const ingestObjectGenerator = new RundownIngestDataCacheGenerator(protectString('rundownId'))
+	const ingestObjectGenerator = new SofieIngestRundownDataCacheGenerator(protectString('rundownId'))
 
-	function createNoChangesObject(ingestRundown: IngestRundown): MutableIngestRundownChanges {
-		const allCacheObjectIds: IngestDataCacheObjId[] = []
+	function createNoChangesObject(ingestRundown: IngestRundownWithSource): MutableIngestRundownChanges {
+		const allCacheObjectIds: SofieIngestDataCacheObjId[] = []
 		for (const segment of ingestRundown.segments) {
 			allCacheObjectIds.push(ingestObjectGenerator.getSegmentObjectId(segment.externalId))
 			for (const part of segment.parts) {

@@ -24,7 +24,7 @@ import {
 } from '@sofie-automation/blueprints-integration'
 import { IngestUpdateOperationFunction } from '../runOperation'
 import { normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
-import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
 /**
  * Update the payload of a mos story

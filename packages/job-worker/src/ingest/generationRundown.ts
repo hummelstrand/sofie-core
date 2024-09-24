@@ -26,7 +26,7 @@ import { BlueprintResultRundown, ExtendedIngestRundown } from '@sofie-automation
 import { wrapTranslatableMessageFromBlueprints } from '@sofie-automation/corelib/dist/TranslatableMessage'
 import { convertRundownToBlueprintSegmentRundown, translateUserEditsFromBlueprint } from '../blueprints/context/lib'
 import { calculateSegmentsAndRemovalsFromIngestData } from './generationSegment'
-import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { SofieIngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/SofieIngestDataCache'
 
 export enum GenerateRundownMode {
 	Create = 'create',
@@ -50,7 +50,7 @@ export interface CommitIngestDataExt extends CommitIngestData {
 export async function updateRundownFromIngestData(
 	context: JobContext,
 	ingestModel: IngestModel,
-	ingestRundown: IngestRundownWithSource,
+	ingestRundown: SofieIngestRundownWithSource,
 	generateMode: GenerateRundownMode
 ): Promise<CommitIngestDataExt | null> {
 	const span = context.startSpan('ingest.rundownInput.updateRundownFromIngestData')
@@ -95,7 +95,7 @@ export interface UpdateRundownInnerResult {
 export async function updateRundownFromIngestDataInner(
 	context: JobContext,
 	ingestModel: IngestModel,
-	ingestRundown: IngestRundownWithSource,
+	ingestRundown: SofieIngestRundownWithSource,
 	generateMode: GenerateRundownMode
 ): Promise<UpdateRundownInnerResult | null> {
 	if (!canRundownBeUpdated(ingestModel.rundown, generateMode === GenerateRundownMode.Create)) return null

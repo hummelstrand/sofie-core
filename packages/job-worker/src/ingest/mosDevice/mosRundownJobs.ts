@@ -13,7 +13,8 @@ import { mosStoryToIngestSegment, parseMosString, updateRanksBasedOnOrder } from
 import { GenerateRundownMode, updateRundownFromIngestData } from '../generationRundown'
 import { IngestUpdateOperationFunction } from '../runOperation'
 import { IngestModel } from '../model/IngestModel'
-import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
+import { SofieIngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/SofieIngestDataCache'
 
 /**
  * Insert or update a mos rundown
@@ -123,7 +124,7 @@ export async function handleMosRundownReadyToAir(
 	context: JobContext,
 	data: MosRundownReadyToAirProps,
 	ingestModel: IngestModel,
-	ingestRundown: IngestRundownWithSource
+	ingestRundown: SofieIngestRundownWithSource
 ): Promise<CommitIngestData | null> {
 	if (!ingestModel.rundown || ingestModel.rundown.airStatus === data.status) return null
 

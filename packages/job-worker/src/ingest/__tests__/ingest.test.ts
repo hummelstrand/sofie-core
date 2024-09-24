@@ -45,7 +45,7 @@ import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { insertQueuedPartWithPieces } from '../../playout/adlibUtils'
 import { UserErrorMessage } from '@sofie-automation/corelib/dist/error'
 import { PlayoutPartInstanceModel } from '../../playout/model/PlayoutPartInstanceModel'
-import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { NrcsIngestCacheType } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { wrapGenericIngestJob, wrapGenericIngestJobWithPrecheck } from '../jobWrappers'
 
 const handleRemovedRundownWrapped = wrapGenericIngestJob(handleRemovedRundown)
@@ -771,7 +771,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			{ $set: { orphaned: SegmentOrphanedReason.DELETED } }
 		)
 		await context.mockCollections.NrcsIngestDataCache.remove({
-			type: IngestCacheType.SEGMENT,
+			type: NrcsIngestCacheType.SEGMENT,
 			rundownId: rundown._id,
 		})
 
@@ -954,7 +954,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 	test('dataSegmentDelete already orphaned segment', async () => {
 		const rundown = await recreateRundown(rundownData1)
 		await context.mockCollections.NrcsIngestDataCache.remove({
-			type: IngestCacheType.SEGMENT,
+			type: NrcsIngestCacheType.SEGMENT,
 			rundownId: rundown._id,
 		})
 

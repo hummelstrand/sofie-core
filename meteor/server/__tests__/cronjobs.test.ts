@@ -19,7 +19,8 @@ import { PieceInstance } from '@sofie-automation/corelib/dist/dataModel/PieceIns
 import { Meteor } from 'meteor/meteor'
 import { EmptyPieceTimelineObjectsBlob } from '@sofie-automation/corelib/dist/dataModel/Piece'
 import {
-	IngestDataCacheObjId,
+	NrcsIngestDataCacheObjId,
+	SofieIngestDataCacheObjId,
 	PartId,
 	PeripheralDeviceId,
 	RundownId,
@@ -174,7 +175,7 @@ describe('cronjobs', () => {
 		testInFiber('Remove NrcsIngestDataCache objects that are not connected to any Rundown', async () => {
 			// Set up a mock rundown, a detached NrcsIngestDataCache object and an object attached to the mock rundown
 			// Detached NrcsIngestDataCache object 0
-			const dataCache0Id = protectString<IngestDataCacheObjId>(getRandomString())
+			const dataCache0Id = protectString<NrcsIngestDataCacheObjId>(getRandomString())
 			await NrcsIngestDataCache.mutableCollection.insertAsync({
 				_id: dataCache0Id,
 				data: {
@@ -190,7 +191,7 @@ describe('cronjobs', () => {
 				type: IngestCacheType.RUNDOWN,
 			})
 			// Attached NrcsIngestDataCache object 1
-			const dataCache1Id = protectString<IngestDataCacheObjId>(getRandomString())
+			const dataCache1Id = protectString<NrcsIngestDataCacheObjId>(getRandomString())
 			await NrcsIngestDataCache.mutableCollection.insertAsync({
 				_id: dataCache1Id,
 				data: {
@@ -216,7 +217,7 @@ describe('cronjobs', () => {
 		testInFiber('Remove SofieIngestDataCache objects that are not connected to any Rundown', async () => {
 			// Set up a mock rundown, a detached SofieIngestDataCache object and an object attached to the mock rundown
 			// Detached SofieIngestDataCache object 0
-			const dataCache0Id = protectString<IngestDataCacheObjId>(getRandomString())
+			const dataCache0Id = protectString<SofieIngestDataCacheObjId>(getRandomString())
 			await SofieIngestDataCache.mutableCollection.insertAsync({
 				_id: dataCache0Id,
 				data: {
@@ -232,7 +233,7 @@ describe('cronjobs', () => {
 				type: IngestCacheType.RUNDOWN,
 			})
 			// Attached SofieIngestDataCache object 1
-			const dataCache1Id = protectString<IngestDataCacheObjId>(getRandomString())
+			const dataCache1Id = protectString<SofieIngestDataCacheObjId>(getRandomString())
 			await SofieIngestDataCache.mutableCollection.insertAsync({
 				_id: dataCache1Id,
 				data: {

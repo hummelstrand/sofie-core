@@ -8,7 +8,8 @@ import {
 } from './runOperation'
 import { CommitIngestData } from './lock'
 import { IngestModel } from './model/IngestModel'
-import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
+import { SofieIngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/SofieIngestDataCache'
 
 /**
  * Wrap a mos specific ingest job to be an ingest update operation, with a provided function which runs a precheck and returns the final ingestRundown mutator
@@ -71,7 +72,7 @@ export function wrapCustomIngestJob<TData extends IngestPropsBase>(
 		context: JobContext,
 		data: TData,
 		ingestModel: IngestModel,
-		ingestRundown: IngestRundownWithSource
+		ingestRundown: SofieIngestRundownWithSource
 	) => Promise<CommitIngestData | null>
 ): (context: JobContext, data: TData) => Promise<void> {
 	return async (context, data) => {

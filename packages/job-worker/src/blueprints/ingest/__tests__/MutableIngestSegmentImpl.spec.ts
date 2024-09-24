@@ -1,6 +1,6 @@
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import { MutableIngestSegmentChanges, MutableIngestSegmentImpl } from '../MutableIngestSegmentImpl'
-import { RundownIngestDataCacheGenerator } from '../../../ingest/ingestCache'
+import { SofieIngestRundownDataCacheGenerator } from '../../../ingest/sofieIngestCache'
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { getSegmentId } from '../../../ingest/lib'
 import { MutableIngestPartImpl } from '../MutableIngestPartImpl'
@@ -53,7 +53,7 @@ describe('MutableIngestSegmentImpl', () => {
 		}
 	}
 
-	const ingestObjectGenerator = new RundownIngestDataCacheGenerator(protectString('rundownId'))
+	const ingestObjectGenerator = new SofieIngestRundownDataCacheGenerator(protectString('rundownId'))
 
 	function createNoChangesObject(ingestSegment: IngestSegment): MutableIngestSegmentChanges {
 		return {

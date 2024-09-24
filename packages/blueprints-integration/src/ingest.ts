@@ -1,6 +1,7 @@
-import { IngestPart, IngestRundown, IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
+import { IngestPart,  IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
 import { IBlueprintRundownDBData } from './documents'
 import { ReadonlyDeep } from 'type-fest'
+import { SofieIngestRundown } from './ingest-types'
 
 export {
 	IngestPart,
@@ -11,7 +12,7 @@ export {
 } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
 
 /** The IngesteRundown is extended with data from Core */
-export interface ExtendedIngestRundown extends IngestRundown {
+export interface ExtendedIngestRundown extends SofieIngestRundown {
 	coreData: IBlueprintRundownDBData | undefined
 }
 
