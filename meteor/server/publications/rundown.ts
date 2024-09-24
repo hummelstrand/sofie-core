@@ -29,7 +29,7 @@ import {
 	Segments,
 } from '../collections'
 import { DBRundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
-import { NrcsIngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { NrcsIngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import {
 	PartId,

@@ -54,7 +54,7 @@ import {
 	Segments,
 	SofieIngestDataCache,
 } from '../collections'
-import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { NrcsIngestCacheType } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { JSONBlobStringify } from '@sofie-automation/shared-lib/dist/lib/JSONBlob'
 import {
 	DefaultEnvironment,
@@ -63,6 +63,7 @@ import {
 } from '../../__mocks__/helpers/database'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { Settings } from '../../lib/Settings'
+import { SofieIngestCacheType } from '@sofie-automation/corelib/dist/dataModel/SofieIngestDataCache'
 
 describe('cronjobs', () => {
 	let env: DefaultEnvironment
@@ -188,7 +189,7 @@ describe('cronjobs', () => {
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// this one is attached to rundown0
 				rundownId: getRandomId(),
-				type: IngestCacheType.RUNDOWN,
+				type: NrcsIngestCacheType.RUNDOWN,
 			})
 			// Attached NrcsIngestDataCache object 1
 			const dataCache1Id = protectString<NrcsIngestDataCacheObjId>(getRandomString())
@@ -204,7 +205,7 @@ describe('cronjobs', () => {
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// just some random ID
 				rundownId: rundownId,
-				type: IngestCacheType.RUNDOWN,
+				type: NrcsIngestCacheType.RUNDOWN,
 			})
 
 			await runCronjobs()
@@ -226,11 +227,12 @@ describe('cronjobs', () => {
 					segments: [],
 					type: '',
 					rundownSource: {} as any,
+					userEditStates: {},
 				},
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// this one is attached to rundown0
 				rundownId: getRandomId(),
-				type: IngestCacheType.RUNDOWN,
+				type: SofieIngestCacheType.RUNDOWN,
 			})
 			// Attached SofieIngestDataCache object 1
 			const dataCache1Id = protectString<SofieIngestDataCacheObjId>(getRandomString())
@@ -242,11 +244,12 @@ describe('cronjobs', () => {
 					segments: [],
 					type: '',
 					rundownSource: {} as any,
+					userEditStates: {},
 				},
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// just some random ID
 				rundownId: rundownId,
-				type: IngestCacheType.RUNDOWN,
+				type: SofieIngestCacheType.RUNDOWN,
 			})
 
 			await runCronjobs()
