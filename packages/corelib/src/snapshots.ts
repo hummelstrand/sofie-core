@@ -22,7 +22,7 @@ export interface CoreRundownPlaylistSnapshot {
 	playlist: DBRundownPlaylist
 	rundowns: Array<DBRundown>
 	ingestData: Array<NrcsIngestDataCacheObj>
-	sofieIngestData: Array<NrcsIngestDataCacheObj> | undefined // Added in 1.51
+	sofieIngestData: Array<NrcsIngestDataCacheObj> | undefined // Added in 1.52
 	baselineObjs: Array<RundownBaselineObj>
 	baselineAdlibs: Array<RundownBaselineAdLibItem>
 	segments: Array<DBSegment>
