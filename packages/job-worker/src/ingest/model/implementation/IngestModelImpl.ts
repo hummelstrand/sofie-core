@@ -21,7 +21,6 @@ import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { Piece, PieceTimelineObjectsBlob } from '@sofie-automation/corelib/dist/dataModel/Piece'
 import {
 	CoreUserEditingDefinition,
-	CoreUserEditingDefinitionAction,
 	DBRundown,
 	RundownOrphanedReason,
 	RundownSource,
@@ -428,7 +427,7 @@ export class IngestModelImpl implements IngestModel, DatabasePersistedModel {
 		showStyleBlueprint: ReadonlyDeep<WrappedShowStyleBlueprint>,
 		source: RundownSource,
 		rundownNotes: RundownNote[],
-		userEdits: CoreUserEditingDefinition[] | undefined
+		userEditOperations: CoreUserEditingDefinition[] | undefined
 	): ReadonlyDeep<DBRundown> {
 		const newRundown = literal<Complete<DBRundown>>({
 			...clone(rundownData as Complete<IBlueprintRundown>),
@@ -439,7 +438,7 @@ export class IngestModelImpl implements IngestModel, DatabasePersistedModel {
 			studioId: this.context.studio._id,
 			showStyleVariantId: showStyleVariant._id,
 			showStyleBaseId: showStyleBase._id,
-			userEdits: clone(userEdits) as CoreUserEditingDefinitionAction[] | undefined,
+			userEditOperations: clone(userEditOperations),
 			orphaned: undefined,
 
 			importVersions: {

@@ -40,7 +40,7 @@ export interface IBlueprintPiece<TPrivateData = unknown, TPublicData = unknown>
 	/**
 	 * User editing definitions for this piece
 	 */
-	userEdits?: UserEditingDefinition[]
+	userEditOperations?: UserEditingDefinition[]
 }
 export interface IBlueprintPieceDB<TPrivateData = unknown, TPublicData = unknown>
 	extends IBlueprintPiece<TPrivateData, TPublicData> {

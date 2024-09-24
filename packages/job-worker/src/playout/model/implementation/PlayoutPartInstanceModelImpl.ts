@@ -29,7 +29,7 @@ import { EmptyPieceTimelineObjectsBlob } from '@sofie-automation/corelib/dist/da
 import _ = require('underscore')
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { IBlueprintMutatablePartSampleKeys } from '../../../blueprints/context/lib'
-import { CoreUserEditingDefinitionAction } from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import { CoreUserEditingDefinition } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 
 interface PlayoutPieceInstanceModelSnapshotImpl {
 	PieceInstance: PieceInstance
@@ -504,7 +504,10 @@ export class PlayoutPartInstanceModelImpl implements PlayoutPartInstanceModel {
 		this.#setPartInstanceValue('previousPartEndState', previousPartEndState)
 	}
 
-	updatePartProps(props: Partial<IBlueprintMutatablePart>): boolean {
+	updatePartProps(
+		props: Partial<IBlueprintMutatablePart>,
+		userEditOperations: CoreUserEditingDefinition[] | undefined
+	): boolean {
 		// Future: this could do some better validation
 
 		// filter the submission to the allowed ones
@@ -515,7 +518,8 @@ export class PlayoutPartInstanceModelImpl implements PlayoutPartInstanceModel {
 			'part',
 			{
 				...this.partInstanceImpl.part,
-				...(trimmedProps as CoreUserEditingDefinitionAction[] | undefined),
+				...trimmedProps,
+				userEditOperations: userEditOperations ?? this.partInstanceImpl.part.userEditOperations,
 			},
 			true
 		)

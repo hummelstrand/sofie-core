@@ -22,7 +22,7 @@ import { wrapTranslatableMessageFromBlueprints } from '@sofie-automation/corelib
 import { updateExpectedPackagesForPartModel } from './expectedPackages'
 import { IngestReplacePartType, IngestSegmentModel } from './model/IngestSegmentModel'
 import { ReadonlyDeep } from 'type-fest'
-import { CoreUserEditingDefinitionAction, Rundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import { Rundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { WrappedShowStyleBlueprint } from '../blueprints/cache'
 import { translateUserEditsFromBlueprint } from '../blueprints/context/lib'
 
@@ -287,10 +287,9 @@ function updateModelWithGeneratedSegment(
 			externalId: ingestSegment.externalId,
 			_rank: ingestSegment.rank,
 			notes: segmentNotes,
-			userEdits:
-				(translateUserEditsFromBlueprint(blueprintSegment.segment.userEdits, [
-					blueprintId,
-				]) as CoreUserEditingDefinitionAction[]) || undefined,
+			userEditOperations: translateUserEditsFromBlueprint(blueprintSegment.segment.userEditOperations, [
+				blueprintId,
+			]),
 		})
 	)
 
@@ -373,10 +372,7 @@ function updateModelWithGeneratedPart(
 					]),
 			  }
 			: undefined,
-		userEdits:
-			(translateUserEditsFromBlueprint(blueprintPart.part.userEdits, [
-				blueprintId,
-			]) as CoreUserEditingDefinitionAction[]) || undefined,
+		userEditOperations: translateUserEditsFromBlueprint(blueprintPart.part.userEditOperations, [blueprintId]),
 	})
 
 	// Update pieces

@@ -272,7 +272,7 @@ export async function regenerateRundownAndBaselineFromIngestData(
 		showStyleBlueprint,
 		rundownSource,
 		rundownNotes,
-		translateUserEditsFromBlueprint(rundownRes.rundown.userEdits, translationNamespaces)
+		translateUserEditsFromBlueprint(rundownRes.rundown.userEditOperations, translationNamespaces)
 	)
 
 	// get the rundown separetely to ensure it exists now

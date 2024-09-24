@@ -24,8 +24,8 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 		return this.#ingestPart.payload
 	}
 
-	get userEditStates(): Record<string, boolean> | undefined {
-		return this.#ingestPart.userEditStates
+	get userEditStates(): Record<string, boolean> {
+		return this.#ingestPart.userEditStates ?? {}
 	}
 
 	setName(name: string): void {
@@ -53,16 +53,12 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 		}
 	}
 
-	#setUserEditState(key: string, protect: boolean): boolean {
-		if (this.#ingestPart.userEditStates !== undefined) {
-			this.#ingestPart.userEditStates[key] = protect
+	setUserEditState(key: string, value: boolean): void {
+		if (!this.#ingestPart.userEditStates) this.#ingestPart.userEditStates = {}
+		if (this.#hasChanges || this.#ingestPart.userEditStates[key] !== value) {
+			this.#ingestPart.userEditStates[key] = value
 			this.#hasChanges = true
 		}
-		return true
-	}
-
-	setUserEditState(key: string, protect: boolean): boolean {
-		return this.#setUserEditState(key, protect)
 	}
 
 	/**

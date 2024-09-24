@@ -6,6 +6,7 @@ import { PartNote } from '@sofie-automation/corelib/dist/dataModel/Notes'
 import { IBlueprintMutatablePart, PieceLifespan, Time } from '@sofie-automation/blueprints-integration'
 import { PartCalculatedTimings } from '@sofie-automation/corelib/dist/playout/timings'
 import { PlayoutPieceInstanceModel } from './PlayoutPieceInstanceModel'
+import { CoreUserEditingDefinition } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 
 /**
  * Token returned when making a backup copy of a PlayoutPartInstanceModel
@@ -207,7 +208,10 @@ export interface PlayoutPartInstanceModel {
 	 * @param props New properties for the Part being wrapped
 	 * @returns True if any valid properties were provided
 	 */
-	updatePartProps(props: Partial<IBlueprintMutatablePart>): boolean
+	updatePartProps(
+		props: Partial<IBlueprintMutatablePart>,
+		userEditOperations: CoreUserEditingDefinition[] | undefined
+	): boolean
 
 	/**
 	 * Ensure that this PartInstance is setup correctly for being in the AdlibTesting Segment

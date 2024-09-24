@@ -22,6 +22,7 @@ import {
 	IBlueprintPieceObjectsSampleKeys,
 	convertPieceInstanceToBlueprints,
 	convertPartInstanceToBlueprints,
+	translateUserEditsFromBlueprint,
 } from './lib'
 import { DBRundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { DBStudio } from '@sofie-automation/corelib/dist/dataModel/Studio'
@@ -173,7 +174,11 @@ export class SyncIngestUpdateToPartInstanceContext
 			}
 		}
 
-		if (!this.partInstance.updatePartProps(updatePart)) {
+		const userEditOperations =
+			updatePart.userEditOperations &&
+			translateUserEditsFromBlueprint(updatePart.userEditOperations, [this.showStyleCompound.blueprintId])
+
+		if (!this.partInstance.updatePartProps(updatePart, userEditOperations)) {
 			throw new Error(`Cannot update PartInstance. Some valid properties must be defined`)
 		}
 

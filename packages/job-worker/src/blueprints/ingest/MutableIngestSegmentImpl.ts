@@ -67,8 +67,8 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		return this.#ingestSegment.payload
 	}
 
-	get userEditStates(): Record<string, boolean> | undefined {
-		return this.#ingestSegment.userEditStates
+	get userEditStates(): Record<string, boolean> {
+		return this.#ingestSegment.userEditStates ?? {}
 	}
 
 	getPart(partExternalId: string): MutableIngestPart<TPartPayload> | undefined {
@@ -163,19 +163,6 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		this.#segmentHasChanges = true
 	}
 
-	#setUserEditState(key: string, protect: boolean): boolean {
-		console.log('setProtectFromNrcsUpdates', protect)
-		if (this.#ingestSegment.userEditStates !== undefined) {
-			this.#ingestSegment.userEditStates[key] = protect
-			this.#segmentHasChanges = true
-		}
-		return true
-	}
-
-	setUserEditState(key: string, protect: boolean): boolean {
-		return this.#setUserEditState(key, protect)
-	}
-
 	/**
 	 * Note: This is not exposed to blueprints
 	 */
@@ -214,23 +201,12 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		}
 	}
 
-	/**
-	 * getUserEditState
-	 *
-	 */
-	getPartUserEditState(partExternalId: string, key: string): boolean {
-		const part = this.#parts.find((p) => p.externalId === partExternalId)
-		if (!part) throw new Error(`Part "${partExternalId}" not found`)
-		return part.userEditStates?.[key] ?? false
-	}
-
-	/**
-	 * setUserEditState
-	 */
-	setPartUserEditState(partExternalId: string, key: string, protect: boolean): void {
-		const part = this.#parts.find((p) => p.externalId === partExternalId)
-		if (!part) throw new Error(`Part "${partExternalId}" not found`)
-		part.setUserEditState(key, protect)
+	setUserEditState(key: string, value: boolean): void {
+		if (!this.#ingestSegment.userEditStates) this.#ingestSegment.userEditStates = {}
+		if (this.#segmentHasChanges || this.#ingestSegment.userEditStates[key] !== value) {
+			this.#ingestSegment.userEditStates[key] = value
+			this.#segmentHasChanges = true
+		}
 	}
 
 	intoChangesInfo(generator: RundownIngestDataCacheGenerator): MutableIngestSegmentChanges {

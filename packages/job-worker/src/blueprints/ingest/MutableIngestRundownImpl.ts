@@ -70,6 +70,10 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		return this.ingestRundown.payload
 	}
 
+	get userEditStates(): Record<string, boolean> {
+		return this.ingestRundown.userEditStates ?? {}
+	}
+
 	/**
 	 * Internal method to propogate the rundown source
 	 */
@@ -261,21 +265,12 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		// this.#segmentOrderChanged = true
 	}
 
-	/**
-	 * getUserEditState
-	 */
-	getSegmentUserEditState(segmentExternalId: string, key: string): boolean {
-		const segment = this.#segments.find((s) => s.externalId === segmentExternalId)
-		if (!segment) throw new Error(`Segment "${segmentExternalId}" not found`)
-		return segment.userEditStates?.[key] ?? false
-	}
-	/**
-	 * setUserEditState
-	 */
-	setSegmentUserEditState(segmentExternalId: string, key: string, protect: boolean): void {
-		const segment = this.#segments.find((s) => s.externalId === segmentExternalId)
-		if (!segment) throw new Error(`Segment "${segmentExternalId}" not found`)
-		segment.setUserEditState(key, protect)
+	setUserEditState(key: string, value: boolean): void {
+		if (!this.ingestRundown.userEditStates) this.ingestRundown.userEditStates = {}
+		if (this.#hasChangesToRundown || this.ingestRundown.userEditStates[key] !== value) {
+			this.ingestRundown.userEditStates[key] = value
+			this.#hasChangesToRundown = true
+		}
 	}
 
 	/** Note: This is NOT exposed to blueprints */

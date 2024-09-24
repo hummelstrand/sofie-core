@@ -37,7 +37,7 @@ export interface IBlueprintRundown<TPrivateData = unknown, TPublicData = unknown
 	/**
 	 * User editing definitions for this rundown
 	 */
-	userEdits?: UserEditingDefinition[]
+	userEditOperations?: UserEditingDefinition[]
 }
 /** The Rundown sent from Core */
 

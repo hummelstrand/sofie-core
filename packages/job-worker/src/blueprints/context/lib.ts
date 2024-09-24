@@ -96,7 +96,7 @@ export const IBlueprintPieceObjectsSampleKeys = allKeysOfObject<IBlueprintPiece>
 	notInVision: true,
 	abSessions: true,
 	userEditStates: true,
-	userEdits: true,
+	userEditOperations: true,
 })
 
 // Compile a list of the keys which are allowed to be set
@@ -121,7 +121,7 @@ export const IBlueprintMutatablePartSampleKeys = allKeysOfObject<IBlueprintMutat
 	identifier: true,
 	hackListenToMediaObjectUpdates: true,
 	userEditStates: true,
-	userEdits: true,
+	userEditOperations: true,
 })
 
 /*
@@ -241,7 +241,7 @@ export function convertPieceToBlueprints(piece: ReadonlyDeep<PieceInstancePiece>
 		extendOnHold: piece.extendOnHold,
 		notInVision: piece.notInVision,
 		userEditStates: piece.userEditStates,
-		userEdits: translateUserEditsToBlueprint(piece.userEdits),
+		userEditOperations: translateUserEditsToBlueprint(piece.userEditOperations),
 	}
 
 	return obj
@@ -284,7 +284,7 @@ export function convertPartToBlueprints(part: ReadonlyDeep<DBPart>): IBlueprintP
 			part.hackListenToMediaObjectUpdates
 		),
 		userEditStates: part.userEditStates,
-		userEdits: translateUserEditsToBlueprint(part.userEdits),
+		userEditOperations: translateUserEditsToBlueprint(part.userEditOperations),
 	}
 
 	return obj
@@ -353,7 +353,7 @@ export function convertSegmentToBlueprints(segment: ReadonlyDeep<DBSegment>): IB
 		showShelf: segment.showShelf,
 		segmentTiming: segment.segmentTiming,
 		userEditStates: segment.userEditStates,
-		userEdits: translateUserEditsToBlueprint(segment.userEdits),
+		userEditOperations: translateUserEditsToBlueprint(segment.userEditOperations),
 	}
 
 	return obj
@@ -379,7 +379,7 @@ export function convertRundownToBlueprints(rundown: ReadonlyDeep<DBRundown>): IB
 		playlistId: unprotectString(rundown.playlistId),
 		airStatus: rundown.airStatus,
 		userEditStates: rundown.userEditStates,
-		userEdits: translateUserEditsToBlueprint(rundown.userEdits),
+		userEditOperations: translateUserEditsToBlueprint(rundown.userEditOperations),
 	}
 
 	return obj

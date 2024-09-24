@@ -22,6 +22,7 @@ import {
 	convertPieceToBlueprints,
 	convertResolvedPieceInstanceToBlueprints,
 	getMediaObjectDuration,
+	translateUserEditsFromBlueprint,
 } from '../lib'
 import { getResolvedPiecesForCurrentPartInstance } from '../../../playout/resolvedPieces'
 import { ReadonlyDeep } from 'type-fest'
@@ -339,7 +340,11 @@ export class PartAndPieceInstanceActionService {
 			throw new Error('PartInstance could not be found')
 		}
 
-		if (!partInstance.updatePartProps(props)) {
+		const userEditOperations =
+			props.userEditOperations &&
+			translateUserEditsFromBlueprint(props.userEditOperations, [this.showStyleCompound.blueprintId])
+
+		if (!partInstance.updatePartProps(props, userEditOperations)) {
 			throw new Error('Some valid properties must be defined')
 		}
 
@@ -386,7 +391,7 @@ export class PartAndPieceInstanceActionService {
 			floated: false,
 			expectedDurationWithTransition: undefined, // Filled in later
 			userEditStates: {},
-			userEdits: [],
+			userEditOperations: [],
 		}
 
 		const pieces = postProcessPieces(

@@ -100,7 +100,7 @@ export interface Rundown {
 	/**
 	 * User editing definitions for this rundown
 	 */
-	userEdits?: CoreUserEditingDefinitionAction[]
+	userEditOperations?: CoreUserEditingDefinition[]
 }
 
 /** A description of where a Rundown originated from */
