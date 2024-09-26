@@ -59,6 +59,7 @@ import {
 	UserEditingDefinitionForm,
 	UserEditingType,
 } from '@sofie-automation/blueprints-integration/dist/userEditing'
+import type { PlayoutMutatablePart } from '../../playout/model/PlayoutPartInstanceModel'
 
 /**
  * Convert an object to have all the values of all keys (including optionals) be 'true'
@@ -564,4 +565,24 @@ export function translateUserEditsFromBlueprint(
 			}
 		})
 	)
+}
+
+export function convertPartialBlueprintMutablePartToCore(
+	updatePart: Partial<IBlueprintMutatablePart>,
+	blueprintId: BlueprintId
+): Partial<PlayoutMutatablePart> {
+	const playoutUpdatePart: Partial<PlayoutMutatablePart> = {
+		...updatePart,
+		userEditOperations: undefined,
+	}
+
+	if ('userEditOperations' in updatePart) {
+		playoutUpdatePart.userEditOperations = translateUserEditsFromBlueprint(updatePart.userEditOperations, [
+			blueprintId,
+		])
+	} else {
+		delete playoutUpdatePart.userEditOperations
+	}
+
+	return playoutUpdatePart
 }

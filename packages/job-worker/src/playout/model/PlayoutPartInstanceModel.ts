@@ -16,6 +16,10 @@ export interface PlayoutPartInstanceModelSnapshot {
 	__isPlayoutPartInstanceModelBackup: true
 }
 
+export interface PlayoutMutatablePart extends Omit<IBlueprintMutatablePart, 'userEditOperations'> {
+	userEditOperations?: CoreUserEditingDefinition[]
+}
+
 export interface PlayoutPartInstanceModel {
 	/**
 	 * The PartInstance properties
@@ -208,10 +212,7 @@ export interface PlayoutPartInstanceModel {
 	 * @param props New properties for the Part being wrapped
 	 * @returns True if any valid properties were provided
 	 */
-	updatePartProps(
-		props: Partial<IBlueprintMutatablePart>,
-		userEditOperations: CoreUserEditingDefinition[] | undefined
-	): boolean
+	updatePartProps(props: Partial<PlayoutMutatablePart>): boolean
 
 	/**
 	 * Ensure that this PartInstance is setup correctly for being in the AdlibTesting Segment

@@ -18,11 +18,11 @@ import {
 	IBlueprintPieceObjectsSampleKeys,
 	convertPartInstanceToBlueprints,
 	convertPartToBlueprints,
+	convertPartialBlueprintMutablePartToCore,
 	convertPieceInstanceToBlueprints,
 	convertPieceToBlueprints,
 	convertResolvedPieceInstanceToBlueprints,
 	getMediaObjectDuration,
-	translateUserEditsFromBlueprint,
 } from '../lib'
 import { getResolvedPiecesForCurrentPartInstance } from '../../../playout/resolvedPieces'
 import { ReadonlyDeep } from 'type-fest'
@@ -340,11 +340,9 @@ export class PartAndPieceInstanceActionService {
 			throw new Error('PartInstance could not be found')
 		}
 
-		const userEditOperations =
-			props.userEditOperations &&
-			translateUserEditsFromBlueprint(props.userEditOperations, [this.showStyleCompound.blueprintId])
+		const playoutUpdatePart = convertPartialBlueprintMutablePartToCore(props, this.showStyleCompound.blueprintId)
 
-		if (!partInstance.updatePartProps(props, userEditOperations)) {
+		if (!partInstance.updatePartProps(playoutUpdatePart)) {
 			throw new Error('Some valid properties must be defined')
 		}
 

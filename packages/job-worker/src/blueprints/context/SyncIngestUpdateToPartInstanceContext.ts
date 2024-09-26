@@ -2,7 +2,7 @@ import { PieceInstanceId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { PieceInstance } from '@sofie-automation/corelib/dist/dataModel/PieceInstance'
 import { normalizeArrayToMap, omit } from '@sofie-automation/corelib/dist/lib'
 import { protectString, protectStringArray, unprotectStringArray } from '@sofie-automation/corelib/dist/protectedString'
-import { PlayoutPartInstanceModel } from '../../playout/model/PlayoutPartInstanceModel'
+import { PlayoutMutatablePart, PlayoutPartInstanceModel } from '../../playout/model/PlayoutPartInstanceModel'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { ContextInfo } from './CommonContext'
@@ -23,6 +23,7 @@ import {
 	convertPieceInstanceToBlueprints,
 	convertPartInstanceToBlueprints,
 	translateUserEditsFromBlueprint,
+	convertPartialBlueprintMutablePartToCore,
 } from './lib'
 import { DBRundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { DBStudio } from '@sofie-automation/corelib/dist/dataModel/Studio'
@@ -174,11 +175,12 @@ export class SyncIngestUpdateToPartInstanceContext
 			}
 		}
 
-		const userEditOperations =
-			updatePart.userEditOperations &&
-			translateUserEditsFromBlueprint(updatePart.userEditOperations, [this.showStyleCompound.blueprintId])
+		const playoutUpdatePart = convertPartialBlueprintMutablePartToCore(
+			updatePart,
+			this.showStyleCompound.blueprintId
+		)
 
-		if (!this.partInstance.updatePartProps(updatePart, userEditOperations)) {
+		if (!this.partInstance.updatePartProps(playoutUpdatePart)) {
 			throw new Error(`Cannot update PartInstance. Some valid properties must be defined`)
 		}
 
