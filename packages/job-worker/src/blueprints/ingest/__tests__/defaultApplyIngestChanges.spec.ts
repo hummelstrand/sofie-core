@@ -1,3 +1,4 @@
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { MutableIngestRundownImpl } from '../MutableIngestRundownImpl'
 import { defaultApplyIngestChanges } from '../defaultApplyIngestChanges'
 import {
@@ -13,13 +14,15 @@ import {
 	IngestChangeType,
 } from '@sofie-automation/blueprints-integration'
 import { clone } from '@sofie-automation/corelib/dist/lib'
+import { toSofieIngestRundown } from './util'
 
 describe('defaultApplyIngestChanges', () => {
-	function createBasicIngestRundown(): IngestRundown {
+	function createBasicIngestRundown(): IngestRundownWithSource {
 		return {
 			externalId: 'rd0',
 			name: 'my rundown',
 			type: 'mock',
+			rundownSource: { type: 'http' },
 			payload: {
 				myData: 'data',
 			},
@@ -45,11 +48,12 @@ describe('defaultApplyIngestChanges', () => {
 			],
 		}
 	}
-	function createMediumIngestRundown(): IngestRundown {
+	function createMediumIngestRundown(): IngestRundownWithSource {
 		return {
 			externalId: 'rd0',
 			name: 'my rundown',
 			type: 'mock',
+			rundownSource: { type: 'http' },
 			payload: {
 				myData: 'data',
 			},
@@ -135,11 +139,12 @@ describe('defaultApplyIngestChanges', () => {
 			],
 		}
 	}
-	function createIngestRundownWithManySegments(): IngestRundown {
+	function createIngestRundownWithManySegments(): IngestRundownWithSource {
 		return {
 			externalId: 'rd0',
 			name: 'my rundown',
 			type: 'mock',
+			rundownSource: { type: 'http' },
 			payload: {
 				myData: 'data',
 			},
@@ -196,8 +201,8 @@ describe('defaultApplyIngestChanges', () => {
 	/**
 	 * This creates a MutableIngestRundownImpl from an IngestRundown, and wraps all methods to record the mutation calls made to the rundown and its contents
 	 */
-	function createMutableIngestRundown(nrcsRundown: IngestRundown) {
-		const mutableIngestRundown = new MutableIngestRundownImpl(clone(nrcsRundown), true)
+	function createMutableIngestRundown(nrcsRundown: IngestRundownWithSource) {
+		const mutableIngestRundown = new MutableIngestRundownImpl(toSofieIngestRundown(nrcsRundown), true)
 
 		const mockCalls: Array<{ target: string; name: string; args: any[] }> = []
 

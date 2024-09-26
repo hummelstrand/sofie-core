@@ -7,9 +7,10 @@ import { SofieIngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataMo
 import { MutableIngestSegmentImpl } from '../MutableIngestSegmentImpl'
 import { IngestRundown, IngestSegment } from '@sofie-automation/blueprints-integration'
 import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
+import { toSofieIngestRundown, toSofieIngestSegment } from './util'
 
 describe('MutableIngestRundownImpl', () => {
-	function getBasicIngestRundown(): IngestRundown {
+	function getBasicIngestRundown(): IngestRundownWithSource {
 		return {
 			externalId: 'rundown0',
 			type: 'mock',
@@ -18,6 +19,7 @@ describe('MutableIngestRundownImpl', () => {
 				val: 'some-val',
 				second: 5,
 			},
+			rundownSource: { type: 'http' },
 			segments: [
 				{
 					externalId: 'seg0',
@@ -92,7 +94,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		return {
 			computedChanges: {
-				ingestRundown,
+				ingestRundown: toSofieIngestRundown(ingestRundown),
 
 				segmentsToRemove: [],
 				segmentsUpdatedRanks: {},
@@ -105,12 +107,14 @@ describe('MutableIngestRundownImpl', () => {
 			allCacheObjectIds: allCacheObjectIds,
 		}
 	}
+
 	function addChangedSegments(
 		changes: MutableIngestRundownChanges,
 		_ingestRundown: IngestRundown,
 		...ingestSegments: IngestSegment[]
 	): void {
-		for (const ingestSegment of ingestSegments) {
+		for (const ingestSegment0 of ingestSegments) {
+			const ingestSegment = toSofieIngestSegment(ingestSegment0)
 			const segmentId = getSegmentId(ingestObjectGenerator.rundownId, ingestSegment.externalId)
 
 			changes.computedChanges.segmentsToRegenerate.push(ingestSegment)
@@ -127,7 +131,8 @@ describe('MutableIngestRundownImpl', () => {
 		_ingestRundown: IngestRundown,
 		...ingestSegments: IngestSegment[]
 	): void {
-		for (const ingestSegment of ingestSegments) {
+		for (const ingestSegment0 of ingestSegments) {
+			const ingestSegment = toSofieIngestSegment(ingestSegment0)
 			changes.changedCacheObjects.push(ingestObjectGenerator.generateSegmentObject(ingestSegment))
 		}
 	}
@@ -155,7 +160,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	test('create basic', () => {
 		const ingestRundown = getBasicIngestRundown()
-		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+		const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 		// compare properties
 		expect(mutableRundown.externalId).toBe(ingestRundown.externalId)
@@ -169,7 +174,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	test('create basic with changes', () => {
 		const ingestRundown = getBasicIngestRundown()
-		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), false)
+		const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), false)
 
 		// compare properties
 		expect(mutableRundown.externalId).toBe(ingestRundown.externalId)
@@ -189,7 +194,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	test('set name', () => {
 		const ingestRundown = getBasicIngestRundown()
-		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+		const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 		// compare properties
 		expect(mutableRundown.name).toBe(ingestRundown.name)
@@ -207,7 +212,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	test('replace payload with change', () => {
 		const ingestRundown = getBasicIngestRundown()
-		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+		const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 		// compare properties
 		expect(mutableRundown.payload).toEqual(ingestRundown.payload)
@@ -226,7 +231,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	test('replace payload with no change', () => {
 		const ingestRundown = getBasicIngestRundown()
-		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+		const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 		// compare properties
 		expect(mutableRundown.payload).toEqual(ingestRundown.payload)
@@ -241,7 +246,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	test('set payload property change', () => {
 		const ingestRundown = getBasicIngestRundown()
-		const mutableRundown = new MutableIngestRundownImpl<any>(clone(ingestRundown), true)
+		const mutableRundown = new MutableIngestRundownImpl<any>(toSofieIngestRundown(clone(ingestRundown)), true)
 
 		// compare properties
 		expect(mutableRundown.payload).toEqual(ingestRundown.payload)
@@ -261,7 +266,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	test('set payload property unchanged', () => {
 		const ingestRundown = getBasicIngestRundown()
-		const mutableRundown = new MutableIngestRundownImpl<any>(clone(ingestRundown), true)
+		const mutableRundown = new MutableIngestRundownImpl<any>(toSofieIngestRundown(clone(ingestRundown)), true)
 
 		// compare properties
 		expect(mutableRundown.payload).toEqual(ingestRundown.payload)
@@ -277,7 +282,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	test('get segments', () => {
 		const ingestRundown = getBasicIngestRundown()
-		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+		const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 		// compare properties
 		expect(mutableRundown.segments.length).toBe(ingestRundown.segments.length)
@@ -294,7 +299,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	test('findPart & findPartAndSegment', () => {
 		const ingestRundown = getBasicIngestRundown()
-		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+		const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 		// compare properties
 		expect(mutableRundown.segments.length).toBe(ingestRundown.segments.length)
@@ -308,7 +313,7 @@ describe('MutableIngestRundownImpl', () => {
 	describe('removeSegment', () => {
 		test('good', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(mutableRundown.removeSegment('seg1')).toBeTruthy()
 
@@ -334,7 +339,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('unknown id', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(mutableRundown.removeSegment('segX')).toBeFalsy()
 
@@ -350,7 +355,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	test('removeAllSegments', () => {
 		const ingestRundown = getBasicIngestRundown()
-		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+		const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 		mutableRundown.removeAllSegments()
 
@@ -369,7 +374,7 @@ describe('MutableIngestRundownImpl', () => {
 
 	test('forceFullRegenerate', () => {
 		const ingestRundown = getBasicIngestRundown()
-		const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+		const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 		// ensure no changes
 		expect(mutableRundown.intoIngestRundown(ingestObjectGenerator)).toEqual(createNoChangesObject(ingestRundown))
@@ -385,7 +390,7 @@ describe('MutableIngestRundownImpl', () => {
 	describe('replaceSegment', () => {
 		test('replace existing with a move', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			const segmentBefore = mutableRundown.getSegment('seg1')
 			expect(segmentBefore).toBeDefined()
@@ -440,7 +445,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('insert new', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(mutableRundown.getSegment('partX')).toBeUndefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
@@ -483,7 +488,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('insert at position', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(mutableRundown.getSegment('partX')).toBeUndefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
@@ -538,7 +543,7 @@ describe('MutableIngestRundownImpl', () => {
 	describe('moveSegmentBefore', () => {
 		test('move unknown', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(mutableRundown.getSegment('segX')).toBeUndefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
@@ -549,7 +554,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('move to position', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
@@ -587,7 +592,7 @@ describe('MutableIngestRundownImpl', () => {
 	describe('moveSegmentAfter', () => {
 		test('move unknown', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(mutableRundown.getSegment('segX')).toBeUndefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
@@ -598,7 +603,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('move to position', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
 
@@ -636,7 +641,7 @@ describe('MutableIngestRundownImpl', () => {
 	describe('changeSegmentExternalId', () => {
 		test('rename unknown', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(mutableRundown.getSegment('segX')).toBeUndefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
@@ -649,7 +654,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('rename to duplicate', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(mutableRundown.getSegment('seg1')).toBeDefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
@@ -662,7 +667,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('good', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			const beforeSegment = mutableRundown.getSegment('seg1') as MutableIngestSegmentImpl
 			expect(beforeSegment).toBeDefined()
@@ -688,7 +693,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('rename twice', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			const beforeSegment = mutableRundown.getSegment('seg1') as MutableIngestSegmentImpl
 			expect(beforeSegment).toBeDefined()
@@ -721,7 +726,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('rename circle', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			const beforeSegment1 = mutableRundown.getSegment('seg1') as MutableIngestSegmentImpl
 			expect(beforeSegment1).toBeDefined()
@@ -767,7 +772,7 @@ describe('MutableIngestRundownImpl', () => {
 	describe('changeSegmentOriginalExternalId', () => {
 		test('rename unknown', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(mutableRundown.getSegment('segX')).toBeUndefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
@@ -780,7 +785,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('rename to duplicate', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			expect(mutableRundown.getSegment('seg1')).toBeDefined()
 			expect(getSegmentIdOrder(mutableRundown)).toEqual(['seg0', 'seg1', 'seg2'])
@@ -793,7 +798,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('good', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			const beforeSegment = mutableRundown.getSegment('seg1') as MutableIngestSegmentImpl
 			expect(beforeSegment).toBeDefined()
@@ -817,7 +822,7 @@ describe('MutableIngestRundownImpl', () => {
 
 		test('rename twice', () => {
 			const ingestRundown = getBasicIngestRundown()
-			const mutableRundown = new MutableIngestRundownImpl(clone(ingestRundown), true)
+			const mutableRundown = new MutableIngestRundownImpl(toSofieIngestRundown(clone(ingestRundown)), true)
 
 			const beforeSegment = mutableRundown.getSegment('seg1') as MutableIngestSegmentImpl
 			expect(beforeSegment).toBeDefined()

@@ -1,10 +1,6 @@
 import { MockJobContext, setupDefaultJobEnvironment } from '../../__mocks__/context'
 import { clone } from '@sofie-automation/corelib/dist/lib'
-import {
-	IngestChangeType,
-	IngestRundown,
-	NrcsIngestRundownChangeDetails,
-} from '@sofie-automation/blueprints-integration'
+import { IngestChangeType, NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
 import { ComputedIngestChangeAction, UpdateIngestRundownChange } from '../runOperation'
 import {
 	handleRegenerateRundown,
@@ -16,12 +12,14 @@ import {
 import { RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { DBRundown, RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
-function getDefaultIngestRundown(): IngestRundown {
+function getDefaultIngestRundown(): IngestRundownWithSource {
 	return {
 		externalId: 'rundown0',
 		type: 'mos',
 		name: 'Rundown',
+		rundownSource: { type: 'http' },
 		segments: [
 			{
 				externalId: 'segment0',
@@ -246,10 +244,11 @@ describe('handleUserUnsyncRundown', () => {
 })
 
 describe('handleUpdatedRundown', () => {
-	const newIngestRundown: IngestRundown = {
+	const newIngestRundown: IngestRundownWithSource = {
 		externalId: 'rundown0',
 		type: 'mos',
 		name: 'Rundown2',
+		rundownSource: { type: 'http' },
 		segments: [
 			{
 				externalId: 'segment0',
@@ -359,10 +358,11 @@ describe('handleUpdatedRundown', () => {
 })
 
 describe('handleUpdatedRundownMetaData', () => {
-	const newIngestRundown: IngestRundown = {
+	const newIngestRundown: IngestRundownWithSource = {
 		externalId: 'rundown0',
 		type: 'mos',
 		name: 'Rundown2',
+		rundownSource: { type: 'http' },
 		segments: [],
 		payload: {
 			key: 'value',
@@ -401,7 +401,7 @@ describe('handleUpdatedRundownMetaData', () => {
 		)
 
 		// update the expected ingestRundown
-		const expectedIngestRundown: IngestRundown = {
+		const expectedIngestRundown: IngestRundownWithSource = {
 			...newIngestRundown,
 			segments: ingestRundown.segments,
 		}

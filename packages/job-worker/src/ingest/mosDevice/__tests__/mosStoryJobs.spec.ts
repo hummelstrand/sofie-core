@@ -2,7 +2,6 @@ import { setupDefaultJobEnvironment } from '../../../__mocks__/context'
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import {
 	IngestChangeType,
-	IngestRundown,
 	MOS,
 	NrcsIngestPartChangeDetails,
 	NrcsIngestSegmentChangeDetailsEnum,
@@ -15,12 +14,14 @@ import {
 	handleMosSwapStories,
 } from '../mosStoryJobs'
 import { IngestUpdateOperationFunction, UpdateIngestRundownChange } from '../../runOperation'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
-function getDefaultIngestRundown(): IngestRundown {
+function getDefaultIngestRundown(): IngestRundownWithSource {
 	return {
 		externalId: 'rundown0',
 		type: 'mos',
 		name: 'Rundown',
+		rundownSource: { type: 'http' },
 		segments: [
 			{
 				externalId: 'segment-part0',
@@ -82,7 +83,6 @@ describe('handleMosDeleteStory', () => {
 
 		expect(
 			handleMosDeleteStory(context, {
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				stories: [],
 			})
@@ -93,7 +93,6 @@ describe('handleMosDeleteStory', () => {
 		const context = setupDefaultJobEnvironment()
 
 		const executeJob = handleMosDeleteStory(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			stories: [mosTypes.mosString128.create('story0')],
 		}) as IngestUpdateOperationFunction
@@ -108,7 +107,6 @@ describe('handleMosDeleteStory', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const executeJob = handleMosDeleteStory(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			stories: [mosTypes.mosString128.create('story0')],
 		}) as IngestUpdateOperationFunction
@@ -123,7 +121,6 @@ describe('handleMosDeleteStory', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const executeJob = handleMosDeleteStory(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			stories: [
 				mosTypes.mosString128.create('story0'), // missing
@@ -141,7 +138,6 @@ describe('handleMosDeleteStory', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const executeJob = handleMosDeleteStory(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			stories: [
 				mosTypes.mosString128.create('part1'), // exists
@@ -182,7 +178,6 @@ describe('handleMosFullStory', () => {
 		const context = setupDefaultJobEnvironment()
 
 		const executeJob = handleMosFullStory(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			story: clone(newMosStory),
 		}) as IngestUpdateOperationFunction
@@ -197,7 +192,6 @@ describe('handleMosFullStory', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const executeJob = handleMosFullStory(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			story: {
 				...clone(newMosStory),
@@ -215,7 +209,6 @@ describe('handleMosFullStory', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const executeJob = handleMosFullStory(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			story: clone(newMosStory),
 		}) as IngestUpdateOperationFunction
@@ -257,7 +250,6 @@ describe('handleMosInsertStories', () => {
 		const newStory = createMockStory('partX', 'Part X')
 
 		const executeJob = handleMosInsertStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			newStories: [newStory],
 			insertBeforeStoryId: null,
@@ -272,7 +264,6 @@ describe('handleMosInsertStories', () => {
 		const context = setupDefaultJobEnvironment()
 
 		const executeJob = handleMosInsertStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			newStories: [],
 			insertBeforeStoryId: null,
@@ -288,7 +279,6 @@ describe('handleMosInsertStories', () => {
 		const newStory = createMockStory('partX', 'Part X')
 
 		const executeJob = handleMosInsertStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			newStories: [newStory],
 			insertBeforeStoryId: mosTypes.mosString128.create('storyX'),
@@ -306,7 +296,6 @@ describe('handleMosInsertStories', () => {
 		const newStory = createMockStory('partX', 'Part X')
 
 		const executeJob = handleMosInsertStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			newStories: [newStory],
 			insertBeforeStoryId: mosTypes.mosString128.create('part1'),
@@ -353,7 +342,6 @@ describe('handleMosInsertStories', () => {
 		const newStory = createMockStory('partX', 'Part X')
 
 		const executeJob = handleMosInsertStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			newStories: [newStory],
 			insertBeforeStoryId: mosTypes.mosString128.create('part1'),
@@ -398,7 +386,6 @@ describe('handleMosInsertStories', () => {
 		const newStory = createMockStory('partX', 'Part X')
 
 		const executeJob = handleMosInsertStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			newStories: [newStory],
 			insertBeforeStoryId: null,
@@ -441,7 +428,6 @@ describe('handleMosSwapStories', () => {
 		const context = setupDefaultJobEnvironment()
 
 		const executeJob = handleMosSwapStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			story0: mosTypes.mosString128.create('part1'),
 			story1: mosTypes.mosString128.create('part3'),
@@ -455,7 +441,6 @@ describe('handleMosSwapStories', () => {
 		const context = setupDefaultJobEnvironment()
 
 		const executeJob = handleMosSwapStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			story0: mosTypes.mosString128.create('part1'),
 			story1: mosTypes.mosString128.create('part1'),
@@ -469,7 +454,6 @@ describe('handleMosSwapStories', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const executeJob = handleMosSwapStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			story0: mosTypes.mosString128.create('partX'),
 			story1: mosTypes.mosString128.create('part3'),
@@ -485,7 +469,6 @@ describe('handleMosSwapStories', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const executeJob = handleMosSwapStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			story0: mosTypes.mosString128.create('part1'),
 			story1: mosTypes.mosString128.create('partX'),
@@ -501,7 +484,6 @@ describe('handleMosSwapStories', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const executeJob = handleMosSwapStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			story0: mosTypes.mosString128.create('part1'),
 			story1: mosTypes.mosString128.create('part3'),
@@ -531,7 +513,6 @@ describe('handleMosMoveStories', () => {
 		const context = setupDefaultJobEnvironment()
 
 		const executeJob = handleMosMoveStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			insertBeforeStoryId: null,
 			stories: [mosTypes.mosString128.create('part3')],
@@ -545,7 +526,6 @@ describe('handleMosMoveStories', () => {
 		const context = setupDefaultJobEnvironment()
 
 		const executeJob = handleMosMoveStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			insertBeforeStoryId: mosTypes.mosString128.create('part1'),
 			stories: [],
@@ -559,7 +539,6 @@ describe('handleMosMoveStories', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const executeJob = handleMosMoveStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			insertBeforeStoryId: null,
 			stories: [mosTypes.mosString128.create('partX'), mosTypes.mosString128.create('part3')],
@@ -575,7 +554,6 @@ describe('handleMosMoveStories', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const executeJob = handleMosMoveStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			insertBeforeStoryId: null,
 			stories: [mosTypes.mosString128.create('part1')],
@@ -606,7 +584,6 @@ describe('handleMosMoveStories', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const executeJob = handleMosMoveStories(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			insertBeforeStoryId: mosTypes.mosString128.create('part1'),
 			stories: [mosTypes.mosString128.create('part2')],

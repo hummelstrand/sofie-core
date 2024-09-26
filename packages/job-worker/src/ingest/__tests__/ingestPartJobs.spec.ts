@@ -1,15 +1,11 @@
 import { setupDefaultJobEnvironment } from '../../__mocks__/context'
 import { handleRemovedPart, handleUpdatedPart } from '../ingestPartJobs'
 import { clone } from '@sofie-automation/corelib/dist/lib'
-import {
-	IngestChangeType,
-	IngestPart,
-	IngestRundown,
-	NrcsIngestPartChangeDetails,
-} from '@sofie-automation/blueprints-integration'
+import { IngestChangeType, IngestPart, NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
 import { UpdateIngestRundownChange } from '../runOperation'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
-function getDefaultIngestRundown(): IngestRundown {
+function getDefaultIngestRundown(): IngestRundownWithSource {
 	return {
 		externalId: 'rundown0',
 		type: 'mos',
@@ -50,6 +46,7 @@ function getDefaultIngestRundown(): IngestRundown {
 				],
 			},
 		],
+		rundownSource: { type: 'http' },
 	}
 }
 
@@ -61,7 +58,6 @@ describe('handleRemovedPart', () => {
 			handleRemovedPart(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					segmentExternalId: 'segment0',
 					partExternalId: 'part0',
@@ -80,7 +76,6 @@ describe('handleRemovedPart', () => {
 			handleRemovedPart(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					segmentExternalId: 'segmentX',
 					partExternalId: 'part0',
@@ -98,7 +93,6 @@ describe('handleRemovedPart', () => {
 		const changes = handleRemovedPart(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				segmentExternalId: 'segment0',
 				partExternalId: 'partX',
@@ -122,7 +116,6 @@ describe('handleRemovedPart', () => {
 		const changes = handleRemovedPart(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				segmentExternalId: 'segment1',
 				partExternalId: 'part0',
@@ -146,7 +139,6 @@ describe('handleRemovedPart', () => {
 		const changes = handleRemovedPart(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				segmentExternalId: 'segment1',
 				partExternalId: 'part2',
@@ -190,7 +182,6 @@ describe('handleUpdatedPart', () => {
 			handleUpdatedPart(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					segmentExternalId: 'segment0',
 					ingestPart: clone(newIngestPart),
@@ -210,7 +201,6 @@ describe('handleUpdatedPart', () => {
 			handleUpdatedPart(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					segmentExternalId: 'segmentX',
 					ingestPart: clone(newIngestPart),
@@ -229,7 +219,6 @@ describe('handleUpdatedPart', () => {
 		const changes = handleUpdatedPart(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				segmentExternalId: 'segment1',
 				ingestPart: clone(newIngestPart),
@@ -266,7 +255,6 @@ describe('handleUpdatedPart', () => {
 		const changes = handleUpdatedPart(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				segmentExternalId: 'segment1',
 				ingestPart: clone(newIngestPart2),

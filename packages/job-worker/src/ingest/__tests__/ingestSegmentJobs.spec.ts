@@ -8,17 +8,18 @@ import {
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import {
 	IngestChangeType,
-	IngestRundown,
 	IngestSegment,
 	NrcsIngestSegmentChangeDetailsEnum,
 } from '@sofie-automation/blueprints-integration'
 import { UpdateIngestRundownChange } from '../runOperation'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
-function getDefaultIngestRundown(): IngestRundown {
+function getDefaultIngestRundown(): IngestRundownWithSource {
 	return {
 		externalId: 'rundown0',
 		type: 'mos',
 		name: 'Rundown',
+		rundownSource: { type: 'http' },
 		segments: [
 			{
 				externalId: 'segment0',
@@ -66,7 +67,6 @@ describe('handleRegenerateSegment', () => {
 			handleRegenerateSegment(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					segmentExternalId: 'segment0',
 				},
@@ -84,7 +84,6 @@ describe('handleRegenerateSegment', () => {
 			handleRegenerateSegment(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					segmentExternalId: 'segmentX',
 				},
@@ -101,7 +100,6 @@ describe('handleRegenerateSegment', () => {
 		const changes = handleRegenerateSegment(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				segmentExternalId: 'segment1',
 			},
@@ -134,7 +132,6 @@ describe('handleRemovedSegment', () => {
 			handleRemovedSegment(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					segmentExternalId: 'segment0',
 				},
@@ -152,7 +149,6 @@ describe('handleRemovedSegment', () => {
 			handleRemovedSegment(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					segmentExternalId: 'segmentX',
 				},
@@ -169,7 +165,6 @@ describe('handleRemovedSegment', () => {
 		const changes = handleRemovedSegment(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				segmentExternalId: 'segment1',
 			},
@@ -213,7 +208,6 @@ describe('handleUpdatedSegment', () => {
 
 		expect(() =>
 			handleUpdatedSegment(context, {
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				ingestSegment: clone(newIngestSegment),
 				isCreateAction: true,
@@ -231,7 +225,6 @@ describe('handleUpdatedSegment', () => {
 
 		expect(() =>
 			handleUpdatedSegment(context, {
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				ingestSegment: customIngestSegment,
 				isCreateAction: true,
@@ -245,7 +238,6 @@ describe('handleUpdatedSegment', () => {
 		const ingestRundown = getDefaultIngestRundown()
 
 		const changes = handleUpdatedSegment(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			ingestSegment: clone(newIngestSegment),
 			isCreateAction: true,
@@ -272,7 +264,6 @@ describe('handleUpdatedSegment', () => {
 
 		expect(() =>
 			handleUpdatedSegment(context, {
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				ingestSegment: clone(newIngestSegment),
 				isCreateAction: false,
@@ -289,7 +280,6 @@ describe('handleUpdatedSegment', () => {
 		customIngestSegment.externalId = 'segment1'
 
 		const changes = handleUpdatedSegment(context, {
-			peripheralDeviceId: null,
 			rundownExternalId: 'rundown0',
 			ingestSegment: clone(customIngestSegment),
 			isCreateAction: false, // has no impact
@@ -318,7 +308,6 @@ describe('handleUpdatedSegmentRanks', () => {
 			handleUpdatedSegmentRanks(
 				context,
 				{
-					peripheralDeviceId: null,
 					rundownExternalId: 'rundown0',
 					newRanks: {
 						segment0: 1,
@@ -338,7 +327,6 @@ describe('handleUpdatedSegmentRanks', () => {
 		const changes = handleUpdatedSegmentRanks(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				newRanks: {
 					segmentX: 2,
@@ -364,7 +352,6 @@ describe('handleUpdatedSegmentRanks', () => {
 		const changes = handleUpdatedSegmentRanks(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				newRanks: {
 					segmentX: 2,
@@ -392,7 +379,6 @@ describe('handleUpdatedSegmentRanks', () => {
 		const changes = handleUpdatedSegmentRanks(
 			context,
 			{
-				peripheralDeviceId: null,
 				rundownExternalId: 'rundown0',
 				newRanks: {
 					segmentX: 2,
