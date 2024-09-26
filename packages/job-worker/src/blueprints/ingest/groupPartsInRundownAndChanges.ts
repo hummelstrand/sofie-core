@@ -177,11 +177,15 @@ function calculateSegmentChanges(
 				}
 			}
 
+			const payloadChanged =
+				oldIngestSegment.name !== segment.name || !_.isEqual(oldIngestSegment.payload, segment.payload)
+
 			const partOrderChanged = hasPartOrderChanged(segment.parts, oldIngestSegment.parts)
-			if (partOrderChanged || Object.keys(segmentPartChanges).length > 0) {
+			if (partOrderChanged || payloadChanged || Object.keys(segmentPartChanges).length > 0) {
 				segmentChanges[segment.externalId] = {
 					partChanges: segmentPartChanges,
 					partOrderChanged,
+					payloadChanged,
 				}
 			}
 		}

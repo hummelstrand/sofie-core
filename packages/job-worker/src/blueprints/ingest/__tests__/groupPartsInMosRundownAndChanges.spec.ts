@@ -214,6 +214,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 								s1p2: NrcsIngestPartChangeDetails.Inserted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
 					},
 					segmentOrderChanged: false,
@@ -284,6 +285,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 								s1p3: NrcsIngestPartChangeDetails.Deleted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
 					},
 					segmentOrderChanged: false,
@@ -357,12 +359,14 @@ describe('groupPartsInMosRundownAndChanges', () => {
 								s1p2: NrcsIngestPartChangeDetails.Updated,
 							},
 							partOrderChanged: false,
+							payloadChanged: false,
 						},
 						rundown0_s2p1: {
 							partChanges: {
 								s2p2: NrcsIngestPartChangeDetails.Updated,
 							},
 							partOrderChanged: false,
+							payloadChanged: false,
 						},
 					},
 					segmentOrderChanged: false,
@@ -371,6 +375,39 @@ describe('groupPartsInMosRundownAndChanges', () => {
 		})
 
 		it('segment renamed', () => {
+			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
+
+			const ingestChanges: NrcsIngestChangeDetails = {
+				source: IngestChangeType.Ingest,
+				segmentChanges: {}, // Note: this is ignored for inserts/deletes
+			}
+
+			const previousIngestRundown = clone(nrcsIngestRundown)
+			previousIngestRundown.segments[0].name = 'SEGMENT0;PART1'
+			previousIngestRundown.segments[0].parts[0].name = 'SEGMENT0;PART1'
+			previousIngestRundown.segments[1].name = 'SEGMENT0;PART2'
+			previousIngestRundown.segments[1].parts[0].name = 'SEGMENT0;PART2'
+
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+
+			expect(result).toEqual({
+				nrcsIngestRundown: combinedIngestRundown,
+				ingestChanges: {
+					source: IngestChangeType.Ingest,
+					changedSegmentExternalIds: {},
+					segmentChanges: {
+						rundown0_s1p1: {
+							partChanges: {},
+							partOrderChanged: false,
+							payloadChanged: true,
+						},
+					},
+					segmentOrderChanged: false,
+				},
+			} satisfies Complete<GroupPartsInMosRundownAndChangesResult>)
+		})
+
+		it('segment id changed', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
@@ -403,7 +440,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			} satisfies Complete<GroupPartsInMosRundownAndChangesResult>)
 		})
 
-		it('segment renamed and moved', () => {
+		it('segment id changed and moved', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
@@ -507,6 +544,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 								s1p2: NrcsIngestPartChangeDetails.Inserted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
 						rundown0_s1p2: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 						rundown0_s2p1: {
@@ -514,6 +552,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 								s2p2: NrcsIngestPartChangeDetails.Inserted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
 						rundown0_s2p2: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 					},
@@ -606,6 +645,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 								s1p2: NrcsIngestPartChangeDetails.Deleted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
 						rundown0_s1p2: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 						rundown0_s2p1: {
@@ -613,6 +653,7 @@ describe('groupPartsInMosRundownAndChanges', () => {
 								s2p2: NrcsIngestPartChangeDetails.Deleted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
 						rundown0_s2p2: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 					},

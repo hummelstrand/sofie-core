@@ -862,21 +862,25 @@ describe('Test recieved mos ingest payloads', () => {
 		await expectRundownToMatchSnapshot(rundown._id, true, true)
 	})
 
-	test.skip('mosRoStorySwap: Swap with self', async () => {
+	test('mosRoStorySwap: Swap with self', async () => {
+		await resetOrphanedRundown()
+
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as DBRundown
 		expect(rundown).toBeTruthy()
 
 		const story0 = mosTypes.mosString128.create('ro1;s1;p1')
 
-		await expect(
-			handleMosSwapStoriesWrapped(context, {
-				rundownExternalId: rundown.externalId,
-				story0,
-				story1: story0,
-			})
-		).rejects.toThrow(
-			`Cannot swap part ${mosTypes.mosString128.stringify(story0)} with itself in rundown ${rundown.externalId}`
-		)
+		// Swap should happen without error
+		await handleMosSwapStoriesWrapped(context, {
+			rundownExternalId: rundown.externalId,
+			story0,
+			story1: story0,
+		})
+
+		// should match the default
+		const { segments, parts } = await getRundownData({ _id: rundown._id })
+		const partMap = mockRO.segmentIdMap()
+		expect(getPartIdMap(segments, parts)).toEqual(partMap)
 	})
 
 	test('mosRoStorySwap: Story not found', async () => {
@@ -1211,7 +1215,7 @@ describe('Test recieved mos ingest payloads', () => {
 				const newSegment = newSegments.find((s) => s.name === newName)
 				if (newSegment) {
 					const oldSegmentId = oldSegment._id
-					expect(oldSegmentId).not.toEqual(newSegment._id) // If the id doesn't change, then the whole test is invalid
+					expect(oldSegmentId).toEqual(newSegment._id) // If the id doesn't change, then the whole test is invalid
 					oldSegment.name = newSegment.name
 					oldSegment._id = newSegment._id
 					oldSegment.externalId = newSegment.externalId
