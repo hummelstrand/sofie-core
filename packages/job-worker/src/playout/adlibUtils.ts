@@ -309,7 +309,8 @@ export function innerStopPieces(
 		if (!filter(pieceInstance)) continue
 
 		// Check if piece has started yet
-		if (!resolvedPieceInstance.resolvedStart || resolvedPieceInstance.resolvedStart > relativeStopAt) continue
+		if (resolvedPieceInstance.resolvedStart == undefined || resolvedPieceInstance.resolvedStart > relativeStopAt)
+			continue
 
 		// If there end time of the piece is already known, make sure it is in the future
 		if (pieceInstance.plannedStoppedPlayback && pieceInstance.plannedStoppedPlayback <= stopAt) continue
