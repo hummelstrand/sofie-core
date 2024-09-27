@@ -2,42 +2,45 @@ import type { ABPlayerDefinition } from '@sofie-automation/blueprints-integratio
 import type { StudioRouteSet } from '@sofie-automation/corelib/dist/dataModel/Studio'
 import { logger } from '../../logging'
 
-interface MembersOfRouteSets {
-	poolName: string
-	playerId: string | number
-	disabled: boolean
-}
+/**
+ * Map<poolName, Map<playerId, disablePlayer>>
+ */
+type MembersOfRouteSets = Map<string, Map<string | number, boolean>>
 
-export function findPlayersInRouteSets(routeSets: Record<string, StudioRouteSet>): MembersOfRouteSets[] {
-	const players: MembersOfRouteSets[] = []
+export function findPlayersInRouteSets(routeSets: Record<string, StudioRouteSet>): MembersOfRouteSets {
+	const routeSetEnabledPlayers: MembersOfRouteSets = new Map()
 	for (const [_key, routeSet] of Object.entries<StudioRouteSet>(routeSets)) {
-		routeSet.abPlayers.forEach((abPlayer) => {
-			players.push({
-				playerId: abPlayer.playerId,
-				poolName: abPlayer.poolName,
-				disabled: !routeSet.active,
-			})
-		})
+		for (const abPlayer of routeSet.abPlayers) {
+			let poolEntry = routeSetEnabledPlayers.get(abPlayer.poolName)
+			if (!poolEntry) {
+				poolEntry = new Map()
+				routeSetEnabledPlayers.set(abPlayer.poolName, poolEntry)
+			}
+
+			// Make sure player is marked as enabled
+			const currentState = poolEntry.get(abPlayer.playerId)
+			poolEntry.set(abPlayer.playerId, currentState || routeSet.active)
+		}
 	}
-	return players
+	return routeSetEnabledPlayers
 }
 
 export function abPoolFilterDisabled(
 	poolName: string,
 	players: ABPlayerDefinition[],
-	membersOfRouteSets: MembersOfRouteSets[]
+	membersOfRouteSets: MembersOfRouteSets
 ): ABPlayerDefinition[] {
-	if (membersOfRouteSets.length == 0) return players
+	const poolRouteSetEnabledPlayers = membersOfRouteSets.get(poolName)
+	if (!poolRouteSetEnabledPlayers || poolRouteSetEnabledPlayers.size == 0) return players
 
 	// Filter out any disabled players:
 	return players.filter((player) => {
-		const disabled = membersOfRouteSets.find(
-			(abPlayer) => abPlayer.playerId === player.playerId && abPlayer.poolName === poolName
-		)?.disabled
-		if (disabled) {
+		const playerState = poolRouteSetEnabledPlayers.get(player.playerId)
+		if (playerState === false) {
 			logger.info(`AB Pool ${poolName} playerId : ${player.playerId} are disabled`)
 			return false
 		}
+
 		return true
 	})
 }

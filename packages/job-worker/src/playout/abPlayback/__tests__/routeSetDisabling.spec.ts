@@ -85,4 +85,98 @@ describe('route set disabling ab players', () => {
 			expect(result).toEqual(expectedPlayers)
 		})
 	})
+
+	describe('multiple routesets per player', () => {
+		/**
+		 * This is testing the scenario of these 3 routesets where only one can be active at a time
+		 */
+		const ROUTESETS_GROUPED: Record<string, StudioRouteSet> = {
+			all: {
+				name: '',
+				active: true,
+				behavior: StudioRouteBehavior.TOGGLE,
+				exclusivityGroup: 'ab',
+				routes: [],
+				abPlayers: [
+					{
+						poolName: POOL_NAME,
+						playerId: 1,
+					},
+					{
+						poolName: POOL_NAME,
+						playerId: 2,
+					},
+					{
+						poolName: POOL_NAME,
+						playerId: 3,
+					},
+					{
+						poolName: POOL_NAME,
+						playerId: 4,
+					},
+				],
+			},
+			first: {
+				name: '',
+				active: false,
+				behavior: StudioRouteBehavior.TOGGLE,
+				exclusivityGroup: 'ab',
+				routes: [],
+				abPlayers: [
+					{
+						poolName: POOL_NAME,
+						playerId: 1,
+					},
+					{
+						poolName: POOL_NAME,
+						playerId: 2,
+					},
+				],
+			},
+			second: {
+				name: '',
+				active: false,
+				behavior: StudioRouteBehavior.TOGGLE,
+				exclusivityGroup: 'ab',
+				routes: [],
+				abPlayers: [
+					{
+						poolName: POOL_NAME,
+						playerId: 3,
+					},
+					{
+						poolName: POOL_NAME,
+						playerId: 4,
+					},
+				],
+			},
+		}
+
+		test('all', () => {
+			const result = runDisablePlayersFiltering(ROUTESETS_GROUPED, DEFAULT_PLAYERS)
+			expect(result).toEqual(DEFAULT_PLAYERS)
+		})
+
+		test('first', () => {
+			const routesets = clone(ROUTESETS_GROUPED)
+			routesets['all'].active = false
+			routesets['first'].active = true
+
+			const result = runDisablePlayersFiltering(routesets, DEFAULT_PLAYERS)
+
+			const expectedPlayers = DEFAULT_PLAYERS.filter((p) => p.playerId !== 3 && p.playerId !== 4)
+			expect(result).toEqual(expectedPlayers)
+		})
+
+		test('second', () => {
+			const routesets = clone(ROUTESETS_GROUPED)
+			routesets['all'].active = false
+			routesets['second'].active = true
+
+			const result = runDisablePlayersFiltering(routesets, DEFAULT_PLAYERS)
+
+			const expectedPlayers = DEFAULT_PLAYERS.filter((p) => p.playerId !== 1 && p.playerId !== 2)
+			expect(result).toEqual(expectedPlayers)
+		})
+	})
 })
