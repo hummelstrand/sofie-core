@@ -54,6 +54,11 @@ export function RouteSetAbPlayers({ routeSet, overrideHelper }: Readonly<RouteSe
 	return (
 		<>
 			<h4 className="mod mhs">{t('AB Playout devices')}</h4>
+			<p className="text-s dimmed field-hint mhs">
+				{t(
+					'Any AB Playout devices here will only be active when this or another RouteSet that includes them is active'
+				)}
+			</p>
 			{routeSet.computed.abPlayers.length === 0 ? (
 				<p className="text-s dimmed field-hint mhs">{t('There are no AB Playout devices set up yet')}</p>
 			) : (
