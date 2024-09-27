@@ -15,8 +15,11 @@ import StudioContext from '../RundownView/StudioContext'
 import { InvalidPartCover } from '../SegmentTimeline/Parts/InvalidPartCover'
 import { getPartInstanceTimingId } from '../../lib/rundownTiming'
 import { QuickLoopEnd } from './QuickLoopEnd'
+import { getShowHiddenSourceLayers } from '../../lib/localStorage'
 
 const TIMELINE_DEFAULT_BASE = 30 * 1000
+
+const showHiddenSourceLayers = getShowHiddenSourceLayers()
 
 interface IProps {
 	part: PartExtended
@@ -59,7 +62,7 @@ function findTimelineGraphics(pieces: PieceExtended[]) {
 		.filter((piece) => {
 			if (
 				piece.sourceLayer?.type === SourceLayerType.LOWER_THIRD &&
-				!piece.sourceLayer?.isHidden &&
+				(showHiddenSourceLayers || !piece.sourceLayer?.isHidden) &&
 				((piece.instance.piece.lifespan === PieceLifespan.WithinPart && piece.instance.piece.enable.duration) ||
 					!piece.sourceLayer?.onListViewColumn)
 			) {
