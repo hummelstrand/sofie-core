@@ -102,7 +102,7 @@ export interface NrcsIngestChangeDetails {
 	/**
 	 * Describes the changes to the rundown itself
 	 */
-	rundownChanges?: NrcsIngestRundownChangeDetails | null
+	rundownChanges?: NrcsIngestRundownChangeDetails
 
 	/**
 	 * Describes the changes to the segments in the rundown
