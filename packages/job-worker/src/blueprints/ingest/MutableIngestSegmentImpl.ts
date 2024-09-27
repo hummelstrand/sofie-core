@@ -224,7 +224,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 				rank,
 				name: part.name,
 				payload: part.payload,
-				userEditStates: {},
+				userEditStates: part.userEditStates,
 			}
 
 			allCacheObjectIds.push(generator.getPartObjectId(ingestPart.externalId))
