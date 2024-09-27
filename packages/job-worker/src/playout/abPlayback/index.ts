@@ -61,7 +61,7 @@ export function applyAbPlaybackForTimeline(
 
 	for (const [poolName, players] of Object.entries<ABPlayerDefinition[]>(abConfiguration.pools)) {
 		// Filter out offline devices
-		const filteredPlayers = abPoolFilterDisabled(context, poolName, players, routeSetMembers)
+		const filteredPlayers = abPoolFilterDisabled(poolName, players, routeSetMembers)
 
 		const previousAssignmentMap: ReadonlyDeep<ABSessionAssignments> | undefined =
 			playlist.assignedAbSessions?.[poolName]

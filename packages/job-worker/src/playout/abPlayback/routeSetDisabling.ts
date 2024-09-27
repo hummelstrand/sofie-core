@@ -1,6 +1,5 @@
 import type { ABPlayerDefinition } from '@sofie-automation/blueprints-integration'
 import type { StudioRouteSet } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import type { JobContext } from '../../jobs'
 import { logger } from '../../logging'
 
 interface MembersOfRouteSets {
@@ -24,7 +23,6 @@ export function findPlayersInRouteSets(routeSets: Record<string, StudioRouteSet>
 }
 
 export function abPoolFilterDisabled(
-	context: JobContext,
 	poolName: string,
 	players: ABPlayerDefinition[],
 	membersOfRouteSets: MembersOfRouteSets[]
@@ -33,9 +31,11 @@ export function abPoolFilterDisabled(
 
 	// Filter out any disabled players:
 	return players.filter((player) => {
-		const disabled = membersOfRouteSets.find((abPlayer) => abPlayer.playerId === player.playerId)?.disabled
+		const disabled = membersOfRouteSets.find(
+			(abPlayer) => abPlayer.playerId === player.playerId && abPlayer.poolName === poolName
+		)?.disabled
 		if (disabled) {
-			logger.info(`${context.studio._id} - AB Pool ${poolName} playerId : ${player.playerId} are disabled`)
+			logger.info(`AB Pool ${poolName} playerId : ${player.playerId} are disabled`)
 			return false
 		}
 		return true
