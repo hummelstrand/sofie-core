@@ -1321,7 +1321,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sofie-automation/blueprints-integration@portal:../packages/blueprints-integration::locator=automation-core%40workspace%3A."
   dependencies:
-    "@sofie-automation/shared-lib": 1.51.0-in-testing.0
+    "@sofie-automation/shared-lib": 1.51.0-in-testing.3
     tslib: ^2.6.2
     type-fest: ^3.13.1
   languageName: node
@@ -1362,8 +1362,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sofie-automation/corelib@portal:../packages/corelib::locator=automation-core%40workspace%3A."
   dependencies:
-    "@sofie-automation/blueprints-integration": 1.51.0-in-testing.0
-    "@sofie-automation/shared-lib": 1.51.0-in-testing.0
+    "@sofie-automation/blueprints-integration": 1.51.0-in-testing.3
+    "@sofie-automation/shared-lib": 1.51.0-in-testing.3
     fast-clone: ^1.5.13
     i18next: ^21.10.0
     influx: ^5.9.3
@@ -1394,9 +1394,9 @@ __metadata:
   resolution: "@sofie-automation/job-worker@portal:../packages/job-worker::locator=automation-core%40workspace%3A."
   dependencies:
     "@slack/webhook": ^6.1.0
-    "@sofie-automation/blueprints-integration": 1.51.0-in-testing.0
-    "@sofie-automation/corelib": 1.51.0-in-testing.0
-    "@sofie-automation/shared-lib": 1.51.0-in-testing.0
+    "@sofie-automation/blueprints-integration": 1.51.0-in-testing.3
+    "@sofie-automation/corelib": 1.51.0-in-testing.3
+    "@sofie-automation/shared-lib": 1.51.0-in-testing.3
     amqplib: ^0.10.3
     deepmerge: ^4.3.1
     elastic-apm-node: ^3.51.0
@@ -1405,7 +1405,7 @@ __metadata:
     node-fetch: ^2.7.0
     p-lazy: ^3.1.0
     p-timeout: ^4.1.0
-    superfly-timeline: 9.0.0
+    superfly-timeline: 9.0.1
     threadedclass: ^1.2.2
     tslib: ^2.6.2
     type-fest: ^3.13.1
@@ -1418,7 +1418,7 @@ __metadata:
   resolution: "@sofie-automation/shared-lib@portal:../packages/shared-lib::locator=automation-core%40workspace%3A."
   dependencies:
     "@mos-connection/model": ^4.1.1
-    timeline-state-resolver-types: 9.1.1-nightly-release51-20240830-093530-7d1db9cd4.0
+    timeline-state-resolver-types: 9.2.0-alpha.0
     tslib: ^2.6.2
     type-fest: ^3.13.1
   languageName: node
@@ -2794,7 +2794,7 @@ __metadata:
     semver: ^7.5.4
     sinon: ^14.0.2
     standard-version: ^9.5.0
-    superfly-timeline: 9.0.0
+    superfly-timeline: 9.0.1
     threadedclass: ^1.2.2
     timecode: 0.0.4
     ts-jest: ^29.1.2
@@ -11570,12 +11570,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"superfly-timeline@npm:9.0.0":
-  version: 9.0.0
-  resolution: "superfly-timeline@npm:9.0.0"
+"superfly-timeline@npm:9.0.1":
+  version: 9.0.1
+  resolution: "superfly-timeline@npm:9.0.1"
   dependencies:
     tslib: ^2.6.0
-  checksum: bb56fc6d6884f2956cdc1f18edceff48bc693c2329b009170e4d399ce70b8123ef38ddada0f0479eb359690eae39e7e578a9ec4ba326d6e4704653f74cde1a6d
+  checksum: 4267eed691fe9ce9f89bf17c8aed1a98206938dd6d850c64b083e4fd3a3dc5329801c76c757450c9520375bad100ce512cc6d6a3e4a997bdfa14a4e7d65f09f2
   languageName: node
   linkType: hard
 
@@ -11748,12 +11748,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"timeline-state-resolver-types@npm:9.1.1-nightly-release51-20240830-093530-7d1db9cd4.0":
-  version: 9.1.1-nightly-release51-20240830-093530-7d1db9cd4.0
-  resolution: "timeline-state-resolver-types@npm:9.1.1-nightly-release51-20240830-093530-7d1db9cd4.0"
+"timeline-state-resolver-types@npm:9.2.0-alpha.0":
+  version: 9.2.0-alpha.0
+  resolution: "timeline-state-resolver-types@npm:9.2.0-alpha.0"
   dependencies:
     tslib: ^2.6.2
-  checksum: 7d57f25139d33a1bd62cd46b7d1a8c6ab9d5a12f51ba5dc115ae5a40dc751bef8100bedc1b81bde500315231b4918e25198171a4520ee82fd785f74c7e040be9
+  checksum: 88004b58606489102eb39601926bc56ca6ea2142e70339e9d0b8a7a848d7347a4b213340da3ebf5cf13edad804b14b1a155191b2123b805b96f8f221488e015a
   languageName: node
   linkType: hard
 
