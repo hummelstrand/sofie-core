@@ -37,7 +37,7 @@ export function abPoolFilterDisabled(
 	return players.filter((player) => {
 		const playerState = poolRouteSetEnabledPlayers.get(player.playerId)
 		if (playerState === false) {
-			logger.info(`AB Pool ${poolName} playerId : ${player.playerId} are disabled`)
+			logger.silly(`AB Pool ${poolName} playerId : ${player.playerId} are disabled`)
 			return false
 		}
 
