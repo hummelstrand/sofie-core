@@ -167,7 +167,11 @@ function calculateSegmentChanges(
 				const oldPart = oldPartMap.get(part.externalId)
 				if (!oldPart) {
 					segmentPartChanges[part.externalId] = NrcsIngestPartChangeDetails.Inserted
-				} else if (allPartWithChanges.has(part.externalId)) {
+				} else if (
+					allPartWithChanges.has(part.externalId) ||
+					oldPart.name !== part.name ||
+					!_.isEqual(oldPart.payload, part.payload)
+				) {
 					segmentPartChanges[part.externalId] = NrcsIngestPartChangeDetails.Updated
 				}
 			}
