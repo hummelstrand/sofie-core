@@ -20,21 +20,25 @@ function getDefaultIngestRundown(): IngestRundownWithSource {
 		type: 'mos',
 		name: 'Rundown',
 		rundownSource: { type: 'http' },
+		payload: undefined,
 		segments: [
 			{
 				externalId: 'segment0',
 				name: 'Segment 0',
 				rank: 0,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part0',
 						name: 'Part 0',
 						rank: 0,
+						payload: undefined,
 					},
 					{
 						externalId: 'part1',
 						name: 'Part 1',
 						rank: 1,
+						payload: undefined,
 					},
 				],
 			},
@@ -42,16 +46,19 @@ function getDefaultIngestRundown(): IngestRundownWithSource {
 				externalId: 'segment1',
 				name: 'Segment 1',
 				rank: 1,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part2',
 						name: 'Part 2',
 						rank: 0,
+						payload: undefined,
 					},
 					{
 						externalId: 'part3',
 						name: 'Part 3',
 						rank: 1,
+						payload: undefined,
 					},
 				],
 			},
@@ -249,21 +256,25 @@ describe('handleUpdatedRundown', () => {
 		type: 'mos',
 		name: 'Rundown2',
 		rundownSource: { type: 'http' },
+		payload: undefined,
 		segments: [
 			{
 				externalId: 'segment0',
 				name: 'Segment 0b',
 				rank: 0,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part0',
 						name: 'Part 0b',
 						rank: 0,
+						payload: undefined,
 					},
 					{
 						externalId: 'part1',
 						name: 'Part 1b',
 						rank: 1,
+						payload: undefined,
 					},
 				],
 			},
@@ -271,16 +282,19 @@ describe('handleUpdatedRundown', () => {
 				externalId: 'segment2',
 				name: 'Segment 2',
 				rank: 1,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part4',
 						name: 'Part 4',
 						rank: 0,
+						payload: undefined,
 					},
 					{
 						externalId: 'part5',
 						name: 'Part 5',
 						rank: 1,
+						payload: undefined,
 					},
 				],
 			},

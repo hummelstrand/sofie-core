@@ -27,16 +27,19 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			externalId: 'rundown0',
 			type: 'mos',
 			name: 'Rundown',
+			payload: undefined,
 			segments: [
 				{
 					externalId: 'segment-s1p1',
 					name: 'SEGMENT1;PART1',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's1p1',
 							name: 'SEGMENT1;PART1',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -44,11 +47,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					externalId: 'segment-s1p2',
 					name: 'SEGMENT1;PART2',
 					rank: 1,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's1p2',
 							name: 'SEGMENT1;PART2',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -56,11 +61,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					externalId: 'segment-s2p1',
 					name: 'SEGMENT2;PART1',
 					rank: 2,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's2p1',
 							name: 'SEGMENT2;PART1',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -68,11 +75,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					externalId: 'segment-s2p2',
 					name: 'SEGMENT2;PART2',
 					rank: 3,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's2p2',
 							name: 'SEGMENT2;PART2',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -82,21 +91,25 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			externalId: 'rundown0',
 			type: 'mos',
 			name: 'Rundown',
+			payload: undefined,
 			segments: [
 				{
 					externalId: 'rundown0_s1p1',
 					name: 'SEGMENT1',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's1p1',
 							name: 'SEGMENT1;PART1',
 							rank: 0,
+							payload: undefined,
 						},
 						{
 							externalId: 's1p2',
 							name: 'SEGMENT1;PART2',
 							rank: 1,
+							payload: undefined,
 						},
 					],
 				},
@@ -104,16 +117,19 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					externalId: 'rundown0_s2p1',
 					name: 'SEGMENT2',
 					rank: 1,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's2p1',
 							name: 'SEGMENT2;PART1',
 							rank: 0,
+							payload: undefined,
 						},
 						{
 							externalId: 's2p2',
 							name: 'SEGMENT2;PART2',
 							rank: 1,
+							payload: undefined,
 						},
 					],
 				},
@@ -263,11 +279,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 				externalId: 'segment-s1p3',
 				name: 'SEGMENT1;PART3',
 				rank: 3,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 's1p3',
 						name: 'SEGMENT1;PART3',
 						rank: 0,
+						payload: undefined,
 					},
 				],
 			})
@@ -306,11 +324,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 				externalId: 'segment-s2p0',
 				name: 'SEGMENT2;PART0',
 				rank: 3,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 's2p0',
 						name: 'SEGMENT2;PART0',
 						rank: 0,
+						payload: undefined,
 					},
 				],
 			})
@@ -585,16 +605,19 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					externalId: 'rundown0',
 					type: 'mos',
 					name: 'Rundown',
+					payload: undefined,
 					segments: [
 						{
 							externalId: 'rundown0_s1p1',
 							name: 'SEGMENT1',
 							rank: 0,
+							payload: undefined,
 							parts: [
 								{
 									externalId: 's1p1',
 									name: 'SEGMENT1;PART1',
 									rank: 0,
+									payload: undefined,
 								},
 							],
 						},
@@ -602,11 +625,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 							externalId: 'rundown0_s2p1',
 							name: 'SEGMENT2',
 							rank: 1,
+							payload: undefined,
 							parts: [
 								{
 									externalId: 's2p1',
 									name: 'SEGMENT2;PART1',
 									rank: 0,
+									payload: undefined,
 								},
 							],
 						},
@@ -614,11 +639,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 							externalId: 'rundown0_s1p2',
 							name: 'SEGMENT1',
 							rank: 2,
+							payload: undefined,
 							parts: [
 								{
 									externalId: 's1p2',
 									name: 'SEGMENT1;PART2',
 									rank: 0,
+									payload: undefined,
 								},
 							],
 						},
@@ -626,11 +653,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 							externalId: 'rundown0_s2p2',
 							name: 'SEGMENT2',
 							rank: 3,
+							payload: undefined,
 							parts: [
 								{
 									externalId: 's2p2',
 									name: 'SEGMENT2;PART2',
 									rank: 0,
+									payload: undefined,
 								},
 							],
 						},

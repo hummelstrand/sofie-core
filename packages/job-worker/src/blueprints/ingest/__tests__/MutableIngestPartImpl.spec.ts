@@ -4,7 +4,7 @@ import { clone } from '@sofie-automation/corelib/dist/lib'
 import { toSofieIngestPart } from './util'
 
 describe('MutableIngestPartImpl', () => {
-	function getBasicIngestPart(): IngestPart {
+	function getBasicIngestPart(): IngestPart<any> {
 		return {
 			externalId: 'externalId',
 			name: 'name',

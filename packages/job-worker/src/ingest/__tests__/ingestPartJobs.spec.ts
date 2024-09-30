@@ -10,21 +10,25 @@ function getDefaultIngestRundown(): IngestRundownWithSource {
 		externalId: 'rundown0',
 		type: 'mos',
 		name: 'Rundown',
+		payload: undefined,
 		segments: [
 			{
 				externalId: 'segment0',
 				name: 'Segment 0',
 				rank: 0,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part0',
 						name: 'Part 0',
 						rank: 0,
+						payload: undefined,
 					},
 					{
 						externalId: 'part1',
 						name: 'Part 1',
 						rank: 1,
+						payload: undefined,
 					},
 				],
 			},
@@ -32,16 +36,19 @@ function getDefaultIngestRundown(): IngestRundownWithSource {
 				externalId: 'segment1',
 				name: 'Segment 1',
 				rank: 1,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part2',
 						name: 'Part 2',
 						rank: 0,
+						payload: undefined,
 					},
 					{
 						externalId: 'part3',
 						name: 'Part 3',
 						rank: 1,
+						payload: undefined,
 					},
 				],
 			},

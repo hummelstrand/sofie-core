@@ -8,7 +8,7 @@ import { IngestPart, IngestSegment } from '@sofie-automation/blueprints-integrat
 import { toSofieIngestPart, toSofieIngestSegment } from './util'
 
 describe('MutableIngestSegmentImpl', () => {
-	function getBasicIngestSegment(): IngestSegment {
+	function getBasicIngestSegment(): IngestSegment<any> {
 		return {
 			externalId: 'externalId',
 			name: 'name',

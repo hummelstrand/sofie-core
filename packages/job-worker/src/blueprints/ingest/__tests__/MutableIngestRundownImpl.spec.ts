@@ -10,7 +10,7 @@ import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataMode
 import { toSofieIngestRundown, toSofieIngestSegment } from './util'
 
 describe('MutableIngestRundownImpl', () => {
-	function getBasicIngestRundown(): IngestRundownWithSource {
+	function getBasicIngestRundown(): IngestRundownWithSource<any> {
 		return {
 			externalId: 'rundown0',
 			type: 'mock',

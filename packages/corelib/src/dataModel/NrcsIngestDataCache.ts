@@ -9,7 +9,8 @@ export enum NrcsIngestCacheType {
 }
 export type IngestCacheData = IngestRundown | IngestSegment | IngestPart
 
-export interface IngestRundownWithSource extends IngestRundown {
+export interface IngestRundownWithSource<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown>
+	extends IngestRundown<TRundownPayload, TSegmentPayload, TPartPayload> {
 	rundownSource: RundownSource
 }
 

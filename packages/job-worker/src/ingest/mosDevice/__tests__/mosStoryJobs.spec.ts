@@ -22,16 +22,19 @@ function getDefaultIngestRundown(): IngestRundownWithSource {
 		type: 'mos',
 		name: 'Rundown',
 		rundownSource: { type: 'http' },
+		payload: undefined,
 		segments: [
 			{
 				externalId: 'segment-part0',
 				name: 'Part 0',
 				rank: 0,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part0',
 						name: 'Part 0',
 						rank: 0,
+						payload: undefined,
 					},
 				],
 			},
@@ -39,11 +42,13 @@ function getDefaultIngestRundown(): IngestRundownWithSource {
 				externalId: 'segment-part1',
 				name: 'Part 1',
 				rank: 1,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part1',
 						name: 'Part 1',
 						rank: 0,
+						payload: undefined,
 					},
 				],
 			},
@@ -51,11 +56,13 @@ function getDefaultIngestRundown(): IngestRundownWithSource {
 				externalId: 'segment-part2',
 				name: 'Part 2',
 				rank: 2,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part2',
 						name: 'Part 2',
 						rank: 0,
+						payload: undefined,
 					},
 				],
 			},
@@ -63,11 +70,13 @@ function getDefaultIngestRundown(): IngestRundownWithSource {
 				externalId: 'segment-part3',
 				name: 'Part 3',
 				rank: 3,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part3',
 						name: 'Part 3',
 						rank: 0,
+						payload: undefined,
 					},
 				],
 			},
@@ -310,6 +319,7 @@ describe('handleMosInsertStories', () => {
 			externalId: 'segment-partX',
 			name: 'Part X',
 			rank: 1,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'partX',
@@ -356,6 +366,7 @@ describe('handleMosInsertStories', () => {
 			externalId: 'segment-partX',
 			name: 'Part X',
 			rank: 1,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'partX',
@@ -400,6 +411,7 @@ describe('handleMosInsertStories', () => {
 			externalId: 'segment-partX',
 			name: 'Part X',
 			rank: 4,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'partX',
