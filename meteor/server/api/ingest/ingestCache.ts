@@ -1,6 +1,6 @@
 import * as _ from 'underscore'
 import { Meteor } from 'meteor/meteor'
-import { IngestRundown, IngestSegment, IngestPart } from '@sofie-automation/blueprints-integration'
+import { IngestRundown, IngestSegment } from '@sofie-automation/blueprints-integration'
 import { logger } from '../../logging'
 import { profiler } from '../profiler'
 import { RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'

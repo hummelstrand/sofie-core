@@ -177,6 +177,7 @@ describe('handleMosFullStory', () => {
 		RunningOrderId: mosTypes.mosString128.create('rundown0'),
 		Body: [
 			{
+				itemType: 'other',
 				Type: 'p',
 				Content: 'Hello World!',
 			},
