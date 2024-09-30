@@ -1,19 +1,20 @@
 import type {
-	IngestSegment,
 	MutableIngestRundown,
 	MutableIngestSegment,
 	MutableIngestPart,
+	IngestSegment,
+	SofieIngestSegment,
 } from '@sofie-automation/blueprints-integration'
 import { Complete, clone, omit } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { MutableIngestSegmentImpl } from './MutableIngestSegmentImpl'
-import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
+import { SofieIngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { SofieIngestRundownDataCacheGenerator } from '../../ingest/sofieIngestCache'
 import {
-	IngestRundownWithSource,
-	NrcsIngestDataCacheObj,
-} from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+	SofieIngestDataCacheObj,
+	SofieIngestRundownWithSource,
+} from '@sofie-automation/corelib/dist/dataModel/SofieIngestDataCache'
 import type { ComputedIngestChangeObject } from '../../ingest/runOperation'
 import { RundownSource } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 
@@ -22,14 +23,17 @@ export interface MutableIngestRundownChanges {
 	computedChanges: ComputedIngestChangeObject
 
 	// define what portions of the ingestRundown need saving
-	changedCacheObjects: NrcsIngestDataCacheObj[]
-	allCacheObjectIds: IngestDataCacheObjId[]
+	changedCacheObjects: SofieIngestDataCacheObj[]
+	allCacheObjectIds: SofieIngestDataCacheObjId[]
 }
 
 export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown>
 	implements MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>
 {
-	readonly ingestRundown: Omit<IngestRundownWithSource, 'segments'>
+	readonly ingestRundown: Omit<
+		SofieIngestRundownWithSource<TRundownPayload, TSegmentPayload, TPartPayload>,
+		'segments'
+	>
 	#hasChangesToRundown = false
 	// #segmentOrderChanged = false
 
@@ -37,7 +41,10 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 	readonly #originalSegmentRanks = new Map<string, number>()
 
-	constructor(ingestRundown: IngestRundownWithSource, isExistingRundown: boolean) {
+	constructor(
+		ingestRundown: SofieIngestRundownWithSource<TRundownPayload, TSegmentPayload, TPartPayload>,
+		isExistingRundown: boolean
+	) {
 		this.ingestRundown = omit(ingestRundown, 'segments')
 		this.#segments = ingestRundown.segments
 			.slice() // shallow copy
@@ -67,7 +74,11 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	get payload(): ReadonlyDeep<TRundownPayload> | undefined {
-		return this.ingestRundown.payload
+		return this.ingestRundown.payload as ReadonlyDeep<TRundownPayload>
+	}
+
+	get userEditStates(): Record<string, boolean> {
+		return this.ingestRundown.userEditStates ?? {}
 	}
 
 	/**
@@ -98,13 +109,17 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		}
 	}
 
-	setPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void {
+	setPayloadProperty<TKey extends keyof TRundownPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TRundownPayload[TKey]> | TRundownPayload[TKey]
+	): void {
 		if (!this.ingestRundown.payload) {
 			throw new Error('Rundown payload is not set')
 		}
 
 		if (this.#hasChangesToRundown || !_.isEqual(this.ingestRundown.payload[key], value)) {
-			this.ingestRundown.payload[key] = clone(value)
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+			;(this.ingestRundown.payload as any)[key] = clone(value)
 			this.#hasChangesToRundown = true
 		}
 	}
@@ -176,12 +191,15 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	replaceSegment(
-		segment: Omit<IngestSegment, 'rank'>,
+		segment: Omit<IngestSegment<TSegmentPayload, TPartPayload>, 'rank'>,
 		beforeSegmentExternalId: string | null
 	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
 		if (segment.externalId === beforeSegmentExternalId) throw new Error('Cannot insert Segment before itself')
 
-		const newSegment = new MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>(segment, true)
+		const newSegment = new MutableIngestSegmentImpl<TSegmentPayload, TPartPayload>(
+			{ ...segment, userEditStates: {}, parts: segment.parts.map((p) => ({ ...p, userEditStates: {} })) },
+			true
+		)
 
 		const oldSegment = this.#segments.find((s) => s.externalId === segment.externalId)
 		if (oldSegment?.originalExternalId) {
@@ -261,30 +279,21 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		// this.#segmentOrderChanged = true
 	}
 
-	/**
-	 * getUserEditState
-	 */
-	getSegmentUserEditState(segmentExternalId: string, key: string): boolean {
-		const segment = this.#segments.find((s) => s.externalId === segmentExternalId)
-		if (!segment) throw new Error(`Segment "${segmentExternalId}" not found`)
-		return segment.userEditStates?.[key] ?? false
-	}
-	/**
-	 * setUserEditState
-	 */
-	setSegmentUserEditState(segmentExternalId: string, key: string, protect: boolean): void {
-		const segment = this.#segments.find((s) => s.externalId === segmentExternalId)
-		if (!segment) throw new Error(`Segment "${segmentExternalId}" not found`)
-		segment.setUserEditState(key, protect)
+	setUserEditState(key: string, value: boolean): void {
+		if (!this.ingestRundown.userEditStates) this.ingestRundown.userEditStates = {}
+		if (this.#hasChangesToRundown || this.ingestRundown.userEditStates[key] !== value) {
+			this.ingestRundown.userEditStates[key] = value
+			this.#hasChangesToRundown = true
+		}
 	}
 
 	/** Note: This is NOT exposed to blueprints */
-	intoIngestRundown(ingestObjectGenerator: RundownIngestDataCacheGenerator): MutableIngestRundownChanges {
-		const ingestSegments: IngestSegment[] = []
-		const changedCacheObjects: NrcsIngestDataCacheObj[] = []
-		const allCacheObjectIds: IngestDataCacheObjId[] = []
+	intoIngestRundown(ingestObjectGenerator: SofieIngestRundownDataCacheGenerator): MutableIngestRundownChanges {
+		const ingestSegments: SofieIngestSegment[] = []
+		const changedCacheObjects: SofieIngestDataCacheObj[] = []
+		const allCacheObjectIds: SofieIngestDataCacheObjId[] = []
 
-		const segmentsToRegenerate: IngestSegment[] = []
+		const segmentsToRegenerate: SofieIngestSegment[] = []
 		const segmentExternalIdChanges: Record<string, string> = {}
 		const segmentsUpdatedRanks: Record<string, number> = {}
 
@@ -306,7 +315,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 				usedPartIds.add(part.externalId)
 			}
 
-			const ingestSegment: Complete<IngestSegment> = {
+			const ingestSegment: Complete<SofieIngestSegment> = {
 				externalId: segment.externalId,
 				rank,
 				name: segment.name,

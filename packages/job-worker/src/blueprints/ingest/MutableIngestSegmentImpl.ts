@@ -1,22 +1,23 @@
 import type {
 	IngestPart,
-	IngestSegment,
 	MutableIngestPart,
 	MutableIngestSegment,
+	SofieIngestPart,
+	SofieIngestSegment,
 } from '@sofie-automation/blueprints-integration'
 import { Complete, clone, omit } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 import { MutableIngestPartImpl } from './MutableIngestPartImpl'
-import { RundownIngestDataCacheGenerator } from '../../ingest/ingestCache'
-import { SofieIngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { SofieIngestRundownDataCacheGenerator } from '../../ingest/sofieIngestCache'
 import { getSegmentId } from '../../ingest/lib'
-import { IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { SofieIngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { SofieIngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/SofieIngestDataCache'
 
 export interface MutableIngestSegmentChanges {
-	ingestParts: IngestPart[]
+	ingestParts: SofieIngestPart[]
 	changedCacheObjects: SofieIngestDataCacheObj[]
-	allCacheObjectIds: IngestDataCacheObjId[]
+	allCacheObjectIds: SofieIngestDataCacheObjId[]
 	segmentHasChanges: boolean
 	partIdsWithChanges: string[]
 	partOrderHasChanged: boolean
@@ -26,7 +27,7 @@ export interface MutableIngestSegmentChanges {
 export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = unknown>
 	implements MutableIngestSegment<TSegmentPayload, TPartPayload>
 {
-	readonly #ingestSegment: Omit<IngestSegment, 'rank' | 'parts'>
+	readonly #ingestSegment: Omit<SofieIngestSegment<TSegmentPayload, TPartPayload>, 'rank' | 'parts'>
 	#originalExternalId: string
 	#segmentHasChanges = false
 	#partOrderHasChanged = false
@@ -41,7 +42,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		}
 	}
 
-	constructor(ingestSegment: Omit<IngestSegment, 'rank'>, hasChanges = false) {
+	constructor(ingestSegment: Omit<SofieIngestSegment<TSegmentPayload, TPartPayload>, 'rank'>, hasChanges = false) {
 		this.#originalExternalId = ingestSegment.externalId
 		this.#ingestSegment = omit(ingestSegment, 'parts')
 		this.#parts = ingestSegment.parts
@@ -64,11 +65,11 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	}
 
 	get payload(): ReadonlyDeep<TSegmentPayload> | undefined {
-		return this.#ingestSegment.payload
+		return this.#ingestSegment.payload as ReadonlyDeep<TSegmentPayload>
 	}
 
-	get userEditStates(): Record<string, boolean> | undefined {
-		return this.#ingestSegment.userEditStates
+	get userEditStates(): Record<string, boolean> {
+		return this.#ingestSegment.userEditStates ?? {}
 	}
 
 	getPart(partExternalId: string): MutableIngestPart<TPartPayload> | undefined {
@@ -116,14 +117,14 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	}
 
 	replacePart(
-		ingestPart: Omit<IngestPart, 'rank'>,
+		ingestPart: Omit<IngestPart<TPartPayload>, 'rank'>,
 		beforePartExternalId: string | null
 	): MutableIngestPart<TPartPayload> {
 		if (ingestPart.externalId === beforePartExternalId) throw new Error('Cannot insert Part before itself')
 
 		this.#removePart(ingestPart.externalId)
 
-		const newPart = new MutableIngestPartImpl<TPartPayload>(ingestPart, true)
+		const newPart = new MutableIngestPartImpl<TPartPayload>({ ...ingestPart, userEditStates: {} }, true)
 
 		if (beforePartExternalId) {
 			const beforeIndex = this.#parts.findIndex((s) => s.externalId === beforePartExternalId)
@@ -163,19 +164,6 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		this.#segmentHasChanges = true
 	}
 
-	#setUserEditState(key: string, protect: boolean): boolean {
-		console.log('setProtectFromNrcsUpdates', protect)
-		if (this.#ingestSegment.userEditStates !== undefined) {
-			this.#ingestSegment.userEditStates[key] = protect
-			this.#segmentHasChanges = true
-		}
-		return true
-	}
-
-	setUserEditState(key: string, protect: boolean): boolean {
-		return this.#setUserEditState(key, protect)
-	}
-
 	/**
 	 * Note: This is not exposed to blueprints
 	 */
@@ -203,51 +191,44 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		}
 	}
 
-	setPayloadProperty<TKey extends keyof TSegmentPayload>(key: TKey, value: TSegmentPayload[TKey]): void {
+	setPayloadProperty<TKey extends keyof TSegmentPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TSegmentPayload[TKey]> | TSegmentPayload[TKey]
+	): void {
 		if (!this.#ingestSegment.payload) {
 			throw new Error('Segment payload is not set')
 		}
 
 		if (this.#segmentHasChanges || !_.isEqual(this.#ingestSegment.payload[key], value)) {
-			this.#ingestSegment.payload[key] = clone(value)
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+			;(this.#ingestSegment.payload as any)[key] = clone(value)
 			this.#segmentHasChanges = true
 		}
 	}
 
-	/**
-	 * getUserEditState
-	 *
-	 */
-	getPartUserEditState(partExternalId: string, key: string): boolean {
-		const part = this.#parts.find((p) => p.externalId === partExternalId)
-		if (!part) throw new Error(`Part "${partExternalId}" not found`)
-		return part.userEditStates?.[key] ?? false
+	setUserEditState(key: string, value: boolean): void {
+		if (!this.#ingestSegment.userEditStates) this.#ingestSegment.userEditStates = {}
+		if (this.#segmentHasChanges || this.#ingestSegment.userEditStates[key] !== value) {
+			this.#ingestSegment.userEditStates[key] = value
+			this.#segmentHasChanges = true
+		}
 	}
 
-	/**
-	 * setUserEditState
-	 */
-	setPartUserEditState(partExternalId: string, key: string, protect: boolean): void {
-		const part = this.#parts.find((p) => p.externalId === partExternalId)
-		if (!part) throw new Error(`Part "${partExternalId}" not found`)
-		part.setUserEditState(key, protect)
-	}
-
-	intoChangesInfo(generator: RundownIngestDataCacheGenerator): MutableIngestSegmentChanges {
-		const ingestParts: IngestPart[] = []
+	intoChangesInfo(generator: SofieIngestRundownDataCacheGenerator): MutableIngestSegmentChanges {
+		const ingestParts: SofieIngestPart[] = []
 		const changedCacheObjects: SofieIngestDataCacheObj[] = []
-		const allCacheObjectIds: IngestDataCacheObjId[] = []
+		const allCacheObjectIds: SofieIngestDataCacheObjId[] = []
 		const partIdsWithChanges: string[] = []
 
 		const segmentId = getSegmentId(generator.rundownId, this.#ingestSegment.externalId)
 
 		this.#parts.forEach((part, rank) => {
-			const ingestPart: Complete<IngestPart> = {
+			const ingestPart: Complete<SofieIngestPart> = {
 				externalId: part.externalId,
 				rank,
 				name: part.name,
 				payload: part.payload,
-				userEditStates: {},
+				userEditStates: part.userEditStates,
 			}
 
 			allCacheObjectIds.push(generator.getPartObjectId(ingestPart.externalId))

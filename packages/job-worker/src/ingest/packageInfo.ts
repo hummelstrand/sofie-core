@@ -46,7 +46,12 @@ export async function handleUpdatedPackageInfoForRundown(
 	}
 
 	await runCustomIngestUpdateOperation(context, data, async (context, ingestModel, ingestRundown) => {
-		if (!ingestRundown) throw new Error('onUpdatedPackageInfoForRundown called but ingestData is undefined')
+		if (!ingestRundown) {
+			logger.error(
+				`onUpdatedPackageInfoForRundown called but ingestRundown is undefined (rundownExternalId: "${data.rundownExternalId}")`
+			)
+			return null
+		}
 
 		/** All segments that need updating */
 		const segmentsToUpdate = new Set<SegmentId>()

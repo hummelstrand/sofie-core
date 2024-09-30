@@ -38,6 +38,7 @@ export function groupMosPartsIntoIngestSegments(
 				name: partGroup.name,
 				rank: i,
 				parts: partGroup.parts.map((part, i) => ({ ...part, rank: i })),
+				payload: undefined,
 			} satisfies IngestSegment)
 	)
 }
@@ -51,14 +52,17 @@ export function groupMosPartsIntoIngestSegments(
  * @param groupPartsIntoSegmentsOrSeparator A string to split the segment name on, or a function to group parts into segments
  * @returns A transformed rundown and changes object
  */
-export function groupPartsInRundownAndChanges(
+export function groupPartsInRundownAndChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 	nrcsIngestRundown: IngestRundown,
 	previousNrcsIngestRundown: IngestRundown | undefined,
 	ingestChanges: Omit<NrcsIngestChangeDetails, 'segmentOrderChanged'>,
-	groupPartsIntoSegments: (ingestSegments: IngestSegment[]) => IngestSegment[]
-): GroupPartsInMosRundownAndChangesResult {
+	groupPartsIntoSegments: (ingestSegments: IngestSegment[]) => IngestSegment<TSegmentPayload, TPartPayload>[]
+): GroupPartsInMosRundownAndChangesResult<TRundownPayload, TSegmentPayload, TPartPayload> {
 	// Combine parts into segments
-	const combinedIngestRundown = groupPartsIntoNewIngestRundown(nrcsIngestRundown, groupPartsIntoSegments)
+	const combinedIngestRundown = groupPartsIntoNewIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>(
+		nrcsIngestRundown,
+		groupPartsIntoSegments
+	)
 
 	// If there is no previous rundown, we need to regenerate everything
 	if (!previousNrcsIngestRundown) {
@@ -167,7 +171,11 @@ function calculateSegmentChanges(
 				const oldPart = oldPartMap.get(part.externalId)
 				if (!oldPart) {
 					segmentPartChanges[part.externalId] = NrcsIngestPartChangeDetails.Inserted
-				} else if (allPartWithChanges.has(part.externalId)) {
+				} else if (
+					allPartWithChanges.has(part.externalId) ||
+					oldPart.name !== part.name ||
+					!_.isEqual(oldPart.payload, part.payload)
+				) {
 					segmentPartChanges[part.externalId] = NrcsIngestPartChangeDetails.Updated
 				}
 			}
@@ -177,11 +185,15 @@ function calculateSegmentChanges(
 				}
 			}
 
+			const payloadChanged =
+				oldIngestSegment.name !== segment.name || !_.isEqual(oldIngestSegment.payload, segment.payload)
+
 			const partOrderChanged = hasPartOrderChanged(segment.parts, oldIngestSegment.parts)
-			if (partOrderChanged || Object.keys(segmentPartChanges).length > 0) {
+			if (partOrderChanged || payloadChanged || Object.keys(segmentPartChanges).length > 0) {
 				segmentChanges[segment.externalId] = {
 					partChanges: segmentPartChanges,
 					partOrderChanged,
+					payloadChanged,
 				}
 			}
 		}
@@ -220,12 +232,12 @@ function hasPartOrderChanged(ingestParts: IngestPart[], oldIngestParts: IngestPa
 	return false
 }
 
-function groupPartsIntoNewIngestRundown(
+function groupPartsIntoNewIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>(
 	ingestRundown: IngestRundown,
-	groupPartsIntoIngestSements: (ingestSegments: IngestSegment[]) => IngestSegment[]
-): IngestRundown {
+	groupPartsIntoIngestSements: (ingestSegments: IngestSegment[]) => IngestSegment<TSegmentPayload, TPartPayload>[]
+): IngestRundown<TRundownPayload, TSegmentPayload, TPartPayload> {
 	return {
-		...ingestRundown,
+		...(ingestRundown as IngestRundown<TRundownPayload>),
 		segments: groupPartsIntoIngestSements(ingestRundown.segments),
 	}
 }

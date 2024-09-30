@@ -3,7 +3,7 @@ import { ITranslatableMessage } from '../TranslatableMessage'
 import { PartId, RundownId, SegmentId } from './Ids'
 import { PartNote } from './Notes'
 import { ReadonlyDeep } from 'type-fest'
-import { CoreUserEditingDefinitionAction } from './Rundown'
+import { CoreUserEditingDefinition } from './Rundown'
 
 export interface PartInvalidReason {
 	message: ITranslatableMessage
@@ -46,7 +46,7 @@ export interface DBPart extends Omit<IBlueprintPart, 'userEdits'> {
 	/**
 	 * User editing definitions for this part
 	 */
-	userEdits?: CoreUserEditingDefinitionAction[]
+	userEditOperations?: CoreUserEditingDefinition[]
 }
 
 export function isPartPlayable(part: Pick<ReadonlyDeep<DBPart>, 'invalid' | 'floated'>): boolean {

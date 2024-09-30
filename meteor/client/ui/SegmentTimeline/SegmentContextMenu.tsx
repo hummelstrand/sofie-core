@@ -61,10 +61,7 @@ export const SegmentContextMenu = withTranslation()(
 
 			const canSetAsNext = !!this.props.playlist?.activationId
 
-			return this.props.studioMode &&
-				this.props.playlist &&
-				this.props.playlist.activationId &&
-				segment?.orphaned !== SegmentOrphanedReason.ADLIB_TESTING ? (
+			return segment?.orphaned !== SegmentOrphanedReason.ADLIB_TESTING ? (
 				<Escape to="document">
 					<ContextMenu id="segment-timeline-context-menu">
 						{part && timecode === null && (
@@ -92,7 +89,7 @@ export const SegmentContextMenu = withTranslation()(
 										isSegmentEditAble,
 										segment.rundownId,
 										segment.name,
-										segment.userEdits,
+										segment.userEditOperations,
 										segment.userEditStates,
 										{
 											segmentExternalId: segment?.externalId,
@@ -173,7 +170,7 @@ export const SegmentContextMenu = withTranslation()(
 									isPartEditAble,
 									part.instance.rundownId,
 									part.instance.part.title,
-									part.instance.part.userEdits,
+									part.instance.part.userEditOperations,
 									part.instance.part.userEditStates,
 									{
 										segmentExternalId: segment?.externalId,

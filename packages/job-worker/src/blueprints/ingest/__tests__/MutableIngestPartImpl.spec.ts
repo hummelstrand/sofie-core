@@ -1,9 +1,10 @@
 import { IngestPart } from '@sofie-automation/blueprints-integration'
 import { MutableIngestPartImpl } from '../MutableIngestPartImpl'
 import { clone } from '@sofie-automation/corelib/dist/lib'
+import { toSofieIngestPart } from './util'
 
 describe('MutableIngestPartImpl', () => {
-	function getBasicIngestPart(): IngestPart {
+	function getBasicIngestPart(): IngestPart<any> {
 		return {
 			externalId: 'externalId',
 			name: 'name',
@@ -17,7 +18,7 @@ describe('MutableIngestPartImpl', () => {
 
 	test('create basic', () => {
 		const ingestPart = getBasicIngestPart()
-		const mutablePart = new MutableIngestPartImpl(clone(ingestPart))
+		const mutablePart = new MutableIngestPartImpl(toSofieIngestPart(clone(ingestPart)))
 
 		// compare properties
 		expect(mutablePart.externalId).toBe(ingestPart.externalId)
@@ -30,7 +31,7 @@ describe('MutableIngestPartImpl', () => {
 
 	test('create basic with changes', () => {
 		const ingestPart = getBasicIngestPart()
-		const mutablePart = new MutableIngestPartImpl(clone(ingestPart), true)
+		const mutablePart = new MutableIngestPartImpl(toSofieIngestPart(clone(ingestPart)), true)
 
 		// compare properties
 		expect(mutablePart.externalId).toBe(ingestPart.externalId)
@@ -46,7 +47,7 @@ describe('MutableIngestPartImpl', () => {
 
 	test('set name', () => {
 		const ingestPart = getBasicIngestPart()
-		const mutablePart = new MutableIngestPartImpl(clone(ingestPart))
+		const mutablePart = new MutableIngestPartImpl(toSofieIngestPart(clone(ingestPart)))
 
 		// compare properties
 		expect(mutablePart.name).toBe(ingestPart.name)
@@ -61,7 +62,7 @@ describe('MutableIngestPartImpl', () => {
 
 	test('replace payload with change', () => {
 		const ingestPart = getBasicIngestPart()
-		const mutablePart = new MutableIngestPartImpl(clone(ingestPart))
+		const mutablePart = new MutableIngestPartImpl(toSofieIngestPart(clone(ingestPart)))
 
 		// compare properties
 		expect(mutablePart.payload).toEqual(ingestPart.payload)
@@ -77,7 +78,7 @@ describe('MutableIngestPartImpl', () => {
 
 	test('replace payload with no change', () => {
 		const ingestPart = getBasicIngestPart()
-		const mutablePart = new MutableIngestPartImpl(clone(ingestPart))
+		const mutablePart = new MutableIngestPartImpl(toSofieIngestPart(clone(ingestPart)))
 
 		// compare properties
 		expect(mutablePart.payload).toEqual(ingestPart.payload)
@@ -92,7 +93,7 @@ describe('MutableIngestPartImpl', () => {
 
 	test('set payload property change', () => {
 		const ingestPart = getBasicIngestPart()
-		const mutablePart = new MutableIngestPartImpl<any>(clone(ingestPart))
+		const mutablePart = new MutableIngestPartImpl<any>(toSofieIngestPart(clone(ingestPart)))
 
 		// compare properties
 		expect(mutablePart.payload).toEqual(ingestPart.payload)
@@ -109,7 +110,7 @@ describe('MutableIngestPartImpl', () => {
 
 	test('set payload property unchanged', () => {
 		const ingestPart = getBasicIngestPart()
-		const mutablePart = new MutableIngestPartImpl<any>(clone(ingestPart))
+		const mutablePart = new MutableIngestPartImpl<any>(toSofieIngestPart(clone(ingestPart)))
 
 		// compare properties
 		expect(mutablePart.payload).toEqual(ingestPart.payload)

@@ -30,6 +30,7 @@ import { logger } from '../logging'
 import { JSONBlobParse, JSONBlobStringify } from '@sofie-automation/shared-lib/dist/lib/JSONBlob'
 import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import { SofieIngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/SofieIngestDataCache'
 
 /**
  * Generate the Playlist owned portions of a Playlist snapshot
@@ -411,7 +412,7 @@ export async function handleRestorePlaylistSnapshot(
 			context,
 			context.directCollections.SofieIngestDataCache,
 			{ rundownId: { $in: rundownIds } },
-			updateItemIds(snapshot.sofieIngestData || snapshot.ingestData, true)
+			updateItemIds(snapshot.sofieIngestData || (snapshot.ingestData as any as SofieIngestDataCacheObj[]), true)
 		),
 		saveIntoDb(
 			context,

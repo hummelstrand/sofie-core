@@ -1,10 +1,6 @@
 import { MockJobContext, setupDefaultJobEnvironment } from '../../__mocks__/context'
 import { clone } from '@sofie-automation/corelib/dist/lib'
-import {
-	IngestChangeType,
-	IngestRundown,
-	NrcsIngestRundownChangeDetails,
-} from '@sofie-automation/blueprints-integration'
+import { IngestChangeType, NrcsIngestRundownChangeDetails } from '@sofie-automation/blueprints-integration'
 import { ComputedIngestChangeAction, UpdateIngestRundownChange } from '../runOperation'
 import {
 	handleRegenerateRundown,
@@ -16,27 +12,33 @@ import {
 import { RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { DBRundown, RundownOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
-function getDefaultIngestRundown(): IngestRundown {
+function getDefaultIngestRundown(): IngestRundownWithSource {
 	return {
 		externalId: 'rundown0',
 		type: 'mos',
 		name: 'Rundown',
+		rundownSource: { type: 'http' },
+		payload: undefined,
 		segments: [
 			{
 				externalId: 'segment0',
 				name: 'Segment 0',
 				rank: 0,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part0',
 						name: 'Part 0',
 						rank: 0,
+						payload: undefined,
 					},
 					{
 						externalId: 'part1',
 						name: 'Part 1',
 						rank: 1,
+						payload: undefined,
 					},
 				],
 			},
@@ -44,16 +46,19 @@ function getDefaultIngestRundown(): IngestRundown {
 				externalId: 'segment1',
 				name: 'Segment 1',
 				rank: 1,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part2',
 						name: 'Part 2',
 						rank: 0,
+						payload: undefined,
 					},
 					{
 						externalId: 'part3',
 						name: 'Part 3',
 						rank: 1,
+						payload: undefined,
 					},
 				],
 			},
@@ -246,25 +251,30 @@ describe('handleUserUnsyncRundown', () => {
 })
 
 describe('handleUpdatedRundown', () => {
-	const newIngestRundown: IngestRundown = {
+	const newIngestRundown: IngestRundownWithSource = {
 		externalId: 'rundown0',
 		type: 'mos',
 		name: 'Rundown2',
+		rundownSource: { type: 'http' },
+		payload: undefined,
 		segments: [
 			{
 				externalId: 'segment0',
 				name: 'Segment 0b',
 				rank: 0,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part0',
 						name: 'Part 0b',
 						rank: 0,
+						payload: undefined,
 					},
 					{
 						externalId: 'part1',
 						name: 'Part 1b',
 						rank: 1,
+						payload: undefined,
 					},
 				],
 			},
@@ -272,16 +282,19 @@ describe('handleUpdatedRundown', () => {
 				externalId: 'segment2',
 				name: 'Segment 2',
 				rank: 1,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 'part4',
 						name: 'Part 4',
 						rank: 0,
+						payload: undefined,
 					},
 					{
 						externalId: 'part5',
 						name: 'Part 5',
 						rank: 1,
+						payload: undefined,
 					},
 				],
 			},
@@ -299,7 +312,7 @@ describe('handleUpdatedRundown', () => {
 				rundownExternalId: 'rundown0',
 				ingestRundown: clone(ingestRundown),
 				isCreateAction: true,
-				rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
+				rundownSource: { type: 'http' },
 			},
 			undefined
 		)
@@ -325,7 +338,7 @@ describe('handleUpdatedRundown', () => {
 					rundownExternalId: 'rundown0',
 					ingestRundown: clone(ingestRundown),
 					isCreateAction: false,
-					rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
+					rundownSource: { type: 'http' },
 				},
 				undefined
 			)
@@ -343,7 +356,7 @@ describe('handleUpdatedRundown', () => {
 				rundownExternalId: 'rundown0',
 				ingestRundown: clone(newIngestRundown),
 				isCreateAction: false,
-				rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
+				rundownSource: { type: 'http' },
 			},
 			clone(ingestRundown)
 		)
@@ -359,10 +372,11 @@ describe('handleUpdatedRundown', () => {
 })
 
 describe('handleUpdatedRundownMetaData', () => {
-	const newIngestRundown: IngestRundown = {
+	const newIngestRundown: IngestRundownWithSource = {
 		externalId: 'rundown0',
 		type: 'mos',
 		name: 'Rundown2',
+		rundownSource: { type: 'http' },
 		segments: [],
 		payload: {
 			key: 'value',
@@ -378,7 +392,7 @@ describe('handleUpdatedRundownMetaData', () => {
 				{
 					rundownExternalId: 'rundown0',
 					ingestRundown: clone(newIngestRundown),
-					rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
+					rundownSource: { type: 'http' },
 				},
 				undefined
 			)
@@ -395,13 +409,13 @@ describe('handleUpdatedRundownMetaData', () => {
 			{
 				rundownExternalId: 'rundown0',
 				ingestRundown: clone(newIngestRundown),
-				rundownSource: { type: 'testing', showStyleVariantId: protectString('showStyleVariant0') },
+				rundownSource: { type: 'http' },
 			},
 			clone(ingestRundown)
 		)
 
 		// update the expected ingestRundown
-		const expectedIngestRundown: IngestRundown = {
+		const expectedIngestRundown: IngestRundownWithSource = {
 			...newIngestRundown,
 			segments: ingestRundown.segments,
 		}

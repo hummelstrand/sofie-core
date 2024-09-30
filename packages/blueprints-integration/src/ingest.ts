@@ -1,6 +1,7 @@
-import { IngestPart, IngestRundown, IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
+import { IngestPart, IngestSegment } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
 import { IBlueprintRundownDBData } from './documents'
 import { ReadonlyDeep } from 'type-fest'
+import { SofieIngestRundown } from './ingest-types'
 
 export {
 	IngestPart,
@@ -11,7 +12,8 @@ export {
 } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
 
 /** The IngesteRundown is extended with data from Core */
-export interface ExtendedIngestRundown extends IngestRundown {
+export interface ExtendedIngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown>
+	extends SofieIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload> {
 	coreData: IBlueprintRundownDBData | undefined
 }
 
@@ -101,7 +103,7 @@ export interface NrcsIngestChangeDetails {
 	/**
 	 * Describes the changes to the rundown itself
 	 */
-	rundownChanges?: NrcsIngestRundownChangeDetails | null
+	rundownChanges?: NrcsIngestRundownChangeDetails
 
 	/**
 	 * Describes the changes to the segments in the rundown
@@ -146,6 +148,8 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 
 	/** Payload of rundown metadata. For use by other blueprints methods */
 	readonly payload: ReadonlyDeep<TRundownPayload> | undefined
+
+	readonly userEditStates: Record<string, boolean>
 
 	/** Array of segments in this rundown */
 	readonly segments: ReadonlyArray<MutableIngestSegment<TSegmentPayload, TPartPayload>>
@@ -192,7 +196,7 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	 * @returns the new MutableIngestSegment
 	 */
 	replaceSegment(
-		segment: Omit<IngestSegment, 'rank'>,
+		segment: Omit<IngestSegment<TSegmentPayload, TPartPayload>, 'rank'>,
 		beforeSegmentExternalId: string | null
 	): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
@@ -252,17 +256,12 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	 * @param key the key of the payload to update
 	 * @param value the new value
 	 */
-	setPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
+	setPayloadProperty<TKey extends keyof TRundownPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TRundownPayload[TKey]> | TRundownPayload[TKey]
+	): void
 
-	/**
-	 * getUserEditState
-	 */
-	getSegmentUserEditState(segmentExternalId: string, key: string): boolean
-
-	/**
-	 * setUserEditState
-	 */
-	setSegmentUserEditState(segmentExternalId: string, key: string, protect: boolean): void
+	setUserEditState(key: string, value: boolean): void
 }
 
 export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = unknown> {
@@ -276,6 +275,8 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 
 	/** Payload of segment metadata. For use by other blueprints methods */
 	readonly payload: ReadonlyDeep<TSegmentPayload> | undefined
+
+	readonly userEditStates: Record<string, boolean>
 
 	/** Array of parts in this segment */
 	readonly parts: ReadonlyArray<MutableIngestPart<TPartPayload>>
@@ -308,7 +309,7 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	 * @returns the new MutableIngestPart
 	 */
 	replacePart(
-		ingestPart: Omit<IngestPart, 'rank'>,
+		ingestPart: Omit<IngestPart<TPartPayload>, 'rank'>,
 		beforePartExternalId: string | null
 	): MutableIngestPart<TPartPayload>
 
@@ -342,16 +343,12 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	 * @param key the key of the payload to update
 	 * @param value the new value
 	 */
-	setPayloadProperty<TKey extends keyof TSegmentPayload>(key: TKey, value: TSegmentPayload[TKey]): void
+	setPayloadProperty<TKey extends keyof TSegmentPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TSegmentPayload[TKey]> | TSegmentPayload[TKey]
+	): void
 
-	/**
-	 * getUserEditState
-	 */
-	getPartUserEditState(partExternalId: string, key: string): boolean
-	/**
-	 * setUserEditState
-	 */
-	setPartUserEditState(partExternalId: string, key: string, protect: boolean): void
+	setUserEditState(key: string, value: boolean): void
 }
 
 export interface MutableIngestPart<TPartPayload = unknown> {
@@ -362,6 +359,8 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 
 	/** Payload of the part. For use by other blueprints methods */
 	readonly payload: ReadonlyDeep<TPartPayload> | undefined
+
+	readonly userEditStates: Record<string, boolean>
 
 	/**
 	 * Set the name of the Part
@@ -381,7 +380,12 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 	 * @param key the key of the payload to update
 	 * @param value the new value
 	 */
-	setPayloadProperty<TKey extends keyof TPartPayload>(key: TKey, value: TPartPayload[TKey]): void
+	setPayloadProperty<TKey extends keyof TPartPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TPartPayload[TKey]> | TPartPayload[TKey]
+	): void
+
+	setUserEditState(key: string, value: boolean): void
 }
 
 export type TransformPayloadFunction<T> = (payload: any, oldPayload: ReadonlyDeep<T> | undefined) => T | ReadonlyDeep<T>

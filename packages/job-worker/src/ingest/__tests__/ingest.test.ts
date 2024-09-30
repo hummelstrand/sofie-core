@@ -45,7 +45,7 @@ import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { insertQueuedPartWithPieces } from '../../playout/adlibUtils'
 import { UserErrorMessage } from '@sofie-automation/corelib/dist/error'
 import { PlayoutPartInstanceModel } from '../../playout/model/PlayoutPartInstanceModel'
-import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { NrcsIngestCacheType } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { wrapGenericIngestJob, wrapGenericIngestJobWithPrecheck } from '../jobWrappers'
 
 const handleRemovedRundownWrapped = wrapGenericIngestJob(handleRemovedRundown)
@@ -62,21 +62,25 @@ const rundownData1: IngestRundown = {
 	externalId: externalId,
 	name: 'MyMockRundown',
 	type: 'mock',
+	payload: undefined,
 	segments: [
 		{
 			externalId: 'segment0',
 			name: 'Segment 0',
 			rank: 0,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'part0',
 					name: 'Part 0',
 					rank: 0,
+					payload: undefined,
 				},
 				{
 					externalId: 'part1',
 					name: 'Part 1',
 					rank: 0,
+					payload: undefined,
 				},
 			],
 		},
@@ -84,11 +88,13 @@ const rundownData1: IngestRundown = {
 			externalId: 'segment1',
 			name: 'Segment 1',
 			rank: 0,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'part2',
 					name: 'Part 2',
 					rank: 0,
+					payload: undefined,
 				},
 			],
 		},
@@ -271,11 +277,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: 'segment2',
 			name: 'Segment 2',
 			rank: 0,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'part3',
 					name: 'Part 3',
 					rank: 0,
+					payload: undefined,
 				},
 			],
 		})
@@ -315,11 +323,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: 'segment2',
 			name: 'Segment 2',
 			rank: 0,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'part3',
 					name: 'Part 3',
 					rank: 0,
+					payload: undefined,
 				},
 			],
 		})
@@ -327,6 +337,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: 'partZ',
 			name: 'Part Z',
 			rank: 0,
+			payload: undefined,
 		})
 
 		await handleUpdatedRundownWrapped(context, {
@@ -367,11 +378,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: 'segment2',
 			name: 'Segment 2',
 			rank: 0,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'part3',
 					name: 'Part 3',
 					rank: 0,
+					payload: undefined,
 				},
 			],
 		})
@@ -446,6 +459,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: externalId,
 			name: 'MyMockRundownRenamed',
 			type: 'mock',
+			payload: undefined,
 		}
 
 		await handleUpdatedRundownMetaDataWrapped(context, {
@@ -530,16 +544,19 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: externalId,
 			name: 'MyMockRundown',
 			type: 'mock',
+			payload: undefined,
 			segments: [
 				{
 					externalId: 'segment0',
 					name: 'Segment 0',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 'part1',
 							name: 'Part 1',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -547,11 +564,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 					externalId: 'segment2',
 					name: 'Segment 2',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 'part3',
 							name: 'Part 3',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -583,16 +602,19 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: externalId,
 			name: 'MyMockRundown',
 			type: 'mock',
+			payload: undefined,
 			segments: [
 				{
 					externalId: 'segment0',
 					name: 'Segment 0',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 'part1',
 							name: 'Part 1',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -645,6 +667,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: segExternalId,
 			name: 'MyMockSegment',
 			rank: 0,
+			payload: undefined,
 			parts: [],
 		}
 
@@ -672,6 +695,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: segExternalId,
 			name: 'MyMockSegment',
 			rank: 0,
+			payload: undefined,
 			parts: [],
 		}
 
@@ -710,6 +734,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: segExternalId,
 			name: 'MyMockSegment2',
 			rank: 0,
+			payload: undefined,
 			parts: [],
 		}
 
@@ -735,11 +760,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: segExternalId,
 			name: 'MyMockSegment',
 			rank: 0,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'part42',
 					name: 'Part 42',
 					rank: 0,
+					payload: undefined,
 				},
 			],
 		}
@@ -771,7 +798,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			{ $set: { orphaned: SegmentOrphanedReason.DELETED } }
 		)
 		await context.mockCollections.NrcsIngestDataCache.remove({
-			type: IngestCacheType.SEGMENT,
+			type: NrcsIngestCacheType.SEGMENT,
 			rundownId: rundown._id,
 		})
 
@@ -786,11 +813,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: segExternalId,
 			name: 'MyMockSegment2',
 			rank: 0,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'part423',
 					name: 'Part 423',
 					rank: 0,
+					payload: undefined,
 				},
 			],
 		}
@@ -827,11 +856,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: segExternalId,
 			name: 'MyMockSegment2',
 			rank: 0,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'part423',
 					name: 'Part 423',
 					rank: 0,
+					payload: undefined,
 				},
 			],
 		}
@@ -859,6 +890,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: segExternalId2,
 			name: 'MyMockSegment',
 			rank: 0,
+			payload: undefined,
 			parts: [],
 		}
 
@@ -939,6 +971,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: '',
 			name: 'MyMockSegment',
 			rank: 0,
+			payload: undefined,
 			parts: [],
 		}
 
@@ -954,7 +987,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 	test('dataSegmentDelete already orphaned segment', async () => {
 		const rundown = await recreateRundown(rundownData1)
 		await context.mockCollections.NrcsIngestDataCache.remove({
-			type: IngestCacheType.SEGMENT,
+			type: NrcsIngestCacheType.SEGMENT,
 			rundownId: rundown._id,
 		})
 
@@ -982,16 +1015,19 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: externalId,
 			name: 'MyMockRundown',
 			type: 'mock',
+			payload: undefined,
 			segments: [
 				{
 					externalId: 'segment0',
 					name: 'Segment 0',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 'part1',
 							name: 'Part 1',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -999,11 +1035,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 					externalId: 'segment2',
 					name: 'Segment 2',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 'part2',
 							name: 'Part 2',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -1011,11 +1049,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 					externalId: segExternalId,
 					name: 'Segment 3',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 'part3',
 							name: 'Part 3',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -1102,6 +1142,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: segExternalId,
 			name: 'MyMockSegment',
 			rank: 0,
+			payload: undefined,
 			parts: [],
 		}
 		await expect(
@@ -1126,6 +1167,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: 'party',
 			name: 'Part Y',
 			rank: 0,
+			payload: undefined,
 		}
 
 		await handleUpdatedPartWrapped(context, {
@@ -1213,47 +1255,48 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: externalId,
 			name: 'MyMockRundown',
 			type: 'mock',
+			payload: undefined,
 			segments: [
 				{
 					externalId: 'segment0',
 					name: 'Segment 0',
 					rank: 1,
-					// payload?: any,
+					payload: undefined,
 					parts: [],
 				},
 				{
 					externalId: 'segment1',
 					name: 'Segment 1',
 					rank: 2,
-					// payload?: any,
+					payload: undefined,
 					parts: [],
 				},
 				{
 					externalId: 'segment2',
 					name: 'Segment 2',
 					rank: 3,
-					// payload?: any,
+					payload: undefined,
 					parts: [],
 				},
 				{
 					externalId: 'segment3',
 					name: 'Segment 3',
 					rank: 4,
-					// payload?: any,
+					payload: undefined,
 					parts: [],
 				},
 				{
 					externalId: 'segment4',
 					name: 'Segment 4',
 					rank: 5,
-					// payload?: any,
+					payload: undefined,
 					parts: [],
 				},
 				{
 					externalId: 'segment5',
 					name: 'Segment 5',
 					rank: 6,
-					// payload?: any,
+					payload: undefined,
 					parts: [],
 				},
 			],
@@ -1386,11 +1429,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: externalId,
 			name: 'MyMockRundown',
 			type: 'mock',
+			payload: undefined,
 			segments: [
 				{
 					externalId: 'segment0',
 					name: 'Segment 0',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 'part0',
@@ -1438,11 +1483,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 					externalId: 'segment1',
 					name: 'Segment 1',
 					rank: 1,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 'part2',
 							name: 'Part 2',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -1562,11 +1609,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: externalId,
 			name: 'MyMockRundown',
 			type: 'mock',
+			payload: undefined,
 			segments: [
 				{
 					externalId: 'segment0',
 					name: 'Segment 0',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 'part0',
@@ -1614,11 +1663,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 					externalId: 'segment1',
 					name: 'Segment 1',
 					rank: 1,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 'part2',
 							name: 'Part 2',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -1626,11 +1677,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 					externalId: 'segment2',
 					name: 'Segment 2',
 					rank: 1,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 'part3',
 							name: 'Part 3',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -1725,11 +1778,13 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: 'segment2',
 			name: 'Segment 2a',
 			rank: 1,
+			payload: undefined,
 			parts: [
 				{
 					externalId: 'part3',
 					name: 'Part 3',
 					rank: 0,
+					payload: undefined,
 				},
 			],
 		}
@@ -1862,6 +1917,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: externalId,
 			name: 'MyMockRundown',
 			type: 'mock',
+			payload: undefined,
 			segments: [
 				{
 					externalId: 'segment0',
@@ -1917,6 +1973,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 							externalId: 'part2',
 							name: 'Part 2',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -2028,6 +2085,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 			externalId: externalId,
 			name: 'MyMockRundown',
 			type: 'mock',
+			payload: undefined,
 			segments: [
 				{
 					externalId: 'segment0',
@@ -2083,6 +2141,7 @@ describe('Test ingest actions for rundowns and segments', () => {
 							externalId: 'part2',
 							name: 'Part 2',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},

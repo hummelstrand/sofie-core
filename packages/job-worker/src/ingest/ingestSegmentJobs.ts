@@ -13,11 +13,11 @@ import {
 import { IngestUpdateOperationFunction, UpdateIngestRundownChange, UpdateIngestRundownResult } from './runOperation'
 import {
 	IngestChangeType,
-	IngestRundown,
 	NrcsIngestSegmentChangeDetailsEnum,
+	SofieIngestRundown,
 } from '@sofie-automation/blueprints-integration'
 import { IngestModel } from './model/IngestModel'
-import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
 /**
  * Regnerate a Segment from the cached IngestSegment
@@ -153,7 +153,7 @@ export async function handleRemoveOrphanedSegemnts(
 	context: JobContext,
 	data: RemoveOrphanedSegmentsProps,
 	ingestModel: IngestModel,
-	ingestRundown: IngestRundown
+	ingestRundown: SofieIngestRundown
 ): Promise<CommitIngestData | null> {
 	// Find the segments that are still orphaned (in case they have resynced before this executes)
 	// We flag them for deletion again, and they will either be kept if they are somehow playing, or purged if they are not

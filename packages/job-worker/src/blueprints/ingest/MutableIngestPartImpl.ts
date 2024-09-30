@@ -1,13 +1,13 @@
-import type { IngestPart, MutableIngestPart } from '@sofie-automation/blueprints-integration'
+import type { SofieIngestPart, MutableIngestPart } from '@sofie-automation/blueprints-integration'
 import { clone } from '@sofie-automation/corelib/dist/lib'
 import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 
 export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIngestPart<TPartPayload> {
-	readonly #ingestPart: Omit<IngestPart, 'rank'>
+	readonly #ingestPart: Omit<SofieIngestPart<TPartPayload>, 'rank'>
 	#hasChanges = false
 
-	constructor(ingestPart: Omit<IngestPart, 'rank'>, hasChanges = false) {
+	constructor(ingestPart: Omit<SofieIngestPart<TPartPayload>, 'rank'>, hasChanges = false) {
 		this.#ingestPart = ingestPart
 		this.#hasChanges = hasChanges
 	}
@@ -21,11 +21,11 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 	}
 
 	get payload(): ReadonlyDeep<TPartPayload> | undefined {
-		return this.#ingestPart.payload
+		return this.#ingestPart.payload as ReadonlyDeep<TPartPayload>
 	}
 
-	get userEditStates(): Record<string, boolean> | undefined {
-		return this.#ingestPart.userEditStates
+	get userEditStates(): Record<string, boolean> {
+		return this.#ingestPart.userEditStates ?? {}
 	}
 
 	setName(name: string): void {
@@ -42,27 +42,27 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 		}
 	}
 
-	setPayloadProperty<TKey extends keyof TPartPayload>(key: TKey, value: TPartPayload[TKey]): void {
+	setPayloadProperty<TKey extends keyof TPartPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TPartPayload[TKey]> | TPartPayload[TKey]
+	): void {
 		if (!this.#ingestPart.payload) {
 			throw new Error('Part payload is not set')
 		}
 
 		if (this.#hasChanges || !_.isEqual(this.#ingestPart.payload[key], value)) {
-			this.#ingestPart.payload[key] = clone(value)
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+			;(this.#ingestPart.payload as any)[key] = clone(value)
 			this.#hasChanges = true
 		}
 	}
 
-	#setUserEditState(key: string, protect: boolean): boolean {
-		if (this.#ingestPart.userEditStates !== undefined) {
-			this.#ingestPart.userEditStates[key] = protect
+	setUserEditState(key: string, value: boolean): void {
+		if (!this.#ingestPart.userEditStates) this.#ingestPart.userEditStates = {}
+		if (this.#hasChanges || this.#ingestPart.userEditStates[key] !== value) {
+			this.#ingestPart.userEditStates[key] = value
 			this.#hasChanges = true
 		}
-		return true
-	}
-
-	setUserEditState(key: string, protect: boolean): boolean {
-		return this.#setUserEditState(key, protect)
 	}
 
 	/**

@@ -1,13 +1,13 @@
-import { RundownId, SegmentId, IngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { RundownId, SegmentId, NrcsIngestDataCacheObjId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import {
 	NrcsIngestDataCacheObj,
-	IngestCacheType,
+	NrcsIngestCacheType,
 	NrcsIngestDataCacheObjRundown,
 	NrcsIngestDataCacheObjSegment,
 	NrcsIngestDataCacheObjPart,
 	IngestRundownWithSource,
-} from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
-import { protectString, unprotectString } from '@sofie-automation/corelib/dist/protectedString'
+} from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
+import { ProtectedString, protectString, unprotectString } from '@sofie-automation/corelib/dist/protectedString'
 import _ = require('underscore')
 import { IngestPart, IngestSegment } from '@sofie-automation/blueprints-integration'
 import { JobContext } from '../jobs'
@@ -19,8 +19,8 @@ import { diffAndReturnLatestObjects } from './model/implementation/utils'
 import { ICollection } from '../db'
 import { getCurrentTime } from '../lib'
 
-export class RundownIngestDataCache {
-	readonly #changedDocumentIds = new Set<IngestDataCacheObjId>()
+export class NrcsIngestRundownDataCache {
+	readonly #changedDocumentIds = new Set<NrcsIngestDataCacheObjId>()
 
 	private constructor(
 		private readonly context: JobContext,
@@ -29,19 +29,10 @@ export class RundownIngestDataCache {
 		private documents: NrcsIngestDataCacheObj[]
 	) {}
 
-	static async create(
-		context: JobContext,
-		collection: ICollection<NrcsIngestDataCacheObj>,
-		rundownId: RundownId
-	): Promise<RundownIngestDataCache> {
-		const docs = await collection.findFetch({ rundownId })
+	static async create(context: JobContext, rundownId: RundownId): Promise<NrcsIngestRundownDataCache> {
+		const docs = await context.directCollections.NrcsIngestDataCache.findFetch({ rundownId })
 
-		return new RundownIngestDataCache(context, collection, rundownId, docs)
-	}
-
-	/** Check whether this cache contains any documents */
-	isEmpty(): boolean {
-		return this.documents.length === 0
+		return new NrcsIngestRundownDataCache(context, context.directCollections.NrcsIngestDataCache, rundownId, docs)
 	}
 
 	/**
@@ -52,7 +43,7 @@ export class RundownIngestDataCache {
 		const span = this.context.startSpan('ingest.ingestCache.loadCachedRundownData')
 
 		const cachedRundown = this.documents.find(
-			(e): e is NrcsIngestDataCacheObjRundown => e.type === IngestCacheType.RUNDOWN
+			(e): e is NrcsIngestDataCacheObjRundown => e.type === NrcsIngestCacheType.RUNDOWN
 		)
 		if (!cachedRundown) {
 			span?.end()
@@ -73,7 +64,7 @@ export class RundownIngestDataCache {
 		const segmentMap = groupByToMap(this.documents.filter(hasSegmentId), 'segmentId')
 		for (const objs of segmentMap.values()) {
 			const segmentEntry = objs.find(
-				(e): e is NrcsIngestDataCacheObjSegment => e.type === IngestCacheType.SEGMENT
+				(e): e is NrcsIngestDataCacheObjSegment => e.type === NrcsIngestCacheType.SEGMENT
 			)
 			if (segmentEntry) {
 				const ingestSegment: IngestSegment = {
@@ -82,7 +73,7 @@ export class RundownIngestDataCache {
 				}
 
 				for (const entry of objs) {
-					if (entry.type === IngestCacheType.PART) {
+					if (entry.type === NrcsIngestCacheType.PART) {
 						ingestSegment.parts.push(entry.data)
 					}
 				}
@@ -123,41 +114,6 @@ export class RundownIngestDataCache {
 	}
 
 	/**
-	 * Remove all documents from the cache other than the ids provided
-	 * @param documentIdsToKeep The IDs of the documents to keep in the cache
-	 */
-	removeAllOtherDocuments(documentIdsToKeep: IngestDataCacheObjId[]): void {
-		const documentIdsToKeepSet = new Set<IngestDataCacheObjId>(documentIdsToKeep)
-
-		const newDocuments: NrcsIngestDataCacheObj[] = []
-		for (const document of this.documents) {
-			if (!documentIdsToKeepSet.has(document._id)) {
-				this.#changedDocumentIds.add(document._id)
-			} else {
-				newDocuments.push(document)
-			}
-		}
-		this.documents = newDocuments
-	}
-
-	/**
-	 * Replace/insert a set of documents into the cache
-	 * This can be used to insert or update multiple documents at once
-	 * This does not diff the documents, it assumes that has already been done prior to calling this method
-	 * @param changedCacheObjects Documents to store in the cache
-	 */
-	replaceDocuments(changedCacheObjects: NrcsIngestDataCacheObj[]): void {
-		const newDocumentsMap = normalizeArrayToMap(this.documents, '_id')
-
-		for (const newDocument of changedCacheObjects) {
-			this.#changedDocumentIds.add(newDocument._id)
-			newDocumentsMap.set(newDocument._id, newDocument)
-		}
-
-		this.documents = Array.from(newDocumentsMap.values())
-	}
-
-	/**
 	 * Write any changes in the cache to the database
 	 */
 	async saveToDatabase(): Promise<void> {
@@ -168,7 +124,7 @@ export class RundownIngestDataCache {
 		const modifiedTime = getCurrentTime()
 
 		const updates: AnyBulkWriteOperation<NrcsIngestDataCacheObj>[] = []
-		const removedIds: IngestDataCacheObjId[] = []
+		const removedIds: NrcsIngestDataCacheObjId[] = []
 		for (const changedId of this.#changedDocumentIds) {
 			const newDoc = documentsMap.get(changedId)
 			if (!newDoc) {
@@ -203,23 +159,23 @@ export class RundownIngestDataCache {
 	}
 }
 
-export class RundownIngestDataCacheGenerator {
+class RundownIngestDataCacheGenerator<TId extends ProtectedString<any>> {
 	constructor(public readonly rundownId: RundownId) {}
 
-	getPartObjectId(partExternalId: string): IngestDataCacheObjId {
-		return protectString<IngestDataCacheObjId>(`${this.rundownId}_part_${partExternalId}`)
+	getPartObjectId(partExternalId: string): TId {
+		return protectString<TId>(`${this.rundownId}_part_${partExternalId}`)
 	}
-	getSegmentObjectId(segmentExternalId: string): IngestDataCacheObjId {
-		return protectString<IngestDataCacheObjId>(`${this.rundownId}_segment_${segmentExternalId}`)
+	getSegmentObjectId(segmentExternalId: string): TId {
+		return protectString<TId>(`${this.rundownId}_segment_${segmentExternalId}`)
 	}
-	getRundownObjectId(): IngestDataCacheObjId {
-		return protectString<IngestDataCacheObjId>(unprotectString(this.rundownId))
+	getRundownObjectId(): TId {
+		return protectString<TId>(unprotectString(this.rundownId))
 	}
 
 	generatePartObject(segmentId: SegmentId, part: IngestPart): NrcsIngestDataCacheObjPart {
 		return {
 			_id: this.getPartObjectId(part.externalId),
-			type: IngestCacheType.PART,
+			type: NrcsIngestCacheType.PART,
 			rundownId: this.rundownId,
 			segmentId: segmentId,
 			partId: getPartId(this.rundownId, part.externalId),
@@ -231,7 +187,7 @@ export class RundownIngestDataCacheGenerator {
 	generateSegmentObject(ingestSegment: SetOptional<IngestSegment, 'parts'>): NrcsIngestDataCacheObjSegment {
 		return {
 			_id: this.getSegmentObjectId(ingestSegment.externalId),
-			type: IngestCacheType.SEGMENT,
+			type: NrcsIngestCacheType.SEGMENT,
 			rundownId: this.rundownId,
 			segmentId: getSegmentId(this.rundownId, ingestSegment.externalId),
 			modified: 0, // Populated when saving
@@ -247,7 +203,7 @@ export class RundownIngestDataCacheGenerator {
 	): NrcsIngestDataCacheObjRundown {
 		return {
 			_id: this.getRundownObjectId(),
-			type: IngestCacheType.RUNDOWN,
+			type: NrcsIngestCacheType.RUNDOWN,
 			rundownId: this.rundownId,
 			modified: 0, // Populated when saving
 			data: {

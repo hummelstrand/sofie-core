@@ -58,5 +58,6 @@ export function mosStoryToIngestSegment(mosStory: MOS.IMOSStory, undefinedPayloa
 				payload: undefinedPayload ? undefined : {},
 			},
 		],
+		payload: undefined,
 	}
 }

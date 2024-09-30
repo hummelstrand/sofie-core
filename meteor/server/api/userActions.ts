@@ -47,7 +47,7 @@ import {
 	StudioId,
 } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { NrcsIngestDataCache, Parts, Pieces, Rundowns } from '../collections'
-import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { NrcsIngestCacheType } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { verifyHashedToken } from './singleUseTokens'
 import { QuickLoopMarker } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { runIngestOperation } from './ingest/lib'
@@ -73,7 +73,7 @@ async function pieceSetInOutPoints(
 	const partCache = await NrcsIngestDataCache.findOneAsync({
 		rundownId: rundown._id,
 		partId: part._id,
-		type: IngestCacheType.PART,
+		type: NrcsIngestCacheType.PART,
 	})
 	if (!partCache) throw new Meteor.Error(404, `Part Cache for "${partId}" not found!`)
 	const piece = await Pieces.findOneAsync(pieceId)
@@ -1236,7 +1236,7 @@ class ServerUserActionAPI
 			userEvent,
 			eventTime,
 			'executeUserChangeOperation',
-			[operationTarget, operation],
+			{ operationTarget, operation },
 			async () => {
 				const access = await RundownPlaylistContentWriteAccess.rundown(this, rundownId)
 				if (!access.rundown) throw new Error(`Rundown "${rundownId}" not found`)

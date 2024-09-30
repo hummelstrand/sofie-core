@@ -19,7 +19,8 @@ import { PieceInstance } from '@sofie-automation/corelib/dist/dataModel/PieceIns
 import { Meteor } from 'meteor/meteor'
 import { EmptyPieceTimelineObjectsBlob } from '@sofie-automation/corelib/dist/dataModel/Piece'
 import {
-	IngestDataCacheObjId,
+	NrcsIngestDataCacheObjId,
+	SofieIngestDataCacheObjId,
 	PartId,
 	PeripheralDeviceId,
 	RundownId,
@@ -53,7 +54,7 @@ import {
 	Segments,
 	SofieIngestDataCache,
 } from '../collections'
-import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { NrcsIngestCacheType } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { JSONBlobStringify } from '@sofie-automation/shared-lib/dist/lib/JSONBlob'
 import {
 	DefaultEnvironment,
@@ -62,6 +63,7 @@ import {
 } from '../../__mocks__/helpers/database'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { Settings } from '../../lib/Settings'
+import { SofieIngestCacheType } from '@sofie-automation/corelib/dist/dataModel/SofieIngestDataCache'
 
 describe('cronjobs', () => {
 	let env: DefaultEnvironment
@@ -174,7 +176,7 @@ describe('cronjobs', () => {
 		testInFiber('Remove NrcsIngestDataCache objects that are not connected to any Rundown', async () => {
 			// Set up a mock rundown, a detached NrcsIngestDataCache object and an object attached to the mock rundown
 			// Detached NrcsIngestDataCache object 0
-			const dataCache0Id = protectString<IngestDataCacheObjId>(getRandomString())
+			const dataCache0Id = protectString<NrcsIngestDataCacheObjId>(getRandomString())
 			await NrcsIngestDataCache.mutableCollection.insertAsync({
 				_id: dataCache0Id,
 				data: {
@@ -182,14 +184,16 @@ describe('cronjobs', () => {
 					name: '',
 					segments: [],
 					type: '',
+					rundownSource: {} as any,
+					payload: undefined,
 				},
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// this one is attached to rundown0
 				rundownId: getRandomId(),
-				type: IngestCacheType.RUNDOWN,
+				type: NrcsIngestCacheType.RUNDOWN,
 			})
 			// Attached NrcsIngestDataCache object 1
-			const dataCache1Id = protectString<IngestDataCacheObjId>(getRandomString())
+			const dataCache1Id = protectString<NrcsIngestDataCacheObjId>(getRandomString())
 			await NrcsIngestDataCache.mutableCollection.insertAsync({
 				_id: dataCache1Id,
 				data: {
@@ -197,11 +201,13 @@ describe('cronjobs', () => {
 					name: '',
 					segments: [],
 					type: '',
+					rundownSource: {} as any,
+					payload: undefined,
 				},
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// just some random ID
 				rundownId: rundownId,
-				type: IngestCacheType.RUNDOWN,
+				type: NrcsIngestCacheType.RUNDOWN,
 			})
 
 			await runCronjobs()
@@ -214,7 +220,7 @@ describe('cronjobs', () => {
 		testInFiber('Remove SofieIngestDataCache objects that are not connected to any Rundown', async () => {
 			// Set up a mock rundown, a detached SofieIngestDataCache object and an object attached to the mock rundown
 			// Detached SofieIngestDataCache object 0
-			const dataCache0Id = protectString<IngestDataCacheObjId>(getRandomString())
+			const dataCache0Id = protectString<SofieIngestDataCacheObjId>(getRandomString())
 			await SofieIngestDataCache.mutableCollection.insertAsync({
 				_id: dataCache0Id,
 				data: {
@@ -222,14 +228,17 @@ describe('cronjobs', () => {
 					name: '',
 					segments: [],
 					type: '',
+					rundownSource: {} as any,
+					userEditStates: {},
+					payload: undefined,
 				},
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// this one is attached to rundown0
 				rundownId: getRandomId(),
-				type: IngestCacheType.RUNDOWN,
+				type: SofieIngestCacheType.RUNDOWN,
 			})
 			// Attached SofieIngestDataCache object 1
-			const dataCache1Id = protectString<IngestDataCacheObjId>(getRandomString())
+			const dataCache1Id = protectString<SofieIngestDataCacheObjId>(getRandomString())
 			await SofieIngestDataCache.mutableCollection.insertAsync({
 				_id: dataCache1Id,
 				data: {
@@ -237,11 +246,14 @@ describe('cronjobs', () => {
 					name: '',
 					segments: [],
 					type: '',
+					rundownSource: {} as any,
+					userEditStates: {},
+					payload: undefined,
 				},
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// just some random ID
 				rundownId: rundownId,
-				type: IngestCacheType.RUNDOWN,
+				type: SofieIngestCacheType.RUNDOWN,
 			})
 
 			await runCronjobs()

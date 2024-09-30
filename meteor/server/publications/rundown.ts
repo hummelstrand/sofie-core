@@ -29,7 +29,7 @@ import {
 	Segments,
 } from '../collections'
 import { DBRundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
-import { IngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { NrcsIngestDataCacheObj } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { literal } from '@sofie-automation/corelib/dist/lib'
 import {
 	PartId,
@@ -532,9 +532,9 @@ meteorPublish(
 // Note: this publication is for dev purposes only:
 meteorPublish(
 	CorelibPubSub.ingestDataCache,
-	async function (selector: MongoQuery<IngestDataCacheObj>, token: string | undefined) {
+	async function (selector: MongoQuery<NrcsIngestDataCacheObj>, token: string | undefined) {
 		if (!selector) throw new Meteor.Error(400, 'selector argument missing')
-		const modifier: FindOptions<IngestDataCacheObj> = {
+		const modifier: FindOptions<NrcsIngestDataCacheObj> = {
 			fields: {},
 		}
 		if (

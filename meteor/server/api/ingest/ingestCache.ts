@@ -6,15 +6,15 @@ import { profiler } from '../profiler'
 import { RundownId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { NrcsIngestDataCache } from '../../collections'
 import {
-	IngestCacheType,
-	IngestDataCacheObj,
-	IngestDataCacheObjRundown,
-	IngestDataCacheObjSegment,
-} from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+	NrcsIngestCacheType,
+	NrcsIngestDataCacheObj,
+	NrcsIngestDataCacheObjRundown,
+	NrcsIngestDataCacheObjSegment,
+} from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { groupByToMap } from '@sofie-automation/corelib/dist/lib'
 
 export class RundownIngestDataCache {
-	private constructor(private readonly rundownId: RundownId, private readonly documents: IngestDataCacheObj[]) {}
+	private constructor(private readonly rundownId: RundownId, private readonly documents: NrcsIngestDataCacheObj[]) {}
 
 	static async create(rundownId: RundownId): Promise<RundownIngestDataCache> {
 		const docs = await NrcsIngestDataCache.findFetchAsync({ rundownId })
@@ -26,7 +26,7 @@ export class RundownIngestDataCache {
 		const span = profiler.startSpan('ingest.ingestCache.loadCachedRundownData')
 
 		const cachedRundown = this.documents.find(
-			(e): e is IngestDataCacheObjRundown => e.type === IngestCacheType.RUNDOWN
+			(e): e is NrcsIngestDataCacheObjRundown => e.type === NrcsIngestCacheType.RUNDOWN
 		)
 		if (!cachedRundown) {
 			span?.end()
@@ -37,12 +37,14 @@ export class RundownIngestDataCache {
 
 		const segmentMap = groupByToMap(this.documents, 'segmentId')
 		for (const objs of segmentMap.values()) {
-			const segmentEntry = objs.find((e): e is IngestDataCacheObjSegment => e.type === IngestCacheType.SEGMENT)
+			const segmentEntry = objs.find(
+				(e): e is NrcsIngestDataCacheObjSegment => e.type === NrcsIngestCacheType.SEGMENT
+			)
 			if (segmentEntry) {
 				const ingestSegment = segmentEntry.data
 
 				for (const entry of objs) {
-					if (entry.type === IngestCacheType.PART) {
+					if (entry.type === NrcsIngestCacheType.PART) {
 						ingestSegment.parts.push(entry.data)
 					}
 				}
@@ -62,7 +64,7 @@ export class RundownIngestDataCache {
 		const cacheEntries = this.documents.filter((d) => d.segmentId && d.segmentId === segmentId)
 
 		const segmentEntries = cacheEntries.filter(
-			(e): e is IngestDataCacheObjSegment => e.type === IngestCacheType.SEGMENT
+			(e): e is NrcsIngestDataCacheObjSegment => e.type === NrcsIngestCacheType.SEGMENT
 		)
 		if (segmentEntries.length > 1)
 			logger.warn(
@@ -71,12 +73,13 @@ export class RundownIngestDataCache {
 
 		const segmentEntry = segmentEntries[0]
 		if (!segmentEntry) return undefined
-		if (segmentEntry.type !== IngestCacheType.SEGMENT) throw new Meteor.Error(500, 'Wrong type on cached segment')
+		if (segmentEntry.type !== NrcsIngestCacheType.SEGMENT)
+			throw new Meteor.Error(500, 'Wrong type on cached segment')
 
 		const ingestSegment = segmentEntry.data
 
 		for (const entry of cacheEntries) {
-			if (entry.type === IngestCacheType.PART) {
+			if (entry.type === NrcsIngestCacheType.PART) {
 				ingestSegment.parts.push(entry.data)
 			}
 		}

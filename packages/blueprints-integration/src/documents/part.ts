@@ -93,7 +93,7 @@ export interface IBlueprintMutatablePart<TPrivateData = unknown, TPublicData = u
 	/**
 	 * User editing definitions for this part
 	 */
-	userEdits?: UserEditingDefinition[]
+	userEditOperations?: UserEditingDefinition[]
 }
 
 export interface HackPartMediaObjectSubscription {

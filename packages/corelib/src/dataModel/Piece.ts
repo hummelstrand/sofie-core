@@ -7,7 +7,7 @@ import {
 } from '@sofie-automation/blueprints-integration'
 import { ProtectedString, protectString, unprotectString } from '../protectedString'
 import { PieceId, RundownId, SegmentId, PartId } from './Ids'
-import { CoreUserEditingDefinitionAction } from './Rundown'
+import { CoreUserEditingDefinition } from './Rundown'
 
 /** A generic list of playback availability statuses for a Piece */
 export enum PieceStatusCode {
@@ -82,7 +82,7 @@ export interface Piece extends PieceGeneric, Omit<IBlueprintPieceDB, '_id' | 'co
 	/**
 	 * User editing definitions for this piece
 	 */
-	userEdits?: CoreUserEditingDefinitionAction[]
+	userEditOperations?: CoreUserEditingDefinition[]
 }
 
 export type PieceTimelineObjectsBlob = ProtectedString<'PieceTimelineObjectsBlob'>

@@ -27,16 +27,19 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			externalId: 'rundown0',
 			type: 'mos',
 			name: 'Rundown',
+			payload: undefined,
 			segments: [
 				{
 					externalId: 'segment-s1p1',
 					name: 'SEGMENT1;PART1',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's1p1',
 							name: 'SEGMENT1;PART1',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -44,11 +47,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					externalId: 'segment-s1p2',
 					name: 'SEGMENT1;PART2',
 					rank: 1,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's1p2',
 							name: 'SEGMENT1;PART2',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -56,11 +61,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					externalId: 'segment-s2p1',
 					name: 'SEGMENT2;PART1',
 					rank: 2,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's2p1',
 							name: 'SEGMENT2;PART1',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -68,11 +75,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					externalId: 'segment-s2p2',
 					name: 'SEGMENT2;PART2',
 					rank: 3,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's2p2',
 							name: 'SEGMENT2;PART2',
 							rank: 0,
+							payload: undefined,
 						},
 					],
 				},
@@ -82,38 +91,45 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			externalId: 'rundown0',
 			type: 'mos',
 			name: 'Rundown',
+			payload: undefined,
 			segments: [
 				{
-					externalId: 'rundown0_SEGMENT1_s1p1',
+					externalId: 'rundown0_s1p1',
 					name: 'SEGMENT1',
 					rank: 0,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's1p1',
 							name: 'SEGMENT1;PART1',
 							rank: 0,
+							payload: undefined,
 						},
 						{
 							externalId: 's1p2',
 							name: 'SEGMENT1;PART2',
 							rank: 1,
+							payload: undefined,
 						},
 					],
 				},
 				{
-					externalId: 'rundown0_SEGMENT2_s2p1',
+					externalId: 'rundown0_s2p1',
 					name: 'SEGMENT2',
 					rank: 1,
+					payload: undefined,
 					parts: [
 						{
 							externalId: 's2p1',
 							name: 'SEGMENT2;PART1',
 							rank: 0,
+							payload: undefined,
 						},
 						{
 							externalId: 's2p2',
 							name: 'SEGMENT2;PART2',
 							rank: 1,
+							payload: undefined,
 						},
 					],
 				},
@@ -209,11 +225,12 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {},
 					segmentChanges: {
-						rundown0_SEGMENT1_s1p1: {
+						rundown0_s1p1: {
 							partChanges: {
 								s1p2: NrcsIngestPartChangeDetails.Inserted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
 					},
 					segmentOrderChanged: false,
@@ -239,10 +256,10 @@ describe('groupPartsInMosRundownAndChanges', () => {
 				ingestChanges: {
 					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {
-						rundown0_SEGMENT2_s2p2: 'rundown0_SEGMENT2_s2p1',
+						rundown0_s2p2: 'rundown0_s2p1',
 					},
 					segmentChanges: {
-						rundown0_SEGMENT2_s2p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
+						rundown0_s2p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 					},
 					segmentOrderChanged: true,
 				},
@@ -262,11 +279,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 				externalId: 'segment-s1p3',
 				name: 'SEGMENT1;PART3',
 				rank: 3,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 's1p3',
 						name: 'SEGMENT1;PART3',
 						rank: 0,
+						payload: undefined,
 					},
 				],
 			})
@@ -279,11 +298,12 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {},
 					segmentChanges: {
-						rundown0_SEGMENT1_s1p1: {
+						rundown0_s1p1: {
 							partChanges: {
 								s1p3: NrcsIngestPartChangeDetails.Deleted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
 					},
 					segmentOrderChanged: false,
@@ -304,11 +324,13 @@ describe('groupPartsInMosRundownAndChanges', () => {
 				externalId: 'segment-s2p0',
 				name: 'SEGMENT2;PART0',
 				rank: 3,
+				payload: undefined,
 				parts: [
 					{
 						externalId: 's2p0',
 						name: 'SEGMENT2;PART0',
 						rank: 0,
+						payload: undefined,
 					},
 				],
 			})
@@ -320,10 +342,10 @@ describe('groupPartsInMosRundownAndChanges', () => {
 				ingestChanges: {
 					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {
-						rundown0_SEGMENT2_s2p0: 'rundown0_SEGMENT2_s2p1',
+						rundown0_s2p0: 'rundown0_s2p1',
 					},
 					segmentChanges: {
-						rundown0_SEGMENT2_s2p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
+						rundown0_s2p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 					},
 					segmentOrderChanged: true,
 				},
@@ -352,17 +374,19 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {},
 					segmentChanges: {
-						rundown0_SEGMENT1_s1p1: {
+						rundown0_s1p1: {
 							partChanges: {
 								s1p2: NrcsIngestPartChangeDetails.Updated,
 							},
 							partOrderChanged: false,
+							payloadChanged: false,
 						},
-						rundown0_SEGMENT2_s2p1: {
+						rundown0_s2p1: {
 							partChanges: {
 								s2p2: NrcsIngestPartChangeDetails.Updated,
 							},
 							partOrderChanged: false,
+							payloadChanged: false,
 						},
 					},
 					segmentOrderChanged: false,
@@ -390,18 +414,24 @@ describe('groupPartsInMosRundownAndChanges', () => {
 				nrcsIngestRundown: combinedIngestRundown,
 				ingestChanges: {
 					source: IngestChangeType.Ingest,
-					changedSegmentExternalIds: {
-						rundown0_SEGMENT0_s1p1: 'rundown0_SEGMENT1_s1p1',
-					},
+					changedSegmentExternalIds: {},
 					segmentChanges: {
-						rundown0_SEGMENT1_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
+						rundown0_s1p1: {
+							partChanges: {
+								// name change counts as a payload change
+								s1p1: NrcsIngestPartChangeDetails.Updated,
+								s1p2: NrcsIngestPartChangeDetails.Updated,
+							},
+							partOrderChanged: false,
+							payloadChanged: true,
+						},
 					},
-					segmentOrderChanged: true,
+					segmentOrderChanged: false,
 				},
 			} satisfies Complete<GroupPartsInMosRundownAndChangesResult>)
 		})
 
-		it('segment renamed and moved', () => {
+		it('segment id changed', () => {
 			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
 
 			const ingestChanges: NrcsIngestChangeDetails = {
@@ -410,9 +440,44 @@ describe('groupPartsInMosRundownAndChanges', () => {
 			}
 
 			const previousIngestRundown = clone(nrcsIngestRundown)
-			previousIngestRundown.segments[0].name = 'SEGMENT0;PART1'
+			previousIngestRundown.segments[0].externalId = 'segment-s1p1-old'
+			previousIngestRundown.segments[0].parts[0].externalId = 's1p1-old'
 			previousIngestRundown.segments[0].parts[0].name = 'SEGMENT0;PART1'
-			previousIngestRundown.segments[1].name = 'SEGMENT0;PART2'
+			previousIngestRundown.segments[1].externalId = 'segment-s1p2-old'
+			previousIngestRundown.segments[1].parts[0].externalId = 's1p2-old'
+			previousIngestRundown.segments[1].parts[0].name = 'SEGMENT0;PART2'
+
+			const result = groupMosPartsInRundownAndChanges(nrcsIngestRundown, previousIngestRundown, ingestChanges)
+
+			expect(result).toEqual({
+				nrcsIngestRundown: combinedIngestRundown,
+				ingestChanges: {
+					source: IngestChangeType.Ingest,
+					changedSegmentExternalIds: {
+						'rundown0_s1p1-old': 'rundown0_s1p1',
+					},
+					segmentChanges: {
+						rundown0_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
+					},
+					segmentOrderChanged: true,
+				},
+			} satisfies Complete<GroupPartsInMosRundownAndChangesResult>)
+		})
+
+		it('segment id changed and moved', () => {
+			const { nrcsIngestRundown, combinedIngestRundown } = createBasicMosIngestRundown()
+
+			const ingestChanges: NrcsIngestChangeDetails = {
+				source: IngestChangeType.Ingest,
+				segmentChanges: {}, // Note: this is ignored for inserts/deletes
+			}
+
+			const previousIngestRundown = clone(nrcsIngestRundown)
+			previousIngestRundown.segments[0].externalId = 'segment-s1p1-old'
+			previousIngestRundown.segments[0].parts[0].externalId = 's1p1-old'
+			previousIngestRundown.segments[0].parts[0].name = 'SEGMENT0;PART1'
+			previousIngestRundown.segments[1].externalId = 'segment-s1p2-old'
+			previousIngestRundown.segments[1].parts[0].externalId = 's1p2-old'
 			previousIngestRundown.segments[1].parts[0].name = 'SEGMENT0;PART2'
 			previousIngestRundown.segments = [
 				previousIngestRundown.segments[2],
@@ -429,10 +494,10 @@ describe('groupPartsInMosRundownAndChanges', () => {
 				ingestChanges: {
 					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {
-						rundown0_SEGMENT0_s1p1: 'rundown0_SEGMENT1_s1p1',
+						'rundown0_s1p1-old': 'rundown0_s1p1',
 					},
 					segmentChanges: {
-						rundown0_SEGMENT1_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
+						rundown0_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 					},
 					segmentOrderChanged: true,
 				},
@@ -463,10 +528,10 @@ describe('groupPartsInMosRundownAndChanges', () => {
 				ingestChanges: {
 					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {
-						rundown0_SEGMENT1_s1p2: 'rundown0_SEGMENT1_s1p1',
+						rundown0_s1p2: 'rundown0_s1p1',
 					},
 					segmentChanges: {
-						rundown0_SEGMENT1_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
+						rundown0_s1p1: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 					},
 					segmentOrderChanged: true,
 				},
@@ -498,20 +563,22 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {},
 					segmentChanges: {
-						rundown0_SEGMENT1_s1p1: {
+						rundown0_s1p1: {
 							partChanges: {
 								s1p2: NrcsIngestPartChangeDetails.Inserted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
-						rundown0_SEGMENT1_s1p2: NrcsIngestSegmentChangeDetailsEnum.Deleted,
-						rundown0_SEGMENT2_s2p1: {
+						rundown0_s1p2: NrcsIngestSegmentChangeDetailsEnum.Deleted,
+						rundown0_s2p1: {
 							partChanges: {
 								s2p2: NrcsIngestPartChangeDetails.Inserted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
-						rundown0_SEGMENT2_s2p2: NrcsIngestSegmentChangeDetailsEnum.Deleted,
+						rundown0_s2p2: NrcsIngestSegmentChangeDetailsEnum.Deleted,
 					},
 					segmentOrderChanged: true,
 				},
@@ -542,52 +609,61 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					externalId: 'rundown0',
 					type: 'mos',
 					name: 'Rundown',
+					payload: undefined,
 					segments: [
 						{
-							externalId: 'rundown0_SEGMENT1_s1p1',
+							externalId: 'rundown0_s1p1',
 							name: 'SEGMENT1',
 							rank: 0,
+							payload: undefined,
 							parts: [
 								{
 									externalId: 's1p1',
 									name: 'SEGMENT1;PART1',
 									rank: 0,
+									payload: undefined,
 								},
 							],
 						},
 						{
-							externalId: 'rundown0_SEGMENT2_s2p1',
+							externalId: 'rundown0_s2p1',
 							name: 'SEGMENT2',
 							rank: 1,
+							payload: undefined,
 							parts: [
 								{
 									externalId: 's2p1',
 									name: 'SEGMENT2;PART1',
 									rank: 0,
+									payload: undefined,
 								},
 							],
 						},
 						{
-							externalId: 'rundown0_SEGMENT1_s1p2',
+							externalId: 'rundown0_s1p2',
 							name: 'SEGMENT1',
 							rank: 2,
+							payload: undefined,
 							parts: [
 								{
 									externalId: 's1p2',
 									name: 'SEGMENT1;PART2',
 									rank: 0,
+									payload: undefined,
 								},
 							],
 						},
 						{
-							externalId: 'rundown0_SEGMENT2_s2p2',
+							externalId: 'rundown0_s2p2',
 							name: 'SEGMENT2',
 							rank: 3,
+							payload: undefined,
 							parts: [
 								{
 									externalId: 's2p2',
 									name: 'SEGMENT2;PART2',
 									rank: 0,
+									payload: undefined,
 								},
 							],
 						},
@@ -597,20 +673,22 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					source: IngestChangeType.Ingest,
 					changedSegmentExternalIds: {},
 					segmentChanges: {
-						rundown0_SEGMENT1_s1p1: {
+						rundown0_s1p1: {
 							partChanges: {
 								s1p2: NrcsIngestPartChangeDetails.Deleted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
-						rundown0_SEGMENT1_s1p2: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
-						rundown0_SEGMENT2_s2p1: {
+						rundown0_s1p2: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
+						rundown0_s2p1: {
 							partChanges: {
 								s2p2: NrcsIngestPartChangeDetails.Deleted,
 							},
 							partOrderChanged: true,
+							payloadChanged: false,
 						},
-						rundown0_SEGMENT2_s2p2: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
+						rundown0_s2p2: NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated,
 					},
 					segmentOrderChanged: true,
 				},

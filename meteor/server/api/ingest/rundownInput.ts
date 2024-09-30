@@ -16,7 +16,7 @@ import { MethodContext } from '../../../lib/api/methods'
 import { IngestJobs } from '@sofie-automation/corelib/dist/worker/ingest'
 import { MediaObject } from '@sofie-automation/shared-lib/dist/core/model/MediaObjects'
 import { PeripheralDeviceId, RundownId, SegmentId, StudioId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { NrcsIngestCacheType } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
 export namespace RundownInput {
 	export async function dataPlaylistGet(
@@ -415,7 +415,7 @@ async function onMediaObjectChanged(newDocument: MediaObject, oldDocument?: Medi
 			(
 				await NrcsIngestDataCache.findFetchAsync(
 					{
-						type: IngestCacheType.SEGMENT,
+						type: NrcsIngestCacheType.SEGMENT,
 						rundownId: { $in: updateIds.map((obj) => obj.rundownId) },
 					},
 					{

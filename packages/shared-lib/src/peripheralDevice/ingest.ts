@@ -1,10 +1,10 @@
-export interface IngestPlaylist {
+export interface IngestPlaylist<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {
 	/** Id of the playlist. */
 	externalId: string
 	/** Ingest cache of rundowns in this playlist. */
-	rundowns: IngestRundown[]
+	rundowns: IngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>[]
 }
-export interface IngestRundown {
+export interface IngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {
 	/** Id of the rundown as reported by the ingest gateway. Must be unique for each rundown owned by the gateway */
 	externalId: string
 	/** Name of the rundown */
@@ -14,18 +14,12 @@ export interface IngestRundown {
 	type: string
 
 	/** Raw payload of rundown metadata. Only used by the blueprints */
-	payload?: any
+	payload: TRundownPayload
 
 	/** Array of segments in this rundown */
-	segments: IngestSegment[]
-
-	/** States for UserEdits, could be lock from NRCS updates,
-	 * lock from user changes,
-	 * or removedByUser
-	 * */
-	userEditStates?: Record<string, boolean>
+	segments: IngestSegment<TSegmentPayload, TPartPayload>[]
 }
-export interface IngestSegment {
+export interface IngestSegment<TSegmentPayload = unknown, TPartPayload = unknown> {
 	/** Id of the segment as reported by the ingest gateway. Must be unique for each segment in the rundown */
 	externalId: string
 	/** Name of the segment */
@@ -34,18 +28,12 @@ export interface IngestSegment {
 	rank: number
 
 	/** Raw payload of segment metadata. Only used by the blueprints */
-	payload?: any
+	payload: TSegmentPayload
 
 	/** Array of parts in this segment */
-	parts: IngestPart[]
-
-	/** States for UserEdits, could be lock from NRCS updates,
-	 * lock from user changes,
-	 * or removedByUser
-	 * */
-	userEditStates?: Record<string, boolean>
+	parts: IngestPart<TPartPayload>[]
 }
-export interface IngestPart {
+export interface IngestPart<TPartPayload = unknown> {
 	/** Id of the part as reported by the ingest gateway. Must be unique for each part in the rundown */
 	externalId: string
 	/** Name of the part */
@@ -54,16 +42,10 @@ export interface IngestPart {
 	rank: number
 
 	/** Raw payload of the part. Only used by the blueprints */
-	payload?: any
-
-	/** States for UserEdits, could be lock from NRCS updates,
-	 * lock from user changes,
-	 * or removedByUser
-	 * */
-	userEditStates?: Record<string, boolean>
+	payload: TPartPayload
 }
 
-export interface IngestAdlib {
+export interface IngestAdlib<TPayload = unknown> {
 	/** Id of the adlib as reported by the ingest source. Must be unique for each adlib */
 	externalId: string
 	/** Name of the adlib */
@@ -72,11 +54,5 @@ export interface IngestAdlib {
 	/** Type of the raw payload. Only used by the blueprints */
 	payloadType: string
 	/** Raw payload of the adlib. Only used by the blueprints */
-	payload?: any
-
-	/** States for UserEdits, could be lock from NRCS updates,
-	 * lock from user changes,
-	 * or removedByUser
-	 * */
-	userEditStates?: Record<string, boolean>
+	payload: TPayload
 }

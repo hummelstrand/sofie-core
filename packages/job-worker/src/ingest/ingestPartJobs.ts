@@ -2,7 +2,7 @@ import { JobContext } from '../jobs'
 import { IngestRemovePartProps, IngestUpdatePartProps } from '@sofie-automation/corelib/dist/worker/ingest'
 import { UpdateIngestRundownChange } from './runOperation'
 import { IngestChangeType, NrcsIngestPartChangeDetails } from '@sofie-automation/blueprints-integration'
-import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
 /**
  * Remove a Part from a Segment

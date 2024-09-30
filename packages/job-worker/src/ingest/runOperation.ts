@@ -1,6 +1,6 @@
 import { IngestModel, IngestModelReadonly } from './model/IngestModel'
 import { BeforeIngestOperationPartMap, CommitIngestOperation } from './commit'
-import { RundownIngestDataCache, RundownIngestDataCacheGenerator } from './ingestCache'
+import { SofieIngestRundownDataCache, SofieIngestRundownDataCacheGenerator } from './sofieIngestCache'
 import { canRundownBeUpdated, getRundownId, getSegmentId } from './lib'
 import { JobContext } from '../jobs'
 import { IngestPropsBase } from '@sofie-automation/corelib/dist/worker/ingest'
@@ -13,7 +13,7 @@ import {
 	NrcsIngestChangeDetails,
 	IngestRundown,
 	UserOperationChange,
-	IngestSegment,
+	SofieIngestSegment,
 } from '@sofie-automation/blueprints-integration'
 import { MutableIngestRundownImpl } from '../blueprints/ingest/MutableIngestRundownImpl'
 import { ProcessIngestDataContext } from '../blueprints/context'
@@ -21,7 +21,9 @@ import { PartId, RundownId, SegmentId } from '@sofie-automation/corelib/dist/dat
 import { GenerateRundownMode, updateRundownFromIngestData, updateRundownFromIngestDataInner } from './generationRundown'
 import { calculateSegmentsAndRemovalsFromIngestData, calculateSegmentsFromIngestData } from './generationSegment'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
-import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
+import { SofieIngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/SofieIngestDataCache'
+import { NrcsIngestRundownDataCache } from './nrcsIngestCache'
 
 export enum ComputedIngestChangeAction {
 	DELETE = 'delete',
@@ -36,12 +38,12 @@ export interface UpdateIngestRundownChange {
 export type UpdateIngestRundownResult = UpdateIngestRundownChange | ComputedIngestChangeAction
 
 export interface ComputedIngestChangeObject {
-	ingestRundown: IngestRundownWithSource
+	ingestRundown: SofieIngestRundownWithSource
 
 	// define what needs regenerating
 	segmentsToRemove: string[]
 	segmentsUpdatedRanks: Record<string, number> // contains the new rank
-	segmentsToRegenerate: IngestSegment[]
+	segmentsToRegenerate: SofieIngestSegment[]
 	regenerateRundown: boolean // Future: full vs metadata?
 
 	segmentExternalIdChanges: Record<string, string> // old -> new
@@ -62,7 +64,7 @@ export async function runCustomIngestUpdateOperation(
 	doWorkFcn: (
 		context: JobContext,
 		ingestModel: IngestModel,
-		ingestRundown: IngestRundownWithSource
+		ingestRundown: SofieIngestRundownWithSource
 	) => Promise<CommitIngestData | null>
 ): Promise<RundownId> {
 	if (!data.rundownExternalId) {
@@ -76,11 +78,7 @@ export async function runCustomIngestUpdateOperation(
 		// Load the old ingest data
 		const pIngestModel = loadIngestModelFromRundownExternalId(context, rundownLock, data.rundownExternalId)
 		pIngestModel.catch(() => null) // Prevent unhandled promise rejection
-		const sofieIngestObjectCache = await RundownIngestDataCache.create(
-			context,
-			context.directCollections.SofieIngestDataCache,
-			rundownId
-		)
+		const sofieIngestObjectCache = await SofieIngestRundownDataCache.create(context, rundownId)
 		const sofieIngestRundown = sofieIngestObjectCache.fetchRundown()
 		if (!sofieIngestRundown) throw new Error(`SofieIngestRundown "${rundownId}" not found`)
 
@@ -152,7 +150,7 @@ export async function runIngestUpdateOperation(
 export async function runIngestUpdateOperationBase(
 	context: JobContext,
 	data: IngestPropsBase,
-	executeFcn: (nrcsIngestObjectCache: RundownIngestDataCache) => Promise<UpdateIngestRundownResult>
+	executeFcn: (nrcsIngestObjectCache: NrcsIngestRundownDataCache) => Promise<UpdateIngestRundownResult>
 ): Promise<RundownId> {
 	if (!data.rundownExternalId) {
 		throw new Error(`Job is missing rundownExternalId`)
@@ -165,17 +163,9 @@ export async function runIngestUpdateOperationBase(
 		// Load the old ingest data
 		const pIngestModel = loadIngestModelFromRundownExternalId(context, rundownLock, data.rundownExternalId)
 		pIngestModel.catch(() => null) // Prevent unhandled promise rejection
-		const pSofieIngestObjectCache = RundownIngestDataCache.create(
-			context,
-			context.directCollections.SofieIngestDataCache,
-			rundownId
-		)
+		const pSofieIngestObjectCache = SofieIngestRundownDataCache.create(context, rundownId)
 		pSofieIngestObjectCache.catch(() => null) // Prevent unhandled promise rejection
-		const nrcsIngestObjectCache = await RundownIngestDataCache.create(
-			context,
-			context.directCollections.NrcsIngestDataCache,
-			rundownId
-		)
+		const nrcsIngestObjectCache = await NrcsIngestRundownDataCache.create(context, rundownId)
 		const originalNrcsIngestRundown = clone(nrcsIngestObjectCache.fetchRundown())
 
 		const ingestRundownChanges = await executeFcn(nrcsIngestObjectCache)
@@ -221,7 +211,7 @@ export async function runIngestUpdateOperationBase(
 
 function updateNrcsIngestObjects(
 	context: JobContext,
-	nrcsIngestObjectCache: RundownIngestDataCache,
+	nrcsIngestObjectCache: NrcsIngestRundownDataCache,
 	updateNrcsIngestModelFcn: (oldIngestRundown: IngestRundownWithSource | undefined) => UpdateIngestRundownResult
 ): UpdateIngestRundownResult {
 	const updateNrcsIngestModelSpan = context.startSpan('ingest.calcFcn')
@@ -248,7 +238,7 @@ function updateNrcsIngestObjects(
 async function updateSofieIngestRundown(
 	context: JobContext,
 	rundownId: RundownId,
-	sofieIngestObjectCache: RundownIngestDataCache,
+	sofieIngestObjectCache: SofieIngestRundownDataCache,
 	ingestRundownChanges: UpdateIngestRundownResult,
 	previousNrcsIngestRundown: IngestRundown | undefined
 ): Promise<ComputedIngestChanges | null> {
@@ -279,7 +269,7 @@ async function updateSofieIngestRundown(
 						payload: undefined,
 						userEditStates: {},
 						rundownSource: nrcsIngestRundown.rundownSource,
-					} satisfies Complete<IngestRundownWithSource>,
+					} satisfies Complete<SofieIngestRundownWithSource>,
 					false
 			  )
 
@@ -332,7 +322,7 @@ async function updateSofieIngestRundown(
 		// Ensure the rundownSource is propogated
 		mutableIngestRundown.updateRundownSource(nrcsIngestRundown.rundownSource)
 
-		const ingestObjectGenerator = new RundownIngestDataCacheGenerator(rundownId)
+		const ingestObjectGenerator = new SofieIngestRundownDataCacheGenerator(rundownId)
 		const resultChanges = mutableIngestRundown.intoIngestRundown(ingestObjectGenerator)
 
 		// Sync changes to the cache

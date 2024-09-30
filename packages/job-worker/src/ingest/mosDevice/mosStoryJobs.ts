@@ -24,7 +24,7 @@ import {
 } from '@sofie-automation/blueprints-integration'
 import { IngestUpdateOperationFunction } from '../runOperation'
 import { normalizeArrayToMap } from '@sofie-automation/corelib/dist/lib'
-import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 
 /**
  * Update the payload of a mos story
@@ -171,7 +171,7 @@ export function handleMosInsertStories(
 		for (const segment of newIngestSegments) {
 			segmentChanges[segment.externalId] = NrcsIngestSegmentChangeDetailsEnum.InsertedOrUpdated
 		}
-		if (data.replace && insertBeforeSegmentExternalId) {
+		if (data.replace && insertBeforeSegmentExternalId && !segmentChanges[insertBeforeSegmentExternalId]) {
 			segmentChanges[insertBeforeSegmentExternalId] = NrcsIngestSegmentChangeDetailsEnum.Deleted
 		}
 

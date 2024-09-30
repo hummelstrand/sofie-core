@@ -44,15 +44,19 @@ export interface IProcessIngestDataContext extends IStudioContext {
 	 * @param groupPartsIntoSegments A function to group parts into segments
 	 * @returns A transformed rundown and changes object
 	 */
-	groupPartsInRundownAndChanges(
+	groupPartsInRundownAndChanges<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown>(
 		ingestRundown: IngestRundown,
 		previousIngestRundown: IngestRundown | undefined,
 		ingestChanges: NrcsIngestChangeDetails,
-		groupPartsIntoSegments: (ingestSegments: IngestSegment[]) => IngestSegment[]
-	): GroupPartsInMosRundownAndChangesResult
+		groupPartsIntoSegments: (ingestSegments: IngestSegment[]) => IngestSegment<TSegmentPayload, TPartPayload>[]
+	): GroupPartsInMosRundownAndChangesResult<TRundownPayload, TSegmentPayload, TPartPayload>
 }
 
-export interface GroupPartsInMosRundownAndChangesResult {
-	nrcsIngestRundown: IngestRundown
+export interface GroupPartsInMosRundownAndChangesResult<
+	TRundownPayload = unknown,
+	TSegmentPayload = unknown,
+	TPartPayload = unknown
+> {
+	nrcsIngestRundown: IngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>
 	ingestChanges: NrcsIngestChangeDetails
 }

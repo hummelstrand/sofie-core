@@ -21,7 +21,11 @@ import {
 	PieceLifespan,
 	Time,
 } from '@sofie-automation/blueprints-integration'
-import { PlayoutPartInstanceModel, PlayoutPartInstanceModelSnapshot } from '../PlayoutPartInstanceModel'
+import {
+	PlayoutMutatablePart,
+	PlayoutPartInstanceModel,
+	PlayoutPartInstanceModelSnapshot,
+} from '../PlayoutPartInstanceModel'
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { PlayoutPieceInstanceModel } from '../PlayoutPieceInstanceModel'
 import { PlayoutPieceInstanceModelImpl } from './PlayoutPieceInstanceModelImpl'
@@ -29,7 +33,6 @@ import { EmptyPieceTimelineObjectsBlob } from '@sofie-automation/corelib/dist/da
 import _ = require('underscore')
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { IBlueprintMutatablePartSampleKeys } from '../../../blueprints/context/lib'
-import { CoreUserEditingDefinitionAction } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { QuickLoopService } from '../services/QuickLoopService'
 
 /**
@@ -526,21 +529,23 @@ export class PlayoutPartInstanceModelImpl implements PlayoutPartInstanceModel {
 		this.#setPartInstanceValue('previousPartEndState', previousPartEndState)
 	}
 
-	updatePartProps(props: Partial<IBlueprintMutatablePart>): boolean {
+	updatePartProps(props: Partial<PlayoutMutatablePart>): boolean {
 		// Future: this could do some better validation
 
 		// filter the submission to the allowed ones
 		const trimmedProps: Partial<IBlueprintMutatablePart> = filterPropsToAllowed(props)
 		if (Object.keys(trimmedProps).length === 0) return false
 
-		this.#compareAndSetPartInstanceValue(
-			'part',
-			{
-				...this.partInstanceImpl.part,
-				...(trimmedProps as CoreUserEditingDefinitionAction[] | undefined),
-			},
-			true
-		)
+		const newPart: DBPart = {
+			...this.partInstanceImpl.part,
+			...trimmedProps,
+			userEditOperations: this.partInstanceImpl.part.userEditOperations, // Replaced below if changed
+		}
+
+		// Only replace `userEditOperations` if new values were provided
+		if ('userEditOperations' in trimmedProps) newPart.userEditOperations = props.userEditOperations
+
+		this.#compareAndSetPartInstanceValue('part', newPart, true)
 
 		return true
 	}

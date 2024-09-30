@@ -23,7 +23,7 @@ import { MongoQuery } from '../../../db'
 import { handleRemovedRundown } from '../../ingestRundownJobs'
 import { MOS } from '@sofie-automation/corelib'
 import { groupByToMap, literal, normalizeArrayToMap, omit } from '@sofie-automation/corelib/dist/lib'
-import { IngestCacheType } from '@sofie-automation/corelib/dist/dataModel/IngestDataCache'
+import { NrcsIngestCacheType } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import { getPartId } from '../../lib'
 import { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
 import { handleSetNextPart } from '../../../playout/setNextJobs'
@@ -458,7 +458,7 @@ describe('Test recieved mos ingest payloads', () => {
 		await context.mockCollections.Parts.remove({ _id: { $in: partsToRemove.map((p) => p._id) } })
 		await context.mockCollections.NrcsIngestDataCache.remove({
 			rundownId: rundown._id,
-			type: IngestCacheType.PART,
+			type: NrcsIngestCacheType.PART,
 			partId: { $in: partsToRemove.map((p) => p._id) },
 		})
 	})
@@ -513,13 +513,13 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const partMap = mockRO.segmentIdMap()
 		partMap.splice(1, 0, {
-			segmentId: 'IiRyvJZ9SAVEo_UKYVJUUveInbA_',
+			segmentId: 'Rjo_e_rlOh2eE8XOyVmXZCMgTNY_',
 			segmentName: 'SEGMENT1B',
 			parts: [mosTypes.mosString128.stringify(newPartData.ID)],
 		})
-		partMap[2].segmentId = 'Kbs6joYlqXZr_QeVR7ssTHfJ4kI_'
-		partMap[3].segmentId = 'SIuQJB7ZJNtRcxtqLGljE_qBGo8_'
-		partMap[4].segmentId = 'ddtMj3S9nDPeQ3tkyHTCOYrU414_'
+		partMap[2].segmentId = '6cEU5uY8M93lfQssMy9XaGxT23E_'
+		partMap[3].segmentId = 'rSEZMzZhJ55454sqsU_7TOq_DIk_'
+		partMap[4].segmentId = 'YXMZjMqslZFcM3K4sGelyBYJ_rA_'
 		expect(getPartIdMap(segments, parts)).toEqual(partMap)
 
 		await expectRundownToMatchSnapshot(rundown._id, true, true)
@@ -854,7 +854,7 @@ describe('Test recieved mos ingest payloads', () => {
 		const { segments, parts } = await getRundownData({ _id: rundown._id })
 
 		const partMap = mockRO.segmentIdMap()
-		partMap[0].segmentId = 'is9fJG4C1Q7i4JBj5ccMlCzk1zM_'
+		partMap[0].segmentId = 'o0rZ5k7WadtZ2XSmf_c3txGILuw_'
 		partMap[0].parts[0] = 'ro1;s1;p3'
 		partMap[0].parts[2] = 'ro1;s1;p1'
 		expect(getPartIdMap(segments, parts)).toEqual(partMap)
@@ -863,20 +863,24 @@ describe('Test recieved mos ingest payloads', () => {
 	})
 
 	test('mosRoStorySwap: Swap with self', async () => {
+		await resetOrphanedRundown()
+
 		const rundown = (await context.mockCollections.Rundowns.findOne()) as DBRundown
 		expect(rundown).toBeTruthy()
 
 		const story0 = mosTypes.mosString128.create('ro1;s1;p1')
 
-		await expect(
-			handleMosSwapStoriesWrapped(context, {
-				rundownExternalId: rundown.externalId,
-				story0,
-				story1: story0,
-			})
-		).rejects.toThrow(
-			`Cannot swap part ${mosTypes.mosString128.stringify(story0)} with itself in rundown ${rundown.externalId}`
-		)
+		// Swap should happen without error
+		await handleMosSwapStoriesWrapped(context, {
+			rundownExternalId: rundown.externalId,
+			story0,
+			story1: story0,
+		})
+
+		// should match the default
+		const { segments, parts } = await getRundownData({ _id: rundown._id })
+		const partMap = mockRO.segmentIdMap()
+		expect(getPartIdMap(segments, parts)).toEqual(partMap)
 	})
 
 	test('mosRoStorySwap: Story not found', async () => {
@@ -927,7 +931,7 @@ describe('Test recieved mos ingest payloads', () => {
 
 		const partMap = mockRO.segmentIdMap()
 		partMap[1].parts.push('ro1;s4;p1')
-		partMap[2].segmentId = 'RzYAlXBEVlAqzR8s38yjLxS41xU_'
+		partMap[2].segmentId = 'o6BHLNEWMc9FbHBRRWMOiwQ3IN0_'
 		partMap[2].parts.reverse()
 		partMap.splice(3, 1)
 		expect(getPartIdMap(segments, parts)).toEqual(partMap)
@@ -961,37 +965,37 @@ describe('Test recieved mos ingest payloads', () => {
 			{
 				parts: ['ro1;s1;p1'],
 				segmentName: 'SEGMENT1',
-				segmentId: 'aZYVvzVUYqFQBxY1iavRymzMiys_',
+				segmentId: 'baQfD5zawLDmJTRumGpHDH2MwaM_',
 			},
 			{
 				parts: ['ro1;s2;p2'],
 				segmentName: 'SEGMENT2',
-				segmentId: 'F5ID5_MkDHoJM5rV8VYhh7CFkWA_',
+				segmentId: 'yVemxI_brsRMvHAeFVtG2tahCgU_',
 			},
 			{
 				parts: ['ro1;s1;p3'],
 				segmentName: 'SEGMENT1',
-				segmentId: 'is9fJG4C1Q7i4JBj5ccMlCzk1zM_',
+				segmentId: 'o0rZ5k7WadtZ2XSmf_c3txGILuw_',
 			},
 			{
 				parts: ['ro1;s2;p1'],
 				segmentName: 'SEGMENT2',
-				segmentId: 'Kbs6joYlqXZr_QeVR7ssTHfJ4kI_',
+				segmentId: '6cEU5uY8M93lfQssMy9XaGxT23E_',
 			},
 			{
 				parts: ['ro1;s1;p2'],
 				segmentName: 'SEGMENT1',
-				segmentId: 'KK1Zsy8wo_zZwZOhKln0BoXAIJI_',
+				segmentId: 'zz3BgLI_xxlvfTOTR55skUkKWHk_',
 			},
 			{
 				parts: ['ro1;s3;p1', 'ro1;s3;p2'],
 				segmentName: 'SEGMENT3',
-				segmentId: 'SIuQJB7ZJNtRcxtqLGljE_qBGo8_',
+				segmentId: 'rSEZMzZhJ55454sqsU_7TOq_DIk_',
 			},
 			{
 				parts: ['ro1;s4;p1'],
 				segmentName: 'SEGMENT2',
-				segmentId: 'ddtMj3S9nDPeQ3tkyHTCOYrU414_',
+				segmentId: 'YXMZjMqslZFcM3K4sGelyBYJ_rA_',
 			},
 		]
 		expect(getPartIdMap(segments, parts)).toEqual(partMap)
@@ -1211,7 +1215,7 @@ describe('Test recieved mos ingest payloads', () => {
 				const newSegment = newSegments.find((s) => s.name === newName)
 				if (newSegment) {
 					const oldSegmentId = oldSegment._id
-					expect(oldSegmentId).not.toEqual(newSegment._id) // If the id doesn't change, then the whole test is invalid
+					expect(oldSegmentId).toEqual(newSegment._id) // If the id doesn't change, then the whole test is invalid
 					oldSegment.name = newSegment.name
 					oldSegment._id = newSegment._id
 					oldSegment.externalId = newSegment.externalId

@@ -57,7 +57,7 @@ export interface IBlueprintSegment<TPrivateData = unknown, TPublicData = unknown
 	/**
 	 * User editing definitions for this segment
 	 */
-	userEdits?: UserEditingDefinition[]
+	userEditOperations?: UserEditingDefinition[]
 }
 /** The Segment sent from Core */
 export interface IBlueprintSegmentDB<TPrivateData = unknown, TPublicData = unknown>
