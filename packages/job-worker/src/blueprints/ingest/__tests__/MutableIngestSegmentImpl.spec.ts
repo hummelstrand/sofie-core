@@ -4,11 +4,10 @@ import { SofieIngestRundownDataCacheGenerator } from '../../../ingest/sofieInges
 import { protectString } from '@sofie-automation/corelib/dist/protectedString'
 import { getSegmentId } from '../../../ingest/lib'
 import { MutableIngestPartImpl } from '../MutableIngestPartImpl'
-import { IngestPart, IngestSegment } from '@sofie-automation/blueprints-integration'
-import { toSofieIngestPart, toSofieIngestSegment } from './util'
+import { IngestPart, IngestSegment, SofieIngestSegment } from '@sofie-automation/blueprints-integration'
 
 describe('MutableIngestSegmentImpl', () => {
-	function getBasicIngestSegment(): IngestSegment<any> {
+	function getBasicIngestSegment(): SofieIngestSegment<any> {
 		return {
 			externalId: 'externalId',
 			name: 'name',
@@ -16,6 +15,10 @@ describe('MutableIngestSegmentImpl', () => {
 			payload: {
 				val: 'some-val',
 				second: 5,
+			},
+			userEditStates: {
+				one: true,
+				two: false,
 			},
 			parts: [
 				{
@@ -25,6 +28,7 @@ describe('MutableIngestSegmentImpl', () => {
 					payload: {
 						val: 'some-val',
 					},
+					userEditStates: {},
 				},
 				{
 					externalId: 'part1',
@@ -33,6 +37,7 @@ describe('MutableIngestSegmentImpl', () => {
 					payload: {
 						val: 'second-val',
 					},
+					userEditStates: {},
 				},
 				{
 					externalId: 'part2',
@@ -41,6 +46,7 @@ describe('MutableIngestSegmentImpl', () => {
 					payload: {
 						val: 'third-val',
 					},
+					userEditStates: {},
 				},
 				{
 					externalId: 'part3',
@@ -49,6 +55,7 @@ describe('MutableIngestSegmentImpl', () => {
 					payload: {
 						val: 'last-val',
 					},
+					userEditStates: {},
 				},
 			],
 		}
@@ -56,9 +63,9 @@ describe('MutableIngestSegmentImpl', () => {
 
 	const ingestObjectGenerator = new SofieIngestRundownDataCacheGenerator(protectString('rundownId'))
 
-	function createNoChangesObject(ingestSegment: IngestSegment): MutableIngestSegmentChanges {
+	function createNoChangesObject(ingestSegment: SofieIngestSegment): MutableIngestSegmentChanges {
 		return {
-			ingestParts: ingestSegment.parts.map(toSofieIngestPart),
+			ingestParts: ingestSegment.parts,
 			changedCacheObjects: [],
 			allCacheObjectIds: ingestSegment.parts.map((p) => ingestObjectGenerator.getPartObjectId(p.externalId)),
 			segmentHasChanges: false,
@@ -82,7 +89,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 	test('create basic', () => {
 		const ingestSegment = getBasicIngestSegment()
-		const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+		const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 		// compare properties
 		expect(mutableSegment.externalId).toBe(ingestSegment.externalId)
@@ -96,7 +103,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 	test('create basic with changes', () => {
 		const ingestSegment = getBasicIngestSegment()
-		const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)), true)
+		const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment), true)
 
 		// compare properties
 		expect(mutableSegment.externalId).toBe(ingestSegment.externalId)
@@ -110,9 +117,7 @@ describe('MutableIngestSegmentImpl', () => {
 		const segmentId = getSegmentId(ingestObjectGenerator.rundownId, ingestSegment.externalId)
 		for (const ingestPart of ingestSegment.parts) {
 			expectedChanges.partIdsWithChanges.push(ingestPart.externalId)
-			expectedChanges.changedCacheObjects.push(
-				ingestObjectGenerator.generatePartObject(segmentId, toSofieIngestPart(ingestPart))
-			)
+			expectedChanges.changedCacheObjects.push(ingestObjectGenerator.generatePartObject(segmentId, ingestPart))
 		}
 		expect(mutableSegment.intoChangesInfo(ingestObjectGenerator)).toEqual(expectedChanges)
 
@@ -122,7 +127,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 	test('set name', () => {
 		const ingestSegment = getBasicIngestSegment()
-		const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+		const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 		// compare properties
 		expect(mutableSegment.name).toBe(ingestSegment.name)
@@ -139,7 +144,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 	test('replace payload with change', () => {
 		const ingestSegment = getBasicIngestSegment()
-		const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+		const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 		// compare properties
 		expect(mutableSegment.payload).toEqual(ingestSegment.payload)
@@ -157,7 +162,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 	test('replace payload with no change', () => {
 		const ingestSegment = getBasicIngestSegment()
-		const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+		const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 		// compare properties
 		expect(mutableSegment.payload).toEqual(ingestSegment.payload)
@@ -172,7 +177,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 	test('set payload property change', () => {
 		const ingestSegment = getBasicIngestSegment()
-		const mutableSegment = new MutableIngestSegmentImpl<any>(toSofieIngestSegment(clone(ingestSegment)))
+		const mutableSegment = new MutableIngestSegmentImpl<any>(clone(ingestSegment))
 
 		// compare properties
 		expect(mutableSegment.payload).toEqual(ingestSegment.payload)
@@ -191,7 +196,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 	test('set payload property unchanged', () => {
 		const ingestSegment = getBasicIngestSegment()
-		const mutableSegment = new MutableIngestSegmentImpl<any>(toSofieIngestSegment(clone(ingestSegment)))
+		const mutableSegment = new MutableIngestSegmentImpl<any>(clone(ingestSegment))
 
 		// compare properties
 		expect(mutableSegment.payload).toEqual(ingestSegment.payload)
@@ -205,9 +210,44 @@ describe('MutableIngestSegmentImpl', () => {
 		expect(mutableSegment.intoChangesInfo(ingestObjectGenerator)).toEqual(createNoChangesObject(ingestSegment))
 	})
 
+	test('set user edit state change', () => {
+		const ingestSegment = getBasicIngestSegment()
+		const mutableSegment = new MutableIngestSegmentImpl<any>(clone(ingestSegment))
+
+		// compare properties
+		expect(mutableSegment.userEditStates).toEqual(ingestSegment.userEditStates)
+		expect(mutableSegment.intoChangesInfo(ingestObjectGenerator)).toEqual(createNoChangesObject(ingestSegment))
+
+		const newUserEditStates = { ...ingestSegment.userEditStates, two: true, another: false }
+		mutableSegment.setUserEditState('two', true)
+		mutableSegment.setUserEditState('another', false)
+		expect(mutableSegment.userEditStates).toEqual(newUserEditStates)
+
+		// check it has changes
+		const expectedChanges = createNoChangesObject(ingestSegment)
+		expectedChanges.segmentHasChanges = true
+		expect(mutableSegment.intoChangesInfo(ingestObjectGenerator)).toEqual(expectedChanges)
+	})
+
+	test('set user edit state unchanged', () => {
+		const ingestSegment = getBasicIngestSegment()
+		const mutableSegment = new MutableIngestSegmentImpl<any>(clone(ingestSegment))
+
+		// compare properties
+		expect(mutableSegment.userEditStates).toEqual(ingestSegment.userEditStates)
+		expect(mutableSegment.intoChangesInfo(ingestObjectGenerator)).toEqual(createNoChangesObject(ingestSegment))
+
+		mutableSegment.setUserEditState('one', true)
+		mutableSegment.setUserEditState('two', false)
+		expect(mutableSegment.userEditStates).toEqual(ingestSegment.userEditStates)
+
+		// check it has changes
+		expect(mutableSegment.intoChangesInfo(ingestObjectGenerator)).toEqual(createNoChangesObject(ingestSegment))
+	})
+
 	test('get parts', () => {
 		const ingestSegment = getBasicIngestSegment()
-		const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+		const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 		// compare properties
 		expect(mutableSegment.parts.length).toBe(ingestSegment.parts.length)
@@ -227,7 +267,7 @@ describe('MutableIngestSegmentImpl', () => {
 	describe('removePart', () => {
 		test('good', () => {
 			const ingestSegment = getBasicIngestSegment()
-			const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+			const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 			expect(mutableSegment.removePart('part1')).toBeTruthy()
 
@@ -251,7 +291,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 		test('unknown id', () => {
 			const ingestSegment = getBasicIngestSegment()
-			const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+			const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 			expect(mutableSegment.removePart('partX')).toBeFalsy()
 
@@ -265,7 +305,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 	test('forceRegenerate', () => {
 		const ingestSegment = getBasicIngestSegment()
-		const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+		const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 		// ensure no changes
 		expect(mutableSegment.intoChangesInfo(ingestObjectGenerator)).toEqual(createNoChangesObject(ingestSegment))
@@ -281,7 +321,7 @@ describe('MutableIngestSegmentImpl', () => {
 	describe('replacePart', () => {
 		test('replace existing with a move', () => {
 			const ingestSegment = getBasicIngestSegment()
-			const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+			const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 			expect(mutableSegment.getPart('part1')).toBeDefined()
 			expect(getPartIdOrder(mutableSegment)).toEqual(['part0', 'part1', 'part2', 'part3'])
@@ -304,7 +344,7 @@ describe('MutableIngestSegmentImpl', () => {
 			expect(getPartIdOrder(mutableSegment)).toEqual(['part0', 'part2', 'part3', 'part1'])
 			const expectedIngestSegment = clone(ingestSegment)
 			removePartFromIngestSegment(expectedIngestSegment, 'part1')
-			expectedIngestSegment.parts.push({ ...newPart, rank: 3 })
+			expectedIngestSegment.parts.push({ ...newPart, rank: 3, userEditStates: {} })
 
 			const expectedChanges = createNoChangesObject(expectedIngestSegment)
 			expectedChanges.partOrderHasChanged = true
@@ -312,7 +352,7 @@ describe('MutableIngestSegmentImpl', () => {
 			expectedChanges.changedCacheObjects.push(
 				ingestObjectGenerator.generatePartObject(
 					getSegmentId(ingestObjectGenerator.rundownId, ingestSegment.externalId),
-					toSofieIngestPart({ ...newPart, rank: 3 })
+					{ ...newPart, rank: 3, userEditStates: {} }
 				)
 			)
 
@@ -321,7 +361,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 		test('insert new', () => {
 			const ingestSegment = getBasicIngestSegment()
-			const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+			const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 			expect(mutableSegment.getPart('partX')).toBeUndefined()
 			expect(getPartIdOrder(mutableSegment)).toEqual(['part0', 'part1', 'part2', 'part3'])
@@ -343,7 +383,7 @@ describe('MutableIngestSegmentImpl', () => {
 			// check it has changes
 			expect(getPartIdOrder(mutableSegment)).toEqual(['part0', 'part1', 'part2', 'part3', 'partX'])
 			const expectedIngestSegment = clone(ingestSegment)
-			expectedIngestSegment.parts.push({ ...newPart, rank: 4 })
+			expectedIngestSegment.parts.push({ ...newPart, rank: 4, userEditStates: {} })
 
 			const expectedChanges = createNoChangesObject(expectedIngestSegment)
 			expectedChanges.partOrderHasChanged = true
@@ -351,7 +391,7 @@ describe('MutableIngestSegmentImpl', () => {
 			expectedChanges.changedCacheObjects.push(
 				ingestObjectGenerator.generatePartObject(
 					getSegmentId(ingestObjectGenerator.rundownId, ingestSegment.externalId),
-					toSofieIngestPart({ ...newPart, rank: 4 })
+					{ ...newPart, rank: 4, userEditStates: {} }
 				)
 			)
 
@@ -360,7 +400,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 		test('insert at position', () => {
 			const ingestSegment = getBasicIngestSegment()
-			const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+			const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 			expect(mutableSegment.getPart('partX')).toBeUndefined()
 			expect(getPartIdOrder(mutableSegment)).toEqual(['part0', 'part1', 'part2', 'part3'])
@@ -401,7 +441,7 @@ describe('MutableIngestSegmentImpl', () => {
 	describe('movePartBefore', () => {
 		test('move unknown', () => {
 			const ingestSegment = getBasicIngestSegment()
-			const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+			const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 			expect(mutableSegment.getPart('partX')).toBeUndefined()
 			expect(getPartIdOrder(mutableSegment)).toEqual(['part0', 'part1', 'part2', 'part3'])
@@ -412,7 +452,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 		test('move to position', () => {
 			const ingestSegment = getBasicIngestSegment()
-			const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+			const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 			expect(getPartIdOrder(mutableSegment)).toEqual(['part0', 'part1', 'part2', 'part3'])
 
@@ -444,7 +484,7 @@ describe('MutableIngestSegmentImpl', () => {
 	describe('movePartAfter', () => {
 		test('move unknown', () => {
 			const ingestSegment = getBasicIngestSegment()
-			const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+			const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 			expect(mutableSegment.getPart('partX')).toBeUndefined()
 			expect(getPartIdOrder(mutableSegment)).toEqual(['part0', 'part1', 'part2', 'part3'])
@@ -455,7 +495,7 @@ describe('MutableIngestSegmentImpl', () => {
 
 		test('move to position', () => {
 			const ingestSegment = getBasicIngestSegment()
-			const mutableSegment = new MutableIngestSegmentImpl(toSofieIngestSegment(clone(ingestSegment)))
+			const mutableSegment = new MutableIngestSegmentImpl(clone(ingestSegment))
 
 			expect(getPartIdOrder(mutableSegment)).toEqual(['part0', 'part1', 'part2', 'part3'])
 

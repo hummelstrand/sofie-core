@@ -7,13 +7,13 @@ import type {
 import type { IngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/NrcsIngestDataCache'
 import type { SofieIngestRundownWithSource } from '@sofie-automation/corelib/dist/dataModel/SofieIngestDataCache'
 
-export function toSofieIngestPart(ingestPart: IngestPart): SofieIngestPart {
+function toSofieIngestPart(ingestPart: IngestPart): SofieIngestPart {
 	return {
 		...ingestPart,
 		userEditStates: {},
 	}
 }
-export function toSofieIngestSegment(ingestSegment: IngestSegment): SofieIngestSegment {
+function toSofieIngestSegment(ingestSegment: IngestSegment): SofieIngestSegment {
 	return {
 		...ingestSegment,
 		userEditStates: {},
