@@ -37,12 +37,6 @@ export interface DBPart extends Omit<IBlueprintPart, 'userEdits'> {
 	/** A modified expectedDuration with the piece/transition derived timings factored in */
 	expectedDurationWithTransition: number | undefined
 
-	/** States for UserEdits, could be lock from NRCS updates,
-	 * lock from user changes,
-	 * or removedByUser
-	 * */
-	userEditStates?: Record<string, boolean>
-
 	/**
 	 * User editing definitions for this part
 	 */

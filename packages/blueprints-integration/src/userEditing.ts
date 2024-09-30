@@ -9,6 +9,7 @@ export interface UserEditingDefinitionAction {
 	id: string
 	label: ITranslatableMessage
 	svgIcon?: string
+	isActive?: boolean
 }
 
 export interface UserEditingDefinitionForm {

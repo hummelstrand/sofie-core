@@ -96,7 +96,6 @@ export const IBlueprintPieceObjectsSampleKeys = allKeysOfObject<IBlueprintPiece>
 	allowDirectPlay: true,
 	notInVision: true,
 	abSessions: true,
-	userEditStates: true,
 	userEditOperations: true,
 })
 
@@ -120,7 +119,6 @@ export const IBlueprintMutatablePartSampleKeys = allKeysOfObject<IBlueprintMutat
 	displayDuration: true,
 	identifier: true,
 	hackListenToMediaObjectUpdates: true,
-	userEditStates: true,
 	userEditOperations: true,
 })
 
@@ -240,7 +238,6 @@ export function convertPieceToBlueprints(piece: ReadonlyDeep<PieceInstancePiece>
 		pieceType: piece.pieceType,
 		extendOnHold: piece.extendOnHold,
 		notInVision: piece.notInVision,
-		userEditStates: piece.userEditStates,
 		userEditOperations: translateUserEditsToBlueprint(piece.userEditOperations),
 	}
 
@@ -282,7 +279,6 @@ export function convertPartToBlueprints(part: ReadonlyDeep<DBPart>): IBlueprintP
 		hackListenToMediaObjectUpdates: clone<HackPartMediaObjectSubscription[] | undefined>(
 			part.hackListenToMediaObjectUpdates
 		),
-		userEditStates: part.userEditStates,
 		userEditOperations: translateUserEditsToBlueprint(part.userEditOperations),
 	}
 
@@ -351,7 +347,6 @@ export function convertSegmentToBlueprints(segment: ReadonlyDeep<DBSegment>): IB
 		displayAs: segment.displayAs,
 		showShelf: segment.showShelf,
 		segmentTiming: segment.segmentTiming,
-		userEditStates: segment.userEditStates,
 		userEditOperations: translateUserEditsToBlueprint(segment.userEditOperations),
 	}
 
@@ -377,7 +372,6 @@ export function convertRundownToBlueprints(rundown: ReadonlyDeep<DBRundown>): IB
 		showStyleVariantId: unprotectString(rundown.showStyleVariantId),
 		playlistId: unprotectString(rundown.playlistId),
 		airStatus: rundown.airStatus,
-		userEditStates: rundown.userEditStates,
 		userEditOperations: translateUserEditsToBlueprint(rundown.userEditOperations),
 	}
 
@@ -517,6 +511,7 @@ function translateUserEditsToBlueprint(
 						id: userEdit.id,
 						label: omit(userEdit.label, 'namespaces'),
 						svgIcon: userEdit.svgIcon,
+						isActive: userEdit.isActive,
 					} satisfies Complete<UserEditingDefinitionAction>
 				case UserEditingType.FORM:
 					return {
@@ -549,6 +544,7 @@ export function translateUserEditsFromBlueprint(
 						id: userEdit.id,
 						label: wrapTranslatableMessageFromBlueprints(userEdit.label, blueprintIds),
 						svgIcon: userEdit.svgIcon,
+						isActive: userEdit.isActive,
 					} satisfies Complete<CoreUserEditingDefinitionAction>
 				case UserEditingType.FORM:
 					return {
