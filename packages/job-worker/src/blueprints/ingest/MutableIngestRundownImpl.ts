@@ -103,7 +103,10 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		}
 	}
 
-	setPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void {
+	setPayloadProperty<TKey extends keyof TRundownPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TRundownPayload[TKey]> | TRundownPayload[TKey]
+	): void {
 		if (!this.ingestRundown.payload) {
 			throw new Error('Rundown payload is not set')
 		}

@@ -191,7 +191,10 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		}
 	}
 
-	setPayloadProperty<TKey extends keyof TSegmentPayload>(key: TKey, value: TSegmentPayload[TKey]): void {
+	setPayloadProperty<TKey extends keyof TSegmentPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TSegmentPayload[TKey]> | TSegmentPayload[TKey]
+	): void {
 		if (!this.#ingestSegment.payload) {
 			throw new Error('Segment payload is not set')
 		}

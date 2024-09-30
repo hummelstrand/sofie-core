@@ -255,7 +255,10 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	 * @param key the key of the payload to update
 	 * @param value the new value
 	 */
-	setPayloadProperty<TKey extends keyof TRundownPayload>(key: TKey, value: TRundownPayload[TKey]): void
+	setPayloadProperty<TKey extends keyof TRundownPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TRundownPayload[TKey]> | TRundownPayload[TKey]
+	): void
 
 	setUserEditState(key: string, value: boolean): void
 }
@@ -339,7 +342,10 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	 * @param key the key of the payload to update
 	 * @param value the new value
 	 */
-	setPayloadProperty<TKey extends keyof TSegmentPayload>(key: TKey, value: TSegmentPayload[TKey]): void
+	setPayloadProperty<TKey extends keyof TSegmentPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TSegmentPayload[TKey]> | TSegmentPayload[TKey]
+	): void
 
 	setUserEditState(key: string, value: boolean): void
 }
@@ -373,7 +379,10 @@ export interface MutableIngestPart<TPartPayload = unknown> {
 	 * @param key the key of the payload to update
 	 * @param value the new value
 	 */
-	setPayloadProperty<TKey extends keyof TPartPayload>(key: TKey, value: TPartPayload[TKey]): void
+	setPayloadProperty<TKey extends keyof TPartPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TPartPayload[TKey]> | TPartPayload[TKey]
+	): void
 
 	setUserEditState(key: string, value: boolean): void
 }

@@ -42,7 +42,10 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 		}
 	}
 
-	setPayloadProperty<TKey extends keyof TPartPayload>(key: TKey, value: TPartPayload[TKey]): void {
+	setPayloadProperty<TKey extends keyof TPartPayload>(
+		key: TKey,
+		value: ReadonlyDeep<TPartPayload[TKey]> | TPartPayload[TKey]
+	): void {
 		if (!this.#ingestPart.payload) {
 			throw new Error('Part payload is not set')
 		}
