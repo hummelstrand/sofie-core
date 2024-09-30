@@ -3,13 +3,13 @@ import { assertNever, clone } from '@sofie-automation/corelib/dist/lib'
 import { RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { CoreUserEditingDefinition } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import { JSONBlobParse, UserEditingType, UserOperationTarget } from '@sofie-automation/blueprints-integration'
-import { UserAction, doUserAction } from '../../../lib/clientUserAction'
 import { translateMessage } from '@sofie-automation/corelib/dist/TranslatableMessage'
 import { MenuItem } from '@jstarpl/react-contextmenu'
-import { MeteorCall } from '../../../lib/api/methods'
 import { i18nTranslator } from '../i18n'
 import { doModalDialog } from '../../lib/ModalDialog'
 import { SchemaFormInPlace } from '../../lib/forms/SchemaFormInPlace'
+import { doUserAction, UserAction } from '../../lib/clientUserAction'
+import { MeteorCall } from '../../lib/meteorApi'
 
 export function RenderUserEditOperations(
 	isFormEditable: boolean,
@@ -17,11 +17,11 @@ export function RenderUserEditOperations(
 	targetName: string,
 	userEdits: CoreUserEditingDefinition[] | undefined,
 	operationTarget: UserOperationTarget
-): React.JSX.Element {
+): React.JSX.Element | null {
 	const t = i18nTranslator
-	if (!userEdits || userEdits.length === 0) return <React.Fragment />
+	if (!userEdits || userEdits.length === 0) return null
 	return (
-		<React.Fragment>
+		<>
 			<hr />
 			{userEdits.map((userEdit, i) => {
 				switch (userEdit.type) {
@@ -81,6 +81,6 @@ export function RenderUserEditOperations(
 						return null
 				}
 			})}
-		</React.Fragment>
+		</>
 	)
 }
