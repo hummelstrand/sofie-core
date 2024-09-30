@@ -417,7 +417,11 @@ describe('groupPartsInMosRundownAndChanges', () => {
 					changedSegmentExternalIds: {},
 					segmentChanges: {
 						rundown0_s1p1: {
-							partChanges: {},
+							partChanges: {
+								// name change counts as a payload change
+								s1p1: NrcsIngestPartChangeDetails.Updated,
+								s1p2: NrcsIngestPartChangeDetails.Updated,
+							},
 							partOrderChanged: false,
 							payloadChanged: true,
 						},
