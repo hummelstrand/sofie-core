@@ -92,11 +92,6 @@ export interface Rundown {
 	playlistId: RundownPlaylistId
 	/** If the playlistId has ben set manually by a user in Sofie */
 	playlistIdIsSetInSofie?: boolean
-	/** States for UserEdits, could be lock from NRCS updates,
-	 * lock from user changes,
-	 * or removedByUser
-	 * */
-	userEditStates?: Record<string, boolean>
 	/**
 	 * User editing definitions for this rundown
 	 */
@@ -149,6 +144,7 @@ export interface CoreUserEditingDefinitionAction {
 	id: string
 	label: ITranslatableMessage
 	svgIcon?: string
+	isActive?: boolean
 }
 
 export interface CoreUserEditingDefinitionForm {

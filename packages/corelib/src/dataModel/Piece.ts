@@ -73,12 +73,6 @@ export interface Piece extends PieceGeneric, Omit<IBlueprintPieceDB, '_id' | 'co
 	/** This is set when the part is invalid and these pieces should be ignored */
 	invalid: boolean
 
-	/** States for UserEdits, could be lock from NRCS updates,
-	 * lock from user changes,
-	 * or removedByUser
-	 * */
-	userEditStates?: Record<string, boolean>
-
 	/**
 	 * User editing definitions for this piece
 	 */

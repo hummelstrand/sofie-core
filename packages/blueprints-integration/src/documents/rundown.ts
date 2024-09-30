@@ -28,12 +28,6 @@ export interface IBlueprintRundown<TPrivateData = unknown, TPublicData = unknown
 	 */
 	endOfRundownIsShowBreak?: boolean
 
-	/** States for UserEdits, could be lock from NRCS updates,
-	 * lock from user changes,
-	 * or removedByUser
-	 * */
-	userEditStates?: Record<string, boolean>
-
 	/**
 	 * User editing definitions for this rundown
 	 */
