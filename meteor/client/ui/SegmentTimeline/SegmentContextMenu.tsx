@@ -90,7 +90,6 @@ export const SegmentContextMenu = withTranslation()(
 										segment.rundownId,
 										segment.name,
 										segment.userEditOperations,
-										segment.userEditStates,
 										{
 											segmentExternalId: segment?.externalId,
 											partExternalId: undefined,
@@ -171,7 +170,6 @@ export const SegmentContextMenu = withTranslation()(
 									part.instance.rundownId,
 									part.instance.part.title,
 									part.instance.part.userEditOperations,
-									part.instance.part.userEditStates,
 									{
 										segmentExternalId: segment?.externalId,
 										partExternalId: part.instance.part.externalId,

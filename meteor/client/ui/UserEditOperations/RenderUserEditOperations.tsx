@@ -15,46 +15,43 @@ export function RenderUserEditOperations(
 	isFormEditable: boolean,
 	rundownId: RundownId,
 	targetName: string,
-	userEdits: CoreUserEditingDefinition[] | undefined,
-	userEditStates: Record<string, boolean> | undefined,
+	userEditOperations: CoreUserEditingDefinition[] | undefined,
 	operationTarget: UserOperationTarget
 ): React.JSX.Element {
 	const t = i18nTranslator
-	if (!userEdits || userEdits.length === 0) return <React.Fragment />
+	if (!userEditOperations || userEditOperations.length === 0) return <React.Fragment />
 	return (
 		<React.Fragment>
 			<hr />
-			{userEdits.map((userEdit, i) => {
-				switch (userEdit.type) {
+			{userEditOperations.map((userEditOperation, i) => {
+				switch (userEditOperation.type) {
 					case UserEditingType.ACTION:
-						return translateMessage(userEdit.label, i18nTranslator) !== '' ? (
+						return translateMessage(userEditOperation.label, i18nTranslator) !== '' ? (
 							<MenuItem
-								key={`${userEdit.id}_${i}`}
+								key={`${userEditOperation.id}_${i}`}
 								onClick={(e) => {
 									doUserAction(t, e, UserAction.EXECUTE_USER_OPERATION, (e, ts) =>
 										MeteorCall.userAction.executeUserChangeOperation(e, ts, rundownId, operationTarget, {
-											id: userEdit.id,
+											id: userEditOperation.id,
 										})
 									)
 								}}
 							>
 								{
 									// ToDo: use CSS to Style state instead of asterix
-									userEditStates && userEditStates[userEdit.id] ? (
-										<span className="action-protected">{userEditStates[userEdit.id].valueOf() ? '• ' : ''}</span>
-									) : null
+									userEditOperation.isActive ? <span className="action-protected">{'• '}</span> : null
 								}
-								<span>{translateMessage(userEdit.label, i18nTranslator)}</span>
+								<span>{translateMessage(userEditOperation.label, i18nTranslator)}</span>
 							</MenuItem>
 						) : null
 					case UserEditingType.FORM:
 						return (
 							<MenuItem
 								disabled={!isFormEditable}
-								key={`${userEdit.id}_${i}`}
+								key={`${userEditOperation.id}_${i}`}
 								onClick={(e) => {
-									const schema = JSONBlobParse(userEdit.schema)
-									const values = clone(userEdit.currentValues)
+									const schema = JSONBlobParse(userEditOperation.schema)
+									const values = clone(userEditOperation.currentValues)
 
 									// TODO:
 									doModalDialog({
@@ -63,7 +60,7 @@ export function RenderUserEditOperations(
 											<SchemaFormInPlace
 												schema={schema}
 												object={values}
-												translationNamespaces={userEdit.translationNamespaces}
+												translationNamespaces={userEditOperation.translationNamespaces}
 											/>
 										),
 										// acceptText: 'OK',
@@ -73,18 +70,18 @@ export function RenderUserEditOperations(
 											doUserAction(t, e, UserAction.EXECUTE_USER_OPERATION, (e, ts) =>
 												MeteorCall.userAction.executeUserChangeOperation(e, ts, rundownId, operationTarget, {
 													...values,
-													id: userEdit.id,
+													id: userEditOperation.id,
 												})
 											)
 										},
 									})
 								}}
 							>
-								<span>{translateMessage(userEdit.label, i18nTranslator)}</span>
+								<span>{translateMessage(userEditOperation.label, i18nTranslator)}</span>
 							</MenuItem>
 						)
 					default:
-						assertNever(userEdit)
+						assertNever(userEditOperation)
 						return null
 				}
 			})}
