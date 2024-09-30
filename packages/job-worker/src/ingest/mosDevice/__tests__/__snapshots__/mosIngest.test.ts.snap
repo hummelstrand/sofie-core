@@ -54,11 +54,11 @@ exports[`Test recieved mos ingest payloads mosRoCreate 2`] = `
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -347,11 +347,11 @@ exports[`Test recieved mos ingest payloads mosRoCreate: replace existing 2`] = `
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -634,11 +634,11 @@ exports[`Test recieved mos ingest payloads mosRoFullStory: Valid data 2`] = `
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -940,11 +940,11 @@ exports[`Test recieved mos ingest payloads mosRoReadyToAir: Update ro 2`] = `
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -1234,11 +1234,11 @@ exports[`Test recieved mos ingest payloads mosRoStatus: Update ro 2`] = `
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -1530,11 +1530,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryDelete: Remove segment 2`] 
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -1792,11 +1792,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryInsert: Into segment 2`] = 
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -2099,11 +2099,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryInsert: New segment 2`] = `
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -2414,11 +2414,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Move whole segment to
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -2712,11 +2712,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryMove: Within segment 2`] = 
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -3010,11 +3010,11 @@ exports[`Test recieved mos ingest payloads mosRoStoryReplace: Same segment 2`] =
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -3307,11 +3307,11 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments 
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -3597,11 +3597,11 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Swap across segments2
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -3919,11 +3919,11 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: With first in same se
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",
@@ -4217,11 +4217,11 @@ exports[`Test recieved mos ingest payloads mosRoStorySwap: Within same segment 2
       "MosExternalMetaData": [
         {
           "MosPayload": {
-            "AllowExternalMod": 1,
+            "AllowExternalMod": "1",
             "AnsvRed": "DKSL",
-            "AutoArchiveClips": 1,
+            "AutoArchiveClips": "1",
             "Clipnames": "Klipp 1;\\Klipp 2;\\Klipp 3;\\Klipp 4;",
-            "ENPSItemType": 2,
+            "ENPSItemType": "2",
             "EndTime": "2018-09-07T07:09:00",
             "Kanal": "NRK1",
             "LocalStartTime": "2018-10-07T07:00:00",

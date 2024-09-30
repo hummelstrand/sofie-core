@@ -49,7 +49,7 @@ import {
 	RundownPlaylistTiming,
 } from '@sofie-automation/blueprints-integration'
 import { JobContext, ProcessedShowStyleBase, ProcessedShowStyleVariant } from '../../jobs'
-import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import { DBRundownPlaylist, QuickLoopMarkerType } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import _ = require('underscore')
 import { BlueprintId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { wrapTranslatableMessageFromBlueprints } from '@sofie-automation/corelib/dist/TranslatableMessage'
@@ -414,7 +414,9 @@ export function convertRundownPlaylistToBlueprints(
 
 		timing: clone<RundownPlaylistTiming>(playlist.timing),
 		outOfOrderTiming: playlist.outOfOrderTiming,
-		loop: playlist.loop,
+		loop:
+			playlist.quickLoop?.start?.type === QuickLoopMarkerType.PLAYLIST &&
+			playlist.quickLoop.end?.type === QuickLoopMarkerType.PLAYLIST,
 		timeOfDayCountdowns: playlist.timeOfDayCountdowns,
 
 		privateData: clone(playlist.privateData),
