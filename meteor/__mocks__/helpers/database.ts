@@ -431,7 +431,7 @@ export async function setupMockShowStyleBlueprint(
 				},
 				getRundown: (
 					_context: IShowStyleContext,
-					ingestRundown: SofieIngestRundown
+					ingestRundown: SofieIngestRundown<any, any, any>
 				): BlueprintResultRundown => {
 					const rundown: IBlueprintRundown = {
 						externalId: ingestRundown.externalId,
@@ -455,7 +455,10 @@ export async function setupMockShowStyleBlueprint(
 						baseline: { timelineObjects: [] },
 					}
 				},
-				getSegment: (_context: unknown, ingestSegment: SofieIngestSegment): BlueprintResultSegment => {
+				getSegment: (
+					_context: unknown,
+					ingestSegment: SofieIngestSegment<any, any>
+				): BlueprintResultSegment => {
 					const segment: IBlueprintSegment = {
 						name: ingestSegment.name ? ingestSegment.name : ingestSegment.externalId,
 						privateData: ingestSegment.payload,

@@ -9,7 +9,11 @@ export enum SofieIngestCacheType {
 }
 export type SofieIngestCacheData = SofieIngestRundown | SofieIngestSegment | SofieIngestPart
 
-export interface SofieIngestRundownWithSource extends SofieIngestRundown {
+export interface SofieIngestRundownWithSource<
+	TRundownPayload = unknown,
+	TSegmentPayload = unknown,
+	TPartPayload = unknown
+> extends SofieIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload> {
 	rundownSource: RundownSource
 }
 

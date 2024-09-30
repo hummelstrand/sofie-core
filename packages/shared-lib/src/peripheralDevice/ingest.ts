@@ -4,7 +4,7 @@ export interface IngestPlaylist {
 	/** Ingest cache of rundowns in this playlist. */
 	rundowns: IngestRundown[]
 }
-export interface IngestRundown {
+export interface IngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {
 	/** Id of the rundown as reported by the ingest gateway. Must be unique for each rundown owned by the gateway */
 	externalId: string
 	/** Name of the rundown */
@@ -14,12 +14,12 @@ export interface IngestRundown {
 	type: string
 
 	/** Raw payload of rundown metadata. Only used by the blueprints */
-	payload?: any
+	payload: TRundownPayload
 
 	/** Array of segments in this rundown */
-	segments: IngestSegment[]
+	segments: IngestSegment<TSegmentPayload, TPartPayload>[]
 }
-export interface IngestSegment {
+export interface IngestSegment<TSegmentPayload = unknown, TPartPayload = unknown> {
 	/** Id of the segment as reported by the ingest gateway. Must be unique for each segment in the rundown */
 	externalId: string
 	/** Name of the segment */
@@ -28,12 +28,12 @@ export interface IngestSegment {
 	rank: number
 
 	/** Raw payload of segment metadata. Only used by the blueprints */
-	payload?: any
+	payload: TSegmentPayload
 
 	/** Array of parts in this segment */
-	parts: IngestPart[]
+	parts: IngestPart<TPartPayload>[]
 }
-export interface IngestPart {
+export interface IngestPart<TPartPayload = unknown> {
 	/** Id of the part as reported by the ingest gateway. Must be unique for each part in the rundown */
 	externalId: string
 	/** Name of the part */
@@ -42,7 +42,7 @@ export interface IngestPart {
 	rank: number
 
 	/** Raw payload of the part. Only used by the blueprints */
-	payload?: any
+	payload: TPartPayload
 }
 
 export interface IngestAdlib {

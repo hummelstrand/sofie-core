@@ -185,6 +185,7 @@ describe('cronjobs', () => {
 					segments: [],
 					type: '',
 					rundownSource: {} as any,
+					payload: undefined,
 				},
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// this one is attached to rundown0
@@ -201,6 +202,7 @@ describe('cronjobs', () => {
 					segments: [],
 					type: '',
 					rundownSource: {} as any,
+					payload: undefined,
 				},
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// just some random ID
@@ -228,6 +230,7 @@ describe('cronjobs', () => {
 					type: '',
 					rundownSource: {} as any,
 					userEditStates: {},
+					payload: undefined,
 				},
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// this one is attached to rundown0
@@ -245,6 +248,7 @@ describe('cronjobs', () => {
 					type: '',
 					rundownSource: {} as any,
 					userEditStates: {},
+					payload: undefined,
 				},
 				modified: new Date(2000, 0, 1, 0, 0, 0).getTime(),
 				// just some random ID

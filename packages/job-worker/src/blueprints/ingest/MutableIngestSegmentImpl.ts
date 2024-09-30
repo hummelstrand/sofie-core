@@ -27,7 +27,7 @@ export interface MutableIngestSegmentChanges {
 export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = unknown>
 	implements MutableIngestSegment<TSegmentPayload, TPartPayload>
 {
-	readonly #ingestSegment: Omit<SofieIngestSegment, 'rank' | 'parts'>
+	readonly #ingestSegment: Omit<SofieIngestSegment<TSegmentPayload, TPartPayload>, 'rank' | 'parts'>
 	#originalExternalId: string
 	#segmentHasChanges = false
 	#partOrderHasChanged = false
@@ -42,7 +42,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		}
 	}
 
-	constructor(ingestSegment: Omit<SofieIngestSegment, 'rank'>, hasChanges = false) {
+	constructor(ingestSegment: Omit<SofieIngestSegment<TSegmentPayload, TPartPayload>, 'rank'>, hasChanges = false) {
 		this.#originalExternalId = ingestSegment.externalId
 		this.#ingestSegment = omit(ingestSegment, 'parts')
 		this.#parts = ingestSegment.parts
@@ -65,7 +65,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	}
 
 	get payload(): ReadonlyDeep<TSegmentPayload> | undefined {
-		return this.#ingestSegment.payload
+		return this.#ingestSegment.payload as ReadonlyDeep<TSegmentPayload>
 	}
 
 	get userEditStates(): Record<string, boolean> {
@@ -117,7 +117,7 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 	}
 
 	replacePart(
-		ingestPart: Omit<IngestPart, 'rank'>,
+		ingestPart: Omit<IngestPart<TPartPayload>, 'rank'>,
 		beforePartExternalId: string | null
 	): MutableIngestPart<TPartPayload> {
 		if (ingestPart.externalId === beforePartExternalId) throw new Error('Cannot insert Part before itself')
@@ -200,7 +200,8 @@ export class MutableIngestSegmentImpl<TSegmentPayload = unknown, TPartPayload = 
 		}
 
 		if (this.#segmentHasChanges || !_.isEqual(this.#ingestSegment.payload[key], value)) {
-			this.#ingestSegment.payload[key] = clone(value)
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+			;(this.#ingestSegment.payload as any)[key] = clone(value)
 			this.#segmentHasChanges = true
 		}
 	}

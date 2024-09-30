@@ -413,25 +413,28 @@ class PayloadTransformers<TRundownPayload, TSegmentPayload, TPartPayload> {
 	transformPayloadsOnSegmentAndParts(
 		segment: IngestSegment,
 		mutableSegment: MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined
-	): IngestSegment {
+	): IngestSegment<TSegmentPayload, TPartPayload> {
 		return {
 			...segment,
 			payload: this.#options.transformSegmentPayload(
 				segment.payload,
 				mutableSegment ? mutableSegment.payload : this.#initialMutableSegments.get(segment.externalId)?.payload
-			),
+			) as TSegmentPayload,
 			parts: segment.parts.map((part) =>
 				this.transformPayloadOnPart(part, mutableSegment?.getPart(part.externalId))
 			),
 		}
 	}
-	transformPayloadOnPart(part: IngestPart, mutablePart: MutableIngestPart<TPartPayload> | undefined): IngestPart {
+	transformPayloadOnPart(
+		part: IngestPart,
+		mutablePart: MutableIngestPart<TPartPayload> | undefined
+	): IngestPart<TPartPayload> {
 		return {
 			...part,
 			payload: this.#options.transformPartPayload(
 				part.payload,
 				mutablePart ? mutablePart.payload : this.#initialMutableParts.get(part.externalId)?.payload
-			),
+			) as TPartPayload,
 		}
 	}
 }

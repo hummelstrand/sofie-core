@@ -39,13 +39,13 @@ export class ProcessIngestDataContext extends StudioContext implements IProcessI
 		)
 	}
 
-	groupPartsInRundownAndChanges(
+	groupPartsInRundownAndChanges<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown>(
 		ingestRundown: IngestRundown,
 		previousIngestRundown: IngestRundown | undefined,
 		ingestChanges: NrcsIngestChangeDetails,
-		groupPartsIntoSegments: (ingestSegments: IngestSegment[]) => IngestSegment[]
-	): GroupPartsInMosRundownAndChangesResult {
-		return groupPartsInRundownAndChanges(
+		groupPartsIntoSegments: (ingestSegments: IngestSegment[]) => IngestSegment<TSegmentPayload, TPartPayload>[]
+	): GroupPartsInMosRundownAndChangesResult<TRundownPayload, TSegmentPayload, TPartPayload> {
+		return groupPartsInRundownAndChanges<TRundownPayload, TSegmentPayload, TPartPayload>(
 			ingestRundown,
 			previousIngestRundown,
 			ingestChanges,

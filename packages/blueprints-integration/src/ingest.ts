@@ -195,7 +195,7 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 	 * @returns the new MutableIngestSegment
 	 */
 	replaceSegment(
-		segment: Omit<IngestSegment, 'rank'>,
+		segment: Omit<IngestSegment<TSegmentPayload, TPartPayload>, 'rank'>,
 		beforeSegmentExternalId: string | null
 	): MutableIngestSegment<TSegmentPayload, TPartPayload>
 
@@ -308,7 +308,7 @@ export interface MutableIngestSegment<TSegmentPayload = unknown, TPartPayload = 
 	 * @returns the new MutableIngestPart
 	 */
 	replacePart(
-		ingestPart: Omit<IngestPart, 'rank'>,
+		ingestPart: Omit<IngestPart<TPartPayload>, 'rank'>,
 		beforePartExternalId: string | null
 	): MutableIngestPart<TPartPayload>
 

@@ -30,7 +30,10 @@ export interface MutableIngestRundownChanges {
 export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown>
 	implements MutableIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload>
 {
-	readonly ingestRundown: Omit<SofieIngestRundownWithSource, 'segments'>
+	readonly ingestRundown: Omit<
+		SofieIngestRundownWithSource<TRundownPayload, TSegmentPayload, TPartPayload>,
+		'segments'
+	>
 	#hasChangesToRundown = false
 	// #segmentOrderChanged = false
 
@@ -38,7 +41,10 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 
 	readonly #originalSegmentRanks = new Map<string, number>()
 
-	constructor(ingestRundown: SofieIngestRundownWithSource, isExistingRundown: boolean) {
+	constructor(
+		ingestRundown: SofieIngestRundownWithSource<TRundownPayload, TSegmentPayload, TPartPayload>,
+		isExistingRundown: boolean
+	) {
 		this.ingestRundown = omit(ingestRundown, 'segments')
 		this.#segments = ingestRundown.segments
 			.slice() // shallow copy
@@ -68,7 +74,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	get payload(): ReadonlyDeep<TRundownPayload> | undefined {
-		return this.ingestRundown.payload
+		return this.ingestRundown.payload as ReadonlyDeep<TRundownPayload>
 	}
 
 	get userEditStates(): Record<string, boolean> {
@@ -112,7 +118,8 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 		}
 
 		if (this.#hasChangesToRundown || !_.isEqual(this.ingestRundown.payload[key], value)) {
-			this.ingestRundown.payload[key] = clone(value)
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+			;(this.ingestRundown.payload as any)[key] = clone(value)
 			this.#hasChangesToRundown = true
 		}
 	}
@@ -184,7 +191,7 @@ export class MutableIngestRundownImpl<TRundownPayload = unknown, TSegmentPayload
 	}
 
 	replaceSegment(
-		segment: Omit<IngestSegment, 'rank'>,
+		segment: Omit<IngestSegment<TSegmentPayload, TPartPayload>, 'rank'>,
 		beforeSegmentExternalId: string | null
 	): MutableIngestSegment<TSegmentPayload, TPartPayload> {
 		if (segment.externalId === beforeSegmentExternalId) throw new Error('Cannot insert Segment before itself')

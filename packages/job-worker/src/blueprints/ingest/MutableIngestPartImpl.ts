@@ -4,10 +4,10 @@ import { ReadonlyDeep } from 'type-fest'
 import _ = require('underscore')
 
 export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIngestPart<TPartPayload> {
-	readonly #ingestPart: Omit<SofieIngestPart, 'rank'>
+	readonly #ingestPart: Omit<SofieIngestPart<TPartPayload>, 'rank'>
 	#hasChanges = false
 
-	constructor(ingestPart: Omit<SofieIngestPart, 'rank'>, hasChanges = false) {
+	constructor(ingestPart: Omit<SofieIngestPart<TPartPayload>, 'rank'>, hasChanges = false) {
 		this.#ingestPart = ingestPart
 		this.#hasChanges = hasChanges
 	}
@@ -21,7 +21,7 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 	}
 
 	get payload(): ReadonlyDeep<TPartPayload> | undefined {
-		return this.#ingestPart.payload
+		return this.#ingestPart.payload as ReadonlyDeep<TPartPayload>
 	}
 
 	get userEditStates(): Record<string, boolean> {
@@ -51,7 +51,8 @@ export class MutableIngestPartImpl<TPartPayload = unknown> implements MutableIng
 		}
 
 		if (this.#hasChanges || !_.isEqual(this.#ingestPart.payload[key], value)) {
-			this.#ingestPart.payload[key] = clone(value)
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+			;(this.#ingestPart.payload as any)[key] = clone(value)
 			this.#hasChanges = true
 		}
 	}

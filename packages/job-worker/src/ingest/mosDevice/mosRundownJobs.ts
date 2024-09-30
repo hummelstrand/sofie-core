@@ -82,7 +82,7 @@ export function handleMosRundownMetadata(
 ): IngestUpdateOperationFunction | null {
 	return (ingestRundown) => {
 		if (ingestRundown) {
-			ingestRundown.payload = Object.assign(ingestRundown.payload, data.mosRunningOrderBase)
+			ingestRundown.payload = Object.assign(ingestRundown.payload as object, data.mosRunningOrderBase)
 
 			return {
 				// We modify in-place
