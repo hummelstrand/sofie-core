@@ -3,7 +3,7 @@ import { ITranslatableMessage } from '../TranslatableMessage'
 import { PartId, RundownId, SegmentId } from './Ids'
 import { PartNote } from './Notes'
 import { ReadonlyDeep } from 'type-fest'
-import { CoreUserEditingDefinition } from './Rundown'
+import { CoreUserEditingDefinition } from './UserEditingDefinitions'
 
 export interface PartInvalidReason {
 	message: ITranslatableMessage
@@ -12,7 +12,7 @@ export interface PartInvalidReason {
 }
 
 /** A "Line" in NRK Lingo. */
-export interface DBPart extends Omit<IBlueprintPart, 'userEdits'> {
+export interface DBPart extends Omit<IBlueprintPart, 'userEditOperations'> {
 	_id: PartId
 	/**
 	 * Position inside the segment

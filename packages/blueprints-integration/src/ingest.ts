@@ -11,7 +11,7 @@ export {
 	IngestAdlib,
 } from '@sofie-automation/shared-lib/dist/peripheralDevice/ingest'
 
-/** The IngesteRundown is extended with data from Core */
+/** The IngestRundown is extended with data from Core */
 export interface ExtendedIngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown>
 	extends SofieIngestRundown<TRundownPayload, TSegmentPayload, TPartPayload> {
 	coreData: IBlueprintRundownDBData | undefined

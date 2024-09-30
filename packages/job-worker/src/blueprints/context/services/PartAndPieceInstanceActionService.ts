@@ -387,7 +387,7 @@ export class PartAndPieceInstanceActionService {
 			invalidReason: undefined,
 			floated: false,
 			expectedDurationWithTransition: undefined, // Filled in later
-			userEditOperations: [],
+			userEditOperations: [], // Adlibbed parts can't be edited by ingest
 		}
 
 		const pieces = postProcessPieces(

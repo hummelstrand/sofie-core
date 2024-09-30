@@ -1,7 +1,7 @@
 import React from 'react'
 import { assertNever, clone } from '@sofie-automation/corelib/dist/lib'
 import { RundownId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { CoreUserEditingDefinition } from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import { CoreUserEditingDefinition } from '@sofie-automation/corelib/dist/dataModel/UserEditingDefinitions'
 import { JSONBlobParse, UserEditingType, UserOperationTarget } from '@sofie-automation/blueprints-integration'
 import { translateMessage } from '@sofie-automation/corelib/dist/TranslatableMessage'
 import { MenuItem } from '@jstarpl/react-contextmenu'

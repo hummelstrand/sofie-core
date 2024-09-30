@@ -14,12 +14,8 @@ import {
 	RundownPlaylistId,
 	SegmentId,
 } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import {
-	CoreUserEditingDefinition,
-	DBRundown,
-	RundownOrphanedReason,
-	RundownSource,
-} from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import { DBRundown, RundownOrphanedReason, RundownSource } from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import { CoreUserEditingDefinition } from '@sofie-automation/corelib/dist/dataModel/UserEditingDefinitions'
 import { RundownBaselineAdLibAction } from '@sofie-automation/corelib/dist/dataModel/RundownBaselineAdLibAction'
 import { RundownBaselineAdLibItem } from '@sofie-automation/corelib/dist/dataModel/RundownBaselineAdLibPiece'
 import { LazyInitialiseReadonly } from '../../lib/lazy'

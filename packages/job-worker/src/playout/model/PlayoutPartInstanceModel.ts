@@ -6,7 +6,7 @@ import { PartNote } from '@sofie-automation/corelib/dist/dataModel/Notes'
 import { IBlueprintMutatablePart, PieceLifespan, Time } from '@sofie-automation/blueprints-integration'
 import { PartCalculatedTimings } from '@sofie-automation/corelib/dist/playout/timings'
 import { PlayoutPieceInstanceModel } from './PlayoutPieceInstanceModel'
-import { CoreUserEditingDefinition } from '@sofie-automation/corelib/dist/dataModel/Rundown'
+import { CoreUserEditingDefinition } from '@sofie-automation/corelib/dist/dataModel/UserEditingDefinitions'
 
 /**
  * Token returned when making a backup copy of a PlayoutPartInstanceModel

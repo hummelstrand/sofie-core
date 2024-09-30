@@ -1,11 +1,4 @@
-import {
-	JSONBlob,
-	JSONSchema,
-	RundownPlaylistTiming,
-	Time,
-	UserEditingType,
-} from '@sofie-automation/blueprints-integration'
-import { ITranslatableMessage } from '../TranslatableMessage'
+import { RundownPlaylistTiming, Time } from '@sofie-automation/blueprints-integration'
 import {
 	RundownId,
 	OrganizationId,
@@ -17,6 +10,7 @@ import {
 } from './Ids'
 import { RundownNote } from './Notes'
 import { ReadonlyDeep } from 'type-fest'
+import { CoreUserEditingDefinition } from './UserEditingDefinitions'
 
 export enum RundownOrphanedReason {
 	/** Rundown is deleted from the source but we still need it */
@@ -136,22 +130,3 @@ export function getRundownNrcsName(rundown: ReadonlyDeep<Pick<DBRundown, 'source
 
 /** Note: Use Rundown instead */
 export type DBRundown = Rundown
-
-export type CoreUserEditingDefinition = CoreUserEditingDefinitionAction | CoreUserEditingDefinitionForm
-
-export interface CoreUserEditingDefinitionAction {
-	type: UserEditingType.ACTION
-	id: string
-	label: ITranslatableMessage
-	svgIcon?: string
-	isActive?: boolean
-}
-
-export interface CoreUserEditingDefinitionForm {
-	type: UserEditingType.FORM
-	id: string
-	label: ITranslatableMessage
-	schema: JSONBlob<JSONSchema>
-	currentValues: Record<string, any>
-	translationNamespaces: string[]
-}

@@ -8,13 +8,12 @@ import {
 	PieceInstancePiece,
 	ResolvedPieceInstance,
 } from '@sofie-automation/corelib/dist/dataModel/PieceInstance'
+import { DBRundown, Rundown } from '@sofie-automation/corelib/dist/dataModel/Rundown'
 import {
 	CoreUserEditingDefinition,
 	CoreUserEditingDefinitionAction,
 	CoreUserEditingDefinitionForm,
-	DBRundown,
-	Rundown,
-} from '@sofie-automation/corelib/dist/dataModel/Rundown'
+} from '@sofie-automation/corelib/dist/dataModel/UserEditingDefinitions'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { assertNever, clone, Complete, literal, omit } from '@sofie-automation/corelib/dist/lib'
 import { unprotectString, unprotectStringArray } from '@sofie-automation/corelib/dist/protectedString'
