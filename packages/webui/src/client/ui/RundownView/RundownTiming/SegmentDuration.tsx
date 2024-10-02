@@ -4,7 +4,6 @@ import { withTiming, WithTiming } from './withTiming'
 import { RundownUtils } from '../../../lib/rundown'
 import { PartUi } from '../../SegmentTimeline/SegmentTimelineContainer'
 import { calculatePartInstanceExpectedDurationWithTransition } from '@sofie-automation/corelib/dist/playout/timings'
-import { getPartInstanceTimingId } from '../../../lib/rundownTiming'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 
 interface ISegmentDurationProps {
@@ -29,7 +28,7 @@ export const SegmentDuration = withTiming<ISegmentDurationProps, {}>()(function 
 ) {
 	let duration: number | undefined = undefined
 	let budget = 0
-	let playedOut = 0
+	const playedOut = props.timingDurations.remainingTimeOnCurrentSegment || 0
 
 	const segmentBudgetDuration = props.segment.segmentTiming?.budgetDuration
 
@@ -37,7 +36,6 @@ export const SegmentDuration = withTiming<ISegmentDurationProps, {}>()(function 
 		budget = segmentBudgetDuration
 	}
 	if (props.parts && props.timingDurations.partPlayed) {
-		const { partPlayed } = props.timingDurations
 		if (segmentBudgetDuration === undefined) {
 			props.parts.forEach((part) => {
 				budget +=
@@ -46,9 +44,6 @@ export const SegmentDuration = withTiming<ISegmentDurationProps, {}>()(function 
 						: calculatePartInstanceExpectedDurationWithTransition(part.instance) || 0
 			})
 		}
-		props.parts.forEach((part) => {
-			playedOut += (!part.instance.part.untimed ? partPlayed[getPartInstanceTimingId(part.instance)] : 0) || 0
-		})
 	}
 
 	duration = budget - playedOut

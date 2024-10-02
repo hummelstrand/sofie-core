@@ -134,6 +134,7 @@ export class RundownTimingCalculator {
 
 		let lastSegmentId: SegmentId | undefined = undefined
 		let nextRundownAnchor: number | undefined = undefined
+		let remainingTimeOnCurrentSegment = 0
 
 		if (playlist) {
 			const breakProps = currentRundown ? this.getRundownsBeforeNextBreak(rundowns, currentRundown) : undefined
@@ -281,6 +282,12 @@ export class RundownTimingCalculator {
 						defaultDuration
 					partDisplayDuration = Math.max(partDisplayDurationNoPlayback, now - lastStartedPlayback)
 					this.partPlayed[partInstanceOrPartId] = now - lastStartedPlayback
+					if (liveSegmentId === partInstance.segmentId) {
+						// Workaround:
+						// The offset of 650 microseconds is to compensate for part and segment being in separate
+						// clocks windows in the UI
+						remainingTimeOnCurrentSegment += now - lastStartedPlayback - 650
+					}
 					const segmentStartedPlayback =
 						playlist.segmentsStartedPlayback?.[unprotectString(partInstance.segmentId)] ??
 						lastStartedPlayback
@@ -632,6 +639,7 @@ export class RundownTimingCalculator {
 			segmentStartedPlayback: this.segmentStartedPlayback,
 			currentTime: now,
 			remainingTimeOnCurrentPart,
+			remainingTimeOnCurrentSegment,
 			remainingBudgetOnCurrentSegment,
 			currentPartWillAutoNext,
 			rundownsBeforeNextBreak,
@@ -726,6 +734,8 @@ export interface RundownTimingContext {
 	segmentStartedPlayback?: Record<string, number>
 	/** Remaining time on current part */
 	remainingTimeOnCurrentPart?: number
+	/** Remaining time on current segment */
+	remainingTimeOnCurrentSegment?: number
 	/** Remaining budget on current segment, if its countdownType === CountdownType.SEGMENT_BUDGET_DURATION */
 	remainingBudgetOnCurrentSegment?: number
 	/** Current part will autoNext */
