@@ -42,11 +42,11 @@ export const CurrentPartOrSegmentRemaining = withTiming<IPartRemainingProps, {}>
 				<span
 					className={ClassNames(
 						this.props.className,
-						Math.floor(displayTimecode / 1000) <= 0 ? this.props.heavyClassName : undefined
+						Math.floor(displayTimecode / 1000) < 0 ? this.props.heavyClassName : undefined
 					)}
 					role="timer"
 				>
-					{RundownUtils.formatDiffToTimecode(displayTimecode || 0, true, false, true, false, true, '+', false, true)}
+					{RundownUtils.formatDiffToTimecode(displayTimecode, true, false, true, false, true, '', false, true, true)}
 				</span>
 			)
 		}
