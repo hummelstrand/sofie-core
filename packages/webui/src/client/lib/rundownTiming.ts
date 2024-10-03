@@ -282,11 +282,9 @@ export class RundownTimingCalculator {
 						defaultDuration
 					partDisplayDuration = Math.max(partDisplayDurationNoPlayback, now - lastStartedPlayback)
 					this.partPlayed[partInstanceOrPartId] = now - lastStartedPlayback
+					// If part of live segment, calculate remaining time on current segment:
 					if (liveSegmentId === partInstance.segmentId) {
-						// Workaround:
-						// The offset of 650 microseconds is to compensate for part and segment being in separate
-						// clocks windows in the UI
-						remainingTimeOnCurrentSegment += now - lastStartedPlayback - 650
+						remainingTimeOnCurrentSegment += now - lastStartedPlayback
 					}
 					const segmentStartedPlayback =
 						playlist.segmentsStartedPlayback?.[unprotectString(partInstance.segmentId)] ??
