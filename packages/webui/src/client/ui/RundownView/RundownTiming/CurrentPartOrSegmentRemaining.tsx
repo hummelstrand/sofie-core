@@ -34,20 +34,19 @@ export const CurrentPartOrSegmentRemaining = withTiming<IPartRemainingProps, {}>
 		render(): JSX.Element | null {
 			if (!this.props.timingDurations || !this.props.timingDurations.currentTime) return null
 			if (this.props.timingDurations.currentPartInstanceId !== this.props.currentPartInstanceId) return null
-			let displayTimecode =
+			const displayTimecode =
 				this.props.timingDurations.remainingBudgetOnCurrentSegment ??
 				this.props.timingDurations.remainingTimeOnCurrentPart
 			if (displayTimecode === undefined) return null
-			displayTimecode *= -1
 			return (
 				<span
 					className={ClassNames(
 						this.props.className,
-						Math.floor(displayTimecode / 1000) > 0 ? this.props.heavyClassName : undefined
+						Math.floor(displayTimecode / 1000) <= 0 ? this.props.heavyClassName : undefined
 					)}
 					role="timer"
 				>
-					{RundownUtils.formatDiffToTimecode(displayTimecode || 0, true, false, true, false, true, '', false, true)}
+					{RundownUtils.formatDiffToTimecode(displayTimecode || 0, true, false, true, false, true, '+', false, true)}
 				</span>
 			)
 		}
