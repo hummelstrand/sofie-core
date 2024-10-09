@@ -101,7 +101,6 @@ export class StudioBaselineHelper {
 			throw new Error(`RouteSet "${routeSet.id}" is ACTIVATE_ONLY`)
 
 		const saveOverrides = (newOps: SomeObjectOverrideOp[]) => {
-			// this.#overridesRouteSetBuffer = { defaults: this.#overridesRouteSetBuffer.defaults, overrides: newOps }
 			this.#overridesRouteSetBuffer.overrides = newOps
 			this.#routeSetChanged = true
 		}
