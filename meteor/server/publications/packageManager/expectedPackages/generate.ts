@@ -32,6 +32,7 @@ export async function updateCollectionForExpectedPackageIds(
 	contentCache: ReadonlyDeep<ExpectedPackagesContentCache>,
 	studio: Pick<DBStudio, StudioFields>,
 	layerNameToDeviceIds: Map<string, PeripheralDeviceId[]>,
+	packageContainers: Record<string, StudioPackageContainer>,
 	collection: CustomPublishCollection<PackageManagerExpectedPackage>,
 	filterPlayoutDeviceIds: ReadonlyDeep<PeripheralDeviceId[]> | undefined,
 	regenerateIds: Set<ExpectedPackageId>
@@ -102,6 +103,7 @@ export async function updateCollectionForPieceInstanceIds(
 	contentCache: ReadonlyDeep<ExpectedPackagesContentCache>,
 	studio: Pick<DBStudio, StudioFields>,
 	layerNameToDeviceIds: Map<string, PeripheralDeviceId[]>,
+	packageContainers: Record<string, StudioPackageContainer>,
 	collection: CustomPublishCollection<PackageManagerExpectedPackage>,
 	filterPlayoutDeviceIds: ReadonlyDeep<PeripheralDeviceId[]> | undefined,
 	regenerateIds: Set<PieceInstanceId>
