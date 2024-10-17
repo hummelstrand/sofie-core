@@ -14,8 +14,6 @@ interface IPartRemainingProps {
 	heavyClassName?: string
 	speaking?: boolean
 	vibrating?: boolean
-	/** This component will show the remaining segment budget when that is available, but in some places in the UI we want it to force it to show remaining Part regardless */
-	forceToPartTimer?: boolean
 }
 
 // global variable for remembering last uttered displayTime
@@ -39,7 +37,6 @@ export const CurrentPartOrSegmentRemaining = withTiming<IPartRemainingProps, {}>
 			let displayTimecode =
 				this.props.timingDurations.remainingBudgetOnCurrentSegment ??
 				this.props.timingDurations.remainingTimeOnCurrentPart
-			if (this.props.forceToPartTimer) displayTimecode = this.props.timingDurations.remainingTimeOnCurrentPart
 			if (displayTimecode === undefined) return null
 			displayTimecode *= -1
 			return (
