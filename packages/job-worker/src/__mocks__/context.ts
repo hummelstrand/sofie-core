@@ -231,11 +231,11 @@ export class MockJobContext implements JobContext {
 	}
 
 	async saveRouteSetChanges(): Promise<void> {
-		throw new Error('Method not implemented.')
+		// throw new Error('Method not implemented.')
 	}
 
 	discardRouteSetChanges(): void {
-		throw new Error('Method not implemented.')
+		// throw new Error('Method not implemented.')
 	}
 
 	/**
