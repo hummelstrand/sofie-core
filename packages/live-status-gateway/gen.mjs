@@ -56,6 +56,7 @@ const generator = new TypeScriptGenerator({
 	mapType: 'record',
 	moduleSystem: 'ESM',
 	presets: [CUSTOM_TS_DESCRIPTION_PRESET],
+	rawPropertyNames: true,
 })
 
 const parser = new Parser()
@@ -74,6 +75,9 @@ for (const model of models) {
 	// console.log(model.result, model.modelName)
 	allModelNames.push(model.modelName)
 	allmodelContent.push(model.result)
+
+	if (model.modelName.includes('Anonymous'))
+		throw new Error(`Anonymous model found: ${model.modelName}\n\n${JSON.stringify(model.result, null, 2)}`)
 }
 
 const allModelsString = BANNER + allmodelContent.join('\n\n') + '\n\n' + 'export {' + allModelNames.join(', ') + '};'
