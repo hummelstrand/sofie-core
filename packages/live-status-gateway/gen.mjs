@@ -18,7 +18,7 @@ const renderDescription = ({ renderer, content, item }) => {
  * Preset which adds descriptions
  * Modified from the original, to omit examples
  *
- * @implements {TypeScriptPreset}
+ * @type {import('@asyncapi/modelina').TypeScriptPreset}
  */
 const CUSTOM_TS_DESCRIPTION_PRESET = {
 	class: {
@@ -48,7 +48,6 @@ const CUSTOM_TS_DESCRIPTION_PRESET = {
 		},
 	},
 }
-//# sourceMappingURL=DescriptionPreset.js.map
 
 const generator = new TypeScriptGenerator({
 	modelType: 'interface',
@@ -72,7 +71,6 @@ const models = await generator.generate(asyncApiDoc.document)
 const allModelNames = []
 const allmodelContent = []
 for (const model of models) {
-	// console.log(model.result, model.modelName)
 	allModelNames.push(model.modelName)
 	allmodelContent.push(model.result)
 

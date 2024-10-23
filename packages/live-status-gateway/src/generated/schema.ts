@@ -477,11 +477,11 @@ interface AdLib {
   /**
    * Unique id of the segment this adLib belongs to
    */
-  'segmentId': any;
+  'segmentId': string;
   /**
    * Unique id of the part this adLib belongs to
    */
-  'partId': any;
+  'partId': string;
   'additionalProperties'?: Record<string, any>;
 }
 

@@ -40,8 +40,10 @@ $defs:
         properties:
           segmentId:
             description: Unique id of the segment this adLib belongs to
+            type: string
           partId:
             description: Unique id of the part this adLib belongs to
+            type: string
         required: [segmentId, partId]
     examples:
       - id: 'C6K_yIMuGFUk8X_L9A9_jRT6aq4_'
