@@ -46,7 +46,32 @@ $defs:
             description: The end of the loop
             $ref: '#/$defs/quickLoopMarker'
         required: [locked, running]
-    required: [event, id, name, rundownIds, currentPart, currentSegment, nextPart]
+      timing:
+        description: Timing information about the active playlist
+        type: object
+        properties:
+          timingMode:
+            description: 'Timing mode for the playlist.'
+            type: string
+            enum:
+              - none
+              - forward-time
+              - back-time
+          startedPlayback:
+            description: Unix timestamp of when the playlist started (milliseconds)
+            type: number
+          expectedStart:
+            description: Unix timestamp of when the playlist is expected to start (milliseconds). Required when the timingMode is set to forward-time.
+            type: number
+          expectedDuration:
+            description: Duration of the playlist in ms
+            type: number
+          expectedEnd:
+            description: Unix timestamp of when the playlist is expected to end (milliseconds) Required when the timingMode is set to back-time.
+            type: number
+        required: [timingMode]
+        additionalProperties: false
+    required: [event, id, name, rundownIds, currentPart, currentSegment, nextPart, timing]
     additionalProperties: false
     examples:
       - event: activePlaylist
@@ -61,6 +86,10 @@ $defs:
           $ref: '#/$defs/part/examples/0'
         publicData:
           category: 'Evening News'
+        timing:
+          timingMode: 'forward-time'
+          expectedStart: 1728895750727
+          duration: 180000
   partBase:
     type: object
     properties:
