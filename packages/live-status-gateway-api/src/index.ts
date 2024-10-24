@@ -1,3 +1,2 @@
-// export * from './generated/schema'
-
-export const hello = 'world'
+// Re-export the generated types
+export * from './generated/schema'

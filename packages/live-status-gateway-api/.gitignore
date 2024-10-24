@@ -12,4 +12,5 @@ wallaby.conf.js
 
 .DS_Store
 
-src/generated
+server
+docs

@@ -4,7 +4,7 @@
  * DO NOT MODIFY IT BY HAND. Instead, modify the source AsyncAPI schema files,
  * and run "yarn generate-schema-types" to regenerate this file.
  */
-type Slash = PongEvent | HeartbeatEvent | SubscriptionStatusError | SubscriptionStatusSuccess | StudioEvent | ActivePlaylistEvent | ActivePiecesEvent | SegmentsEvent | AdLibsEvent;
+
 
 interface PongEvent {
   'event': 'pong';
@@ -349,7 +349,7 @@ interface ActivePlaylistTiming {
   /**
    * Duration of the playlist in ms
    */
-  'expectedDuration'?: number;
+  'expectedDurationMs'?: number;
   /**
    * Unix timestamp of when the playlist is expected to end (milliseconds) Required when the timingMode is set to back-time.
    */
@@ -528,4 +528,4 @@ interface GlobalAdLib {
   'additionalProperties'?: Record<string, any>;
 }
 
-export {Slash, PongEvent, HeartbeatEvent, SubscriptionStatusError, SubscriptionStatusInfo, SubscriptionName, SubscriptionStatus, SubscriptionStatusSuccess, StudioEvent, PlaylistInfo, PlaylistActivationStatus, ActivePlaylistEvent, CurrentPart, Piece, CurrentPartTiming, CurrentSegment, CurrentSegmentTiming, SegmentCountdownType, Part, ActivePlaylistQuickLoop, QuickLoopMarker, QuickLoopMarkerType, ActivePlaylistTiming, ActivePlaylistTimingMode, ActivePiecesEvent, SegmentsEvent, Segment, SegmentTiming, AdLibsEvent, AdLib, ActionType, GlobalAdLib};
+export {PongEvent, HeartbeatEvent, SubscriptionStatusError, SubscriptionStatusInfo, SubscriptionName, SubscriptionStatus, SubscriptionStatusSuccess, StudioEvent, PlaylistInfo, PlaylistActivationStatus, ActivePlaylistEvent, CurrentPart, Piece, CurrentPartTiming, CurrentSegment, CurrentSegmentTiming, SegmentCountdownType, Part, ActivePlaylistQuickLoop, QuickLoopMarker, QuickLoopMarkerType, ActivePlaylistTiming, ActivePlaylistTimingMode, ActivePiecesEvent, SegmentsEvent, Segment, SegmentTiming, AdLibsEvent, AdLib, ActionType, GlobalAdLib};

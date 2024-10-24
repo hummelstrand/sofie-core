@@ -5371,6 +5371,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sofie-automation/live-status-gateway-api@workspace:live-status-gateway-api"
   dependencies:
+    "@asyncapi/generator": ^1.17.25
+    "@asyncapi/html-template": ^2.3.9
+    "@asyncapi/modelina": ^3.7.0
+    "@asyncapi/nodejs-ws-template": ^0.9.36
+    "@asyncapi/parser": ^3.3.0
     tslib: ^2.6.2
   languageName: unknown
   linkType: soft
@@ -17806,11 +17811,6 @@ asn1@evs-broadcast/node-asn1:
   version: 0.0.0-use.local
   resolution: "live-status-gateway@workspace:live-status-gateway"
   dependencies:
-    "@asyncapi/generator": ^1.17.25
-    "@asyncapi/html-template": ^2.3.9
-    "@asyncapi/modelina": ^3.7.0
-    "@asyncapi/nodejs-ws-template": ^0.9.36
-    "@asyncapi/parser": ^3.3.0
     "@sofie-automation/blueprints-integration": 1.52.0-in-development
     "@sofie-automation/corelib": 1.52.0-in-development
     "@sofie-automation/live-status-gateway-api": 1.52.0-in-development

@@ -71,6 +71,8 @@ const models = await generator.generate(asyncApiDoc.document)
 const allModelNames = []
 const allmodelContent = []
 for (const model of models) {
+	if (model.modelName === 'Slash') continue // Omit some weird union
+
 	allModelNames.push(model.modelName)
 	allmodelContent.push(model.result)
 
@@ -78,7 +80,8 @@ for (const model of models) {
 		throw new Error(`Anonymous model found: ${model.modelName}\n\n${JSON.stringify(model.result, null, 2)}`)
 }
 
-const allModelsString = BANNER + allmodelContent.join('\n\n') + '\n\n' + 'export {' + allModelNames.join(', ') + '};'
+const allModelsString =
+	BANNER + '\n\n' + allmodelContent.join('\n\n') + '\n\n' + 'export {' + allModelNames.join(', ') + '};'
 
 await fs.writeFile('src/generated/schema.ts', allModelsString)
 
