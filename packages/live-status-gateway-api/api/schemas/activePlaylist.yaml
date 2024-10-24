@@ -10,7 +10,9 @@ $defs:
         const: activePlaylist
       id:
         description: Unique id of the active playlist
-        type: string
+        oneOf:
+          - type: string
+          - type: 'null'
       name:
         description: User-presentable name for the active playlist
         type: string

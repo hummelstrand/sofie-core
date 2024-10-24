@@ -10,7 +10,9 @@ $defs:
         const: studio
       id:
         description: Unique id of the studio
-        type: string
+        oneOf:
+          - type: string
+          - type: 'null'
       name:
         description: User-presentable name for the studio installation
         type: string

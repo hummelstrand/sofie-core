@@ -74,7 +74,7 @@ interface StudioEvent {
   /**
    * Unique id of the studio
    */
-  'id': string;
+  'id': string | null;
   /**
    * User-presentable name for the studio installation
    */
@@ -114,7 +114,7 @@ interface ActivePlaylistEvent {
   /**
    * Unique id of the active playlist
    */
-  'id': string;
+  'id': string | null;
   /**
    * User-presentable name for the active playlist
    */

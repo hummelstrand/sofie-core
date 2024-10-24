@@ -1,7 +1,9 @@
+import { CountdownType } from '@sofie-automation/blueprints-integration'
 import type { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import type { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
 import type { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
-import type { SegmentTiming } from '@sofie-automation/live-status-gateway-api'
+import { assertNever } from '@sofie-automation/corelib/dist/lib'
+import { SegmentCountdownType, SegmentTiming } from '@sofie-automation/live-status-gateway-api'
 
 export interface CurrentSegmentTiming extends SegmentTiming {
 	projectedEndTime: number
@@ -42,6 +44,21 @@ export function calculateSegmentTiming(segment: DBSegment, segmentParts: DBPart[
 				? sum + part.expectedDurationWithTransition
 				: sum
 		}, 0),
-		countdownType: segment.segmentTiming?.countdownType,
+		countdownType: translateSegmentCountdownType(segment.segmentTiming?.countdownType),
+	}
+}
+
+function translateSegmentCountdownType(type: CountdownType | undefined): SegmentCountdownType | undefined {
+	switch (type) {
+		case undefined:
+			return undefined
+		case CountdownType.PART_EXPECTED_DURATION:
+			return SegmentCountdownType.PART_EXPECTED_DURATION
+		case CountdownType.SEGMENT_BUDGET_DURATION:
+			return SegmentCountdownType.SEGMENT_BUDGET_DURATION
+		default:
+			assertNever(type)
+			// Cast and return the value anyway, so that the application works
+			return type as any as SegmentCountdownType
 	}
 }

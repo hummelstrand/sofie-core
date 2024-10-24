@@ -138,7 +138,7 @@ export class ActivePlaylistTopic
 					quickLoop: this.transformQuickLoopStatus(),
 					publicData: this._activePlaylist.publicData,
 					timing: {
-						timingMode: this._activePlaylist.timing.type,
+						timingMode: translatePlaylistTimingType(this._activePlaylist.timing.type),
 						startedPlayback: this._activePlaylist.startedPlayback,
 						expectedDurationMs: this._activePlaylist.timing.expectedDuration,
 						expectedStart:
@@ -328,5 +328,20 @@ export class ActivePlaylistTopic
 
 	private sendStatusToAll() {
 		this.sendStatus(this._subscribers)
+	}
+}
+
+function translatePlaylistTimingType(type: PlaylistTimingType): ActivePlaylistTimingMode {
+	switch (type) {
+		case PlaylistTimingType.None:
+			return ActivePlaylistTimingMode.NONE
+		case PlaylistTimingType.BackTime:
+			return ActivePlaylistTimingMode.BACK_MINUS_TIME
+		case PlaylistTimingType.ForwardTime:
+			return ActivePlaylistTimingMode.FORWARD_MINUS_TIME
+		default:
+			assertNever(type)
+			// Cast and return the value anyway, so that the application works
+			return type as any as ActivePlaylistTimingMode
 	}
 }
