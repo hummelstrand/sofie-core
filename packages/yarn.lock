@@ -5367,6 +5367,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sofie-automation/live-status-gateway-api@1.52.0-in-development, @sofie-automation/live-status-gateway-api@workspace:live-status-gateway-api":
+  version: 0.0.0-use.local
+  resolution: "@sofie-automation/live-status-gateway-api@workspace:live-status-gateway-api"
+  dependencies:
+    tslib: ^2.6.2
+  languageName: unknown
+  linkType: soft
+
 "@sofie-automation/meteor-lib@1.52.0-in-development, @sofie-automation/meteor-lib@workspace:meteor-lib":
   version: 0.0.0-use.local
   resolution: "@sofie-automation/meteor-lib@workspace:meteor-lib"
@@ -17805,6 +17813,7 @@ asn1@evs-broadcast/node-asn1:
     "@asyncapi/parser": ^3.3.0
     "@sofie-automation/blueprints-integration": 1.52.0-in-development
     "@sofie-automation/corelib": 1.52.0-in-development
+    "@sofie-automation/live-status-gateway-api": 1.52.0-in-development
     "@sofie-automation/server-core-integration": 1.52.0-in-development
     "@sofie-automation/shared-lib": 1.52.0-in-development
     debug: ^4.3.4

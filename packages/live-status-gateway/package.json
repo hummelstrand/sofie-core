@@ -55,6 +55,7 @@
 	"dependencies": {
 		"@sofie-automation/blueprints-integration": "1.52.0-in-development",
 		"@sofie-automation/corelib": "1.52.0-in-development",
+		"@sofie-automation/live-status-gateway-api": "1.52.0-in-development",
 		"@sofie-automation/server-core-integration": "1.52.0-in-development",
 		"@sofie-automation/shared-lib": "1.52.0-in-development",
 		"debug": "^4.3.4",
