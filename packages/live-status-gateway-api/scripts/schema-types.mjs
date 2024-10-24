@@ -71,8 +71,6 @@ const models = await generator.generate(asyncApiDoc.document)
 const allModelNames = []
 const allmodelContent = []
 for (const model of models) {
-	if (model.modelName === 'Slash') continue // Omit some weird union
-
 	allModelNames.push(model.modelName)
 	allmodelContent.push(model.result)
 

@@ -29,7 +29,7 @@ $defs:
           $ref: '#/$defs/playlist/examples'
   playlist:
     type: object
-    title: PlaylistInfo
+    title: PlaylistStatus
     properties:
       id:
         description: Unique id of the playlist

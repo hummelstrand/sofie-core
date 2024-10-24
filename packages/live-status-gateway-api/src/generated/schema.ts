@@ -6,6 +6,8 @@
  */
 
 
+type Slash = PongEvent | HeartbeatEvent | SubscriptionStatusError | SubscriptionStatusSuccess | StudioEvent | ActivePlaylistEvent | ActivePiecesEvent | SegmentsEvent | AdLibsEvent;
+
 interface PongEvent {
   'event': 'pong';
   /**
@@ -25,10 +27,10 @@ interface SubscriptionStatusError {
    * Client originated ID reflected in response message.
    */
   'reqid': number;
-  'subscription': SubscriptionStatusInfo;
+  'subscription': SubscriptionDetails;
 }
 
-interface SubscriptionStatusInfo {
+interface SubscriptionDetails {
   /**
    * The name of the topic related to this status.
    */
@@ -45,6 +47,9 @@ interface SubscriptionStatusInfo {
 enum SubscriptionName {
   STUDIO = "studio",
   ACTIVE_PLAYLIST = "activePlaylist",
+  ACTIVE_PIECES = "activePieces",
+  SEGMENTS = "segments",
+  AD_LIBS = "adLibs",
 }
 
 /**
@@ -61,7 +66,7 @@ interface SubscriptionStatusSuccess {
    * Client originated ID reflected in response message.
    */
   'reqid': number;
-  'subscription': SubscriptionStatusInfo;
+  'subscription': SubscriptionDetails;
 }
 
 interface StudioEvent {
@@ -77,10 +82,10 @@ interface StudioEvent {
   /**
    * The playlists that are currently loaded in the studio
    */
-  'playlists': PlaylistInfo[];
+  'playlists': PlaylistStatus[];
 }
 
-interface PlaylistInfo {
+interface PlaylistStatus {
   /**
    * Unique id of the playlist
    */
@@ -118,9 +123,9 @@ interface ActivePlaylistEvent {
    * The set of rundownIds in the active playlist
    */
   'rundownIds': string[];
-  'currentPart': CurrentPart | null;
+  'currentPart': CurrentPartStatus | null;
   'currentSegment': CurrentSegment | null;
-  'nextPart': Part | null;
+  'nextPart': PartStatus | null;
   /**
    * Optional arbitrary data
    */
@@ -135,7 +140,7 @@ interface ActivePlaylistEvent {
   'timing': ActivePlaylistTiming;
 }
 
-interface CurrentPart {
+interface CurrentPartStatus {
   /**
    * Unique id of the part
    */
@@ -155,7 +160,7 @@ interface CurrentPart {
   /**
    * All pieces in this part
    */
-  'pieces': Piece[];
+  'pieces': PieceStatus[];
   /**
    * Optional arbitrary data
    */
@@ -167,7 +172,7 @@ interface CurrentPart {
   'additionalProperties'?: Record<string, any>;
 }
 
-interface Piece {
+interface PieceStatus {
   /**
    * Unique id of the Piece
    */
@@ -255,7 +260,7 @@ enum SegmentCountdownType {
   SEGMENT_BUDGET_DURATION = "segment_budget_duration",
 }
 
-interface Part {
+interface PartStatus {
   /**
    * Unique id of the part
    */
@@ -275,7 +280,7 @@ interface Part {
   /**
    * All pieces in this part
    */
-  'pieces': Piece[];
+  'pieces': PieceStatus[];
   /**
    * Optional arbitrary data
    */
@@ -374,7 +379,7 @@ interface ActivePiecesEvent {
   /**
    * Pieces that are currently active (on air)
    */
-  'activePieces': Piece[];
+  'activePieces': PieceStatus[];
 }
 
 interface SegmentsEvent {
@@ -438,14 +443,14 @@ interface AdLibsEvent {
   /**
    * The available AdLibs for this playlist
    */
-  'adLibs': AdLib[];
+  'adLibs': AdLibStatus[];
   /**
    * The available Global AdLibs for this playlist
    */
-  'globalAdLibs': GlobalAdLib[];
+  'globalAdLibs': GlobalAdLibStatus[];
 }
 
-interface AdLib {
+interface AdLibStatus {
   /**
    * Unique id of the AdLib
    */
@@ -465,7 +470,7 @@ interface AdLib {
   /**
    * The available action type names that can be used to modify the execution of the AdLib
    */
-  'actionType': ActionType[];
+  'actionType': AdLibActionType[];
   /**
    * Tags attached to this AdLib
    */
@@ -485,7 +490,7 @@ interface AdLib {
   'additionalProperties'?: Record<string, any>;
 }
 
-interface ActionType {
+interface AdLibActionType {
   /**
    * The string to be passed to the ExecuteAdlib function
    */
@@ -496,7 +501,7 @@ interface ActionType {
   'label': string;
 }
 
-interface GlobalAdLib {
+interface GlobalAdLibStatus {
   /**
    * Unique id of the AdLib
    */
@@ -516,7 +521,7 @@ interface GlobalAdLib {
   /**
    * The available action type names that can be used to modify the execution of the AdLib
    */
-  'actionType': ActionType[];
+  'actionType': AdLibActionType[];
   /**
    * Tags attached to this AdLib
    */
@@ -528,4 +533,4 @@ interface GlobalAdLib {
   'additionalProperties'?: Record<string, any>;
 }
 
-export {PongEvent, HeartbeatEvent, SubscriptionStatusError, SubscriptionStatusInfo, SubscriptionName, SubscriptionStatus, SubscriptionStatusSuccess, StudioEvent, PlaylistInfo, PlaylistActivationStatus, ActivePlaylistEvent, CurrentPart, Piece, CurrentPartTiming, CurrentSegment, CurrentSegmentTiming, SegmentCountdownType, Part, ActivePlaylistQuickLoop, QuickLoopMarker, QuickLoopMarkerType, ActivePlaylistTiming, ActivePlaylistTimingMode, ActivePiecesEvent, SegmentsEvent, Segment, SegmentTiming, AdLibsEvent, AdLib, ActionType, GlobalAdLib};
+export {Slash, PongEvent, HeartbeatEvent, SubscriptionStatusError, SubscriptionDetails, SubscriptionName, SubscriptionStatus, SubscriptionStatusSuccess, StudioEvent, PlaylistStatus, PlaylistActivationStatus, ActivePlaylistEvent, CurrentPartStatus, PieceStatus, CurrentPartTiming, CurrentSegment, CurrentSegmentTiming, SegmentCountdownType, PartStatus, ActivePlaylistQuickLoop, QuickLoopMarker, QuickLoopMarkerType, ActivePlaylistTiming, ActivePlaylistTimingMode, ActivePiecesEvent, SegmentsEvent, Segment, SegmentTiming, AdLibsEvent, AdLibStatus, AdLibActionType, GlobalAdLibStatus};

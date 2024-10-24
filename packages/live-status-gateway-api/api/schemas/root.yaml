@@ -126,7 +126,7 @@ $defs:
         $ref: '#/$defs/reqid'
       subscription:
         type: object
-        title: SubscriptionStatusInfo
+        title: SubscriptionDetails
         properties:
           name:
             $ref: '#/$defs/name'
@@ -149,6 +149,9 @@ $defs:
     enum:
       - studio
       - activePlaylist
+      - activePieces
+      - segments
+      - adLibs
   status:
     type: string
     title: SubscriptionStatus

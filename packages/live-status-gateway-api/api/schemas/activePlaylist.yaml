@@ -96,7 +96,7 @@ $defs:
           expectedDurationMs: 180000
   partBase:
     type: object
-    title: Part
+    title: PartStatus
     properties:
       id:
         description: Unique id of the part
@@ -142,7 +142,7 @@ $defs:
           - $ref: '#/$defs/piece/examples/0'
   currentPart:
     oneOf:
-      - title: CurrentPart
+      - title: CurrentPartStatus
         allOf:
           - $ref: '#/$defs/partBase'
           - type: object
@@ -219,7 +219,7 @@ $defs:
           countdownType: segment_budget_duration
   piece:
     type: object
-    title: Piece
+    title: PieceStatus
     properties:
       id:
         description: Unique id of the Piece

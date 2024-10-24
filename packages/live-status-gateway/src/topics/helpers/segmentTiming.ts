@@ -1,12 +1,7 @@
-import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
-import { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
-import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
-
-export interface SegmentTiming {
-	budgetDurationMs?: number
-	expectedDurationMs: number
-	countdownType?: 'part_expected_duration' | 'segment_budget_duration'
-}
+import type { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
+import type { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
+import type { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
+import type { SegmentTiming } from '@sofie-automation/live-status-gateway-api'
 
 export interface CurrentSegmentTiming extends SegmentTiming {
 	projectedEndTime: number

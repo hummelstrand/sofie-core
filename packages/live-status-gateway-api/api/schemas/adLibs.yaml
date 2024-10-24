@@ -33,7 +33,7 @@ $defs:
         globalAdLibs:
           $ref: '#/$defs/adLibBase/examples'
   adLib:
-    title: AdLib
+    title: AdLibStatus
     allOf:
       - $ref: '#/$defs/adLibBase'
       - type: object
@@ -58,12 +58,12 @@ $defs:
         publicData:
           fileName: MV000123.mxf
   globalAdLib:
-    title: GlobalAdLib
+    title: GlobalAdLibStatus
     allOf:
       - $ref: '#/$defs/adLibBase'
   adLibBase:
     type: object
-    title: AdLibBase
+    title: AdLibBaseStatus
     properties:
       id:
         description: Unique id of the AdLib
@@ -82,7 +82,7 @@ $defs:
         type: array
         items:
           type: object
-          title: ActionType
+          title: AdLibActionType
           properties:
             name:
               description: The string to be passed to the ExecuteAdlib function
