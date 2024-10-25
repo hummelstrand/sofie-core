@@ -36,6 +36,7 @@
 	},
 	"files": [
 		"/dist",
+		"/api",
 		"/CHANGELOG.md",
 		"/README.md",
 		"/LICENSE"

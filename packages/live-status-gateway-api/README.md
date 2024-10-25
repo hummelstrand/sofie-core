@@ -8,4 +8,6 @@ This is a part of the [**Sofie** TV News Studio Automation System](https://githu
 
 ## Purpose
 
-This library is a collection of typings used by the `live-status-gateway` and consumers of the api it provides
+This library is a collection of typings used by the `live-status-gateway` and consumers of the api it provides.
+
+The package also contains the asyncapi schema, to allow for other consumers of the library to do their own generating if desired.
