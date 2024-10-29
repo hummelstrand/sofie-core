@@ -315,7 +315,7 @@ const TimingDisplay = withTranslation()(
 								<CurrentPartOrSegmentRemaining
 									currentPartInstanceId={rundownPlaylist.currentPartInfo.partInstanceId}
 									heavyClassName="overtime"
-									useSegmentTime={true}
+									preferSegmentTime={true}
 								/>
 								<AutoNextStatus />
 								{rundownPlaylist.holdState && rundownPlaylist.holdState !== RundownHoldState.COMPLETE ? (
