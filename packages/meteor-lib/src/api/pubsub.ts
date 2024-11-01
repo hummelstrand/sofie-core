@@ -261,7 +261,7 @@ export interface MeteorPubSubTypes {
 		bucketId: BucketId
 	) => CustomCollectionName.UIBucketContentStatuses
 	[MeteorPubSub.uiBlueprintUpgradeStatuses]: () => CustomCollectionName.UIBlueprintUpgradeStatuses
-	[MeteorPubSub.uiParts]: (playlistId: RundownPlaylistId) => CustomCollectionName.UIParts
+	[MeteorPubSub.uiParts]: (playlistId: RundownPlaylistId | null) => CustomCollectionName.UIParts
 	[MeteorPubSub.uiPartInstances]: (
 		playlistActivationId: RundownPlaylistActivationId | null
 	) => CustomCollectionName.UIPartInstances
