@@ -19,7 +19,10 @@ meteorPublish(
 		check(showStyleBaseIds, Match.Maybe(Array))
 
 		// If values were provided, they must have values
-		if (showStyleBaseIds && showStyleBaseIds.length === 0) return null
+		if (showStyleBaseIds && showStyleBaseIds.length === 0) {
+			this.ready()
+			return null
+		}
 
 		const { cred, selector } = await AutoFillSelector.organizationId<DBShowStyleBase>(this.userId, {}, token)
 
@@ -50,8 +53,14 @@ meteorPublish(
 		check(showStyleVariantIds, Match.Maybe(Array))
 
 		// If values were provided, they must have values
-		if (showStyleBaseIds && showStyleBaseIds.length === 0) return null
-		if (showStyleVariantIds && showStyleVariantIds.length === 0) return null
+		if (showStyleBaseIds && showStyleBaseIds.length === 0) {
+			this.ready()
+			return null
+		}
+		if (showStyleVariantIds && showStyleVariantIds.length === 0) {
+			this.ready()
+			return null
+		}
 
 		const { cred, selector } = await AutoFillSelector.showStyleBaseId<DBShowStyleVariant>(this.userId, {}, token)
 
@@ -77,7 +86,10 @@ meteorPublish(
 		check(showStyleBaseIds, Match.Maybe(Array))
 
 		// If values were provided, they must have values
-		if (showStyleBaseIds && showStyleBaseIds.length === 0) return null
+		if (showStyleBaseIds && showStyleBaseIds.length === 0) {
+			this.ready()
+			return null
+		}
 
 		const selector0: MongoQuery<RundownLayoutBase> = {}
 		if (showStyleBaseIds) selector0.showStyleBaseId = { $in: showStyleBaseIds }

@@ -44,7 +44,10 @@ meteorPublish(
 		check(peripheralDeviceIds, Match.Maybe(Array))
 
 		// If values were provided, they must have values
-		if (peripheralDeviceIds && peripheralDeviceIds.length === 0) return null
+		if (peripheralDeviceIds && peripheralDeviceIds.length === 0) {
+			this.ready()
+			return null
+		}
 
 		const { cred, selector } = await AutoFillSelector.organizationId<PeripheralDevice>(this.userId, {}, token)
 

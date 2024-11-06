@@ -18,7 +18,10 @@ import { getCurrentTime } from '../lib/lib'
 meteorPublish(
 	MeteorPubSub.organization,
 	async function (organizationId: OrganizationId | null, token: string | undefined) {
-		if (!organizationId) return null
+		if (!organizationId) {
+			this.ready()
+			return null
+		}
 
 		const { cred, selector } = await AutoFillSelector.organizationId(this.userId, { _id: organizationId }, token)
 		const modifier: FindOptions<DBOrganization> = {
@@ -43,7 +46,10 @@ meteorPublish(CorelibPubSub.blueprints, async function (blueprintIds: BlueprintI
 	check(blueprintIds, Match.Maybe(Array))
 
 	// If values were provided, they must have values
-	if (blueprintIds && blueprintIds.length === 0) return null
+	if (blueprintIds && blueprintIds.length === 0) {
+		this.ready()
+		return null
+	}
 
 	const { cred, selector } = await AutoFillSelector.organizationId<Blueprint>(this.userId, {}, token)
 

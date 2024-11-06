@@ -24,8 +24,14 @@ meteorPublish(
 		check(studioIds, Match.Maybe(Array))
 
 		// If values were provided, they must have values
-		if (rundownPlaylistIds && rundownPlaylistIds.length === 0) return null
-		if (studioIds && studioIds.length === 0) return null
+		if (rundownPlaylistIds && rundownPlaylistIds.length === 0) {
+			this.ready()
+			return null
+		}
+		if (studioIds && studioIds.length === 0) {
+			this.ready()
+			return null
+		}
 
 		const { cred, selector } = await AutoFillSelector.organizationId<DBRundownPlaylist>(this.userId, {}, token)
 
