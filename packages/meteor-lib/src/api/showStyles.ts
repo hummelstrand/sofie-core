@@ -1,6 +1,10 @@
-import { ShowStyleBaseId, ShowStyleVariantId, StudioId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { HotkeyDefinition, OutputLayers, SourceLayers } from '@sofie-automation/corelib/dist/dataModel/ShowStyleBase'
-import { DBShowStyleVariant } from '@sofie-automation/corelib/dist/dataModel/ShowStyleVariant'
+import type { ShowStyleBaseId, ShowStyleVariantId, StudioId } from '@sofie-automation/corelib/dist/dataModel/Ids.js'
+import type {
+	HotkeyDefinition,
+	OutputLayers,
+	SourceLayers,
+} from '@sofie-automation/corelib/dist/dataModel/ShowStyleBase.js'
+import type { DBShowStyleVariant } from '@sofie-automation/corelib/dist/dataModel/ShowStyleVariant.js'
 
 export interface NewShowStylesAPI {
 	insertShowStyleBase(): Promise<ShowStyleBaseId>

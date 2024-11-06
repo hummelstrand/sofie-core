@@ -14,7 +14,7 @@ async function findCommonJsPathsForLibrary(prefix: string, rootPath: string) {
 		if (stat.isDirectory()) {
 			await findCommonJsPathsForLibrary(path.join(prefix, name), path.join(rootPath, name))
 		} else if (name.endsWith('.js')) {
-			commonJsPaths.push(path.join(prefix, name.slice(0, -3)))
+			commonJsPaths.push(path.join(prefix, name.slice(0, -3)), path.join(prefix, name))
 		}
 	}
 }
@@ -23,8 +23,9 @@ async function findCommonJsPathsForLibrary(prefix: string, rootPath: string) {
 await Promise.all([
 	findCommonJsPathsForLibrary('@sofie-automation/corelib/dist', '../corelib/dist'),
 	findCommonJsPathsForLibrary('@sofie-automation/shared-lib/dist', '../shared-lib/dist'),
-	findCommonJsPathsForLibrary('@sofie-automation/meteor-lib/dist', '../meteor-lib/dist'),
 ])
+
+console.log(commonJsPaths)
 
 // https://vitejs.dev/config/
 export default defineConfig({

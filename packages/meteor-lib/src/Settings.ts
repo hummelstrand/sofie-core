@@ -1,4 +1,4 @@
-import { KeyboardLayouts } from './KeyboardLayout'
+import { KeyboardLayouts } from './KeyboardLayout.js'
 
 /**
  * This is an object specifying installation-wide, User Interface settings.

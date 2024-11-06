@@ -1,8 +1,7 @@
-import { protectString, unprotectString } from '@sofie-automation/corelib/dist/protectedString'
-import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
-import { PartId, RundownPlaylistActivationId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-
-import { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
+import { protectString, unprotectString } from '@sofie-automation/corelib/dist/protectedString.js'
+import type { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part.js'
+import type { PartId, RundownPlaylistActivationId } from '@sofie-automation/corelib/dist/dataModel/Ids.js'
+import type { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance.js'
 
 export interface PartInstance extends DBPartInstance {
 	isTemporary: boolean

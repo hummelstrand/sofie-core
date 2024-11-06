@@ -1,12 +1,12 @@
-import { ISourceLayer, ITranslatableMessage } from '@sofie-automation/blueprints-integration'
-import {
+import type { ISourceLayer, ITranslatableMessage } from '@sofie-automation/blueprints-integration'
+import type {
 	AdLibActionId,
 	PeripheralDeviceId,
 	PieceId,
 	RundownBaselineAdLibActionId,
 	TriggeredActionId,
-} from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { ProtectedString } from '@sofie-automation/corelib/dist/protectedString'
+} from '@sofie-automation/corelib/dist/dataModel/Ids.js'
+import type { ProtectedString } from '@sofie-automation/corelib/dist/protectedString.js'
 
 export type {
 	DeviceActionId,
@@ -16,7 +16,7 @@ export type {
 	PreviewWrappedAdLibId,
 	PreviewWrappedAdLib,
 	IWrappedAdLibBase,
-} from '@sofie-automation/shared-lib/dist/input-gateway/deviceTriggerPreviews'
+} from '@sofie-automation/shared-lib/dist/input-gateway/deviceTriggerPreviews.js'
 
 export type MountedTrigger = (MountedGenericTrigger | MountedAdLibTrigger) & MountedHotkeyMixin
 export type MountedDeviceTrigger = (MountedGenericTrigger | MountedAdLibTrigger) & MountedDeviceMixin

@@ -1,6 +1,6 @@
-import { PackageInfo } from '@sofie-automation/blueprints-integration'
-import { PieceStatusCode } from '@sofie-automation/corelib/dist/dataModel/Piece'
-import { ITranslatableMessage } from '@sofie-automation/corelib/dist/TranslatableMessage'
+import type { PackageInfo } from '@sofie-automation/blueprints-integration'
+import type { PieceStatusCode } from '@sofie-automation/corelib/dist/dataModel/Piece.js'
+import type { ITranslatableMessage } from '@sofie-automation/corelib/dist/TranslatableMessage.js'
 
 export interface PieceContentStatusObj {
 	status: PieceStatusCode

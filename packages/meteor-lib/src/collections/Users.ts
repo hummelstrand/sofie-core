@@ -1,4 +1,4 @@
-import { UserId, OrganizationId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { UserId, OrganizationId } from '@sofie-automation/corelib/dist/dataModel/Ids.js'
 
 export interface UserProfile {
 	name: string

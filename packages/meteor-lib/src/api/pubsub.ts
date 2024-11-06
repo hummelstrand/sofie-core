@@ -1,4 +1,4 @@
-import {
+import type {
 	BucketId,
 	OrganizationId,
 	PartId,
@@ -7,36 +7,36 @@ import {
 	RundownPlaylistId,
 	ShowStyleBaseId,
 	StudioId,
-} from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { Bucket } from '../collections/Buckets'
-import { ICoreSystem } from '../collections/CoreSystem'
-import { Evaluation } from '../collections/Evaluations'
-import { ExpectedPlayoutItem } from '@sofie-automation/corelib/dist/dataModel/ExpectedPlayoutItem'
-import { MediaWorkFlow } from '@sofie-automation/shared-lib/dist/core/model/MediaWorkFlows'
-import { MediaWorkFlowStep } from '@sofie-automation/shared-lib/dist/core/model/MediaWorkFlowSteps'
-import { DBOrganization } from '../collections/Organization'
-import { RundownLayoutBase } from '../collections/RundownLayouts'
-import { SnapshotItem } from '../collections/Snapshots'
-import { TranslationsBundle } from '../collections/TranslationsBundles'
-import { DBTriggeredActions, UITriggeredActionsObj } from '../collections/TriggeredActions'
-import { UserActionsLogItem } from '../collections/UserActionsLog'
-import { DBUser } from '../collections/Users'
-import { UIBucketContentStatus, UIPieceContentStatus, UISegmentPartNote } from './rundownNotifications'
-import { UIShowStyleBase } from './showStyles'
-import { UIStudio } from './studios'
-import { UIDeviceTriggerPreview } from './MountedTriggers'
-import { UIBlueprintUpgradeStatus } from './upgradeStatus'
+} from '@sofie-automation/corelib/dist/dataModel/Ids.js'
+import type { Bucket } from '../collections/Buckets.js'
+import type { ICoreSystem } from '../collections/CoreSystem.js'
+import type { Evaluation } from '../collections/Evaluations.js'
+import type { ExpectedPlayoutItem } from '@sofie-automation/corelib/dist/dataModel/ExpectedPlayoutItem.js'
+import type { MediaWorkFlow } from '@sofie-automation/shared-lib/dist/core/model/MediaWorkFlows.js'
+import type { MediaWorkFlowStep } from '@sofie-automation/shared-lib/dist/core/model/MediaWorkFlowSteps.js'
+import type { DBOrganization } from '../collections/Organization.js'
+import type { RundownLayoutBase } from '../collections/RundownLayouts.js'
+import type { SnapshotItem } from '../collections/Snapshots.js'
+import type { TranslationsBundle } from '../collections/TranslationsBundles.js'
+import type { DBTriggeredActions, UITriggeredActionsObj } from '../collections/TriggeredActions.js'
+import type { UserActionsLogItem } from '../collections/UserActionsLog.js'
+import type { DBUser } from '../collections/Users.js'
+import type { UIBucketContentStatus, UIPieceContentStatus, UISegmentPartNote } from './rundownNotifications.js'
+import type { UIShowStyleBase } from './showStyles.js'
+import type { UIStudio } from './studios.js'
+import type { UIDeviceTriggerPreview } from './MountedTriggers.js'
+import type { UIBlueprintUpgradeStatus } from './upgradeStatus.js'
 import {
 	PeripheralDevicePubSub,
 	PeripheralDevicePubSubTypes,
 	PeripheralDevicePubSubCollections,
 	PeripheralDevicePubSubCollectionsNames,
-} from '@sofie-automation/shared-lib/dist/pubsub/peripheralDevice'
-import { CorelibPubSub, CorelibPubSubCollections, CorelibPubSubTypes } from '@sofie-automation/corelib/dist/pubsub'
-import { CollectionName } from '@sofie-automation/corelib/dist/dataModel/Collections'
-import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
-import { PartInstance } from '../collections/PartInstances'
-import type { DBNotificationObj } from '@sofie-automation/corelib/dist/dataModel/Notifications'
+} from '@sofie-automation/shared-lib/dist/pubsub/peripheralDevice.js'
+import { CorelibPubSub, CorelibPubSubCollections, CorelibPubSubTypes } from '@sofie-automation/corelib/dist/pubsub.js'
+import { CollectionName } from '@sofie-automation/corelib/dist/dataModel/Collections.js'
+import type { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part.js'
+import type { PartInstance } from '../collections/PartInstances.js'
+import type { DBNotificationObj } from '@sofie-automation/corelib/dist/dataModel/Notifications.js'
 
 /**
  * Ids of possible DDP subscriptions for the UI only

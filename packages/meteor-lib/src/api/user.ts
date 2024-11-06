@@ -1,5 +1,5 @@
-import { UserProfile } from '../collections/Users'
-import { UserId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import type { UserProfile } from '../collections/Users.js'
+import type { UserId } from '@sofie-automation/corelib/dist/dataModel/Ids.js'
 
 export interface NewUserAPI {
 	enrollUser(email: string, name: string): Promise<UserId>

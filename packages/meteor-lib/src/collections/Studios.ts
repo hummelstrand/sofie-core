@@ -4,9 +4,9 @@ import {
 	MappingExt,
 	StudioRouteType,
 	StudioRouteSet,
-} from '@sofie-automation/corelib/dist/dataModel/Studio'
-import { omit } from '@sofie-automation/corelib/dist/lib'
-import { protectString } from '@sofie-automation/corelib/dist/protectedString'
+} from '@sofie-automation/corelib/dist/dataModel/Studio.js'
+import { omit } from '@sofie-automation/corelib/dist/lib.js'
+import { protectString } from '@sofie-automation/corelib/dist/protectedString.js'
 
 export function getActiveRoutes(routeSets: Record<string, StudioRouteSet>): ResultingMappingRoutes {
 	const routes: ResultingMappingRoutes = {

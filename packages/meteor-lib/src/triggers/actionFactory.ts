@@ -8,27 +8,27 @@ import {
 	SomeAction,
 	Time,
 } from '@sofie-automation/blueprints-integration'
-import { TFunction } from 'i18next'
-import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
-import { DBShowStyleBase, SourceLayers } from '@sofie-automation/corelib/dist/dataModel/ShowStyleBase'
-import { DBStudio } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import RundownViewEventBus, { RundownViewEvents } from '../triggers/RundownViewEventBus'
-import { UserAction } from '../userAction'
-import { AdLibFilterChainLink, compileAdLibFilter, IWrappedAdLib } from './actionFilterChainCompilers'
-import { ClientAPI } from '../api/client'
-import {
+import type { TFunction } from 'i18next'
+import type { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist.js'
+import type { DBShowStyleBase, SourceLayers } from '@sofie-automation/corelib/dist/dataModel/ShowStyleBase.js'
+import type { DBStudio } from '@sofie-automation/corelib/dist/dataModel/Studio.js'
+import RundownViewEventBus, { RundownViewEvents } from '../triggers/RundownViewEventBus.js'
+import { UserAction } from '../userAction.js'
+import { AdLibFilterChainLink, compileAdLibFilter, IWrappedAdLib } from './actionFilterChainCompilers.js'
+import { ClientAPI } from '../api/client.js'
+import type {
 	PartId,
 	PartInstanceId,
 	RundownId,
 	RundownPlaylistId,
 	StudioId,
-} from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { DeviceActions } from '@sofie-automation/shared-lib/dist/core/model/ShowStyle'
-import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/error'
-import { MountedAdLibTriggerType } from '../api/MountedTriggers'
-import { DummyReactiveVar, TriggerReactiveVar } from './reactive-var'
-import { TriggersContext, TriggerTrackerComputation } from './triggersContext'
-import { assertNever } from '@sofie-automation/corelib/dist/lib'
+} from '@sofie-automation/corelib/dist/dataModel/Ids.js'
+import { DeviceActions } from '@sofie-automation/shared-lib/dist/core/model/ShowStyle.js'
+import { UserError, UserErrorMessage } from '@sofie-automation/corelib/dist/error.js'
+import { MountedAdLibTriggerType } from '../api/MountedTriggers.js'
+import { DummyReactiveVar, TriggerReactiveVar } from './reactive-var.js'
+import type { TriggersContext, TriggerTrackerComputation } from './triggersContext.js'
+import { assertNever } from '@sofie-automation/corelib/dist/lib.js'
 
 // as described in this issue: https://github.com/Microsoft/TypeScript/issues/14094
 type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never }

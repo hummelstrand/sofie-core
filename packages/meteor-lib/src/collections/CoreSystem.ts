@@ -1,6 +1,6 @@
-import { LogLevel } from '../lib'
-import { CoreSystemId, BlueprintId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { protectString } from '@sofie-automation/corelib/dist/protectedString'
+import type { LogLevel } from '../lib.js'
+import type { CoreSystemId, BlueprintId } from '@sofie-automation/corelib/dist/dataModel/Ids.js'
+import { protectString } from '@sofie-automation/corelib/dist/protectedString.js'
 
 export const SYSTEM_ID: CoreSystemId = protectString('core')
 

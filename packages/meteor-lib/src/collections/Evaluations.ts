@@ -1,12 +1,12 @@
-import { Time } from '@sofie-automation/shared-lib/dist/lib/lib'
-import {
+import type { Time } from '@sofie-automation/shared-lib/dist/lib/lib.js'
+import type {
 	EvaluationId,
 	StudioId,
 	RundownPlaylistId,
 	SnapshotId,
 	OrganizationId,
 	UserId,
-} from '@sofie-automation/corelib/dist/dataModel/Ids'
+} from '@sofie-automation/corelib/dist/dataModel/Ids.js'
 
 export interface Evaluation extends EvaluationBase {
 	_id: EvaluationId

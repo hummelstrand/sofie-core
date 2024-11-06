@@ -1,11 +1,11 @@
 import { ExpectedPackage } from '@sofie-automation/blueprints-integration'
-import { assertNever, literal } from '@sofie-automation/corelib/dist/lib'
-import { StudioLight } from '@sofie-automation/corelib/dist/dataModel/Studio'
-import * as deepExtend from 'deep-extend'
+import { assertNever, literal } from '@sofie-automation/corelib/dist/lib.js'
+import type { StudioLight } from '@sofie-automation/corelib/dist/dataModel/Studio.js'
+import deepExtend from 'deep-extend'
 import {
 	htmlTemplateGetSteps,
 	htmlTemplateGetFileNamesFromSteps,
-} from '@sofie-automation/shared-lib/dist/package-manager/helpers'
+} from '@sofie-automation/shared-lib/dist/package-manager/helpers.js'
 
 export function getPreviewPackageSettings(
 	expectedPackage: ExpectedPackage.Any

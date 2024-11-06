@@ -1,6 +1,5 @@
-import { ResultingMappingRoutes } from '@sofie-automation/corelib/dist/dataModel/Studio'
-
-import { TimelineObjGeneric, updateLookaheadLayer } from '@sofie-automation/corelib/dist/dataModel/Timeline'
+import type { ResultingMappingRoutes } from '@sofie-automation/corelib/dist/dataModel/Studio.js'
+import { TimelineObjGeneric, updateLookaheadLayer } from '@sofie-automation/corelib/dist/dataModel/Timeline.js'
 
 export function getRoutedTimeline(
 	inputTimelineObjs: TimelineObjGeneric[],

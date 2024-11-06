@@ -1,4 +1,4 @@
-import * as Shared from '@sofie-automation/shared-lib/dist/peripheralDevice/mediaManager'
+import * as Shared from '@sofie-automation/shared-lib/dist/peripheralDevice/mediaManager.js'
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace MediaManagerAPI {

@@ -1,6 +1,6 @@
 import type { Collection as RawCollection, Db as RawDb } from 'mongodb'
-import { MongoFieldSpecifier, MongoModifier, MongoQuery, SortSpecifier } from '@sofie-automation/corelib/dist/mongo'
-import { ProtectedString } from '@sofie-automation/corelib/dist/protectedString'
+import { MongoFieldSpecifier, MongoModifier, MongoQuery, SortSpecifier } from '@sofie-automation/corelib/dist/mongo.js'
+import { ProtectedString } from '@sofie-automation/corelib/dist/protectedString.js'
 
 export interface MongoReadOnlyCollection<DBInterface extends { _id: ProtectedString<any> }> {
 	/**

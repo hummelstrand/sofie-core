@@ -1,11 +1,11 @@
-import { Time } from '@sofie-automation/shared-lib/dist/lib/lib'
-import {
+import type { Time } from '@sofie-automation/shared-lib/dist/lib/lib.js'
+import type {
 	SnapshotId,
 	StudioId,
 	RundownId,
 	RundownPlaylistId,
 	OrganizationId,
-} from '@sofie-automation/corelib/dist/dataModel/Ids'
+} from '@sofie-automation/corelib/dist/dataModel/Ids.js'
 
 export enum SnapshotType {
 	RUNDOWNPLAYLIST = 'rundownplaylist',
