@@ -65,10 +65,7 @@ meteorPublish(PeripheralDevicePubSub.rundownsForDevice, async function (deviceId
 		throw new Meteor.Error(403, 'Publication can only be used by authorized PeripheralDevices')
 
 	// No studio, then no rundowns
-	if (!resolvedCred.device.studioId) {
-		this.ready()
-		return null
-	}
+	if (!resolvedCred.device.studioId) return null
 
 	selector.studioId = resolvedCred.device.studioId
 
@@ -90,10 +87,7 @@ meteorPublish(
 		check(playlistIds, Array)
 
 		// If values were provided, they must have values
-		if (playlistIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (playlistIds.length === 0) return null
 
 		const { cred, selector } = await AutoFillSelector.organizationId<DBRundown>(
 			this.userId,
@@ -127,10 +121,7 @@ meteorPublish(
 	async function (showStyleBaseIds: ShowStyleBaseId[], token: string | undefined) {
 		check(showStyleBaseIds, Array)
 
-		if (showStyleBaseIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (showStyleBaseIds.length === 0) return null
 
 		const { cred, selector } = await AutoFillSelector.organizationId<DBRundown>(
 			this.userId,
@@ -165,10 +156,7 @@ meteorPublish(
 	async function (rundownIds: RundownId[], filter: { omitHidden?: boolean } | undefined, token: string | undefined) {
 		check(rundownIds, Array)
 
-		if (rundownIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (rundownIds.length === 0) return null
 
 		const selector: MongoQuery<DBSegment> = {
 			rundownId: { $in: rundownIds },
@@ -195,14 +183,8 @@ meteorPublish(
 		check(rundownIds, Array)
 		check(segmentIds, Match.Maybe(Array))
 
-		if (rundownIds.length === 0) {
-			this.ready()
-			return null
-		}
-		if (segmentIds && segmentIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (rundownIds.length === 0) return null
+		if (segmentIds && segmentIds.length === 0) return null
 
 		const modifier: FindOptions<DBPart> = {
 			fields: {
@@ -237,10 +219,7 @@ meteorPublish(
 		check(rundownIds, Array)
 		check(playlistActivationId, Match.Maybe(String))
 
-		if (rundownIds.length === 0 || !playlistActivationId) {
-			this.ready()
-			return null
-		}
+		if (rundownIds.length === 0 || !playlistActivationId) return null
 
 		const modifier: FindOptions<DBPartInstance> = {
 			fields: {
@@ -273,10 +252,7 @@ meteorPublish(
 	) {
 		check(rundownIds, Array)
 
-		if (rundownIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (rundownIds.length === 0) return null
 
 		const selector: MongoQuery<DBPartInstance> = {
 			rundownId: { $in: rundownIds },
@@ -314,10 +290,7 @@ meteorPublish(
 		check(partIds, Match.Maybe(Array))
 
 		// If values were provided, they must have values
-		if (partIds && partIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (partIds && partIds.length === 0) return null
 
 		const selector: MongoQuery<Piece> = {
 			startRundownId: { $in: rundownIds },
@@ -388,10 +361,7 @@ const adlibPiecesSubFields: MongoFieldSpecifierZeroes<AdLibPiece> = {
 meteorPublish(CorelibPubSub.adLibPieces, async function (rundownIds: RundownId[], token: string | undefined) {
 	check(rundownIds, Array)
 
-	if (rundownIds.length === 0) {
-		this.ready()
-		return null
-	}
+	if (rundownIds.length === 0) return null
 
 	const selector: MongoQuery<AdLibPiece> = {
 		rundownId: { $in: rundownIds },
@@ -447,14 +417,8 @@ meteorPublish(
 		check(partInstanceIds, Match.Maybe(Array))
 
 		// If values were provided, they must have values
-		if (rundownIds.length === 0) {
-			this.ready()
-			return null
-		}
-		if (partInstanceIds && partInstanceIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (rundownIds.length === 0) return null
+		if (partInstanceIds && partInstanceIds.length === 0) return null
 
 		const selector: MongoQuery<PieceInstance> = {
 			rundownId: { $in: rundownIds },
@@ -521,10 +485,7 @@ meteorPublish(
 	) {
 		check(rundownIds, Array)
 
-		if (rundownIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (rundownIds.length === 0) return null
 
 		const selector: MongoQuery<PieceInstance> = {
 			rundownId: { $in: rundownIds },
@@ -561,10 +522,7 @@ meteorPublish(
 			if (!peripheralDevice) throw new Meteor.Error(`PeripheralDevice "${deviceId}" not found`)
 
 			const studioId = peripheralDevice.studioId
-			if (!studioId) {
-				this.ready()
-				return null
-			}
+			if (!studioId) return null
 
 			return ExpectedPlayoutItems.findWithCursor({ studioId })
 		}
@@ -593,10 +551,7 @@ meteorPublish(
 	async function (rundownIds: RundownId[], token: string | undefined) {
 		check(rundownIds, Array)
 
-		if (rundownIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (rundownIds.length === 0) return null
 
 		const selector: MongoQuery<RundownBaselineAdLibItem> = {
 			rundownId: { $in: rundownIds },
@@ -624,10 +579,7 @@ const adlibActionSubFields: MongoFieldSpecifierZeroes<AdLibAction> = {
 meteorPublish(CorelibPubSub.adLibActions, async function (rundownIds: RundownId[], token: string | undefined) {
 	check(rundownIds, Array)
 
-	if (rundownIds.length === 0) {
-		this.ready()
-		return null
-	}
+	if (rundownIds.length === 0) return null
 
 	const selector: MongoQuery<AdLibAction> = {
 		rundownId: { $in: rundownIds },
@@ -666,10 +618,7 @@ meteorPublish(
 	async function (rundownIds: RundownId[], token: string | undefined) {
 		check(rundownIds, Array)
 
-		if (rundownIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (rundownIds.length === 0) return null
 
 		const selector: MongoQuery<RundownBaselineAdLibAction> = {
 			rundownId: { $in: rundownIds },

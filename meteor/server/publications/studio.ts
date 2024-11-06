@@ -42,10 +42,7 @@ meteorPublish(CorelibPubSub.studios, async function (studioIds: StudioId[] | nul
 	check(studioIds, Match.Maybe(Array))
 
 	// If values were provided, they must have values
-	if (studioIds && studioIds.length === 0) {
-		this.ready()
-		return null
-	}
+	if (studioIds && studioIds.length === 0) return null
 
 	const { cred, selector } = await AutoFillSelector.organizationId<DBStudio>(this.userId, {}, token)
 
@@ -81,10 +78,7 @@ meteorPublish(CorelibPubSub.expectedPackages, async function (studioIds: StudioI
 	// Note: This differs from the expected packages sent to the Package Manager, instead @see PubSub.expectedPackagesForDevice
 	check(studioIds, Array)
 
-	if (studioIds.length === 0) {
-		this.ready()
-		return null
-	}
+	if (studioIds.length === 0) return null
 
 	if (await StudioReadAccess.studioContent(studioIds, { userId: this.userId, token })) {
 		return ExpectedPackages.findWithCursor({
@@ -98,10 +92,7 @@ meteorPublish(
 	async function (studioIds: StudioId[], token: string | undefined) {
 		check(studioIds, Array)
 
-		if (studioIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (studioIds.length === 0) return null
 
 		if (await StudioReadAccess.studioContent(studioIds, { userId: this.userId, token })) {
 			return ExpectedPackageWorkStatuses.findWithCursor({
@@ -116,10 +107,7 @@ meteorPublish(
 	async function (studioIds: StudioId[], token: string | undefined) {
 		check(studioIds, Array)
 
-		if (studioIds.length === 0) {
-			this.ready()
-			return null
-		}
+		if (studioIds.length === 0) return null
 
 		if (await StudioReadAccess.studioContent(studioIds, { userId: this.userId, token })) {
 			return PackageContainerStatuses.findWithCursor({
