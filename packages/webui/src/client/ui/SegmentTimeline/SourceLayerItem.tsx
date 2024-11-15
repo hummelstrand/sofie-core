@@ -1,6 +1,12 @@
 import * as React from 'react'
 import { ISourceLayerUi, IOutputLayerUi, PartUi, PieceUi } from './SegmentTimelineContainer'
-import { SourceLayerType, PieceLifespan, IBlueprintPieceType } from '@sofie-automation/blueprints-integration'
+import {
+	SourceLayerType,
+	PieceLifespan,
+	IBlueprintPieceType,
+	UserEditingType,
+	DefaultUserOperationsTypes,
+} from '@sofie-automation/blueprints-integration'
 import { RundownUtils } from '../../lib/rundown'
 import { DefaultLayerItemRenderer } from './Renderers/DefaultLayerItemRenderer'
 import { MicSourceRenderer } from './Renderers/MicSourceRenderer'
@@ -22,7 +28,8 @@ import { UIStudio } from '@sofie-automation/meteor-lib/dist/api/studios'
 import { ReadonlyDeep } from 'type-fest'
 import { PieceContentStatusObj } from '@sofie-automation/meteor-lib/dist/api/pieceContentStatus'
 import { useSelectedElementsContext } from '../RundownView/SelectedElementsContext'
-import { useCallback, useRef, useState, useEffect } from 'react'
+import { useCallback, useRef, useState, useEffect, useContext } from 'react'
+import { dragContext } from '../RundownView/DragContext'
 const LEFT_RIGHT_ANCHOR_SPACER = 15
 const MARGINAL_ANCHORED_WIDTH = 5
 
@@ -111,6 +118,8 @@ export const SourceLayerItem = (props: Readonly<ISourceLayerItemProps>): JSX.Ele
 	const [leftAnchoredWidth, setLeftAnchoredWidth] = useState<number>(0)
 	const [rightAnchoredWidth, setRightAnchoredWidth] = useState<number>(0)
 
+	const dragCtx = useContext(dragContext)
+
 	const state = {
 		highlight,
 		showMiniInspector,
@@ -176,10 +185,42 @@ export const SourceLayerItem = (props: Readonly<ISourceLayerItemProps>): JSX.Ele
 		},
 		[piece]
 	)
-	const itemMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-		e.preventDefault()
-		e.stopPropagation()
-	}, [])
+	const itemMouseDown = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			e.preventDefault()
+			e.stopPropagation()
+			console.log(
+				'mousedown',
+				UserEditingType.SOFIE,
+				DefaultUserOperationsTypes,
+				piece.instance.piece.userEditOperations?.map(
+					(op) => op.type === UserEditingType.SOFIE && op.id === '__sofie-retime-piece'
+				)
+			)
+
+			if (
+				!piece.instance.piece.userEditOperations?.find(
+					// (op) => op.type === UserEditingType.SOFIE && op.id === DefaultUserOperationsTypes.RETIME_PIECE
+					(op) => op.type === UserEditingType.SOFIE && op.id === '__sofie-retime-piece'
+				)
+			)
+				return
+
+			const targetPos = (e.target as HTMLDivElement).getBoundingClientRect()
+			if (dragCtx)
+				dragCtx.startDrag(
+					piece,
+					timeScale,
+					{
+						x: e.clientX,
+						y: e.clientY,
+					},
+					targetPos.x - e.clientX,
+					part.instance.segmentId
+				)
+		},
+		[piece, timeScale]
+	)
 	const itemMouseUp = useCallback((e: any) => {
 		const eM = e as MouseEvent
 		if (eM.ctrlKey === true) {
