@@ -135,18 +135,7 @@ export class RundownTimingCalculator {
 		let lastSegmentIds: { segmentId: SegmentId; segmentPlayoutId: SegmentPlayoutId } | undefined = undefined
 		let nextRundownAnchor: number | undefined = undefined
 
-		if (playlist) {
-			const breakProps = currentRundown ? this.getRundownsBeforeNextBreak(rundowns, currentRundown) : undefined
-
-			if (breakProps) {
-				rundownsBeforeNextBreak = breakProps.rundownsBeforeNextBreak
-				breakIsLastRundown = breakProps.breakIsLastRundown
-			}
-
-			if (!playlist.nextPartInfo) {
-				this.nextSegmentId = undefined
-			}
-
+		const iterateParts = (playlist: DBRundownPlaylist) => {
 			partInstances.forEach((partInstance, itIndex) => {
 				const partId = partInstance.part._id
 				const partInstanceId = !partInstance.isTemporary ? partInstance._id : null
@@ -489,7 +478,9 @@ export class RundownTimingCalculator {
 						partInstance.part.expectedDuration ?? 0
 				}
 			})
+		}
 
+		const accumulate = (playlist: DBRundownPlaylist) => {
 			// This is where the waitAccumulator-generated data in the linearSegLines is used to calculate the countdowns.
 			// at this point the "waitAccumulator" should be the total sum of all the "waits" in the rundown
 			let localAccum = 0
@@ -571,7 +562,9 @@ export class RundownTimingCalculator {
 					}
 				}
 			}
+		}
 
+		const iterateSegments = (playlist: DBRundownPlaylist) => {
 			// For the sake of Segment Budget Durations, we need to now iterate over all Segments
 			let nextSegmentIndex = -1
 			let itIndex = -1
@@ -613,6 +606,23 @@ export class RundownTimingCalculator {
 					(rundownAsPlayedDurations[unprotectString(segment.rundownId)] ?? 0) +
 					valToAddToRundownAsPlayedDuration
 			}
+		}
+
+		if (playlist) {
+			const breakProps = currentRundown ? this.getRundownsBeforeNextBreak(rundowns, currentRundown) : undefined
+
+			if (breakProps) {
+				rundownsBeforeNextBreak = breakProps.rundownsBeforeNextBreak
+				breakIsLastRundown = breakProps.breakIsLastRundown
+			}
+
+			if (!playlist.nextPartInfo) {
+				this.nextSegmentId = undefined
+			}
+
+			iterateParts(playlist)
+			accumulate(playlist)
+			iterateSegments(playlist)
 		}
 
 		let remainingTimeOnCurrentPart: number | undefined = undefined
