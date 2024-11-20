@@ -411,6 +411,26 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 					/>
 				)}
 			</LabelAndOverridesForInt>
+
+			<LabelAndOverridesForCheckbox
+				label={t('Allow HOLD mode')}
+				item={wrappedItem}
+				itemKey={'allowHold'}
+				overrideHelper={overrideHelper}
+				hint={t('When disabled, any HOLD operations will be silently ignored')}
+			>
+				{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
+			</LabelAndOverridesForCheckbox>
+
+			<LabelAndOverridesForCheckbox
+				label={t('Allow direct playing pieces')}
+				item={wrappedItem}
+				itemKey={'allowPieceDirectPlay'}
+				overrideHelper={overrideHelper}
+				hint={t('When enabled, double clicking on certain pieces in the GUI will play them as adlibs')}
+			>
+				{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
+			</LabelAndOverridesForCheckbox>
 		</>
 	)
 }
