@@ -371,6 +371,16 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 			</LabelAndOverridesForCheckbox>
 
 			<LabelAndOverridesForCheckbox
+				label={t('Enable Buckets')}
+				item={wrappedItem}
+				itemKey={'enableBuckets'}
+				overrideHelper={overrideHelper}
+				hint={t('This enables or disables buckets in the UI - enabled is the default behavior')}
+			>
+				{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
+			</LabelAndOverridesForCheckbox>
+
+			<LabelAndOverridesForCheckbox
 				label={t('Enable QuickLoop')}
 				item={wrappedItem}
 				itemKey={'enableQuickLoop'}
