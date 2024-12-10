@@ -57,9 +57,6 @@ export interface Rundown {
 	 */
 	orphaned?: RundownOrphanedReason
 
-	/** Last sent storyStatus to ingestDevice (MOS) */
-	notifiedCurrentPlayingPartExternalId?: string
-
 	/** Holds notes (warnings / errors) thrown by the blueprints during creation, or appended after */
 	notes?: Array<RundownNote>
 
