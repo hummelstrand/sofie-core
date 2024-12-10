@@ -117,8 +117,6 @@ export function convertPeripheralDeviceForGateway(
 		}
 	}
 
-	console.log('got', peripheralDevice._id, deviceSettings)
-
 	return literal<Complete<PeripheralDeviceForDevice>>({
 		_id: peripheralDevice._id,
 		studioId: peripheralDevice.studioAndConfigId?.studioId,
