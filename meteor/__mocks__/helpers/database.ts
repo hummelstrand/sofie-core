@@ -386,7 +386,6 @@ export async function setupMockStudioBlueprint(
 				},
 
 				studioConfigSchema: '{}' as any,
-				studioMigrations: [],
 				getBaseline: () => {
 					return {
 						timelineObjects: [],
@@ -443,7 +442,6 @@ export async function setupMockShowStyleBlueprint(
 				},
 
 				showStyleConfigSchema: '{}' as any,
-				showStyleMigrations: [],
 				getShowStyleVariantId: (): string | null => {
 					return SHOW_STYLE_VARIANT_ID
 				},
