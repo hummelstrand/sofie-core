@@ -382,18 +382,15 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 			const studios = await Studios.findFetchAsync({
 				'peripheralDeviceSettings.deviceSettings.defaults': { $exists: false },
 			})
-
 			if (studios.length > 0) {
 				return 'studio is missing peripheralDeviceSettings.deviceSettings'
 			}
-
 			return false
 		},
 		migrate: async () => {
 			const studios = await Studios.findFetchAsync({
 				'peripheralDeviceSettings.deviceSettings.defaults': { $exists: false },
 			})
-
 			for (const studio of studios) {
 				await Studios.updateAsync(studio._id, {
 					$set: {
@@ -407,7 +404,6 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 			}
 		},
 	},
-
 	{
 		id: `PeripheralDevice populate secretSettingsStatus`,
 		canBeRunAutomatically: true,
@@ -418,11 +414,9 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 				settings: { $exists: true },
 				secretSettingsStatus: { $exists: false },
 			})
-
 			if (devices.length > 0) {
 				return 'settings must be moved to the studio'
 			}
-
 			return false
 		},
 		migrate: async () => {
@@ -431,11 +425,9 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 				settings: { $exists: true },
 				secretSettingsStatus: { $exists: false },
 			})
-
 			for (const device of devices) {
 				// @ts-expect-error settings is typed as Record<string, any>
 				const oldSettings = device.settings as Record<string, any> | undefined
-
 				await PeripheralDevices.updateAsync(device._id, {
 					$set: {
 						secretSettingsStatus: {
@@ -451,7 +443,6 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 			}
 		},
 	},
-
 	{
 		id: `move PeripheralDevice settings to studio`,
 		canBeRunAutomatically: true,
@@ -461,11 +452,9 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 				studioId: { $exists: true },
 				settings: { $exists: true },
 			})
-
 			if (devices.length > 0) {
 				return 'settings must be moved to the studio'
 			}
-
 			return false
 		},
 		migrate: async () => {
@@ -473,29 +462,24 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 				studioId: { $exists: true },
 				settings: { $exists: true },
 			})
-
 			for (const device of devices) {
 				// @ts-expect-error settings is typed as Record<string, any>
 				const oldSettings = device.settings
 				// @ts-expect-error studioId is typed as StudioId
 				const oldStudioId: StudioId = device.studioId
-
 				// Will never happen, but make types match query
 				if (!oldSettings || !oldStudioId) {
 					logger.warn(`Skipping migration of device ${device._id} as it is missing settings or studioId`)
 					continue
 				}
-
 				// If the studio is not found, then something is a little broken so skip
 				const existingStudio = await Studios.findOneAsync(oldStudioId)
 				if (!existingStudio) {
 					logger.warn(`Skipping migration of device ${device._id} as the studio ${oldStudioId} is missing`)
 					continue
 				}
-
 				// Use the device id as the settings id
 				const newConfigId = unprotectString(device._id)
-
 				// Compile the new list of overrides
 				const newOverrides = [
 					...existingStudio.peripheralDeviceSettings.deviceSettings.overrides,
@@ -508,13 +492,11 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 						}),
 					}),
 				]
-
 				await Studios.updateAsync(existingStudio._id, {
 					$set: {
 						'peripheralDeviceSettings.deviceSettings.overrides': newOverrides,
 					},
 				})
-
 				await PeripheralDevices.updateAsync(device._id, {
 					$set: {
 						studioAndConfigId: {

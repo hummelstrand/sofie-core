@@ -24,6 +24,8 @@ import { SegmentHandler } from '../collections/segmentHandler'
 import { SegmentsHandler } from '../collections/segmentsHandler'
 import { normalizeArray } from '@sofie-automation/corelib/dist/lib'
 import { PlaylistTimingType } from '@sofie-automation/blueprints-integration'
+import { SegmentsHandler } from '../collections/segmentsHandler'
+import { normalizeArray } from '@sofie-automation/corelib/dist/lib'
 
 const THROTTLE_PERIOD_MS = 100
 

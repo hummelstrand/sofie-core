@@ -566,6 +566,9 @@ export function translateUserEditsFromBlueprint(
 	)
 }
 
+/**
+ * Converts a BlueprintMutatablePart into a PlayoutMutatablePart
+ */
 export function convertPartialBlueprintMutablePartToCore(
 	updatePart: Partial<IBlueprintMutatablePart>,
 	blueprintId: BlueprintId
