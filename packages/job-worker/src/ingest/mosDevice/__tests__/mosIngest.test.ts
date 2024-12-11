@@ -543,9 +543,7 @@ describe('Test recieved mos ingest payloads', () => {
 				replace: false,
 			})
 		).rejects.toThrow(
-			`Part ${getMosIngestSegmentId(mosTypes.mosString128.stringify(beforeStoryId))} in rundown ${
-				rundown.externalId
-			} not found`
+			`Part ${mosTypes.mosString128.stringify(beforeStoryId)} in rundown ${rundown.externalId} not found`
 		)
 
 		expect(
@@ -677,9 +675,7 @@ describe('Test recieved mos ingest payloads', () => {
 				replace: true,
 			})
 		).rejects.toThrow(
-			`Part ${getMosIngestSegmentId(mosTypes.mosString128.stringify(beforeStoryId))} in rundown ${
-				rundown.externalId
-			} not found`
+			`Part ${mosTypes.mosString128.stringify(beforeStoryId)} in rundown ${rundown.externalId} not found`
 		)
 
 		expect(
