@@ -198,6 +198,7 @@ export const addSteps = addMigrationSteps(CURRENT_SYSTEM_VERSION, [
 			}
 		},
 	},
+
 	{
 		id: 'TriggeredActions.remove old systemwide',
 		canBeRunAutomatically: true,

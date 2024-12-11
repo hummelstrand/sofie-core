@@ -64,6 +64,7 @@ export async function handleCreateAdlibTestingRundownForShowStyleVariant(
 			showStyleVariantId: showStyleVariant._id,
 		},
 	}
+
 	const createdRundownId = await runIngestUpdateOperation(context, updateData, (ingestRundown) =>
 		handleUpdatedRundown(context, updateData, ingestRundown)
 	)
