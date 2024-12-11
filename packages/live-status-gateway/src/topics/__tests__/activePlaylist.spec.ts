@@ -50,7 +50,6 @@ describe('ActivePlaylistTopic', () => {
 			currentSegment: null,
 			rundownIds: unprotectStringArray(playlist.rundownIdsInOrder),
 			publicData: undefined,
-			quickLoop: undefined,
 			timing: {
 				timingMode: PlaylistTimingType.None,
 			},
@@ -92,15 +91,14 @@ describe('ActivePlaylistTopic', () => {
 			expectedDuration: 10000,
 			publicData: { b: 'c' },
 		}
-		const currentPartInstance = {
-			_id: currentPartInstanceId,
-			part: part1,
-			timings: { plannedStartedPlayback: 1600000060000 },
-			segmentId: segment1id,
-		}
 		const testPartInstances: PartialDeep<SelectedPartInstances> = {
-			current: currentPartInstance,
-			firstInSegmentPlayout: currentPartInstance,
+			current: {
+				_id: currentPartInstanceId,
+				part: part1,
+				timings: { plannedStartedPlayback: 1600000060000 },
+				segmentId: segment1id,
+			},
+			firstInSegmentPlayout: {},
 			inCurrentSegment: [
 				literal<PartialDeep<DBPartInstance>>({
 					_id: protectString(currentPartInstanceId),
@@ -115,7 +113,6 @@ describe('ActivePlaylistTopic', () => {
 
 		await topic.update(SegmentHandler.name, {
 			_id: segment1id,
-			segmentTiming: { budgetDuration: 12300, countdownType: CountdownType.SEGMENT_BUDGET_DURATION },
 		} as DBSegment)
 
 		topic.addSubscriber(mockSubscriber)
@@ -138,14 +135,11 @@ describe('ActivePlaylistTopic', () => {
 				id: 'SEGMENT_1',
 				timing: {
 					expectedDurationMs: 10000,
-					budgetDurationMs: 12300,
-					projectedEndTime: 1600000072300,
-					countdownType: 'segment_budget_duration',
+					projectedEndTime: 1600000070000,
 				},
 			},
 			rundownIds: unprotectStringArray(playlist.rundownIdsInOrder),
 			publicData: { a: 'b' },
-			quickLoop: undefined,
 			timing: {
 				timingMode: PlaylistTimingType.None,
 			},

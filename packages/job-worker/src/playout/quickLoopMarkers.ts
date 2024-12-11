@@ -8,8 +8,8 @@ import { setNextPart } from './setNext'
 import { resetPartInstancesWithPieceInstances } from './lib'
 import { QuickLoopMarker, QuickLoopMarkerType } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { PlayoutModel } from './model/PlayoutModel'
 import { clone } from 'underscore'
+import { PlayoutModel } from './model/PlayoutModel'
 
 export async function handleSetQuickLoopMarker(context: JobContext, data: SetQuickLoopMarkerProps): Promise<void> {
 	return runJobWithPlayoutModel(
