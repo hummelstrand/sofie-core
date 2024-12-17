@@ -86,4 +86,8 @@ export interface IStudioSettings {
 	 * Doubleclick changes behaviour as selector for userediting
 	 */
 	enableUserEdits?: boolean
+	/**
+	 * Enable evaluation form - the default behavior is to have evaluation forms.
+	 */
+	enableEvaluationForm: boolean
 }
