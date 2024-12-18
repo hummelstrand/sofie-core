@@ -121,7 +121,7 @@ describe('ActivePlaylistTopic', () => {
 
 		topic.addSubscriber(mockSubscriber)
 
-		const expectedStatus: ActivePlaylistStatus = {
+		const expectedStatus: ActivePlaylistEvent = {
 			event: 'activePlaylist',
 			name: playlist.name,
 			id: unprotectString(playlist._id),
@@ -145,7 +145,7 @@ describe('ActivePlaylistTopic', () => {
 			rundownIds: unprotectStringArray(playlist.rundownIdsInOrder),
 			publicData: { a: 'b' },
 			timing: {
-				timingMode: PlaylistTimingType.None,
+				timingMode: ActivePlaylistTimingMode.NONE,
 			},
 			quickLoop: undefined,
 		}
