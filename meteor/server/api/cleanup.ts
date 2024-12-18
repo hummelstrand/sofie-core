@@ -69,8 +69,8 @@ import {
 	UserActionsLog,
 	Workers,
 	WorkerThreadStatuses,
-	SofieIngestDataCache,
 	Notifications,
+	SofieIngestDataCache,
 } from '../collections'
 import { AsyncOnlyMongoCollection, AsyncOnlyReadOnlyMongoCollection } from '../collections/collection'
 import { getCollectionKey } from '../collections/lib'
@@ -126,10 +126,6 @@ export async function cleanupOldDataInner(actuallyCleanup = false): Promise<Coll
 	// Organizations
 	{
 		addToResult(CollectionName.Organizations, 0) // Do nothing
-	}
-	// Users
-	{
-		addToResult(CollectionName.Users, 0) // Do nothing
 	}
 
 	// Documents owned by Organizations:

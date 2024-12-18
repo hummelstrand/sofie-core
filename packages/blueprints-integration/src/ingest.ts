@@ -124,10 +124,40 @@ export interface UserOperationTarget {
 	pieceExternalId: string | undefined
 }
 
-export type DefaultUserOperations = {
-	id: '__sofie-move-segment' // Future: define properly
+export enum DefaultUserOperationsTypes {
+	REVERT_SEGMENT = '__sofie-revert-segment',
+	REVERT_PART = '__sofie-revert-part',
+	REVERT_RUNDOWN = '__sofie-revert-rundown',
+	UPDATE_PROPS = '__sofie-update-props',
+}
+
+export interface DefaultUserOperationRevertRundown {
+	id: DefaultUserOperationsTypes.REVERT_RUNDOWN
 	payload: Record<string, never>
 }
+
+export interface DefaultUserOperationRevertSegment {
+	id: DefaultUserOperationsTypes.REVERT_SEGMENT
+	payload: Record<string, never>
+}
+
+export interface DefaultUserOperationRevertPart {
+	id: DefaultUserOperationsTypes.REVERT_PART
+}
+
+export interface DefaultUserOperationEditProperties {
+	id: DefaultUserOperationsTypes.UPDATE_PROPS
+	payload: {
+		pieceTypeProperties: { type: string; value: Record<string, any> }
+		globalProperties: Record<string, any>
+	}
+}
+
+export type DefaultUserOperations =
+	| DefaultUserOperationRevertRundown
+	| DefaultUserOperationRevertSegment
+	| DefaultUserOperationRevertPart
+	| DefaultUserOperationEditProperties
 
 export interface UserOperationChange<TCustomBlueprintOperations extends { id: string } = never> {
 	/** Indicate that this change is from user operations */
@@ -136,7 +166,11 @@ export interface UserOperationChange<TCustomBlueprintOperations extends { id: st
 	operationTarget: UserOperationTarget
 	operation: DefaultUserOperations | TCustomBlueprintOperations
 }
-
+/**
+ * The MutableIngestRundown is used to modify the contents of an IngestRundown during ingest.
+ * The public properties and methods are used i blueprints to selectively apply incoming
+ * or apply user operations to the SofieIngestRundown.
+ */
 export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload = unknown, TPartPayload = unknown> {
 	/** Id of the rundown as reported by the ingest gateway. Must be unique for each rundown owned by the gateway */
 	readonly externalId: string
@@ -172,6 +206,10 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 		  }
 		| undefined
 
+	/**
+	 * Returns a Segment with a certain externalId
+	 * @param segmentExternalId
+	 */
 	getSegment(segmentExternalId: string): MutableIngestSegment<TSegmentPayload, TPartPayload> | undefined
 
 	/**
@@ -261,6 +299,9 @@ export interface MutableIngestRundown<TRundownPayload = unknown, TSegmentPayload
 		value: ReadonlyDeep<TRundownPayload[TKey]> | TRundownPayload[TKey]
 	): void
 
+	/**
+	 * Set a value in the userEditState
+	 */
 	setUserEditState(key: string, value: boolean): void
 }
 

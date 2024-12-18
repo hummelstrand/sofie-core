@@ -12,9 +12,9 @@ import { Translated } from '../../lib/ReactMeteorData/ReactMeteorData'
 import { RundownUtils } from '../../lib/rundown'
 import { IContextMenuContext } from '../RundownView'
 import { PartUi, SegmentUi } from './SegmentTimelineContainer'
-import { SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
+import { PartId, SegmentId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { SegmentOrphanedReason } from '@sofie-automation/corelib/dist/dataModel/Segment'
-import { RenderUserEditOperations } from '../UserEditOperations/RenderUserEditOperations'
+import { UserEditOperationMenuItems } from '../UserEditOperations/RenderUserEditOperations'
 import * as RundownResolver from '../../lib/RundownResolver'
 
 interface IProps {
@@ -23,11 +23,14 @@ interface IProps {
 	onQueueNextSegment: (segmentId: SegmentId | null, e: any) => void
 	onSetQuickLoopStart: (marker: QuickLoopMarker | null, e: any) => void
 	onSetQuickLoopEnd: (marker: QuickLoopMarker | null, e: any) => void
+	onEditSegmentProps: (id: SegmentId) => void
+	onEditPartProps: (id: PartId) => void
 	playlist?: DBRundownPlaylist
 	studioMode: boolean
 	contextMenuContext: IContextMenuContext | null
 	enablePlayFromAnywhere: boolean
 	enableQuickLoop: boolean
+	enableUserEdits: boolean
 }
 interface IState {}
 
@@ -40,7 +43,12 @@ export const SegmentContextMenu = withTranslation()(
 		render(): JSX.Element | null {
 			const { t } = this.props
 
-			if (!this.props.studioMode || !this.props.playlist || !this.props.playlist.activationId) return null
+			if (
+				!this.props.studioMode ||
+				!this.props.playlist ||
+				(!this.props.enableUserEdits && !this.props.playlist.activationId)
+			)
+				return null
 
 			const part = this.getPartFromContext()
 			const segment = this.getSegmentFromContext()
@@ -84,19 +92,28 @@ export const SegmentContextMenu = withTranslation()(
 										<span>{t('Clear queued segment')}</span>
 									</MenuItem>
 								)}
-								{segment &&
-									RenderUserEditOperations(
-										isSegmentEditAble,
-										segment.rundownId,
-										segment.name,
-										segment.userEditOperations,
-										{
-											segmentExternalId: segment?.externalId,
+								{segment && (
+									<UserEditOperationMenuItems
+										rundownId={segment.rundownId}
+										targetName={segment.name}
+										operationTarget={{
+											segmentExternalId: segment.externalId,
 											partExternalId: undefined,
 											pieceExternalId: undefined,
-										}
-									)}
+										}}
+										userEditOperations={segment.userEditOperations}
+										isFormEditable={isSegmentEditAble}
+									/>
+								)}
 								<hr />
+								{this.props.enableUserEdits && (
+									<>
+										<hr />
+										<MenuItem onClick={() => this.props.onEditSegmentProps(part.instance.segmentId)}>
+											<span>{t('Edit Segment Properties')}</span>
+										</MenuItem>
+									</>
+								)}
 							</>
 						)}
 						{part && !part.instance.part.invalid && timecode !== null && (
@@ -166,16 +183,28 @@ export const SegmentContextMenu = withTranslation()(
 									</>
 								)}
 
-								{RenderUserEditOperations(
-									isPartEditAble,
-									part.instance.rundownId,
-									part.instance.part.title,
-									part.instance.part.userEditOperations,
-									{
+								<UserEditOperationMenuItems
+									rundownId={part.instance.rundownId}
+									targetName={part.instance.part.title}
+									operationTarget={{
 										segmentExternalId: segment?.externalId,
 										partExternalId: part.instance.part.externalId,
 										pieceExternalId: undefined,
-									}
+									}}
+									userEditOperations={part.instance.part.userEditOperations}
+									isFormEditable={isPartEditAble}
+								/>
+
+								{this.props.enableUserEdits && (
+									<>
+										<hr />
+										<MenuItem onClick={() => this.props.onEditSegmentProps(part.instance.segmentId)}>
+											<span>{t('Edit Segment Properties')}</span>
+										</MenuItem>
+										<MenuItem onClick={() => this.props.onEditPartProps(part.instance.part._id)}>
+											<span>{t('Edit Part Properties')}</span>
+										</MenuItem>
+									</>
 								)}
 							</>
 						)}

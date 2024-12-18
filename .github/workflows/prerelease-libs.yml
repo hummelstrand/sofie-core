@@ -55,15 +55,8 @@ jobs:
           - server-core-integration
           - shared-lib
           # - live-status-gateway-api # no tests yet
-        node-version: [14.x, 18.x, 20.x, 22.x]
-        include:
-          # manual openapi to avoid testing for 14.x
-          - node-version: 18.x
-            package-name: openapi
-          - node-version: 20.x
-            package-name: openapi
-          - node-version: 22.x
-            package-name: openapi
+          - openapi
+        node-version: [22.x]
 
     steps:
       - uses: actions/checkout@v4

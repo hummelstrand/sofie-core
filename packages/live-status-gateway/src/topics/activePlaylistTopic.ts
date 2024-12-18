@@ -21,9 +21,9 @@ import { SelectedPieceInstances, PieceInstancesHandler, PieceInstanceMin } from 
 import { toPieceStatus } from './helpers/pieceStatus'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
 import { SegmentHandler } from '../collections/segmentHandler'
+import { PlaylistTimingType } from '@sofie-automation/blueprints-integration'
 import { SegmentsHandler } from '../collections/segmentsHandler'
 import { normalizeArray } from '@sofie-automation/corelib/dist/lib'
-import { PlaylistTimingType } from '@sofie-automation/blueprints-integration'
 import {
 	PartStatus,
 	CurrentPartStatus,

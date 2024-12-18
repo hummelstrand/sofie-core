@@ -1,12 +1,12 @@
 import { SegmentDisplayMode, SegmentTimingInfo } from '@sofie-automation/blueprints-integration'
 import { SegmentId, RundownId } from './Ids'
 import { SegmentNote } from './Notes'
-import { CoreUserEditingDefinition } from './UserEditingDefinitions'
+import { CoreUserEditingDefinition, CoreUserEditingProperties } from './UserEditingDefinitions'
 
 export enum SegmentOrphanedReason {
 	/** Segment is deleted from the NRCS but we still need it */
 	DELETED = 'deleted',
-	/** Segment should be hidden, but it is still playing */
+	/** Blueprints want the Segment to be hidden, but it is still playing so is must not be hidden right now. */
 	HIDDEN = 'hidden',
 	/** Segment is owned by playout, and is for AdlibTesting in its rundown */
 	ADLIB_TESTING = 'adlib-testing',
@@ -51,4 +51,10 @@ export interface DBSegment {
 	 * User editing definitions for this segment
 	 */
 	userEditOperations?: CoreUserEditingDefinition[]
+
+	/**
+	 * Properties that are user editable from the properties panel in the Sofie UI, if the user saves changes to these
+	 * it will trigger a user edit operation of type DefaultUserOperationEditProperties
+	 */
+	userEditProperties?: CoreUserEditingProperties
 }

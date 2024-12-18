@@ -1,8 +1,5 @@
-import {
-	DBRundownPlaylist,
-	ForceQuickLoopAutoNext,
-	QuickLoopMarkerType,
-} from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import { DBRundownPlaylist, QuickLoopMarkerType } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
+import { ForceQuickLoopAutoNext } from '@sofie-automation/shared-lib/dist/core/model/StudioSettings'
 import { PartInstance, wrapPartToTemporaryInstance } from '@sofie-automation/meteor-lib/dist/collections/PartInstances'
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
@@ -1453,6 +1450,7 @@ describe('rundown Timing Calculator', () => {
 			toPartPostroll: 500,
 			fromPartRemaining: 0,
 			fromPartPostroll: 0,
+			fromPartKeepalive: 0,
 		}
 		const partInstance2 = wrapPartToTemporaryInstance(protectString(''), parts[1])
 		partInstance2.isTemporary = false
@@ -1466,6 +1464,7 @@ describe('rundown Timing Calculator', () => {
 			toPartPostroll: 0,
 			fromPartRemaining: 500,
 			fromPartPostroll: 500,
+			fromPartKeepalive: 0,
 		}
 		const partInstances = [partInstance1, partInstance2, ...convertPartsToPartInstances([parts[2], parts[3]])]
 		const partInstancesMap: Map<PartId, PartInstance> = new Map()
