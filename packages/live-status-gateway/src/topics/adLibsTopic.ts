@@ -12,7 +12,7 @@ import { AdLibActionsHandler } from '../collections/adLibActionsHandler'
 import { GlobalAdLibActionsHandler } from '../collections/globalAdLibActionsHandler'
 import { AdLibPiece } from '@sofie-automation/corelib/dist/dataModel/AdLibPiece'
 import { RundownBaselineAdLibItem } from '@sofie-automation/corelib/dist/dataModel/RundownBaselineAdLibPiece'
-import { IBlueprintActionManifestDisplayContent } from '@sofie-automation/blueprints-integration'
+import { IBlueprintActionManifestDisplayContent, JSONBlob } from '@sofie-automation/blueprints-integration'
 import { ShowStyleBaseExt, ShowStyleBaseHandler } from '../collections/showStyleBaseHandler'
 import { interpollateTranslation } from '@sofie-automation/corelib/dist/TranslatableMessage'
 import { AdLibsHandler } from '../collections/adLibsHandler'
@@ -97,7 +97,7 @@ export class AdLibsTopic
 							actionType: triggerModes,
 							tags: action.display.tags,
 							publicData: action.publicData,
-							optionsSchema: action.userDataManifest.optionsSchema,
+							optionsSchema: unprotectJsonBlob(action.userDataManifest.optionsSchema),
 						},
 						id: unprotectString(action._id),
 						label: name,
@@ -166,7 +166,7 @@ export class AdLibsTopic
 							actionType: triggerModes,
 							tags: action.display.tags,
 							publicData: action.publicData,
-							optionsSchema: action.userDataManifest.optionsSchema,
+							optionsSchema: unprotectJsonBlob(action.userDataManifest.optionsSchema),
 						},
 						id: unprotectString(action._id),
 						label: name,
@@ -301,4 +301,8 @@ export class AdLibsTopic
 	private sendStatusToAll() {
 		this.sendStatus(this._subscribers)
 	}
+}
+
+function unprotectJsonBlob(blob: JSONBlob<any> | undefined): string | undefined {
+	return blob as string | undefined
 }

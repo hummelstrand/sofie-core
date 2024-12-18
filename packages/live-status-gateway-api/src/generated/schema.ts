@@ -131,13 +131,13 @@ interface ActivePlaylistEvent {
    */
   'publicData'?: any;
   /**
-   * Information about the current quickLoop, if any
-   */
-  'quickLoop'?: ActivePlaylistQuickLoop;
-  /**
    * Timing information about the active playlist
    */
   'timing': ActivePlaylistTiming;
+  /**
+   * Information about the current quickLoop, if any
+   */
+  'quickLoop'?: ActivePlaylistQuickLoop;
 }
 
 interface CurrentPartStatus {
@@ -289,6 +289,41 @@ interface PartStatus {
 }
 
 /**
+ * Timing information about the active playlist
+ */
+interface ActivePlaylistTiming {
+  /**
+   * Timing mode for the playlist.
+   */
+  'timingMode': ActivePlaylistTimingMode;
+  /**
+   * Unix timestamp of when the playlist started (milliseconds)
+   */
+  'startedPlayback'?: number;
+  /**
+   * Unix timestamp of when the playlist is expected to start (milliseconds). Required when the timingMode is set to forward-time.
+   */
+  'expectedStart'?: number;
+  /**
+   * Duration of the playlist in ms
+   */
+  'expectedDurationMs'?: number;
+  /**
+   * Unix timestamp of when the playlist is expected to end (milliseconds) Required when the timingMode is set to back-time.
+   */
+  'expectedEnd'?: number;
+}
+
+/**
+ * Timing mode for the playlist.
+ */
+enum ActivePlaylistTimingMode {
+  NONE = "none",
+  FORWARD_MINUS_TIME = "forward-time",
+  BACK_MINUS_TIME = "back-time",
+}
+
+/**
  * Information about the current quickLoop, if any
  */
 interface ActivePlaylistQuickLoop {
@@ -333,41 +368,6 @@ enum QuickLoopMarkerType {
   RUNDOWN = "rundown",
   SEGMENT = "segment",
   PART = "part",
-}
-
-/**
- * Timing information about the active playlist
- */
-interface ActivePlaylistTiming {
-  /**
-   * Timing mode for the playlist.
-   */
-  'timingMode': ActivePlaylistTimingMode;
-  /**
-   * Unix timestamp of when the playlist started (milliseconds)
-   */
-  'startedPlayback'?: number;
-  /**
-   * Unix timestamp of when the playlist is expected to start (milliseconds). Required when the timingMode is set to forward-time.
-   */
-  'expectedStart'?: number;
-  /**
-   * Duration of the playlist in ms
-   */
-  'expectedDurationMs'?: number;
-  /**
-   * Unix timestamp of when the playlist is expected to end (milliseconds) Required when the timingMode is set to back-time.
-   */
-  'expectedEnd'?: number;
-}
-
-/**
- * Timing mode for the playlist.
- */
-enum ActivePlaylistTimingMode {
-  NONE = "none",
-  FORWARD_MINUS_TIME = "forward-time",
-  BACK_MINUS_TIME = "back-time",
 }
 
 interface ActivePiecesEvent {
@@ -480,6 +480,10 @@ interface AdLibStatus {
    */
   'publicData'?: any;
   /**
+   * JSON schema definition of the adLib properties that can be modified using the adLibOptions property in executeAdLib
+   */
+  'optionsSchema'?: string;
+  /**
    * Unique id of the segment this adLib belongs to
    */
   'segmentId': string;
@@ -530,7 +534,11 @@ interface GlobalAdLibStatus {
    * Optional arbitrary data
    */
   'publicData'?: any;
+  /**
+   * JSON schema definition of the adLib properties that can be modified using the adLibOptions property in executeAdLib
+   */
+  'optionsSchema'?: string;
   'additionalProperties'?: Record<string, any>;
 }
 
-export {Slash, PongEvent, HeartbeatEvent, SubscriptionStatusError, SubscriptionDetails, SubscriptionName, SubscriptionStatus, SubscriptionStatusSuccess, StudioEvent, PlaylistStatus, PlaylistActivationStatus, ActivePlaylistEvent, CurrentPartStatus, PieceStatus, CurrentPartTiming, CurrentSegment, CurrentSegmentTiming, SegmentCountdownType, PartStatus, ActivePlaylistQuickLoop, QuickLoopMarker, QuickLoopMarkerType, ActivePlaylistTiming, ActivePlaylistTimingMode, ActivePiecesEvent, SegmentsEvent, Segment, SegmentTiming, AdLibsEvent, AdLibStatus, AdLibActionType, GlobalAdLibStatus};
+export {Slash, PongEvent, HeartbeatEvent, SubscriptionStatusError, SubscriptionDetails, SubscriptionName, SubscriptionStatus, SubscriptionStatusSuccess, StudioEvent, PlaylistStatus, PlaylistActivationStatus, ActivePlaylistEvent, CurrentPartStatus, PieceStatus, CurrentPartTiming, CurrentSegment, CurrentSegmentTiming, SegmentCountdownType, PartStatus, ActivePlaylistTiming, ActivePlaylistTimingMode, ActivePlaylistQuickLoop, QuickLoopMarker, QuickLoopMarkerType, ActivePiecesEvent, SegmentsEvent, Segment, SegmentTiming, AdLibsEvent, AdLibStatus, AdLibActionType, GlobalAdLibStatus};
