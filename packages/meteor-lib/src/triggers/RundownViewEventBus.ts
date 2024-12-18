@@ -29,6 +29,7 @@ export enum RundownViewEvents {
 	REVEAL_IN_SHELF = 'revealInShelf',
 	SWITCH_SHELF_TAB = 'switchShelfTab',
 	SHELF_STATE = 'shelfState',
+	EDIT_MODE = 'editMode',
 	MINI_SHELF_QUEUE_ADLIB = 'miniShelfQueueAdLib',
 	GO_TO_PART = 'goToPart',
 	GO_TO_PART_INSTANCE = 'goToPartInstance',
@@ -71,6 +72,10 @@ export interface SwitchToShelfTabEvent extends IEventContext {
 }
 
 export interface ShelfStateEvent extends IEventContext {
+	state: boolean | 'toggle'
+}
+
+export interface EditModeEvent extends IEventContext {
 	state: boolean | 'toggle'
 }
 
@@ -139,6 +144,7 @@ class RundownViewEventBus0 extends EventEmitter {
 	emit(event: RundownViewEvents.SEGMENT_ZOOM_ON): boolean
 	emit(event: RundownViewEvents.SEGMENT_ZOOM_OFF): boolean
 	emit(event: RundownViewEvents.SHELF_STATE, e: ShelfStateEvent): boolean
+	emit(event: RundownViewEvents.EDIT_MODE, e: EditModeEvent): boolean
 	emit(event: RundownViewEvents.REVEAL_IN_SHELF, e: RevealInShelfEvent): boolean
 	emit(event: RundownViewEvents.SWITCH_SHELF_TAB, e: SwitchToShelfTabEvent): boolean
 	emit(event: RundownViewEvents.MINI_SHELF_QUEUE_ADLIB, e: MiniShelfQueueAdLibEvent): boolean
@@ -175,6 +181,7 @@ class RundownViewEventBus0 extends EventEmitter {
 	on(event: RundownViewEvents.SEGMENT_ZOOM_OFF, listener: () => void): this
 	on(event: RundownViewEvents.REVEAL_IN_SHELF, listener: (e: RevealInShelfEvent) => void): this
 	on(event: RundownViewEvents.SHELF_STATE, listener: (e: ShelfStateEvent) => void): this
+	on(event: RundownViewEvents.EDIT_MODE, listener: (e: EditModeEvent) => void): this
 	on(event: RundownViewEvents.SWITCH_SHELF_TAB, listener: (e: SwitchToShelfTabEvent) => void): this
 	on(event: RundownViewEvents.MINI_SHELF_QUEUE_ADLIB, listener: (e: MiniShelfQueueAdLibEvent) => void): this
 	on(event: RundownViewEvents.GO_TO_PART, listener: (e: GoToPartEvent) => void): this

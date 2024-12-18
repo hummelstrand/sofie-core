@@ -265,6 +265,12 @@ export interface IShelfAction extends ITriggeredActionBase {
 	filterChain: IGUIContextFilterLink[]
 }
 
+export interface IEditModeAction extends ITriggeredActionBase {
+	action: ClientActions.editMode
+	state: true | false | 'toggle'
+	filterChain: IGUIContextFilterLink[]
+}
+
 export interface IGoToOnAirLineAction extends ITriggeredActionBase {
 	action: ClientActions.goToOnAirLine
 	filterChain: IGUIContextFilterLink[]
@@ -318,6 +324,7 @@ export type SomeAction =
 	| IRundownPlaylistResetAction
 	| IRundownPlaylistResyncAction
 	| IShelfAction
+	| IEditModeAction
 	| IGoToOnAirLineAction
 	| IRewindSegmentsAction
 	| IShowEntireCurrentSegmentAction
