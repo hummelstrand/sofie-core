@@ -21,4 +21,3 @@ Appending query parameter(s) to the URL will allow you to modify the behaviour o
 | `speak=1` | Experimental feature that starts playing an audible countdown 10 seconds before each planned _Take_. _Default value is `0`._ | 
 | `vibrate=1` | Experimental feature that triggers the vibration API in the web browser 3 seconds before each planned _Take_. _Default value is `0`._ | 
 | `zoom=1,...` | Sets the scaling of the entire GUI. _The unit is a percentage where `100` is the default scaling._ | 
-

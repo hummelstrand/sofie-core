@@ -28,6 +28,7 @@
 		"validate:release": "yarn install && run install-and-build && run validate:versions && run validate:release:packages && run validate:release:meteor",
 		"validate:release:meteor": "cd meteor && yarn validate:prod-dependencies && yarn license-validate && yarn lint && yarn test",
 		"validate:release:packages": "cd packages && run validate:dependencies && run test",
+		"validate:versions": "node scripts/checkForMultipleVersions.mjs",
 		"meteor": "cd meteor && meteor",
 		"docs:serve": "cd packages && run docs:serve",
 		"reset": "node scripts/reset.mjs",

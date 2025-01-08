@@ -45,9 +45,6 @@ Meteor.startup(async () => {
 		logger.debug(`Creating observer for studio "${studioId}"`)
 		const manager = new StudioDeviceTriggerManager(studioId)
 		const observer = new StudioObserver(studioId, (showStyleBaseId, cache) => {
-			workInQueue(async () => {
-				await manager.updateTriggers(cache, showStyleBaseId)
-			})
 			logger.silly(`Studio observer updating triggers for "${studioId}":"${showStyleBaseId}"`)
 			workInQueue(async () => manager.updateTriggers(cache, showStyleBaseId))
 
