@@ -41,7 +41,7 @@ import { RundownBaselineAdLibAction } from '@sofie-automation/corelib/dist/dataM
 import { RundownBaselineAdLibItem } from '@sofie-automation/corelib/dist/dataModel/RundownBaselineAdLibPiece'
 import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import { DBSegment } from '@sofie-automation/corelib/dist/dataModel/Segment'
-import { DBNotificationObj } from '@sofie-automation/corelib/dist/dataModel/Notifications'
+import type { DBNotificationObj } from '@sofie-automation/corelib/dist/dataModel/Notifications'
 
 export const AdLibActions = createSyncReadOnlyMongoCollection<AdLibAction>(CollectionName.AdLibActions)
 

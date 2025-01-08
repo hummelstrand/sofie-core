@@ -25,7 +25,7 @@
 		"meteor:run": "cd meteor && yarn start",
 		"lint": "run lint:meteor && run lint:packages",
 		"unit": "run unit:meteor && run unit:packages",
-		"validate:release": "yarn install && run install-and-build && run validate:release:packages && run validate:release:meteor",
+		"validate:release": "yarn install && run install-and-build && run validate:versions && run validate:release:packages && run validate:release:meteor",
 		"validate:release:meteor": "cd meteor && yarn validate:prod-dependencies && yarn license-validate && yarn lint && yarn test",
 		"validate:release:packages": "cd packages && run validate:dependencies && run test",
 		"meteor": "cd meteor && meteor",
