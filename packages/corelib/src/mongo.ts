@@ -1,7 +1,7 @@
 import * as _ from 'underscore'
 import { ProtectedString } from './protectedString'
 import * as objectPath from 'object-path'
-// eslint-disable-next-line node/no-extraneous-import
+// eslint-disable-next-line n/no-extraneous-import
 import type { Condition, Filter, UpdateFilter } from 'mongodb'
 import { clone } from './lib'
 
@@ -31,8 +31,8 @@ export type MongoFieldSpecifierOnesStrict<T extends Record<string, any>> = {
 	[key in keyof T]?: T[key] extends ProtectedString<any>
 		? 1
 		: T[key] extends object | undefined
-		? MongoFieldSpecifierOnesStrict<T[key]> | 1
-		: 1
+			? MongoFieldSpecifierOnesStrict<T[key]> | 1
+			: 1
 }
 
 export interface FindOneOptions<TDoc> {
@@ -154,7 +154,7 @@ export function mongoWhere<T>(o: Record<string, any>, selector: MongoQuery<T>): 
 }
 export function mongoFindOptions<TDoc extends { _id: ProtectedString<any> }>(
 	docs0: ReadonlyArray<TDoc>,
-	options?: FindOptions<TDoc>
+	options?: FindOptions<TDoc>,
 ): TDoc[] {
 	let docs = [...docs0] // Shallow clone it
 	if (options) {
@@ -241,7 +241,7 @@ export function mongoFindOptions<TDoc extends { _id: ProtectedString<any> }>(
 export function mongoModify<TDoc extends { _id: ProtectedString<any> }>(
 	selector: MongoQuery<TDoc>,
 	doc: TDoc,
-	modifier: MongoModifier<TDoc>
+	modifier: MongoModifier<TDoc>,
 ): TDoc {
 	let replace = false
 	for (const [key, value] of Object.entries<any>(modifier)) {
@@ -293,7 +293,7 @@ export function mutatePath<T>(
 	obj: Record<string, unknown>,
 	path: string,
 	substitutions: Record<string, unknown>,
-	mutator: (parentObj: Record<string, unknown>, key: string) => T
+	mutator: (parentObj: Record<string, unknown>, key: string) => T,
 ): void {
 	if (!path) throw new Error('parameter path missing')
 
@@ -333,7 +333,7 @@ export function mutatePath<T>(
 		if (attr === '$') {
 			if (!_.isArray(o))
 				throw new Error(
-					'Object at "' + currentPath + '" is not an array ("' + o + '") (in path "' + path + '")'
+					'Object at "' + currentPath + '" is not an array ("' + o + '") (in path "' + path + '")',
 				)
 
 			const info = generateWildcardAttrInfo()
@@ -352,7 +352,7 @@ export function mutatePath<T>(
 			} else {
 				if (!_.isObject(o[attr]))
 					throw new Error(
-						'Object propery "' + attr + '" is not an object ("' + o[attr] + '") (in path "' + path + '")'
+						'Object propery "' + attr + '" is not an object ("' + o[attr] + '") (in path "' + path + '")',
 					)
 			}
 			o = o[attr]
@@ -389,7 +389,13 @@ export function pushOntoPath<T>(obj: Record<string, unknown>, path: string, valu
 		} else {
 			if (!_.isArray(o[lastAttr]))
 				throw new Error(
-					'Object propery "' + lastAttr + '" is not an array ("' + o[lastAttr] + '") (in path "' + path + '")'
+					'Object propery "' +
+						lastAttr +
+						'" is not an array ("' +
+						o[lastAttr] +
+						'") (in path "' +
+						path +
+						'")',
 				)
 		}
 		const arr: any = o[lastAttr]
@@ -410,7 +416,13 @@ export function pullFromPath<T>(obj: Record<string, unknown>, path: string, matc
 		if (_.has(o, lastAttr)) {
 			if (!_.isArray(o[lastAttr]))
 				throw new Error(
-					'Object propery "' + lastAttr + '" is not an array ("' + o[lastAttr] + '") (in path "' + path + '")'
+					'Object propery "' +
+						lastAttr +
+						'" is not an array ("' +
+						o[lastAttr] +
+						'") (in path "' +
+						path +
+						'")',
 				)
 
 			return (o[lastAttr] = _.filter(o[lastAttr] as any, (entry: T) => !_.isMatch(entry, matchValue)))
@@ -431,13 +443,13 @@ export function setOntoPath<T>(
 	obj: Record<string, unknown>,
 	path: string,
 	substitutions: Record<string, unknown>,
-	valueToSet: T
+	valueToSet: T,
 ): void {
 	mutatePath(
 		obj,
 		path,
 		substitutions,
-		(parentObj: Record<string, unknown>, key: string) => (parentObj[key] = valueToSet)
+		(parentObj: Record<string, unknown>, key: string) => (parentObj[key] = valueToSet),
 	)
 }
 /**
