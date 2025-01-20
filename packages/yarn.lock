@@ -6166,6 +6166,7 @@ __metadata:
     cubic-spline: "npm:^3.0.3"
     deep-extend: "npm:0.6.0"
     ejson: "npm:^2.2.3"
+    globals: "npm:^15.14.0"
     i18next: "npm:^21.10.0"
     i18next-browser-languagedetector: "npm:^6.1.8"
     i18next-http-backend: "npm:^1.4.5"
@@ -15207,7 +15208,7 @@ asn1@evs-broadcast/node-asn1:
   languageName: node
   linkType: hard
 
-"globals@npm:^15.11.0, globals@npm:^15.13.0":
+"globals@npm:^15.11.0, globals@npm:^15.13.0, globals@npm:^15.14.0":
   version: 15.14.0
   resolution: "globals@npm:15.14.0"
   checksum: 10c0/039deb8648bd373b7940c15df9f96ab7508fe92b31bbd39cbd1c1a740bd26db12457aa3e5d211553b234f30e9b1db2fee3683012f543a01a6942c9062857facb
