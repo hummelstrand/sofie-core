@@ -39,7 +39,7 @@
 	"devDependencies": {
 		"@babel/core": "^7.26.0",
 		"@babel/plugin-transform-modules-commonjs": "^7.26.3",
-		"@sofie-automation/code-standard-preset": "~2.4.7",
+		"@sofie-automation/code-standard-preset": "github:SuperFlyTV/sofie-code-standard-preset#commit=1347fbe2fc2aa48c80bf7b49066fae578fc4f6f4",
 		"@types/amqplib": "^0.10.6",
 		"@types/debug": "^4.1.12",
 		"@types/ejson": "^2.2.2",
@@ -71,7 +71,6 @@
 	"name": "packages",
 	"packageManager": "yarn@4.6.0",
 	"resolutions": {
-		"timecode@0.0.4": "patch:timecode@npm%3A0.0.4#./.yarn/patches/timecode-npm-0.0.4-82bde9e6fe.patch",
-		"@sofie-automation/code-standard-preset": "portal:/home/julus/Projects/sofietv/sofie-code-standard-preset"
+		"timecode@0.0.4": "patch:timecode@npm%3A0.0.4#./.yarn/patches/timecode-npm-0.0.4-82bde9e6fe.patch"
 	}
 }

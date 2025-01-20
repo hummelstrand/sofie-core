@@ -5981,9 +5981,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sofie-automation/code-standard-preset@portal:/home/julus/Projects/sofietv/sofie-code-standard-preset::locator=packages%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@sofie-automation/code-standard-preset@portal:/home/julus/Projects/sofietv/sofie-code-standard-preset::locator=packages%40workspace%3A."
+"@sofie-automation/code-standard-preset@github:SuperFlyTV/sofie-code-standard-preset#commit=1347fbe2fc2aa48c80bf7b49066fae578fc4f6f4":
+  version: 3.0.0-0
+  resolution: "@sofie-automation/code-standard-preset@https://github.com/SuperFlyTV/sofie-code-standard-preset.git#commit=1347fbe2fc2aa48c80bf7b49066fae578fc4f6f4"
   dependencies:
     "@sofie-automation/eslint-plugin": "npm:^0.1.1"
     date-fns: "npm:^4.1.0"
@@ -6003,8 +6003,9 @@ __metadata:
   bin:
     sofie-licensecheck: ./bin/checkLicenses.mjs
     sofie-version: ./bin/updateVersion.mjs
+  checksum: 10c0/d58bebe8649ad4d0bdb31dc03068fe8a0bd30628eab1275336e46f85abae24813d0affdbe056cf0385673873fba491cc319cf6b29824edb548d3a04af52bce8f
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "@sofie-automation/corelib@npm:1.52.0-in-development, @sofie-automation/corelib@workspace:corelib":
   version: 0.0.0-use.local
@@ -22024,7 +22025,7 @@ asn1@evs-broadcast/node-asn1:
   dependencies:
     "@babel/core": "npm:^7.26.0"
     "@babel/plugin-transform-modules-commonjs": "npm:^7.26.3"
-    "@sofie-automation/code-standard-preset": "npm:~2.4.7"
+    "@sofie-automation/code-standard-preset": "github:SuperFlyTV/sofie-code-standard-preset#commit=1347fbe2fc2aa48c80bf7b49066fae578fc4f6f4"
     "@types/amqplib": "npm:^0.10.6"
     "@types/debug": "npm:^4.1.12"
     "@types/ejson": "npm:^2.2.2"
