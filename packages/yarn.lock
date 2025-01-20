@@ -5981,9 +5981,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sofie-automation/code-standard-preset@github:SuperFlyTV/sofie-code-standard-preset#commit=da1726cdf3eb9e6e60ecbd6e5373ceb07367b02b":
+"@sofie-automation/code-standard-preset@github:SuperFlyTV/sofie-code-standard-preset#commit=64ba929db3d41d2494e71249e117f2492033922d":
   version: 3.0.0-0
-  resolution: "@sofie-automation/code-standard-preset@https://github.com/SuperFlyTV/sofie-code-standard-preset.git#commit=da1726cdf3eb9e6e60ecbd6e5373ceb07367b02b"
+  resolution: "@sofie-automation/code-standard-preset@https://github.com/SuperFlyTV/sofie-code-standard-preset.git#commit=64ba929db3d41d2494e71249e117f2492033922d"
   dependencies:
     "@sofie-automation/eslint-plugin": "npm:^0.1.1"
     date-fns: "npm:^4.1.0"
@@ -6003,7 +6003,7 @@ __metadata:
   bin:
     sofie-licensecheck: ./bin/checkLicenses.mjs
     sofie-version: ./bin/updateVersion.mjs
-  checksum: 10c0/f3e3427de569c7abb93c5a102115e00c50be864cdf65fdd276ddde28f093dce4ab2363b69d1c7157cde8eaeb2e2a676b4d0a03497f95bde7f56359e91a572225
+  checksum: 10c0/74982e170c814e8461b386a1fdd2687f269490128e283b4e37a29b420bbc6fb30453fe01df3d1fa8b3e932461f9068b0fa6a8e8f760305668e6e68c811027718
   languageName: node
   linkType: hard
 
@@ -22026,7 +22026,7 @@ asn1@evs-broadcast/node-asn1:
   dependencies:
     "@babel/core": "npm:^7.26.0"
     "@babel/plugin-transform-modules-commonjs": "npm:^7.26.3"
-    "@sofie-automation/code-standard-preset": "github:SuperFlyTV/sofie-code-standard-preset#commit=da1726cdf3eb9e6e60ecbd6e5373ceb07367b02b"
+    "@sofie-automation/code-standard-preset": "github:SuperFlyTV/sofie-code-standard-preset#commit=64ba929db3d41d2494e71249e117f2492033922d"
     "@types/amqplib": "npm:^0.10.6"
     "@types/debug": "npm:^4.1.12"
     "@types/ejson": "npm:^2.2.2"

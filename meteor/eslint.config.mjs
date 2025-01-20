@@ -9,6 +9,7 @@ const tmpRules = {
 	'@typescript-eslint/unbound-method': 'off',
 	'@typescript-eslint/no-misused-promises': 'off',
 	'@typescript-eslint/no-unnecessary-type-assertion': 'off',
+	'@typescript-eslint/no-require-imports': 'off',
 }
 
 const extendedRules = await generateEslintConfig({

@@ -77,7 +77,7 @@
 		"@babel/core": "^7.26.0",
 		"@babel/plugin-transform-modules-commonjs": "^7.26.3",
 		"@shopify/jest-koa-mocks": "^5.3.1",
-		"@sofie-automation/code-standard-preset": "github:SuperFlyTV/sofie-code-standard-preset#commit=da1726cdf3eb9e6e60ecbd6e5373ceb07367b02b",
+		"@sofie-automation/code-standard-preset": "github:SuperFlyTV/sofie-code-standard-preset#commit=64ba929db3d41d2494e71249e117f2492033922d",
 		"@sofie-automation/eslint-plugin": "^0.1.1",
 		"@types/app-root-path": "^1.2.8",
 		"@types/body-parser": "^1.19.5",
