@@ -15,7 +15,7 @@ const tmpRules = {
 
 const extendedRules = await generateEslintConfig({
 	tsconfigName: 'tsconfig.eslint.json',
-	ignores: ['public', 'dist', 'src/fonts', 'src/meteor'],
+	ignores: ['public', 'dist', 'src/fonts', 'src/meteor', 'vite.config.mts'],
 	disableNodeRules: true,
 })
 extendedRules.push(
@@ -61,11 +61,12 @@ extendedRules.push(
 			'n/no-missing-import': 'off', // erroring on every single import
 			'react/prop-types': 'off', // we don't use this
 			'@typescript-eslint/no-empty-interface': 'off', // many prop/state types are {}
+			'@typescript-eslint/no-empty-object-type': 'off', // many prop/state types are {}
 			'@typescript-eslint/promise-function-async': 'off', // event handlers can't be async
 
 			...tmpRules,
 		},
-	},
+	}
 )
 
 export default extendedRules

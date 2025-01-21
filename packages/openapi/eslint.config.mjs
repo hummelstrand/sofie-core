@@ -1,7 +1,9 @@
 import { generateEslintConfig } from '@sofie-automation/code-standard-preset/eslint/main.mjs'
 import pluginYaml from 'eslint-plugin-yml'
 
-const extendedRules = await generateEslintConfig({})
+const extendedRules = await generateEslintConfig({
+	ignores: ['client', 'server'],
+})
 extendedRules.push(...pluginYaml.configs['flat/recommended'], {
 	files: ['**/*.yaml'],
 
