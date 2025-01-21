@@ -39,7 +39,7 @@
 	"devDependencies": {
 		"@babel/core": "^7.26.0",
 		"@babel/plugin-transform-modules-commonjs": "^7.26.3",
-		"@sofie-automation/code-standard-preset": "github:SuperFlyTV/sofie-code-standard-preset#commit=68d950c8fc2213b59fa1609a40c59bd4b3d44b2c",
+		"@sofie-automation/code-standard-preset": "github:SuperFlyTV/sofie-code-standard-preset#commit=7656a8f8e52d53adafcca7326f48c7e10becdfb5",
 		"@types/amqplib": "^0.10.6",
 		"@types/debug": "^4.1.12",
 		"@types/ejson": "^2.2.2",

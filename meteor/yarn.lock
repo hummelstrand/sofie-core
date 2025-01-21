@@ -1141,9 +1141,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@sofie-automation/code-standard-preset@github:SuperFlyTV/sofie-code-standard-preset#commit=68d950c8fc2213b59fa1609a40c59bd4b3d44b2c":
+"@sofie-automation/code-standard-preset@github:SuperFlyTV/sofie-code-standard-preset#commit=7656a8f8e52d53adafcca7326f48c7e10becdfb5":
   version: 3.0.0-0
-  resolution: "@sofie-automation/code-standard-preset@https://github.com/SuperFlyTV/sofie-code-standard-preset.git#commit=68d950c8fc2213b59fa1609a40c59bd4b3d44b2c"
+  resolution: "@sofie-automation/code-standard-preset@https://github.com/SuperFlyTV/sofie-code-standard-preset.git#commit=7656a8f8e52d53adafcca7326f48c7e10becdfb5"
   dependencies:
     "@sofie-automation/eslint-plugin": "github:SuperFlyTV/sofie-eslint-plugin#commit=7d1eecabc9ec2fa2c27c167a52c8ed6b1846e5a9"
     date-fns: "npm:^4.1.0"
@@ -1163,7 +1163,7 @@ __metadata:
   bin:
     sofie-licensecheck: ./bin/checkLicenses.mjs
     sofie-version: ./bin/updateVersion.mjs
-  checksum: 10c0/649dbf5133018ff9bd74717bd3586b9b2ad33702dd472d71d9e63a3c41455bea186d3a91b82ac99360dd225ca5f36ab41c6927972f96f33afaef801abc6a1bb8
+  checksum: 10c0/d7ef60e00fe678b58d1da181605d9a0dde05774c03f7e16cdd976e3ade70e73d6f57f0fc1906792b2638bd90cf1bf53d7949cd9d981a12050368669b59de56e2
   languageName: node
   linkType: hard
 
@@ -2251,7 +2251,7 @@ __metadata:
     "@shopify/jest-koa-mocks": "npm:^5.3.1"
     "@slack/webhook": "npm:^7.0.4"
     "@sofie-automation/blueprints-integration": "portal:../packages/blueprints-integration"
-    "@sofie-automation/code-standard-preset": "github:SuperFlyTV/sofie-code-standard-preset#commit=68d950c8fc2213b59fa1609a40c59bd4b3d44b2c"
+    "@sofie-automation/code-standard-preset": "github:SuperFlyTV/sofie-code-standard-preset#commit=7656a8f8e52d53adafcca7326f48c7e10becdfb5"
     "@sofie-automation/corelib": "portal:../packages/corelib"
     "@sofie-automation/job-worker": "portal:../packages/job-worker"
     "@sofie-automation/meteor-lib": "portal:../packages/meteor-lib"
