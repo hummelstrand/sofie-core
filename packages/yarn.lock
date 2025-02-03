@@ -5708,6 +5708,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@shuttle-lib/core@npm:0.0.2":
+  version: 0.0.2
+  resolution: "@shuttle-lib/core@npm:0.0.2"
+  dependencies:
+    tslib: "npm:^2.4.0"
+  checksum: 10c0/0a1eece14b6bfe5ad225491abaa9956da741581faa332b09f81292226e7bc3269e4bd1fe61963954fd988d470ee81cb4d5c38d23369e13d055b996f98390f28d
+  languageName: node
+  linkType: hard
+
 "@sideway/address@npm:^4.1.5":
   version: 4.1.5
   resolution: "@sideway/address@npm:4.1.5"
@@ -6138,6 +6147,7 @@ __metadata:
     sass: "npm:^1.83.4"
     semver: "npm:^7.6.3"
     sha.js: "npm:^2.4.11"
+    shuttle-webhid: "npm:^0.0.2"
     sinon: "npm:^14.0.2"
     type-fest: "npm:^4.32.0"
     typescript: "npm:~5.5"
@@ -7882,6 +7892,13 @@ __metadata:
   version: 1.19.20
   resolution: "@types/urijs@npm:1.19.20"
   checksum: 10c0/52733ac0b53898a02996473d6188d1177bf2adacb83537ee705b171b9a7e2ca3887c1d84123455595539c63315c8196eb4940271ed143a1aeef5f50b954f1b57
+  languageName: node
+  linkType: hard
+
+"@types/w3c-web-hid@npm:^1.0.3":
+  version: 1.0.6
+  resolution: "@types/w3c-web-hid@npm:1.0.6"
+  checksum: 10c0/8e92c302708771cc154c26b5033e11530f465143c1a3c78dc779208d828491e44a9b2f02fac720b1de6a8d93d6daf82853758aaf122aeecc64bfb8431045d3ae
   languageName: node
   linkType: hard
 
@@ -26268,6 +26285,18 @@ asn1@evs-broadcast/node-asn1:
   bin:
     shjs: bin/shjs
   checksum: 10c0/feb25289a12e4bcd04c40ddfab51aff98a3729f5c2602d5b1a1b95f6819ec7804ac8147ebd8d9a85dfab69d501bcf92d7acef03247320f51c1552cec8d8e2382
+  languageName: node
+  linkType: hard
+
+"shuttle-webhid@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "shuttle-webhid@npm:0.0.2"
+  dependencies:
+    "@shuttle-lib/core": "npm:0.0.2"
+    "@types/w3c-web-hid": "npm:^1.0.3"
+    buffer: "npm:^6.0.3"
+    p-queue: "npm:^6.6.2"
+  checksum: 10c0/bb78a012fecae14683f58d21b627121abf652d67b3b1fc6b7ce7427c1c2ba70001b727cc2867813d009985a6fc63e84f0f67023b286e6b7d7670e1cc6ed649c6
   languageName: node
   linkType: hard
 
