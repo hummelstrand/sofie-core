@@ -2394,7 +2394,7 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 			if (adlibPiece.floated) {
 				NotificationCenter.push(
 					new Notification(
-						t('Floated Adlib'),
+						t('Floated AdLib'),
 						NoticeLevel.WARNING,
 						t('Cannot play this AdLib because it is marked as Floated'),
 						'toggleAdLib'

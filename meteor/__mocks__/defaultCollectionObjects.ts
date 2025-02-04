@@ -180,7 +180,7 @@ export function defaultAdLibPiece(_id: PieceId, rundownId: RundownId, partId: Pa
 		rundownId: rundownId,
 		partId: partId,
 		_rank: 0,
-		name: 'Default Adlib',
+		name: 'Default AdLib',
 		lifespan: PieceLifespan.WithinPart,
 		sourceLayerId: '',
 		outputLayerId: '',

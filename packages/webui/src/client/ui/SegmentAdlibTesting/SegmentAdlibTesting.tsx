@@ -464,7 +464,7 @@ export const SegmentAdlibTesting = React.memo(
 						className={'segment-timeline__title__label' + (props.segment.identifier ? ' identifier' : '')}
 						data-identifier={props.segment.identifier}
 					>
-						{t('Adlib Testing')}
+						{t('AdLib Testing')}
 					</h2>
 					{(criticalNotes > 0 || warningNotes > 0) && (
 						<div className="segment-timeline__title__notes">

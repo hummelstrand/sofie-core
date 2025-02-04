@@ -1232,7 +1232,7 @@ describe('Timeline', () => {
 							_id: protectString('adlib1'),
 							rundownId: currentPartInstance!.partInstance.rundownId,
 							externalId: 'fake',
-							name: 'Adlibbed piece',
+							name: 'AdLibbed piece',
 							lifespan: PieceLifespan.WithinPart,
 							sourceLayerId: sourceLayerIds[0],
 							outputLayerId: outputLayerIds[0],

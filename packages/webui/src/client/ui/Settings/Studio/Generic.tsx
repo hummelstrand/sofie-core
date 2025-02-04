@@ -362,7 +362,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 			</LabelAndOverridesForCheckbox>
 
 			<LabelAndOverridesForCheckbox
-				label={t('Allow AdlibTesting (rehearsal) mode, for testing adlibs before taking the first Part')}
+				label={t('Allow AdLib Testing mode, for testing AdLibs before taking the first Part')}
 				item={wrappedItem}
 				itemKey={'allowAdlibTestingSegment'}
 				overrideHelper={overrideHelper}
@@ -457,7 +457,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 				item={wrappedItem}
 				itemKey={'allowPieceDirectPlay'}
 				overrideHelper={overrideHelper}
-				hint={t('When enabled, double clicking on certain pieces in the GUI will play them as adlibs')}
+				hint={t('When enabled, double clicking on certain pieces in the GUI will play them as AdLibs')}
 			>
 				{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
 			</LabelAndOverridesForCheckbox>

@@ -17,7 +17,7 @@ The access level is persisted in browser's Local Storage. To disable, visit`?the
 
 ### Basic mode
 
-Without enabling any additional modes in Sofie, the browser will have minimal access to the system. It will be able to view a rundown but, will not have the ability to manipulate it. This includes activating, deactivating, or resetting the rundown as well as taking the next part, adlib, etc.
+Without enabling any additional modes in Sofie, the browser will have minimal access to the system. It will be able to view a rundown but, will not have the ability to manipulate it. This includes activating, deactivating, or resetting the rundown as well as taking the next part, AdLib, etc.
 
 ### Studio mode
 

@@ -114,18 +114,18 @@ Another benefit to this approach, is that it allows for very cheaply and easily 
 
 In the early days of Sofie, we had only Parts and Pieces, no PartInstances and PieceInstances.
 
-This quickly became costly and complicated to handle cases where the user used Adlibs in Sofie. Some of the challenges were:
+This quickly became costly and complicated to handle cases where the user used AdLibs in Sofie. Some of the challenges were:
 
 - When a Part is deleted from the NRCS and that part is on air, we don't want to delete it in Sofie immediately
 - When a Part is modified in the NRCS and that part is on air, we may not want to apply all of the changes to playout immediately
 - When a Part has finished playback and is set-as-next again, we need to make sure to discard any changes made by the previous playout, and restore it to as if was refreshly ingested (including the changes we ignored while it was on air)
-- When creating an adlib part, we need to be sure that an ingest operation doesn't attempt to delete it, until playout is finished with it.
-- After using an adlib in a part, we need to remove the piece it created when we set-as-next again, or reset the rundown
+- When creating an AdLib part, we need to be sure that an ingest operation doesn't attempt to delete it, until playout is finished with it.
+- After using an AdLib in a part, we need to remove the piece it created when we set-as-next again, or reset the rundown
 - When an earlier part is removed, where an infinite piece has spanned into the current part, we may not want to remove that infinite piece
 
 Our solution to some of this early on was to not regenerate certain Parts when receiving ingest operations for them, and to defer it until after that Part was off air. While this worked, it was not optimal to re-run ingest operations like that while doing a take. This also required the blueprint api to generate a single part in each call, which we were starting to find limiting. This was also problematic when resetting a rundown, as that would often require rerunning ingest for the whole rundown, making it a notably slow operation.
 
-At this point in time, Adlib Actions did not exist in Sofie. They are able to change almost every property of a Part of Piece that ingest is able to define, which makes the resetting process harder.
+At this point in time, AdLib Actions did not exist in Sofie. They are able to change almost every property of a Part of Piece that ingest is able to define, which makes the resetting process harder.
 
 PartInstances and PieceInstances were added as a way for us to make a copy of each Part and Piece, as it was selected for playout, so that we could allow ingest without risking affecting playout, and to simplify the cleanup performed. The PartInstances and PieceInstances are our record of how the Rundown was played, which we can utilise to output metadata such as for chapter markers on a web player. In earlier versions of Sofie this was tracked independently with an `AsRunLog`, which resulted in odd issues such as having `AsRunLog` entries which refered to a Part which no longer existed, or whose content was very different to how it was played.
 

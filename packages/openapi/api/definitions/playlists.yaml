@@ -168,7 +168,7 @@ resources:
                   description: An actionType string to specify a particular variation for the AdLibAction, valid strings are to be read from the status API
                 bucketId:
                   type: string
-                  description: Bucket to execute the adlib from
+                  description: Bucket to execute the AdLib from
                 externalId:
                   type: string
                   description: External Id of the Bucket AdLib to execute

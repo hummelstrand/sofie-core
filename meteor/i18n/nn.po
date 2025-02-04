@@ -555,24 +555,24 @@ msgid "This rundown is now active. Are you sure you want to exit this screen?"
 msgstr "Denne køyreplanen er aktiv. Er du sikker på at du vil avslutte?"
 
 msgid "Invalid AdLib"
-msgstr "Ugyldig adlib"
+msgstr "Ugyldig AdLib"
 
 msgid "Cannot play this AdLib because it is marked as Invalid"
-msgstr "Kan ikkje spele av adlib fordi den er markert som ugyldig"
+msgstr "Kan ikkje spele av AdLib fordi den er markert som ugyldig"
 
 #, fuzzy
 #| msgid "Floated AdLib"
-msgid "Floated Adlib"
-msgstr "Adlib satt på vent"
+msgid "Floated AdLib"
+msgstr "AdLib satt på vent"
 
 msgid "Cannot play this AdLib because it is marked as Floated"
-msgstr "Kan ikkje spele av adlib fordi den er markert som på vent (float)"
+msgstr "Kan ikkje spele av AdLib fordi den er markert som på vent (float)"
 
 msgid "Not queueable"
 msgstr "Kan ikkje setjast i kø"
 
-msgid "Cannot play this adlib because source layer is not queueable"
-msgstr "Kan ikkje spele av adlib fordi den ikkje kan setjast i kø på kjeldelaget"
+msgid "Cannot play this AdLib because source layer is not queueable"
+msgstr "Kan ikkje spele av AdLib fordi den ikkje kan setjast i kø på kjeldelaget"
 
 msgid ""
 "There are no Playout Gateways connected and attached to this studio. Please "
@@ -886,7 +886,7 @@ msgid "{{rundownPlaylistName}} (Looping)"
 msgstr "{{rundownPlaylistName}} (Looper)"
 
 msgid "Floated AdLib"
-msgstr "Adlib satt på vent"
+msgstr "AdLib satt på vent"
 
 msgid "Switchboard"
 msgstr "Omkoplingssentral"
@@ -1196,7 +1196,7 @@ msgid "Waiting for gateway to generate URL..."
 msgstr "Ventar på at gateway genererar URL..."
 
 msgid "Only Match Global AdLibs"
-msgstr "Vis kun globale adliber"
+msgstr "Vis kun globale AdLiber"
 
 msgid "Name"
 msgstr "Namn"
@@ -1214,16 +1214,16 @@ msgid "Button height scale factor"
 msgstr "Høgdeskala for knapp"
 
 msgid "Only Display AdLibs from Current Segment"
-msgstr "Vis berre adliber frå gjeldande tittel"
+msgstr "Vis berre AdLiber frå gjeldande tittel"
 
 msgid "Include Global AdLibs"
-msgstr "Inkluder globale adliber"
+msgstr "Inkluder globale AdLiber"
 
 msgid "Filter Disabled"
 msgstr "Filter deaktivert"
 
-msgid "Include Clear Source Layer in Ad-Libs"
-msgstr "Ta med \"Tøm kjeldelag\" i adliber"
+msgid "Include Clear Source Layer in AdLibs"
+msgstr "Ta med \"Tøm kjeldelag\" i AdLiber"
 
 msgid "Source Layer Types"
 msgstr "Kjeldelagstypar"
@@ -1252,11 +1252,11 @@ msgstr "Horisontal overflyt"
 msgid "Display Take buttons"
 msgstr "Vis Take-knapp"
 
-msgid "Queue all adlibs"
-msgstr "Cue alle adliber"
+msgid "Queue all AdLibs"
+msgstr "Cue alle AdLiber"
 
 msgid "Toggle AdLibs on single mouse click"
-msgstr "Veksle mellom adliber med enkelt museklikk"
+msgstr "Veksle mellom AdLiber med enkelt museklikk"
 
 msgid "Current part can contain next pieces"
 msgstr ""
@@ -1265,12 +1265,12 @@ msgid "Indicate only one next piece per source layer"
 msgstr ""
 
 msgid "Hide duplicated AdLibs"
-msgstr "Skjul dupliserte adliber"
+msgstr "Skjul dupliserte AdLiber"
 
 msgid ""
 "Picks the first instance of an adLib per rundown, identified by uniqueness Id"
 msgstr ""
-"Velger den første førekomsten av ein adlib i kvar køyreplan, identifisert av "
+"Velger den første førekomsten av ein AdLib i kvar køyreplan, identifisert av "
 "unik id"
 
 msgid "URL"
@@ -1282,8 +1282,8 @@ msgstr "Rangering for visning"
 msgid "Role"
 msgstr "Rolle"
 
-msgid "Adlib Rank"
-msgstr "Adlib-rang"
+msgid "AdLib Rank"
+msgstr "AdLib-rang"
 
 msgid "Place label below panel"
 msgstr "Plasser etikett under panel"
@@ -1564,8 +1564,8 @@ msgstr ""
 msgid "Activate Rundown"
 msgstr "Aktiver køyreplan"
 
-msgid "Ad-Lib"
-msgstr "Adlib"
+msgid "AdLib"
+msgstr "AdLib"
 
 msgid "Deactivate Rundown"
 msgstr "Deaktiver køyreplan"
@@ -1621,8 +1621,8 @@ msgstr ""
 msgid "Action"
 msgstr "Handling"
 
-msgid "Ad-Lib Action"
-msgstr "Adlib-handling"
+msgid "AdLib Action"
+msgstr "AdLib-handling"
 
 msgid "Clear Source Layer"
 msgstr "Tøm kjeldelag"
@@ -1631,7 +1631,7 @@ msgid "Sticky Piece"
 msgstr "Element er sticky"
 
 msgid "Global AdLibs"
-msgstr "Globale adliber"
+msgstr "Globale AdLiber"
 
 msgid "Label"
 msgstr "Etikett"
@@ -1682,10 +1682,10 @@ msgid "Select Action"
 msgstr "Vel handling"
 
 msgid ""
-"No Ad-Lib matches in the current state of Rundown: "
+"No AdLib matches in the current state of Rundown: "
 "\"{{rundownPlaylistName}}\""
 msgstr ""
-"Ingen treff på adliber i noverande tilstand for køyeplanen: "
+"Ingen treff på AdLiber i noverande tilstand for køyeplanen: "
 "\"{{rundownPlaylistName}}\""
 
 msgid "No matching Rundowns available to be used for preview"
@@ -2135,7 +2135,7 @@ msgid "Allow disabling of Pieces"
 msgstr "Tillat deaktivering av element"
 
 msgid "AdLibs on this layer can be queued"
-msgstr "Adliber på dette laget kan cues"
+msgstr "AdLiber på dette laget kan cues"
 
 msgid "Exclusivity group"
 msgstr "Ekslusivitetgruppe"
@@ -2825,10 +2825,10 @@ msgid "End Words"
 msgstr "Stikkord"
 
 msgid "Global AdLib"
-msgstr "Globale adliber"
+msgstr "Globale AdLiber"
 
 msgid "AdLib does not provide any options"
-msgstr "Adlib har ingen val"
+msgstr "AdLib har ingen val"
 
 msgid "Execute"
 msgstr "Utfør"
@@ -2861,13 +2861,13 @@ msgid "New Bucket"
 msgstr "Ny bøtte"
 
 msgid "Are you sure you want to delete this AdLib?"
-msgstr "Er du sikker på at du vil slette denne adliben?"
+msgstr "Er du sikker på at du vil slette denne AdLiben?"
 
 msgid "Are you sure you want to delete this Bucket?"
 msgstr "Er du sikker på at du vil slette denne bøtta?"
 
-msgid "Are you sure you want to empty (remove all adlibs inside) this Bucket?"
-msgstr "Er du sikker på at du vil tømme denne bøtta (fjerner alle adliber)?"
+msgid "Are you sure you want to empty (remove all AdLibs inside) this Bucket?"
+msgstr "Er du sikker på at du vil tømme denne bøtta (fjerner alle AdLiber)?"
 
 msgid "Current Segment"
 msgstr "Noverande tittel"
@@ -2882,19 +2882,19 @@ msgid "Segment Count Up"
 msgstr "Oppteljing for tittel"
 
 msgid "Start this AdLib"
-msgstr "Start denne adliben"
+msgstr "Start denne AdLiben"
 
 msgid "Queue this AdLib"
-msgstr "Cue denne adliben"
+msgstr "Cue denne AdLiben"
 
 msgid "Inspect this AdLib"
-msgstr "Inspiser denne adliben"
+msgstr "Inspiser denne AdLiben"
 
 msgid "Rename this AdLib"
-msgstr "Gi denne adliben nytt namn"
+msgstr "Gi denne AdLiben nytt namn"
 
 msgid "Delete this AdLib"
-msgstr "Slett denne adliben"
+msgstr "Slett denne AdLiben"
 
 msgid "Empty this Bucket"
 msgstr "Tøm denne bøtta"
@@ -2909,7 +2909,7 @@ msgid "Create new Bucket"
 msgstr "Opprett ny bøtte"
 
 msgid "AdLib"
-msgstr "Adlib"
+msgstr "AdLib"
 
 msgid "Shortcuts"
 msgstr "Hurtigtastar"
@@ -3441,10 +3441,10 @@ msgstr "{{frames}} {{type}} frame oppdaga i klippet°°°°°°"
 #~ msgstr "Legg til snarvegar for dette panelet"
 
 #~ msgid "Cannot play this AdLib becasue it is marked as Invalid"
-#~ msgstr "Kan ikkje spele av adlib fordi den er markert som ugyldig"
+#~ msgstr "Kan ikkje spele av AdLib fordi den er markert som ugyldig"
 
 #~ msgid "Cannot play this AdLib becasue it is marked as Floated"
-#~ msgstr "Kan ikkje spele av adlib fordi det er markert som på vent (float)"
+#~ msgstr "Kan ikkje spele av AdLib fordi det er markert som på vent (float)"
 
 #~ msgid ""
 #~ "The Rundown was attempted to be moved out of the Playlist when it was on "
@@ -3469,7 +3469,7 @@ msgstr "{{frames}} {{type}} frame oppdaga i klippet°°°°°°"
 #~ msgstr "Fjern hurtigtast"
 
 #~ msgid "Assign Hotkeys to Global AdLibs"
-#~ msgstr "Tildel hurtigtastar til globale adliber"
+#~ msgstr "Tildel hurtigtastar til globale AdLiber"
 
 #~ msgid "Activate Sticky Piece Shortcut"
 #~ msgstr "Aktiver hurtigtast for sticky element"

@@ -405,7 +405,7 @@ export const RundownViewBuckets = withTranslation()(
 
 			doModalDialog(
 				literal<ModalDialogQueueItem>({
-					message: t('Are you sure you want to empty (remove all adlibs inside) this Bucket?'),
+					message: t('Are you sure you want to empty (remove all AdLibs inside) this Bucket?'),
 					title: bucket.name,
 					onAccept: () => {
 						doUserAction(t, e.context, UserAction.EMPTY_BUCKET, (e, ts) =>

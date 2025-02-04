@@ -171,7 +171,7 @@ export const VariantListItem = ({
 
 							<div className="properties-grid">
 								<label className="field">
-									<LabelActual label={t('Can Generate Adlib Testing Rundown')} />
+									<LabelActual label={t('Can Generate AdLib Testing Rundown')} />
 									<EditAttribute
 										modifiedClassName="bghl"
 										attribute={'canGenerateAdlibTestingRundown'}

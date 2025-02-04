@@ -533,7 +533,7 @@ msgstr ""
 msgid "Cannot play this AdLib because it is marked as Invalid"
 msgstr ""
 
-msgid "Floated Adlib"
+msgid "Floated AdLib"
 msgstr ""
 
 msgid "Cannot play this AdLib because it is marked as Floated"
@@ -542,7 +542,7 @@ msgstr ""
 msgid "Not queueable"
 msgstr ""
 
-msgid "Cannot play this adlib because source layer is not queueable"
+msgid "Cannot play this AdLib because source layer is not queueable"
 msgstr ""
 
 msgid ""
@@ -1099,7 +1099,7 @@ msgstr ""
 msgid "Filter Disabled"
 msgstr ""
 
-msgid "Include Clear Source Layer in Ad-Libs"
+msgid "Include Clear Source Layer in AdLibs"
 msgstr ""
 
 msgid "Source Layers"
@@ -1135,7 +1135,7 @@ msgstr ""
 msgid "Display Take buttons"
 msgstr ""
 
-msgid "Queue all adlibs"
+msgid "Queue all AdLibs"
 msgstr ""
 
 msgid "Toggle AdLibs on single mouse click"
@@ -1167,7 +1167,7 @@ msgstr ""
 msgid "Role"
 msgstr ""
 
-msgid "Adlib Rank"
+msgid "AdLib Rank"
 msgstr ""
 
 msgid "Place label below panel"
@@ -1448,7 +1448,7 @@ msgstr ""
 msgid "Activate Rundown"
 msgstr ""
 
-msgid "Ad-Lib"
+msgid "AdLib"
 msgstr ""
 
 msgid "Deactivate Rundown"
@@ -1505,7 +1505,7 @@ msgstr ""
 msgid "Action"
 msgstr ""
 
-msgid "Ad-Lib Action"
+msgid "AdLib Action"
 msgstr ""
 
 msgid "Clear Source Layer"
@@ -1581,7 +1581,7 @@ msgid "Delete Action Trigger"
 msgstr ""
 
 msgid ""
-"No Ad-Lib matches in the current state of Rundown: "
+"No AdLib matches in the current state of Rundown: "
 "\"{{rundownPlaylistName}}\""
 msgstr ""
 
@@ -2821,7 +2821,7 @@ msgstr ""
 msgid "Are you sure you want to delete this Bucket?"
 msgstr ""
 
-msgid "Are you sure you want to empty (remove all adlibs inside) this Bucket?"
+msgid "Are you sure you want to empty (remove all AdLibs inside) this Bucket?"
 msgstr ""
 
 msgid "Current Segment"

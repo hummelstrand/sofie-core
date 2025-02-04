@@ -6,7 +6,7 @@ We are looking into pushing more of this logic into Sofie to aid reusability.
 :::
 
 _AB Playback_ is a common technique for clip playback. The aim is to be able to play multiple clips back to back, alternating which player is used for each clip.  
-At first glance it sounds simple to handle, but it quickly becomes complicated when we consider the need to allow users to run adlibs and that the system needs to seamlessly update pre-programmed clips when this happens.
+At first glance it sounds simple to handle, but it quickly becomes complicated when we consider the need to allow users to run AdLibs and that the system needs to seamlessly update pre-programmed clips when this happens.
 
 To avoid this problem, we take an approach of simply labelling pieces as needing an AB assignment and leaving timeline objects to have some unresolved values during the ingest blueprint operations, and use the `onTimelineGenerate` blueprint function to do the assignment and modify the timeline as needed at the time of playout.
 
@@ -14,7 +14,7 @@ There are other challenges to think about too:
 
 - Users get confused if the player of a clip changes without a reason
 - Reloading an already loaded clip can be costly, so should be avoided when possible
-- Adlibbing a clip, or changing what Part is nexted can result in needing to move what player a clip has assigned
+- AdLibbing a clip, or changing what Part is nexted can result in needing to move what player a clip has assigned
 - Postroll or preroll is often needed
 - Some studios can have less players available than ideal. (eg, going back to back between two clips, and a clip is playing on the studio monitor)
 

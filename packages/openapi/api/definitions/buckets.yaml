@@ -117,7 +117,7 @@ resources:
       parameters:
         - name: bucketId
           in: path
-          description: Bucket to import the adlib to.
+          description: Bucket to import the AdLib to.
           required: true
           schema:
             type: string
@@ -129,7 +129,7 @@ resources:
               $ref: '#/components/schemas/importAdlib'
       responses:
         200:
-          description: Bucket adlib successfully imported.
+          description: Bucket AdLib successfully imported.
           content:
             application/json:
               schema:
@@ -144,11 +144,11 @@ resources:
       operationId: deleteBucketAdlibs
       tags:
         - buckets
-      summary: Deletes all adlibs in a bucket
+      summary: Deletes all AdLibs in a bucket
       parameters:
         - name: bucketId
           in: path
-          description: Bucket to remove adlibs from.
+          description: Bucket to remove AdLibs from.
           required: true
           schema:
             type: string
@@ -172,23 +172,23 @@ resources:
       operationId: deleteBucketAdlib
       tags:
         - buckets
-      summary: Deletes a bucket adlib
+      summary: Deletes a bucket AdLib
       parameters:
         - name: bucketId
           in: path
-          description: Bucket to remove the adlib from.
+          description: Bucket to remove the AdLib from.
           required: true
           schema:
             type: string
         - name: externalId
           in: path
-          description: External id of the bucket adlib to remove.
+          description: External id of the bucket AdLib to remove.
           required: true
           schema:
             type: string
       responses:
         200:
-          description: Bucket Adlib successfuly removed.
+          description: Bucket AdLib successfuly removed.
           content:
             application/json:
               schema:
@@ -238,10 +238,10 @@ components:
       properties:
         externalId:
           type: string
-          description: Id of the adlib recognizable by the external source. Unique within a bucket. If an adlib with the same `externalId` already exists in the bucket, it will be replaced.
+          description: Id of the AdLib recognizable by the external source. Unique within a bucket. If an AdLib with the same `externalId` already exists in the bucket, it will be replaced.
         showStyleBaseId:
           type: string
-          description: Id of the ShowStyle to use when importing the adlib.
+          description: Id of the ShowStyle to use when importing the AdLib.
         name:
           type: string
           description: Adlib Name.

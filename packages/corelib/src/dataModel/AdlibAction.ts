@@ -24,7 +24,7 @@ export interface AdLibActionCommon extends ProtectedStringProperties<IBlueprintA
 
 	/**
 	 * String that can be used to identify adlibs that are equivalent to each other,
-	 * if there are multiple Adlibs with the same uniquenessId,
+	 * if there are multiple AdLibs with the same uniquenessId,
 	 * only one of them should be displayed in the GUI.
 	 */
 	uniquenessId?: string

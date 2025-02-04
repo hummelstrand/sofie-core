@@ -101,8 +101,8 @@ _Prerequisites: previous take must be over 1000ms (configurable on a per-studio 
 
 _Prerequisites: an active playlist, currently not in hold, a currently playing part_
 
-*   Find the adlib and check that it is not invalid or floated
-*   If the adlib is to be queued
+*   Find the AdLib and check that it is not invalid or floated
+*   If the AdLib is to be queued
     *   Create a new PartIntance in the segment
     *   Convert the ad lib to a piece instance
         *   Create a new piece instance in the part instance
@@ -113,9 +113,9 @@ _Prerequisites: an active playlist, currently not in hold, a currently playing p
         *   Insert the part instance
         *   Set all related piece instances as dynamically inserted and insert them
         *   Update part instance ranks
-        *   Insert any infinites that the adlibbed part needs to inherit
-        *   Set the adlib part as next
-*   If the adlib is to be inserted in the current part  
+        *   Insert any infinites that the AdLibbed part needs to inherit
+        *   Set the AdLib part as next
+*   If the AdLib is to be inserted in the current part  
 
     *   Label the piece as dynamic
     *   Set up infinite properties
@@ -141,7 +141,7 @@ _Prerequisites for activate: active playlist, current part, next part and hold s
 
 *   Get current and next part instance
 *   Current part instance should have a PartHoldMode.FROM and next part instance a PartHoldMode.TO
-*   Check that no adlibs have been used
+*   Check that no AdLibs have been used
 *   Set the playlist hold state to PENDING
 *   Update the timeline
 

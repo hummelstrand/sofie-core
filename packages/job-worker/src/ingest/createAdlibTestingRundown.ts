@@ -32,7 +32,7 @@ export async function handleCreateAdlibTestingRundownForShowStyleVariant(
 		showStyleBlueprint.blueprint.generateAdlibTestingIngestRundown || fallbackBlueprintMethod
 	const blueprintContext = new ShowStyleUserContext(
 		{
-			name: `Create Adlib Testing Rundown`,
+			name: `Create AdLib Testing Rundown`,
 			identifier: `studioId=${context.studioId},showStyleBaseId=${showStyleCompound._id},showStyleVariantId=${showStyleCompound.showStyleVariantId}`,
 		},
 		context,

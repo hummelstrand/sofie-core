@@ -428,7 +428,7 @@ export default withTranslation()(
 							</label>
 
 							<label className="field">
-								<LabelActual label={t('Queue all adlibs')} />
+								<LabelActual label={t('Queue all AdLibs')} />
 								<EditAttribute
 									modifiedClassName="bghl"
 									attribute={`filters.${index}.queueAllAdlibs`}
@@ -463,7 +463,7 @@ export default withTranslation()(
 								/>
 							</label>
 
-							<label className="field" title="eg. when pieces in current part serve as data stores for adlibing">
+							<label className="field" title="eg. when pieces in current part serve as data stores for AdLibing">
 								{t('Current part can contain next pieces')}
 								<EditAttribute
 									modifiedClassName="bghl"
@@ -594,7 +594,7 @@ export default withTranslation()(
 					</label>
 
 					<label className="field">
-						<LabelActual label={t('Adlib Rank')} />
+						<LabelActual label={t('AdLib Rank')} />
 						<EditAttribute
 							modifiedClassName="bghl"
 							attribute={`filters.${index}.adlibRank`}

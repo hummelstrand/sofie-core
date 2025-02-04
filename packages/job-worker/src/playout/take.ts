@@ -150,7 +150,7 @@ export async function performTakeToNextedPart(
 		const now = getCurrentTime()
 		if (currentPartInstance.partInstance.blockTakeUntil && currentPartInstance.partInstance.blockTakeUntil > now) {
 			const remainingTime = currentPartInstance.partInstance.blockTakeUntil - now
-			// Adlib-actions can arbitrarily block takes from being done
+			// Adlib Actions can arbitrarily block takes from being done
 			logger.debug(
 				`Take is blocked until ${currentPartInstance.partInstance.blockTakeUntil}. Which is in: ${remainingTime}`
 			)

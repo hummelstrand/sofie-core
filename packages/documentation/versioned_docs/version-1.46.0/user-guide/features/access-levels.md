@@ -17,11 +17,11 @@ The access level is persisted in browser's Local Storage. To disable, visit`?the
 
 ### Basic mode
 
-Without enabling any additional modes in Sofie, the browser will have minimal access to the system. It will be able to view a rundown but, will not have the ability to manipulate it. This includes activating, deactivating, or resetting the rundown as well as taking the next part, adlib, etc.
+Without enabling any additional modes in Sofie, the browser will have minimal access to the system. It will be able to view a rundown but, will not have the ability to manipulate it. This includes activating, deactivating, or resetting the rundown as well as taking the next part, AdLib, etc.
 
 ### Studio mode
 
-Studio Mode gives the current browser full control of the studio and all information associated to it. This includes allowing actions like activating and deactivating rundowns, taking parts, adlibbing, etc. This mode is accessed by adding a `?studio=1` to the end of the URL.
+Studio Mode gives the current browser full control of the studio and all information associated to it. This includes allowing actions like activating and deactivating rundowns, taking parts, AdLibbing, etc. This mode is accessed by adding a `?studio=1` to the end of the URL.
 
 ### Configuration mode
 
