@@ -844,14 +844,19 @@ export class TSRHandler {
 		time: number,
 		objId: string,
 		callbackName0: string,
-		data: PeripheralDeviceAPI.PartPlaybackCallbackData | PeripheralDeviceAPI.PiecePlaybackCallbackData
+		data:
+			| PeripheralDeviceAPI.PartPlaybackCallbackData
+			| PeripheralDeviceAPI.PiecePlaybackCallbackData
+			| PeripheralDeviceAPI.TriggerRegenerationCallbackData
 	): void {
+		console.log('callbakc', callbackName0, data)
 		if (
 			![
 				PeripheralDeviceAPI.PlayoutChangedType.PART_PLAYBACK_STARTED,
 				PeripheralDeviceAPI.PlayoutChangedType.PART_PLAYBACK_STOPPED,
 				PeripheralDeviceAPI.PlayoutChangedType.PIECE_PLAYBACK_STARTED,
 				PeripheralDeviceAPI.PlayoutChangedType.PIECE_PLAYBACK_STOPPED,
+				PeripheralDeviceAPI.PlayoutChangedType.TRIGGER_REGENERATION,
 			].includes(callbackName0 as PeripheralDeviceAPI.PlayoutChangedType)
 		) {
 			// @ts-expect-error Untyped bunch of methods
@@ -911,6 +916,16 @@ export class TSRHandler {
 						time,
 						partInstanceId: (data as PeripheralDeviceAPI.PiecePlaybackCallbackData).partInstanceId,
 						pieceInstanceId: (data as PeripheralDeviceAPI.PiecePlaybackCallbackData).pieceInstanceId,
+					},
+				})
+				break
+			case PeripheralDeviceAPI.PlayoutChangedType.TRIGGER_REGENERATION:
+				this.changedResults.changes.push({
+					type: callbackName,
+					objId,
+					data: {
+						regenerationToken: (data as PeripheralDeviceAPI.TriggerRegenerationCallbackData)
+							.regenerationToken,
 					},
 				})
 				break

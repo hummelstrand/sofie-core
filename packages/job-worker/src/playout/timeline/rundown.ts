@@ -137,6 +137,8 @@ export function buildTimelineObjsForRundown(
 	const timingContext: RundownTimelineTimingContext = {
 		currentPartGroup,
 		currentPartDuration: currentPartEnable.duration,
+
+		// regenerateTimelineAt: For future use
 	}
 
 	// Start generating objects
