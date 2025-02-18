@@ -86,4 +86,9 @@ export interface IStudioSettings {
 	 * Enable evaluation form - the default behavior is to have evaluation forms.
 	 */
 	enableEvaluationForm: boolean
+
+	/**
+	 * Override the piece content statuses with fake info - used for developing the UI
+	 */
+	mockPieceContentStatus?: boolean
 }
