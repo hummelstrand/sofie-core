@@ -149,7 +149,7 @@ export function CameraScreen({ playlist, studioId }: Readonly<IProps>): JSX.Elem
 
 	useSetDocumentClass('dark', 'xdark', 'vertical-overflow-only')
 	useEffect(() => {
-		const containerEl = document.querySelector('#render-target > .container-fluid.header-clear')
+		const containerEl = document.querySelector('#render-target > .container-fluid-custom.header-clear')
 		if (containerEl) containerEl.classList.remove('header-clear')
 
 		return () => {
