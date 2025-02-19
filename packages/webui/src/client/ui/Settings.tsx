@@ -22,7 +22,7 @@ export function Settings(): JSX.Element | null {
 	useSubscription(CorelibPubSub.blueprints, null)
 
 	return (
-		<div className="mtl gutter has-statusbar">
+		<div className="mx-5 mt-5 has-statusbar">
 			<div className="mod mvl mhs">
 				<div className="row">
 					<div className="col c12 rm-c3 settings-menu">

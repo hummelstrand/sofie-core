@@ -45,7 +45,7 @@ export function EvaluationView(): JSX.Element {
 			<header className="mbs">
 				<h1>{t('Evaluations')}</h1>
 			</header>
-			<div className="mod mvl">
+			<div className="my-5">
 				<div className="paging">
 					<DatePickerFromTo from={dateFrom} to={dateTo} onChange={handleChangeDate} />
 				</div>

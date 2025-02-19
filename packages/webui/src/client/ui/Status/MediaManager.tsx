@@ -420,7 +420,7 @@ export function MediaManagerStatus(): JSX.Element {
 					</React.Fragment>
 				) : null}
 			</div>
-			<div className="mod mvl">
+			<div className="my-5">
 				{sortedWorkflows.map((mediaWorkflow) => (
 					<MediaManagerWorkFlowItem
 						isExpanded={expandedHelper.isExpanded(mediaWorkflow._id)}

@@ -13,6 +13,8 @@ import {
 	PeripheralDevicePubSub,
 	PeripheralDevicePubSubCollectionsNames,
 } from '@sofie-automation/shared-lib/dist/pubsub/peripheralDevice'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
 
 const MountedTriggers = new Mongo.Collection<DeviceTriggerMountedAction>(
 	PeripheralDevicePubSubCollectionsNames.mountedTriggers
@@ -30,16 +32,12 @@ const DeviceTriggersView: React.FC = function TimelineDatastoreView() {
 	const { peripheralDeviceId } = useParams<DeviceTriggersViewRouteParams>()
 
 	return (
-		<div className="mtl gutter">
-			<header className="mvs">
+		<div className="mx-5 mt-5">
+			<header className="my-2">
 				<h1>{t('Device Triggers')}</h1>
 			</header>
-			<div className="mod mvl">
-				{peripheralDeviceId && (
-					<div>
-						<DeviceTriggersControls peripheralDeviceId={protectString(peripheralDeviceId)} />
-					</div>
-				)}
+			<div className="my-5">
+				{peripheralDeviceId && <DeviceTriggersControls peripheralDeviceId={protectString(peripheralDeviceId)} />}
 			</div>
 		</div>
 	)
@@ -76,18 +74,20 @@ function DeviceTriggersControls({ peripheralDeviceId }: Readonly<IDatastoreContr
 	)
 
 	return (
-		<div>
-			<label>
-				Device Ids:
-				<input
-					value={deviceIds.join(', ')}
-					onChange={(e) => {
-						setDeviceIds(e.target.value.split(/,\s*/))
-					}}
-				/>
-			</label>
-			<div>
-				<table className="testtools-timelinetable">
+		<Row>
+			<Col xs={12} className="mb-4">
+				<label>
+					Device Ids:&nbsp;
+					<input
+						value={deviceIds.join(', ')}
+						onChange={(e) => {
+							setDeviceIds(e.target.value.split(/,\s*/))
+						}}
+					/>
+				</label>
+			</Col>
+			<Col xs={12}>
+				<table className="testtools-datatable">
 					<tbody>
 						<tr>
 							<th></th>
@@ -126,8 +126,8 @@ function DeviceTriggersControls({ peripheralDeviceId }: Readonly<IDatastoreContr
 						))}
 					</tbody>
 				</table>
-			</div>
-		</div>
+			</Col>
+		</Row>
 	)
 }
 

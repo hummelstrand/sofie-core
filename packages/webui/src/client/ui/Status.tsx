@@ -75,7 +75,7 @@ export default function Status(props: Readonly<IStatusProps>): JSX.Element {
 	useSubscription(CorelibPubSub.showStyleVariants, null, null)
 
 	return (
-		<div className="mtl gutter has-statusbar">
+		<div className="mx-5 mt-5 has-statusbar">
 			{/* <header className='mvs'>
 					<h1>{t('Status')}</h1>
 				</header> */}

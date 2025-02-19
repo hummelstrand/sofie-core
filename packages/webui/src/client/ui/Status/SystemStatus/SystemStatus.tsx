@@ -31,7 +31,7 @@ export function SystemStatus(): JSX.Element {
 			<header className="mbs">
 				<h1>{t('System Status')}</h1>
 			</header>
-			<div className="mod mvl">
+			<div className="my-5">
 				{coreSystem && <CoreItem coreSystem={coreSystem} systemStatus={systemStatus} />}
 
 				{devicesHierarchy.map((d) => (

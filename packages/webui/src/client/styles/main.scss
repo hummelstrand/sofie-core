@@ -15,23 +15,6 @@ input {
 
 @use 'bootstrap';
 
-ul {
-	margin: 20px;
-	padding: 0;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-	font-weight: 300;
-}
-h1 {
-	font-size: 3rem;
-}
-
 @import 'colorScheme';
 @import '_variables';
 @import '_colorScheme';
@@ -63,7 +46,7 @@ h1 {
 // @import 'studioScreenSaver';
 // @import 'supportAndSwitchboardPanel';
 // @import 'systemStatus';
-// @import 'testtools';
+@import 'testtools';
 // @import 'tooltips';
 // @import 'utils';
 // @import 'elementSelected';
@@ -174,28 +157,82 @@ h1 {
 // #render-target {
 // 	font-weight: 300;
 
-// 	h5,
-// 	.h5,
-// 	.text-s,
-// 	.text-s p,
-// 	.text-s .mod,
-// 	.text-s .table,
-// 	.text-s .action-btn,
-// 	.switch,
-// 	.pill,
-// 	.pills .action-btn,
-// 	.notification,
-// 	.tooltip,
-// 	.btn,
-// 	.btn-tight {
-// 		font-weight: 300;
-// 	}
+ul {
+	margin: 20px;
+	padding: 0;
+}
 
-// 	p,
-// 	center,
-// 	.table {
-// 		font-weight: 300;
-// 	}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: 300;
+	color: var(--bs-body-color);
+}
+
+h1,
+.h1 {
+	letter-spacing: -0.03em;
+	font-size: 3rem;
+	line-height: 1.2;
+}
+
+h2,
+.h2 {
+	letter-spacing: -0.03em;
+	font-size: 1.5rem;
+	line-height: 1.5;
+}
+
+h3,
+.h3 {
+	font-size: 0.875rem;
+	text-transform: uppercase;
+	font-weight: bold;
+	line-height: 1.5rem;
+	letter-spacing: 0.6px;
+}
+
+h4,
+.h4 {
+	font-size: 0.875rem;
+	text-transform: uppercase;
+	font-weight: normal;
+	line-height: 1.5rem;
+	letter-spacing: 0.5px;
+}
+
+h5,
+.h5,
+.text-s,
+.text-s p,
+.text-s .mod,
+.text-s .table,
+.text-s .action-btn,
+.switch,
+.pill,
+.pills .action-btn,
+.notification,
+.tooltip,
+.btn,
+.btn-tight {
+	font-weight: 300;
+}
+
+p,
+center,
+.table {
+	font-weight: 300;
+}
+
+.flex-row {
+	display: flex;
+	justify-content: flex-start;
+	align-items: flex-start;
+	flex-direction: row;
+}
 
 // 	.checkbox {
 // 		vertical-align: top;
@@ -231,15 +268,28 @@ h1 {
 // 	}
 // }
 
-// a.selectable {
-// 	display: block;
-// 	text-decoration: inherit;
+.selectable {
+	border-left: 4px solid transparent;
+	overflow: hidden;
+	display: block;
+	text-decoration: inherit;
 
-// 	&:hover,
-// 	&:active {
-// 		text-decoration: inherit;
-// 	}
-// }
+	padding: 0.25rem;
+
+	h3 {
+		margin: 0;
+	}
+
+	&:hover,
+	&:active {
+		text-decoration: inherit;
+	}
+}
+
+.selectable-selected {
+	background: #e0e3e4;
+	border-left-color: #1769ff;
+}
 
 // .btn > svg.svg-inline--fa + span {
 // 	margin-left: 0.5em;

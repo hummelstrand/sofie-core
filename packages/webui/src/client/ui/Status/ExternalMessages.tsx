@@ -34,7 +34,7 @@ function ExternalMessages(): JSX.Element {
 			<header className="mbs">
 				<h1>{t('Message Queue')}</h1>
 			</header>
-			<div className="mod mvl">
+			<div className="my-5">
 				<strong>Studio</strong>
 				<ul>
 					{studios.map((studio) => {
@@ -78,7 +78,7 @@ function ExternalMessagesInStudio({ studioId }: Readonly<IExternalMessagesInStud
 			<div className="paging alc">
 				<DatePickerFromTo from={dateFrom} to={dateTo} onChange={handleChangeDate} />
 			</div>
-			<div className="mod mvl">
+			<div className="my-5">
 				<ExternalMessagesQueuedMessages studioId={studioId} />
 				<ExternalMessagesSentMessages studioId={studioId} />
 			</div>
