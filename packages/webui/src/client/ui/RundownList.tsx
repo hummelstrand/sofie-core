@@ -144,12 +144,12 @@ export function RundownList(): JSX.Element {
 
 			{showGettingStarted === true ? <GettingStarted step={step} /> : null}
 
-			<section className="mtl gutter has-statusbar">
-				<header className="mvs">
+			<section className="mt-5 mx-5 has-statusbar">
+				<header className="my-2">
 					<h1>{t('Rundowns')}</h1>
 				</header>
 				{subsReady ? (
-					<section className="mod mvl rundown-list" role="treegrid">
+					<section className="my-5 rundown-list" role="treegrid">
 						<header className="rundown-list__header">
 							<span className="rundown-list-item__name" role="columnheader">
 								<Tooltip

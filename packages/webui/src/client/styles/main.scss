@@ -10,14 +10,31 @@ input {
 
 @use 'fonts';
 
-// @import 'colorScheme';
-// @import '_variables';
-// @import '_colorScheme';
-
 @use 'defaultColors';
 @use 'itemTypeColors';
 
 @use 'bootstrap';
+
+ul {
+	margin: 20px;
+	padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: 300;
+}
+h1 {
+	font-size: 3rem;
+}
+
+@import 'colorScheme';
+@import '_variables';
+@import '_colorScheme';
 
 @import '_header';
 
@@ -37,11 +54,11 @@ input {
 // @import 'overflowingContainer';
 // @import 'pieceStatusIcon';
 // @import 'prompter';
-// @import 'rundownList';
+@import 'rundownList';
 // @import 'rundownSystemStatus';
 // @import 'settings';
 // @import 'splitDropdown';
-// @import 'statusbar';
+@import 'statusbar';
 // @import 'statusNotification';
 // @import 'studioScreenSaver';
 // @import 'supportAndSwitchboardPanel';
@@ -149,10 +166,10 @@ input {
 // 	// position: relative;
 // 	// z-index: 500;
 // }
-// .header-clear {
-// 	padding-top: 4rem;
-// 	padding-right: $statusbar-width;
-// }
+.header-clear {
+	padding-top: 4rem;
+	padding-right: $statusbar-width;
+}
 
 // #render-target {
 // 	font-weight: 300;

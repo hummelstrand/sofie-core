@@ -127,7 +127,7 @@ class Header extends React.Component<Translated<IPropsHeader & ITrackedPropsHead
 						<SupportPopUpToggle onClick={this.onToggleSupportPanel} isOpen={this.state.isSupportPanelOpen} />
 					</div>
 				</ErrorBoundary>
-				<Navbar data-bs-theme="dark" fixed="top" expand="lg" className="bg-body-tertiary">
+				<Navbar data-bs-theme="dark" fixed="top" expand className="bg-body-tertiary">
 					<Container fluid>
 						<Navbar.Brand>
 							<Link className="badge-sofie" to="/">

@@ -97,7 +97,7 @@ export default React.memo(function RundownListItemView({
 							</Tooltip>
 						</span>
 					) : null}
-					<b className="rundown-name">{rundownNameContent}</b>
+					<span className="rundown-name">{rundownNameContent}</span>
 					{rundown.description ? (
 						<Tooltip overlay={rundown.description} trigger={['hover']} placement="right">
 							<span className="rundown-list-description__icon">
