@@ -90,7 +90,6 @@ import {
 } from '@sofie-automation/meteor-lib/dist/collections/RundownLayouts'
 import { VirtualElement } from '../lib/VirtualElement'
 import { SEGMENT_TIMELINE_ELEMENT_ID } from './SegmentTimeline/SegmentTimeline'
-import { NoraPreviewRenderer } from './FloatingInspectors/NoraFloatingInspector'
 import { Bucket } from '@sofie-automation/meteor-lib/dist/collections/Buckets'
 import { contextMenuHoldToDisplayTime, isEventInInputField } from '../lib/lib'
 import { OffsetPosition } from '../utils/positions'
@@ -3156,9 +3155,6 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 									)}
 								</ErrorBoundary>
 								<ErrorBoundary>
-									<NoraPreviewRenderer />
-								</ErrorBoundary>
-								<ErrorBoundary>
 									<SegmentContextMenu
 										contextMenuContext={this.state.contextMenuContext}
 										playlist={playlist}
@@ -3247,9 +3243,6 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 		renderDetachedShelf() {
 			return (
 				<RundownTimingProvider playlist={this.props.playlist} defaultDuration={Settings.defaultDisplayDuration}>
-					<ErrorBoundary>
-						<NoraPreviewRenderer />
-					</ErrorBoundary>
 					<ErrorBoundary>
 						<Shelf
 							buckets={this.props.buckets}
