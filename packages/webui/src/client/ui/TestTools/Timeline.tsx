@@ -20,13 +20,8 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Classnames from 'classnames'
-import { createSyncPeripheralDeviceCustomPublicationMongoCollection } from '../../collections/lib'
 import { StudioId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { PeripheralDevicePubSubCollectionsNames } from '@sofie-automation/shared-lib/dist/pubsub/peripheralDevice'
-
-export const StudioTimeline = createSyncPeripheralDeviceCustomPublicationMongoCollection(
-	PeripheralDevicePubSubCollectionsNames.studioTimeline
-)
+import { StudioTimeline } from './collections'
 
 interface TimelineViewRouteParams {
 	studioId: string | undefined
