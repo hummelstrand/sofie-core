@@ -81,6 +81,7 @@ export const addSteps = addMigrationSteps('1.52.0', [
 				// .abPlayers in the overrides:
 				for (const override of studio.routeSetsWithOverrides.overrides) {
 					if (override.op === 'set') {
+						if (override.path.includes('.')) continue // Only include overrides at the top level
 						const value = override.value as StudioRouteSet
 
 						if (!value.abPlayers) {
@@ -112,6 +113,7 @@ export const addSteps = addMigrationSteps('1.52.0', [
 				// .abPlayers in the overrides:
 				for (const override of newRouteSetsWithOverrides.overrides) {
 					if (override.op === 'set') {
+						if (override.path.includes('.')) continue // Only include overrides at the top level
 						const value = override.value as StudioRouteSet
 
 						if (!value.abPlayers) {
