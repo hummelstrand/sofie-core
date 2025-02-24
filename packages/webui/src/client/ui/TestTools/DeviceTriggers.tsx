@@ -15,6 +15,7 @@ import {
 } from '@sofie-automation/shared-lib/dist/pubsub/peripheralDevice'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
+import Form from 'react-bootstrap/Form'
 
 const MountedTriggers = new Mongo.Collection<DeviceTriggerMountedAction>(
 	PeripheralDevicePubSubCollectionsNames.mountedTriggers
@@ -32,7 +33,7 @@ const DeviceTriggersView: React.FC = function TimelineDatastoreView() {
 	const { peripheralDeviceId } = useParams<DeviceTriggersViewRouteParams>()
 
 	return (
-		<div className="mx-5 mt-5">
+		<div className="mx-5">
 			<header className="my-2">
 				<h1>{t('Device Triggers')}</h1>
 			</header>
@@ -78,7 +79,7 @@ function DeviceTriggersControls({ peripheralDeviceId }: Readonly<IDatastoreContr
 			<Col xs={12} className="mb-4">
 				<label>
 					Device Ids:&nbsp;
-					<input
+					<Form.Control
 						value={deviceIds.join(', ')}
 						onChange={(e) => {
 							setDeviceIds(e.target.value.split(/,\s*/))

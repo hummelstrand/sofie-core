@@ -11,9 +11,10 @@ input {
 @use 'fonts';
 
 @use 'defaultColors';
-@use 'itemTypeColors';
 
 @use 'bootstrap';
+
+@import 'itemTypeColors';
 
 @import 'colorScheme';
 @import '_variables';
@@ -25,7 +26,7 @@ input {
 // @import 'collapseJSON';
 // @import 'colorPicker';
 // @import 'contextMenu';
-// @import 'datePicker';
+@import 'datePicker';
 // @import 'editAttribute';
 // @import 'externalMessagesStatus';
 // @import 'iconPicker';
@@ -45,7 +46,7 @@ input {
 // @import 'statusNotification';
 // @import 'studioScreenSaver';
 // @import 'supportAndSwitchboardPanel';
-// @import 'systemStatus';
+@import 'systemStatus';
 @import 'testtools';
 // @import 'tooltips';
 // @import 'utils';
@@ -94,10 +95,10 @@ input {
 // @import '../ui/Settings/components/triggeredActions/TriggeredActionsEditor.scss';
 // @import '../ui/Settings/Forms.scss';
 // @import '../ui/SegmentTimeline/SegmentTimeline.scss';
-// @import '../ui/Status/media-status/MediaStatusListItem.scss';
-// @import '../ui/Status/media-status/MediaStatusList.scss';
-// @import '../ui/Status/media-status/MediaStatusListHeader.scss';
-// @import '../ui/Status/package-status/package-status.scss';
+@import '../ui/Status/media-status/MediaStatusListItem.scss';
+@import '../ui/Status/media-status/MediaStatusList.scss';
+@import '../ui/Status/media-status/MediaStatusListHeader.scss';
+@import '../ui/Status/package-status/package-status.scss';
 // @import '../ui/SegmentList/LinePartPieceIndicator/LinePartPieceIndicator.scss';
 // @import '../ui/SegmentList/LinePartPieceIndicator/PieceIndicatorMenu.scss';
 // @import '../ui/SegmentList/SegmentList.scss';
@@ -227,11 +228,51 @@ center,
 	font-weight: 300;
 }
 
+header {
+	font-weight: 700;
+}
+
 .flex-row {
 	display: flex;
 	justify-content: flex-start;
 	align-items: flex-start;
 	flex-direction: row;
+}
+
+.action-btn {
+	cursor: pointer;
+	background: transparent;
+	color: #636363;
+	border: none;
+	display: inline-block;
+	padding: 0;
+	text-decoration: none;
+	vertical-align: baseline;
+	transition: color 0.2s;
+}
+.action-btn .icon {
+	fill: #737373;
+}
+
+.dimmed,
+:link .dimmed,
+:visited .dimmed {
+	color: #9f9f9f;
+}
+
+.pill {
+	background: #252627;
+	border: 1px solid #252627;
+	border-radius: 1rem;
+	color: #ffffff;
+	display: inline-block;
+	line-height: 2;
+	margin: -4px 10px -4px 0;
+	padding: 0 0.5rem;
+
+	a:not(:hover) {
+		text-decoration: none;
+	}
 }
 
 // 	.checkbox {

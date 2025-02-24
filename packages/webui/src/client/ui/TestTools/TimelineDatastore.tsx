@@ -21,7 +21,7 @@ function TimelineDatastoreView(): JSX.Element {
 	const { studioId } = useParams<TimelineDatastoreViewRouteParams>()
 
 	return (
-		<div className="mx-5 mt-5">
+		<div className="mx-5">
 			<header className="my-2">
 				<h1>{t('Timeline Datastore')}</h1>
 			</header>

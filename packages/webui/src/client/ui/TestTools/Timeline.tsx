@@ -26,6 +26,7 @@ import { PeripheralDevicePubSubCollectionsNames } from '@sofie-automation/shared
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button'
+import Form from 'react-bootstrap/Form'
 
 export const StudioTimeline = createSyncPeripheralDeviceCustomPublicationMongoCollection(
 	PeripheralDevicePubSubCollectionsNames.studioTimeline
@@ -40,7 +41,7 @@ function TimelineView(): JSX.Element {
 	const { studioId } = useParams<TimelineViewRouteParams>()
 
 	return (
-		<div className="mx-5 mt-5">
+		<div className="mx-5">
 			<header className="my-2">
 				<h1>{t('Timeline')}</h1>
 			</header>
@@ -162,7 +163,7 @@ function FilterInput({ filterChanged }: Readonly<FilterInputProps>) {
 	}, [filterText])
 
 	return (
-		<input
+		<Form.Control
 			type="text"
 			value={filterText}
 			onChange={changeFilter}
@@ -196,18 +197,18 @@ function TimelineStateTable({ resolvedTimeline, now }: Readonly<TimelineStateTab
 		<Row>
 			<Col xs={12}>
 				<div className="flex-row mb-2">
-					<div className="mr-2">
+					<div className="mx-2">
 						Time:{' '}
-						<select onChange={selectViewTime} value={viewTime ?? 'now'}>
+						<Form.Select onChange={selectViewTime} value={viewTime ?? 'now'}>
 							<option id="now">Now: {now}</option>
 							{times.map((e) => (
 								<option id={e + ''} key={e}>
 									{e}
 								</option>
 							))}
-						</select>
+						</Form.Select>
 					</div>
-					<div className="mr-2">
+					<div className="mx-2">
 						Layer Filter: <FilterInput filterChanged={setLayerFilter} />
 					</div>
 				</div>

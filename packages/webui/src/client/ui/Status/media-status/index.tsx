@@ -18,6 +18,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
 import { mapOrFallback, useDebounce } from '../../../lib/lib'
 import { CorelibPubSub } from '@sofie-automation/corelib/dist/pubsub'
+import Form from 'react-bootstrap/Form'
 
 export function MediaStatus(): JSX.Element | null {
 	const scrollBox = useRef<HTMLDivElement>(null)
@@ -71,7 +72,7 @@ export function MediaStatus(): JSX.Element | null {
 		<div className="mhl gutter">
 			<header className="mbs">
 				<div className="media-status-table-search">
-					<input
+					<Form.Control
 						className="media-status-table-search__search-input"
 						type="search"
 						value={filter}

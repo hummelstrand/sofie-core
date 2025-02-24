@@ -28,7 +28,7 @@ function MappingsView(props: Readonly<IMappingsViewProps>): JSX.Element {
 	const { t } = useTranslation()
 
 	return (
-		<div className="mx-5 mt-5">
+		<div className="mx-5">
 			<header className="my-2">
 				<h1>{t('Routed Mappings')}</h1>
 			</header>
