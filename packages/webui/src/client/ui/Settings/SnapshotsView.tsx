@@ -313,7 +313,7 @@ const SnapshotsViewContent = withTranslation()(
 								) : null}
 							</div>
 						</div>
-						<h2 className="my-4">{t('Restore from Snapshot File')}</h2>
+						<h2 className="mb-4">{t('Restore from Snapshot File')}</h2>
 						<div className="mdi">
 							<p className="mhn">
 								<UploadButton
@@ -358,7 +358,7 @@ const SnapshotsViewContent = withTranslation()(
 								</span>
 							</p>
 						</div>
-						<h2 className="my-4">{t('Restore from Stored Snapshots')}</h2>
+						<h2 className="mb-4">{t('Restore from Stored Snapshots')}</h2>
 						<div>
 							<table className="table">
 								<tbody>

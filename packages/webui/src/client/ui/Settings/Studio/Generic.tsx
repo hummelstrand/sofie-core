@@ -71,7 +71,7 @@ export function StudioGenericProperties({ studio }: IStudioGenericPropertiesProp
 
 	return (
 		<div className="properties-grid">
-			<h2 className="my-4">{t('Generic Properties')}</h2>
+			<h2 className="mb-4">{t('Generic Properties')}</h2>
 
 			<label className="field">
 				<LabelActual label={t('Studio Name')} />

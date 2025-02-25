@@ -89,7 +89,7 @@ export function StudioIngestSubDevices({
 
 	return (
 		<div>
-			<h2 className="my-4">
+			<h2 className="mb-4">
 				<Tooltip
 					overlay={t('Ingest devices are needed to create rundowns')}
 					visible={getHelpMode() && !wrappedSubDevices.length}

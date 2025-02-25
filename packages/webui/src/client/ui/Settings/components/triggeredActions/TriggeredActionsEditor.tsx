@@ -401,7 +401,7 @@ export const TriggeredActionsEditor: React.FC<IProps> = function TriggeredAction
 					/>
 				</ErrorBoundary>
 			)}
-			<h2 className="my-4">{t('Action Triggers')}</h2>
+			<h2 className="mb-4">{t('Action Triggers')}</h2>
 			<div className="mod mhn mvn">
 				<input
 					className="form-control input text-input input-m"

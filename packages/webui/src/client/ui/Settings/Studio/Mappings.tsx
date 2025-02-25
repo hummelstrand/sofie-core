@@ -137,7 +137,7 @@ export function StudioMappings({
 
 	return (
 		<div>
-			<h2 className="my-4">{t('Layer Mappings')}</h2>
+			<h2 className="mb-4">{t('Layer Mappings')}</h2>
 			{!manifest ? (
 				<span>{t('Add a playout device to the studio in order to edit the layer mappings')}</span>
 			) : (

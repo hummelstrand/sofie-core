@@ -3,11 +3,30 @@
 .expco {
 	user-select: none;
 
-	&.form-control {
+	&.form-select {
 		display: flex;
+		padding-right: 0.75rem;
 
 		.expco-title {
 			flex-grow: 1;
+		}
+
+		.action-btn.expco-expand {
+			// Derived from the bootstrap styling for dropdowns, but customised to allow the icon to be rotated
+			background-color: var(--bs-body-bg);
+			background-image: var(--bs-form-select-bg-img), var(--bs-form-select-bg-icon, none);
+			background-repeat: no-repeat;
+			background-position: right 0 center;
+			background-size: 16px 12px;
+
+			width: 16px;
+			transform: rotate(180deg);
+		}
+
+		&:not(.expco-expanded) {
+			.action-btn.expco-expand {
+				transform: rotate(0deg);
+			}
 		}
 	}
 
@@ -19,17 +38,6 @@
 		margin: 0.5rem;
 
 		display: flex;
-
-		// .action-btn {
-		// 	position: static;
-
-		// 	.checkbox {
-		// 		.checkbox-checked,
-		// 		.checkbox-unchecked {
-		// 			top: -3px;
-		// 		}
-		// 	}
-		// }
 	}
 
 	.expco-title.focusable-main {
@@ -42,10 +50,8 @@
 		content: ', ';
 	}
 
-	&:not(.expco-expanded) {
-		.action-btn.expco-expand {
-			transform: rotate(180deg);
-		}
+	&.form-select {
+		background: none;
 	}
 
 	&.expco-expanded:not(.expco-popper) {

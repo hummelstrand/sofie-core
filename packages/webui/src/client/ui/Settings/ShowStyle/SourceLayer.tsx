@@ -139,7 +139,7 @@ export function SourceLayerSettings({ showStyleBase }: Readonly<IStudioSourcesSe
 
 	return (
 		<div>
-			<h2 className="my-4">
+			<h2 className="mb-4">
 				<Tooltip
 					overlay={t('Add some source layers (e.g. Graphics) for your data to appear in rundowns')}
 					visible={getHelpMode() && !sortedSourceLayers.length}

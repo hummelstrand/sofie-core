@@ -1,9 +1,6 @@
 import * as React from 'react'
 import _ from 'underscore'
 import ClassNames from 'classnames'
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheckSquare, faSquare, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { Manager, Reference, Popper } from 'react-popper'
 import Form from 'react-bootstrap/esm/Form'
 
@@ -203,7 +200,7 @@ export class MultiSelect extends React.Component<IProps, IState> {
 						<div
 							ref={(r) => this.setTitleRef(r, ref)}
 							className={ClassNames(
-								'expco form-control',
+								'expco form-select',
 								{
 									'expco-expanded': this.state.expanded,
 									disabled: this.props.disabled,
@@ -212,18 +209,18 @@ export class MultiSelect extends React.Component<IProps, IState> {
 							)}
 							tabIndex={-1}
 							onBlur={this.onBlur}
+							onClick={this.toggleExpco}
 						>
 							<div
 								className={ClassNames('expco-title', {
 									'title-placeholder': !simpleSummary,
 								})}
-								onClick={this.toggleExpco}
 								title={simpleSummary || this.props.placeholder || ''}
 							>
 								{this.generateRichSummary() || this.props.placeholder || ''}
 							</div>
 							<a className="action-btn right expco-expand" onClick={this.toggleExpco}>
-								<FontAwesomeIcon icon={faChevronUp} />
+								&nbsp;
 							</a>
 						</div>
 					)}

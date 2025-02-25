@@ -22,7 +22,7 @@ export function StudioPackageManagerSettings({ studio }: StudioPackageManagerSet
 
 	return (
 		<div className="settings-studio-package-containers">
-			<h2 className="my-4">{t('Package Manager')}</h2>
+			<h2 className="mb-4">{t('Package Manager')}</h2>
 
 			<h3 className="my-2">{t('Studio Settings')}</h3>
 

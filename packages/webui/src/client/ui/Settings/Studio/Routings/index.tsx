@@ -41,7 +41,7 @@ export function StudioRoutings({
 
 	return (
 		<div>
-			<h2 className="my-4">{t('Route Sets')}</h2>
+			<h2 className="mb-4">{t('Route Sets')}</h2>
 			{!manifest && <span>{t('Add a playout device to the studio in order to configure the route sets')}</span>}
 			{manifest && (
 				<>

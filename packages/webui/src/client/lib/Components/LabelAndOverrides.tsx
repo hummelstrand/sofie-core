@@ -61,12 +61,12 @@ export function LabelAndOverrides<T extends object, TValue = any>({
 		} else if (defaultValue === true) {
 			displayValue = 'true'
 		} else if (!defaultValue) {
-			displayValue = '""'
+			displayValue = ''
 		} else if (Array.isArray(defaultValue) || typeof defaultValue === 'object') {
 			displayValue = JSON.stringify(defaultValue) || ''
 		} else {
 			// Display it as a string
-			displayValue = `"${defaultValue}"`
+			displayValue = `${defaultValue}`
 		}
 	}
 

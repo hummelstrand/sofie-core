@@ -226,7 +226,7 @@ export const HotkeyLegendSettings = withTranslation()(
 			const { t } = this.props
 			return (
 				<div>
-					<h2 className="my-4">{t('Custom Hotkey Labels')}</h2>
+					<h2 className="mb-4">{t('Custom Hotkey Labels')}</h2>
 					<table className="expando settings-studio-custom-config-table">
 						<tbody>{this.renderItems()}</tbody>
 					</table>

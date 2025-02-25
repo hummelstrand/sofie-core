@@ -330,7 +330,7 @@ export const ShowStyleVariantsSettings = ({
 
 	return (
 		<div>
-			<h2 className="my-4">{t('Show Style Variants')}</h2>
+			<h2 className="mb-4">{t('Show Style Variants')}</h2>
 			<div>
 				<table className="table expando settings-studio-showStyleVariants-table">
 					{localVariants.map((variant: DBShowStyleVariant) => (

@@ -57,7 +57,7 @@ export function ShowStyleBaseBlueprintConfigurationSettings(
 
 	return (
 		<>
-			<h2 className="my-4">{t('Blueprint Configuration')}</h2>
+			<h2 className="mb-4">{t('Blueprint Configuration')}</h2>
 
 			<div className="properties-grid">
 				<SelectBlueprint showStyleBase={props.showStyleBase} />

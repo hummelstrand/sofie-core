@@ -572,7 +572,7 @@ const RundownLayoutEditorContent = withTranslation()(
 		render(): JSX.Element {
 			return (
 				<div className="studio-edit rundown-layout-editor">
-					<h2 className="my-4">{this.props.customRegion.title}</h2>
+					<h2 className="mb-4">{this.props.customRegion.title}</h2>
 					<table className="expando settings-studio-rundown-layouts-table">
 						<tbody>{this.renderItems()}</tbody>
 					</table>

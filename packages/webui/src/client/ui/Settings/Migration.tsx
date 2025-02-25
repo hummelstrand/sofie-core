@@ -300,7 +300,7 @@ export const MigrationView = translateWithTracker<IProps, IState, ITrackedProps>
 						</div>
 						{this.state.migrationNeeded && this.state.migration ? (
 							<div>
-								<h2 className="my-4">{t('Migrate database')}</h2>
+								<h2 className="mb-4">{t('Migrate database')}</h2>
 
 								<p className="mhn mvs">
 									{t(
@@ -390,7 +390,7 @@ export const MigrationView = translateWithTracker<IProps, IState, ITrackedProps>
 
 								{this.state.warnings.length ? (
 									<div>
-										<h2 className="my-4">{t('Warnings During Migration')}</h2>
+										<h2 className="mb-4">{t('Warnings During Migration')}</h2>
 										<ul>
 											{_.map(this.state.warnings, (warning, key) => {
 												return (

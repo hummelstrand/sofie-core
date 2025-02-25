@@ -86,7 +86,7 @@ export function StudioInputSubDevices({ studioId, studioDevices }: Readonly<Stud
 
 	return (
 		<div>
-			<h2 className="my-4">
+			<h2 className="mb-4">
 				<Tooltip
 					overlay={t('Input devices allow you to trigger Sofie actions remotely')}
 					visible={getHelpMode() && !wrappedSubDevices.length}

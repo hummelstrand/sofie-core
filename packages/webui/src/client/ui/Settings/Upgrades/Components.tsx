@@ -276,7 +276,7 @@ export function UpgradeStatusButtons({ upgradeResult }: Readonly<UpgradeStatusBu
 	return (
 		<>
 			<Button
-				variant="light"
+				variant="outline-secondary"
 				className="me-2"
 				onClick={clickShowChanges}
 				disabled={!!upgradeResult.invalidReason || upgradeResult.changes.length === 0}
@@ -284,7 +284,12 @@ export function UpgradeStatusButtons({ upgradeResult }: Readonly<UpgradeStatusBu
 				<FontAwesomeIcon icon={faEye} className="me-2" />
 				<span>{t('Show config changes')}</span>
 			</Button>
-			<Button variant="light" className="me-2" onClick={clickValidate} disabled={!!upgradeResult.invalidReason}>
+			<Button
+				variant="outline-secondary"
+				className="me-2"
+				onClick={clickValidate}
+				disabled={!!upgradeResult.invalidReason}
+			>
 				<FontAwesomeIcon icon={faDatabase} className="me-2" />
 				<span>{t('Validate and Apply Config')}</span>
 			</Button>
@@ -348,19 +353,25 @@ export function SystemUpgradeStatusButtons({ upgradeResult }: Readonly<SystemUpg
 	}, [upgradeResult])
 
 	return (
-		<div className="mod mhn mvm">
-			<button
-				className="btn mrm"
+		<>
+			<Button
+				variant="outline-secondary"
+				className="me-2"
 				onClick={clickShowChanges}
 				disabled={!!upgradeResult.invalidReason || upgradeResult.changes.length === 0}
 			>
 				<FontAwesomeIcon icon={faEye} />
 				<span>{t('Show config changes')}</span>
-			</button>
-			<button className="btn mrm" onClick={clickApply} disabled={!!upgradeResult.invalidReason}>
+			</Button>
+			<Button
+				variant="outline-secondary"
+				className="me-2"
+				onClick={clickApply}
+				disabled={!!upgradeResult.invalidReason}
+			>
 				<FontAwesomeIcon icon={faDatabase} />
 				<span>{t('Apply Config')}</span>
-			</button>
-		</div>
+			</Button>
+		</>
 	)
 }

@@ -1,9 +1,6 @@
 import React, { useState, ReactNode, useCallback } from 'react'
 import ClassNames from 'classnames'
 
-import { faChevronUp } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-
 interface IProps {
 	selectedKey: string
 	className?: string
@@ -46,7 +43,7 @@ export function SplitDropdown(props: Readonly<IProps>): JSX.Element {
 		>
 			<div className="expco-title focusable-main">{getSelected()}</div>
 			<div className="action-btn right expco-expand subtle" onClick={toggleExpco}>
-				<FontAwesomeIcon icon={faChevronUp} />
+				&nbsp;
 			</div>
 			<div className="expco-body bd">
 				{props.options?.map((child, index) => (
