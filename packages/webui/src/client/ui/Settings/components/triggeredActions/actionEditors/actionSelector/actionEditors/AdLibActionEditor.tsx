@@ -41,7 +41,7 @@ export function AdLibActionEditor({
 		<>
 			<div className="mts">
 				<ToggleSwitchControl
-					classNames={'form-control'}
+					classNames="mb-2"
 					value={!!action.arguments}
 					label={t('Use Trigger Mode')}
 					handleUpdate={(newVal) => {

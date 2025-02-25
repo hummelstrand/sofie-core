@@ -8,6 +8,7 @@ import { sameWidth } from '../../../../../../lib/popperUtils'
 import { catchError } from '../../../../../../lib/lib'
 import { preventOverflow } from '@popperjs/core'
 import { DropdownInputControl, getDropdownInputOptions } from '../../../../../../lib/Components/DropdownInput'
+import Button from 'react-bootstrap/esm/Button'
 
 interface IProps {
 	fieldLabel: string
@@ -98,43 +99,43 @@ export const FilterEditor: React.FC<IProps> = function FilterEditor(props: IProp
 					{...attributes.popper}
 				>
 					{props.description && <p className="man">{props.description}</p>}
-					<div>
-						<DropdownInputControl
-							classNames="input text-input input-m"
-							value={props.field}
-							options={getDropdownInputOptions(props.fields)}
-							// placeholder={props.fieldLabel}
-							handleUpdate={(newVal) => props.onChangeField(newVal)}
-						/>
-					</div>
-					<div>
-						<EditAttribute
-							className={props.type === 'toggle' ? 'form-control' : 'form-control input text-input input-m'}
-							modifiedClassName="bghl"
-							type={props.type}
-							label={props.valueLabel}
-							options={props.values}
-							overrideDisplayValue={typeof props.value === 'number' ? String(props.value) : props.value}
-							attribute={''}
-							updateFunction={(_e, newVal) => props.onChange(newVal)}
-						/>
-					</div>
-					<div className="mts">
-						{!props.final ? (
-							<button
-								className="btn right btn-tight btn-primary"
-								onClick={() => props.onInsertNext && props.onInsertNext(index)}
-							>
-								<FontAwesomeIcon icon={faAngleRight} />
-							</button>
-						) : (
-							<button className="btn right btn-tight btn-primary" onClick={() => props.onClose(index)}>
-								<FontAwesomeIcon icon={faCheck} />
-							</button>
-						)}
-						<button className="btn btn-tight btn-secondary" onClick={() => props.onRemove && props.onRemove(index)}>
-							<FontAwesomeIcon icon={faTrash} />
-						</button>
+
+					<DropdownInputControl
+						classNames="input text-input input-m mb-2"
+						value={props.field}
+						options={getDropdownInputOptions(props.fields)}
+						// placeholder={props.fieldLabel}
+						handleUpdate={(newVal) => props.onChangeField(newVal)}
+					/>
+
+					<EditAttribute
+						className={props.type === 'toggle' ? 'mb-2' : 'input text-input input-m mb-2'}
+						modifiedClassName="bghl"
+						type={props.type}
+						label={props.valueLabel}
+						options={props.values}
+						overrideDisplayValue={typeof props.value === 'number' ? String(props.value) : props.value}
+						attribute={''}
+						updateFunction={(_e, newVal) => props.onChange(newVal)}
+					/>
+
+					<div className="grid-buttons-right">
+						<div>
+							<Button variant="outline-secondary" size="sm" onClick={() => props.onRemove && props.onRemove(index)}>
+								<FontAwesomeIcon icon={faTrash} />
+							</Button>
+						</div>
+						<div>
+							{!props.final ? (
+								<Button variant="primary" size="sm" onClick={() => props.onInsertNext && props.onInsertNext(index)}>
+									<FontAwesomeIcon icon={faAngleRight} />
+								</Button>
+							) : (
+								<Button variant="primary" size="sm" onClick={() => props.onClose(index)}>
+									<FontAwesomeIcon icon={faCheck} />
+								</Button>
+							)}
+						</div>
 					</div>
 				</div>
 			) : null}

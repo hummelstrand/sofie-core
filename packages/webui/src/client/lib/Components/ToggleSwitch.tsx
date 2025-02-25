@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react'
-import ClassNames from 'classnames'
+import Form from 'react-bootstrap/esm/Form'
 
 interface IToggleSwitchControlProps {
 	classNames?: string
@@ -27,24 +27,13 @@ export function ToggleSwitchControl({
 	}, [handleUpdate, disabled])
 
 	return (
-		<div className="mvs">
-			<a
-				className={ClassNames('switch-button', 'mrs', classNames, disabled ? 'disabled' : '', {
-					'sb-on': value,
-				})}
-				role="button"
-				onClick={handleChange}
-				tabIndex={0}
-			>
-				<div className="sb-content">
-					<div className="sb-label">
-						<span className="mls">&nbsp;</span>
-						<span className="mrs right">&nbsp;</span>
-					</div>
-					<div className="sb-switch"></div>
-				</div>
-			</a>
-			<span>{label}</span>
-		</div>
+		<Form.Check
+			type="switch"
+			className={classNames}
+			disabled={disabled}
+			onClick={handleChange}
+			checked={value}
+			label={label}
+		/>
 	)
 }

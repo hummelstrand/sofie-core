@@ -16,6 +16,7 @@ import { ToggleSwitchControl } from '../../../../../../lib/Components/ToggleSwit
 import { DropdownInputControl, DropdownInputOption } from '../../../../../../lib/Components/DropdownInput'
 import { IntInputControl } from '../../../../../../lib/Components/IntInput'
 import { SwitchRouteSetEditor } from './actionEditors/SwitchRouteSetEditor'
+import Button from 'react-bootstrap/esm/Button'
 
 interface IProps {
 	action: SomeAction
@@ -226,7 +227,7 @@ function getActionParametersEditor(
 			return (
 				<div className="mts">
 					<ToggleSwitchControl
-						classNames={'form-control'}
+						classNames="mb-2"
 						value={action.rehearsal}
 						label={t('Rehearsal')}
 						handleUpdate={(newVal) => {
@@ -238,7 +239,7 @@ function getActionParametersEditor(
 					/>
 
 					<ToggleSwitchControl
-						classNames={'form-control'}
+						classNames="mb-2"
 						value={!!action.force}
 						label={t('Force (deactivate others)')}
 						handleUpdate={(newVal) => {
@@ -264,7 +265,7 @@ function getActionParametersEditor(
 			return (
 				<div className="mts">
 					<ToggleSwitchControl
-						classNames={'form-control'}
+						classNames="mb-2"
 						value={!!action.undo}
 						label={t('Undo')}
 						handleUpdate={(newVal) => {
@@ -280,7 +281,7 @@ function getActionParametersEditor(
 			return (
 				<div className="mts">
 					<ToggleSwitchControl
-						classNames={'form-control'}
+						classNames="mb-2"
 						value={!!action.undo}
 						label={t('Undo')}
 						handleUpdate={(newVal) => {
@@ -297,7 +298,7 @@ function getActionParametersEditor(
 				<div className="mts">
 					<label className="block">{t('Move Segments')}</label>
 					<IntInputControl
-						classNames="input text-input input-m"
+						classNames="input text-input input-m mb-2"
 						modifiedClassName="bghl"
 						value={action.segments}
 						placeholder={t('By Segments')}
@@ -310,7 +311,7 @@ function getActionParametersEditor(
 					/>
 					<label className="block">{t('Move Parts')}</label>
 					<IntInputControl
-						classNames="input text-input input-m"
+						classNames="input text-input input-m mb-2"
 						modifiedClassName="bghl"
 						value={action.parts}
 						placeholder={t('By Parts')}
@@ -323,7 +324,7 @@ function getActionParametersEditor(
 					/>
 
 					<ToggleSwitchControl
-						classNames={'form-control'}
+						classNames="mb-2"
 						value={!!action.ignoreQuickLoop}
 						label={t('Ignore QuickLoop')}
 						handleUpdate={(newVal) => {
@@ -348,7 +349,7 @@ function getActionParametersEditor(
 				<div className="mts">
 					<label className="block">{t('State')}</label>
 					<DropdownInputControl<typeof action.state>
-						classNames="input text-input input-m"
+						classNames="input text-input input-m mb-2"
 						value={action.state}
 						// placholder={t('State')}
 						options={[
@@ -385,7 +386,7 @@ function getActionParametersEditor(
 			return (
 				<div className="mts">
 					<ToggleSwitchControl
-						classNames={'form-control'}
+						classNames="mb-2"
 						value={!!action.on}
 						label={t('On')}
 						handleUpdate={(newVal) => {
@@ -401,7 +402,7 @@ function getActionParametersEditor(
 			return (
 				<div className="mts">
 					<ToggleSwitchControl
-						classNames={'form-control'}
+						classNames="mb-2"
 						value={!!action.forward}
 						label={t('Forward')}
 						handleUpdate={(newVal) => {
@@ -418,7 +419,7 @@ function getActionParametersEditor(
 				<div className="mts">
 					<label className="block">{t('Register ID')}</label>
 					<IntInputControl
-						classNames="input text-input input-m"
+						classNames="input text-input input-m mb-2"
 						modifiedClassName="bghl"
 						value={action.register}
 						handleUpdate={(newVal) =>
@@ -431,7 +432,7 @@ function getActionParametersEditor(
 
 					<label className="block">{t('Operation')}</label>
 					<DropdownInputControl<typeof action.operation>
-						classNames="input text-input input-m"
+						classNames="input text-input input-m mb-2"
 						value={action.operation}
 						options={[
 							{
@@ -460,7 +461,7 @@ function getActionParametersEditor(
 
 					<label className="block">{t('Value')}</label>
 					<IntInputControl
-						classNames="input text-input input-m"
+						classNames="input text-input input-m mb-2"
 						modifiedClassName="bghl"
 						value={action.value}
 						handleUpdate={(newVal) =>
@@ -472,7 +473,7 @@ function getActionParametersEditor(
 					/>
 					<label className="block">{t('Minimum register limit')}</label>
 					<IntInputControl
-						classNames="input text-input input-m"
+						classNames="input text-input input-m mb-2"
 						modifiedClassName="bghl"
 						value={action.limitMin}
 						handleUpdate={(newVal) =>
@@ -484,7 +485,7 @@ function getActionParametersEditor(
 					/>
 					<label className="block">{t('Maximum register limit')}</label>
 					<IntInputControl
-						classNames="input text-input input-m"
+						classNames="input text-input input-m mb-2"
 						modifiedClassName="bghl"
 						value={action.limitMax}
 						handleUpdate={(newVal) =>
@@ -579,20 +580,19 @@ export const ActionSelector = function ActionSelector({
 					style={styles.popper}
 					{...attributes.popper}
 				>
-					<div>
-						<DropdownInputControl
-							classNames="input text-input input-m"
-							value={action.action}
-							options={getAvailableActions(t)}
-							// placeholder={t('Action')}
-							handleUpdate={(newVal) =>
-								onChange({
-									...action,
-									action: newVal as any,
-								})
-							}
-						/>
-					</div>
+					<DropdownInputControl
+						classNames="input text-input input-m mb-2"
+						value={action.action}
+						options={getAvailableActions(t)}
+						// placeholder={t('Action')}
+						handleUpdate={(newVal) =>
+							onChange({
+								...action,
+								action: newVal as any,
+							})
+						}
+					/>
+
 					{getActionParametersEditor(t, action, (newVal: Partial<typeof action>) => {
 						onChange({
 							...action,
@@ -600,19 +600,25 @@ export const ActionSelector = function ActionSelector({
 							...(newVal as any),
 						})
 					})}
-					<div className="mts">
-						<button className="btn btn-tight btn-secondary" onClick={onRemove}>
-							<FontAwesomeIcon icon={faTrash} />
-						</button>
-						<button
-							className="btn right btn-tight btn-primary"
-							onClick={() => {
-								onClose && onClose()
-								onSetFilter && onSetFilter()
-							}}
-						>
-							<FontAwesomeIcon icon={faAngleRight} />
-						</button>
+
+					<div className="grid-buttons-right">
+						<div>
+							<Button variant="outline-secondary" size="sm" onClick={onRemove}>
+								<FontAwesomeIcon icon={faTrash} />
+							</Button>
+						</div>
+						<div>
+							<Button
+								variant="primary"
+								size="sm"
+								onClick={() => {
+									onClose && onClose()
+									onSetFilter && onSetFilter()
+								}}
+							>
+								<FontAwesomeIcon icon={faAngleRight} />
+							</Button>
+						</div>
 					</div>
 				</div>
 			) : null}

@@ -1,0 +1,202 @@
+.header-clear {
+	padding-top: 4rem;
+	padding-right: $statusbar-width;
+}
+
+ul {
+	margin: 20px;
+	padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: 300;
+	color: var(--bs-body-color);
+}
+
+h1,
+.h1 {
+	letter-spacing: -0.03em;
+	font-size: 3rem;
+	line-height: 1.2;
+}
+
+h2,
+.h2 {
+	letter-spacing: -0.03em;
+	font-size: 1.5rem;
+	line-height: 1.5;
+}
+
+h3,
+.h3 {
+	font-size: 0.875rem;
+	text-transform: uppercase;
+	font-weight: bold;
+	line-height: 1.5rem;
+	letter-spacing: 0.6px;
+}
+
+h4,
+.h4 {
+	font-size: 0.875rem;
+	text-transform: uppercase;
+	font-weight: normal;
+	line-height: 1.5rem;
+	letter-spacing: 0.5px;
+}
+
+h5,
+.h5,
+.text-s,
+.text-s p,
+.text-s .mod,
+.text-s .table,
+.text-s .action-btn,
+.switch,
+.pill,
+.pills .action-btn,
+.notification,
+.tooltip,
+.btn,
+.btn-tight {
+	font-weight: 300;
+}
+
+p,
+center,
+.table {
+	font-weight: 300;
+}
+
+header {
+	font-weight: 700;
+}
+
+.flex-row {
+	display: flex;
+	justify-content: flex-start;
+	align-items: flex-start;
+	flex-direction: row;
+}
+
+.action-btn {
+	font-size: 0.875rem;
+	cursor: pointer;
+	background: transparent;
+	color: #636363;
+	border: none;
+	display: inline-block;
+	padding: 0;
+	text-decoration: none;
+	vertical-align: baseline;
+	transition: color 0.2s;
+}
+.action-btn .icon {
+	fill: #737373;
+}
+
+.dimmed,
+:link .dimmed,
+:visited .dimmed {
+	color: #9f9f9f;
+}
+
+.pill {
+	background: #252627;
+	border: 1px solid #252627;
+	border-radius: 1rem;
+	color: #ffffff;
+	display: inline-block;
+	line-height: 2;
+	margin: -4px 10px -4px 0;
+	padding: 0 0.5rem;
+
+	a:not(:hover) {
+		text-decoration: none;
+		color: inherit;
+	}
+	a:hover {
+		color: inherit;
+	}
+}
+
+.selectable {
+	border-left: 4px solid transparent;
+	overflow: hidden;
+	display: block;
+	text-decoration: inherit;
+
+	padding: 0.25rem;
+
+	h3,
+	h4 {
+		margin: 0;
+	}
+
+	&:hover,
+	&:active {
+		text-decoration: inherit;
+	}
+}
+
+.selectable-selected {
+	background: #e0e3e4;
+	border-left-color: #1769ff;
+}
+
+/**
+ * Expandos can contain other tables, need to be very specific to avoid
+ * cascading styles (ba-dam-pish!)
+ */
+.expando {
+	border-bottom: 1px solid #ddd;
+}
+
+.expando > tbody > tr > th,
+.expando > tbody > tr > td {
+	background: #f0f0f0;
+	border-top: 1px solid #ddd;
+	padding: 9px 5px 8px 10px;
+}
+
+.expando-tight > tbody > tr > th,
+.expando-tight > tbody > tr > td {
+	padding-bottom: 5px;
+	padding-top: 7px;
+}
+
+.expando > tbody > tr:hover th,
+.expando > tbody > tr:hover td {
+	background: #fff;
+	color: #252627;
+}
+
+.expando tr.hl th,
+.expando tr.hl td {
+	background: #fff;
+}
+
+.expando .expando-details th,
+.expando .expando-details td {
+	border-top: none;
+	padding: 0.5rem;
+}
+
+.expando-details p:first-child {
+	margin-top: 0;
+}
+
+.expando .expando-addon td,
+.expando .expando-addon th {
+	border-top: none;
+	padding: 0;
+}
+
+.expco {
+	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+}
