@@ -3,25 +3,37 @@
 .expco {
 	user-select: none;
 
+	&.form-control {
+		display: flex;
+
+		.expco-title {
+			flex-grow: 1;
+		}
+	}
+
 	.expco-expand.action-btn {
 		top: 10px;
 	}
 
 	.expco-body .expco-item {
-		.action-btn {
-			position: static;
+		margin: 0.5rem;
 
-			.checkbox {
-				.checkbox-checked,
-				.checkbox-unchecked {
-					top: -3px;
-				}
-			}
-		}
+		display: flex;
+
+		// .action-btn {
+		// 	position: static;
+
+		// 	.checkbox {
+		// 		.checkbox-checked,
+		// 		.checkbox-unchecked {
+		// 			top: -3px;
+		// 		}
+		// 	}
+		// }
 	}
 
 	.expco-title.focusable-main {
-		&.placeholder {
+		&.title-placeholder {
 			color: #bbb;
 		}
 	}

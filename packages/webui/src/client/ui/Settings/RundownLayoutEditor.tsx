@@ -577,11 +577,11 @@ const RundownLayoutEditorContent = withTranslation()(
 						<tbody>{this.renderItems()}</tbody>
 					</table>
 					<div className="my-1 mx-2">
-						<button className="btn btn-primary" onClick={this.onAddLayout}>
+						<button className="btn btn-primary mx-1" onClick={this.onAddLayout}>
 							<FontAwesomeIcon icon={faPlus} />
 						</button>
 						<UploadButton
-							className="btn btn-secondary mls"
+							className="btn btn-secondary mx-1"
 							onChange={(e) => this.onUploadFile(e)}
 							accept="application/json,.json"
 						>

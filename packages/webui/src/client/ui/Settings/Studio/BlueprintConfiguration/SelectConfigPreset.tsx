@@ -37,16 +37,7 @@ export function SelectConfigPreset({ studio, blueprint }: Readonly<SelectConfigP
 	return (
 		<label className="field">
 			<LabelActual label={t('Blueprint config preset')} />
-			{!studio.blueprintConfigPresetId && (
-				<div className="error-notice inline">
-					{t('Blueprint config preset not set')} <FontAwesomeIcon icon={faExclamationTriangle} />
-				</div>
-			)}
-			{studio.blueprintConfigPresetIdUnlinked && studio.blueprintConfigPresetId && (
-				<div className="error-notice inline">
-					{t('Blueprint config preset is missing')} <FontAwesomeIcon icon={faExclamationTriangle} />
-				</div>
-			)}
+
 			<EditAttribute
 				modifiedClassName="bghl"
 				attribute="blueprintConfigPresetId"
@@ -58,6 +49,18 @@ export function SelectConfigPreset({ studio, blueprint }: Readonly<SelectConfigP
 				collection={Studios}
 				className="input text-input input-l"
 			/>
+			<div>
+				{!studio.blueprintConfigPresetId && (
+					<div className="error-notice inline">
+						{t('Blueprint config preset not set')} <FontAwesomeIcon icon={faExclamationTriangle} />
+					</div>
+				)}
+				{studio.blueprintConfigPresetIdUnlinked && studio.blueprintConfigPresetId && (
+					<div className="error-notice inline">
+						{t('Blueprint config preset is missing')} <FontAwesomeIcon icon={faExclamationTriangle} />
+					</div>
+				)}
+			</div>
 		</label>
 	)
 }

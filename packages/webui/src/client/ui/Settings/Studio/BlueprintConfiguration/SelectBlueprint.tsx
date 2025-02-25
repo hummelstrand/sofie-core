@@ -49,11 +49,6 @@ export function SelectBlueprint({ studio }: Readonly<SelectBlueprintProps>): JSX
 	return (
 		<label className="field">
 			<LabelActual label={t('Blueprint')} />
-			{!studio.blueprintId ? (
-				<div className="error-notice inline">
-					{t('Blueprint not set')} <FontAwesomeIcon icon={faExclamationTriangle} />
-				</div>
-			) : null}
 
 			<EditAttribute
 				modifiedClassName="bghl"
@@ -66,7 +61,13 @@ export function SelectBlueprint({ studio }: Readonly<SelectBlueprintProps>): JSX
 				collection={Studios}
 				className="input text-input input-l"
 			/>
-			<div></div>
+			<div>
+				{!studio.blueprintId ? (
+					<div className="error-notice inline">
+						{t('Blueprint not set')} <FontAwesomeIcon icon={faExclamationTriangle} />
+					</div>
+				) : null}
+			</div>
 			<div>
 				<RedirectToBlueprintButton id={studio.blueprintId} />
 			</div>

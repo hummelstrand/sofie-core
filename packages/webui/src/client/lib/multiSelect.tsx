@@ -5,6 +5,7 @@ import ClassNames from 'classnames'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare, faSquare, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { Manager, Reference, Popper } from 'react-popper'
+import Form from 'react-bootstrap/esm/Form'
 
 export interface MultiSelectEvent {
 	selectedValues: Array<string>
@@ -181,25 +182,15 @@ export class MultiSelect extends React.Component<IProps, IState> {
 
 	private renderOption = (value: string, key: string, className: string | undefined) => {
 		return (
-			<p className="expco-item" key={key}>
-				<label className={ClassNames('action-btn', className)}>
-					<span className="checkbox">
-						<input
-							type="checkbox"
-							className="form-control"
-							checked={this.isChecked(key)}
-							onChange={() => this.handleChange(key)}
-						/>
-						<span className="checkbox-checked">
-							<FontAwesomeIcon icon={faCheckSquare} />
-						</span>
-						<span className="checkbox-unchecked">
-							<FontAwesomeIcon icon={faSquare} />
-						</span>
-					</span>
-					{value}
-				</label>
-			</p>
+			<div className="expco-item" key={key}>
+				<Form.Check
+					className={ClassNames(className)}
+					checked={this.isChecked(key)}
+					onChange={() => this.handleChange(key)}
+					id={`multiseelct-${value}`}
+					label={value}
+				/>
+			</div>
 		)
 	}
 
@@ -212,7 +203,7 @@ export class MultiSelect extends React.Component<IProps, IState> {
 						<div
 							ref={(r) => this.setTitleRef(r, ref)}
 							className={ClassNames(
-								'expco subtle',
+								'expco form-control',
 								{
 									'expco-expanded': this.state.expanded,
 									disabled: this.props.disabled,
@@ -224,14 +215,14 @@ export class MultiSelect extends React.Component<IProps, IState> {
 						>
 							<div
 								className={ClassNames('expco-title', {
-									placeholder: !simpleSummary,
+									'title-placeholder': !simpleSummary,
 								})}
 								onClick={this.toggleExpco}
 								title={simpleSummary || this.props.placeholder || ''}
 							>
 								{this.generateRichSummary() || this.props.placeholder || ''}
 							</div>
-							<a className="action-btn right expco-expand subtle" onClick={this.toggleExpco}>
+							<a className="action-btn right expco-expand" onClick={this.toggleExpco}>
 								<FontAwesomeIcon icon={faChevronUp} />
 							</a>
 						</div>
@@ -260,7 +251,7 @@ export class MultiSelect extends React.Component<IProps, IState> {
 								style={style}
 								data-placement={placement}
 								className={ClassNames(
-									'expco subtle expco-popper dropdown',
+									'expco expco-popper dropdown',
 									{
 										'expco-expanded': this.state.expanded,
 									},
