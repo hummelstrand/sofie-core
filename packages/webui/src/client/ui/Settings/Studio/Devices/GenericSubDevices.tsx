@@ -318,7 +318,7 @@ function SubDeviceEditRow({
 						<SubDeviceEditForm peripheralDevice={peripheralDevice} item={item} overrideHelper={overrideHelper} />
 					)}
 				</div>
-				<div className="mod alright">
+				<div className="m-1 me-2 text-end">
 					<button className={classNames('btn btn-primary')} onClick={finishEditItem}>
 						<FontAwesomeIcon icon={faCheck} />
 					</button>

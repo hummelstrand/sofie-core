@@ -67,7 +67,7 @@ export function AccessorsTable({ packageContainer, overrideHelper }: AccessorsTa
 					))
 				)}
 			</table>
-			<div className="mod mhs">
+			<div className="my-1 mx-2">
 				<button className="btn btn-primary" onClick={addNewAccessor}>
 					<FontAwesomeIcon icon={faPlus} />
 				</button>

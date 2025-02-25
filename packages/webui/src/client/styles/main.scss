@@ -83,7 +83,7 @@ input {
 // @import 'shelf/textLabelPanel';
 // @import 'shelf/timeOfDayPanel';
 
-// @import '../lib/forms/SchemaFormTable/ObjectTable.scss';
+@import '../lib/forms/SchemaFormTable/ObjectTable.scss';
 // @import '../lib/Components/PromiseButton.scss';
 // @import '../lib/VideoPreviewPlayer.scss';
 // @import '../ui/ClipTrimPanel/ClipTrimPanel.scss';
@@ -93,7 +93,7 @@ input {
 // @import '../ui/SegmentStoryboard/SegmentStoryboard.scss';
 // @import '../ui/SegmentStoryboard/StoryboardPartSecondaryPieces/StoryboardPartSecondaryPieces.scss';
 // @import '../ui/Settings/components/triggeredActions/TriggeredActionsEditor.scss';
-// @import '../ui/Settings/Forms.scss';
+@import '../ui/Settings/Forms.scss';
 // @import '../ui/SegmentTimeline/SegmentTimeline.scss';
 @import '../ui/Status/media-status/MediaStatusListItem.scss';
 @import '../ui/Status/media-status/MediaStatusList.scss';
@@ -373,3 +373,51 @@ header {
 // 		}
 // 	}
 // }
+
+/**
+ * Expandos can contain other tables, need to be very specific to avoid
+ * cascading styles (ba-dam-pish!)
+ */
+.expando {
+	border-bottom: 1px solid #ddd;
+}
+
+.expando > tbody > tr > th,
+.expando > tbody > tr > td {
+	background: #f0f0f0;
+	border-top: 1px solid #ddd;
+	padding: 9px 5px 8px 10px;
+}
+
+.expando-tight > tbody > tr > th,
+.expando-tight > tbody > tr > td {
+	padding-bottom: 5px;
+	padding-top: 7px;
+}
+
+.expando > tbody > tr:hover th,
+.expando > tbody > tr:hover td {
+	background: #fff;
+	color: #252627;
+}
+
+.expando tr.hl th,
+.expando tr.hl td {
+	background: #fff;
+}
+
+.expando .expando-details th,
+.expando .expando-details td {
+	border-top: none;
+	padding: 0.5rem;
+}
+
+.expando-details p:first-child {
+	margin-top: 0;
+}
+
+.expando .expando-addon td,
+.expando .expando-addon th {
+	border-top: none;
+	padding: 0;
+}

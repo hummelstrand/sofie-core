@@ -208,7 +208,7 @@ export function ModalDialog({
 										className={ClassNames(
 											'mod',
 											{
-												alright: !secondaryText,
+												'text-end': !secondaryText,
 											},
 											'modal-dialog-actions'
 										)}

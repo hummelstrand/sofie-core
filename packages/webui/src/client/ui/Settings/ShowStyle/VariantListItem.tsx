@@ -227,7 +227,7 @@ export const VariantListItem = ({
 									/>
 								</div>
 							</div>
-							<div className="mod alright">
+							<div className="m-1 me-2 text-end">
 								<button className="btn btn-primary" onClick={() => onFinishEdit(showStyleVariant._id)}>
 									<FontAwesomeIcon icon={faCheck} />
 								</button>

@@ -401,7 +401,7 @@ export const TriggeredActionsEditor: React.FC<IProps> = function TriggeredAction
 					/>
 				</ErrorBoundary>
 			)}
-			<h2 className="mhn">{t('Action Triggers')}</h2>
+			<h2 className="my-4">{t('Action Triggers')}</h2>
 			<div className="mod mhn mvn">
 				<input
 					className="form-control input text-input input-m"
@@ -477,7 +477,7 @@ export const TriggeredActionsEditor: React.FC<IProps> = function TriggeredAction
 					</div>
 				</>
 			) : null}
-			<div className="mod mhs">
+			<div className="my-1 mx-2">
 				<Tooltip overlay={t('Add Action Trigger')} placement="top">
 					<button className="btn btn-primary" onClick={onNewTriggeredAction}>
 						<FontAwesomeIcon icon={faPlus} />

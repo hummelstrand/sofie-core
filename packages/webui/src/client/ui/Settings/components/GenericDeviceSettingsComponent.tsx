@@ -28,7 +28,7 @@ export function GenericDeviceSettingsComponent({
 
 			{Object.keys(device.configManifest.subdeviceManifest ?? {}).length > 0 && (
 				<>
-					<h2 className="mhn">{t('Attached Subdevices')}</h2>
+					<h2 className="my-4">{t('Attached Subdevices')}</h2>
 
 					{(!subDevices || subDevices.length === 0) && <p>{t('There are no sub-devices for this gateway')}</p>}
 

@@ -1,4 +1,4 @@
-import { faSync } from '@fortawesome/free-solid-svg-icons'
+import { faQuestionCircle, faSync } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { objectPathGet } from '@sofie-automation/corelib/dist/lib'
 import React, { useCallback } from 'react'
@@ -7,6 +7,7 @@ import { ReadonlyDeep } from 'type-fest'
 import { OverrideOpHelperForItemContents, WrappedOverridableItemNormal } from '../../ui/Settings/util/OverrideOpHelper'
 import { DropdownInputOption, findOptionByValue } from './DropdownInput'
 import { hasOpWithPath } from './util'
+import Button from 'react-bootstrap/Button'
 
 export interface LabelAndOverridesProps<T extends object, TValue> {
 	label: string
@@ -77,10 +78,15 @@ export function LabelAndOverrides<T extends object, TValue = any>({
 
 			<div className="field-content">
 				{showClearButton && (
-					<button className="btn btn-primary field-clear" onClick={() => setValue(undefined)} title={t('Clear value')}>
+					<Button
+						variant="primary"
+						className="field-clear"
+						onClick={() => setValue(undefined)}
+						title={t('Clear value')}
+					>
 						&nbsp;
 						<FontAwesomeIcon icon={faSync} />
-					</button>
+					</Button>
 				)}
 
 				{children(value, setValue)}
@@ -88,14 +94,14 @@ export function LabelAndOverrides<T extends object, TValue = any>({
 
 			{item.defaults && (
 				<>
-					<span>
-						&nbsp;({t('Default')} = {displayValue})
+					<span className="field-default">
+						<FontAwesomeIcon icon={faQuestionCircle} title={`${t('Default')}: ${displayValue}`} />
 					</span>
-					<button className="btn btn-primary" onClick={clearOverride} title="Reset to default" disabled={!isOverridden}>
+					<Button variant="primary" onClick={clearOverride} title="Reset to default" disabled={!isOverridden}>
 						{t('Reset')}
 						&nbsp;
 						<FontAwesomeIcon icon={faSync} />
-					</button>
+					</Button>
 				</>
 			)}
 

@@ -118,7 +118,7 @@ export function ExclusivityGroupsTable({
 					)}
 				</tbody>
 			</table>
-			<div className="mod mhs">
+			<div className="my-1 mx-2">
 				<button className="btn btn-primary" onClick={addNewExclusivityGroup}>
 					<FontAwesomeIcon icon={faPlus} />
 				</button>
@@ -235,7 +235,7 @@ function ExclusivityGroupRow({
 								)}
 							</LabelAndOverrides>
 						</div>
-						<div className="mod alright">
+						<div className="m-1 me-2 text-end">
 							<button className="btn btn-primary" onClick={() => toggleExpanded(exclusivityGroup.id)}>
 								<FontAwesomeIcon icon={faCheck} />
 							</button>

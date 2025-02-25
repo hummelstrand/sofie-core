@@ -572,11 +572,11 @@ const RundownLayoutEditorContent = withTranslation()(
 		render(): JSX.Element {
 			return (
 				<div className="studio-edit rundown-layout-editor">
-					<h2 className="mhn">{this.props.customRegion.title}</h2>
+					<h2 className="my-4">{this.props.customRegion.title}</h2>
 					<table className="expando settings-studio-rundown-layouts-table">
 						<tbody>{this.renderItems()}</tbody>
 					</table>
-					<div className="mod mhs">
+					<div className="my-1 mx-2">
 						<button className="btn btn-primary" onClick={this.onAddLayout}>
 							<FontAwesomeIcon icon={faPlus} />
 						</button>

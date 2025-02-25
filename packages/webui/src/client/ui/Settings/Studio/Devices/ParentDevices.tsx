@@ -102,7 +102,7 @@ export function StudioParentDevices({ studioId }: Readonly<StudioParentDevicesPr
 
 	return (
 		<div>
-			<h2 className="mhn">
+			<h2 className="my-4">
 				<Tooltip
 					overlay={t('No gateways are configured')}
 					visible={getHelpMode() && !hasCurrentDevice}
@@ -119,7 +119,7 @@ export function StudioParentDevices({ studioId }: Readonly<StudioParentDevicesPr
 				createItemWithId={addNewItem}
 			/>
 
-			<div className="mod mhs">
+			<div className="my-1 mx-2">
 				<button className="btn btn-primary" onClick={addNewItemClick}>
 					<FontAwesomeIcon icon={faPlus} />
 				</button>
@@ -428,7 +428,7 @@ function ParentDeviceEditRow({
 						<ParentDeviceEditForm peripheralDevice={peripheralDevice} item={item} overrideHelper={overrideHelper} />
 					)}
 				</div>
-				<div className="mod alright">
+				<div className="m-1 me-2 text-end">
 					<button className={classNames('btn btn-primary')} onClick={finishEditItem}>
 						<FontAwesomeIcon icon={faCheck} />
 					</button>

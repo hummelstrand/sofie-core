@@ -57,7 +57,7 @@ export function ShowStyleBaseBlueprintConfigurationSettings(
 
 	return (
 		<>
-			<h2 className="mhn">{t('Blueprint Configuration')}</h2>
+			<h2 className="my-4">{t('Blueprint Configuration')}</h2>
 
 			<SelectBlueprint showStyleBase={props.showStyleBase} />
 			<SelectConfigPreset showStyleBase={props.showStyleBase} />

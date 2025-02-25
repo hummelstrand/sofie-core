@@ -265,7 +265,7 @@ function SystemManagementMonitoring({ coreSystem }: Readonly<WithCoreSystemProps
 
 	return (
 		<>
-			<h2 className="mhn">{t('Application Performance Monitoring')}</h2>
+			<h2 className="my-4">{t('Application Performance Monitoring')}</h2>
 			<div className="properties-grid">
 				<label className="field">
 					<LabelActual label={t('APM Enabled')} />
@@ -336,7 +336,7 @@ function SystemManagementCronJobs({ coreSystem }: Readonly<WithCoreSystemProps>)
 
 	return (
 		<>
-			<h2 className="mhn">{t('Cron jobs')}</h2>
+			<h2 className="my-4">{t('Cron jobs')}</h2>
 			<div className="properties-grid">
 				<LabelAndOverridesForCheckbox
 					label={t('Enable CasparCG restart job')}
@@ -423,7 +423,7 @@ function SystemManagementCleanup() {
 
 	return (
 		<>
-			<h2 className="mhn">{t('Cleanup')}</h2>
+			<h2 className="my-4">{t('Cleanup')}</h2>
 			<div>
 				<button className="btn btn-default" onClick={cleanUpOldDatabaseIndexes}>
 					{t('Cleanup old database indexes')}
@@ -564,7 +564,7 @@ function SystemManagementHeapSnapshot() {
 	}, [])
 	return (
 		<>
-			<h2 className="mhn">{t('Memory troubleshooting')}</h2>
+			<h2 className="my-4">{t('Memory troubleshooting')}</h2>
 			<div>
 				{active ? (
 					<span>{t('Preparing, please wait...')}</span>

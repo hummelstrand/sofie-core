@@ -137,7 +137,7 @@ export function StudioMappings({
 
 	return (
 		<div>
-			<h2 className="mhn">{t('Layer Mappings')}</h2>
+			<h2 className="my-4">{t('Layer Mappings')}</h2>
 			{!manifest ? (
 				<span>{t('Add a playout device to the studio in order to edit the layer mappings')}</span>
 			) : (
@@ -172,7 +172,7 @@ export function StudioMappings({
 							)}
 						</tbody>
 					</table>
-					<div className="mod mhs">
+					<div className="my-1 mx-2">
 						<button className="btn btn-primary" onClick={addNewLayer}>
 							<FontAwesomeIcon icon={faPlus} />
 						</button>
@@ -565,7 +565,7 @@ function StudioMappingsEntry({
 								</>
 							)}
 						</div>
-						<div className="mod alright">
+						<div className="m-1 me-2 text-end">
 							<button className={ClassNames('btn btn-primary')} onClick={toggleEditItem}>
 								<FontAwesomeIcon icon={faCheck} />
 							</button>

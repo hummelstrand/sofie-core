@@ -1,26 +1,30 @@
 import * as React from 'react'
-import { DBStudio, MappingsExt } from '@sofie-automation/corelib/dist/dataModel/Studio'
+import { DBStudio } from '@sofie-automation/corelib/dist/dataModel/Studio'
 import { useTranslation } from 'react-i18next'
-import { ReadonlyDeep } from 'type-fest'
 import { MappingsSettingsManifests } from '../Mappings'
 import { getAllCurrentAndDeletedItemsFromOverrides } from '../../util/OverrideOpHelper'
 import { ExclusivityGroupsTable } from './ExclusivityGroups'
 import { RouteSetsTable } from './RouteSets'
+import { applyAndValidateOverrides } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
+import { useMemo } from 'react'
 
 interface IStudioRoutingsProps {
 	translationNamespaces: string[]
 	studio: DBStudio
-	studioMappings: ReadonlyDeep<MappingsExt>
 	manifest: MappingsSettingsManifests | undefined
 }
 
 export function StudioRoutings({
 	translationNamespaces,
 	studio,
-	studioMappings,
 	manifest,
 }: Readonly<IStudioRoutingsProps>): React.JSX.Element {
 	const { t } = useTranslation()
+
+	const studioMappings = useMemo(
+		() => (studio ? applyAndValidateOverrides(studio.mappingsWithOverrides).obj : {}),
+		[studio?.mappingsWithOverrides]
+	)
 
 	const routeSetsFromOverrides = React.useMemo(
 		() => getAllCurrentAndDeletedItemsFromOverrides(studio.routeSetsWithOverrides, null),

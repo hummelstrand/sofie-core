@@ -408,7 +408,7 @@ export function MediaManagerStatus(): JSX.Element {
 			<header className="mbs">
 				<h1>{t('Media Transfer Status')}</h1>
 			</header>
-			<div className="mod mvl alright">
+			<div className="mod mvl text-end">
 				{userPermissions.studio || userPermissions.configure ? (
 					<React.Fragment>
 						<button className="btn btn-secondary mls" onClick={actionAbortAll}>

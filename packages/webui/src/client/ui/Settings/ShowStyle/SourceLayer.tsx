@@ -139,7 +139,7 @@ export function SourceLayerSettings({ showStyleBase }: Readonly<IStudioSourcesSe
 
 	return (
 		<div>
-			<h2 className="mhn">
+			<h2 className="my-4">
 				<Tooltip
 					overlay={t('Add some source layers (e.g. Graphics) for your data to appear in rundowns')}
 					visible={getHelpMode() && !sortedSourceLayers.length}
@@ -170,7 +170,7 @@ export function SourceLayerSettings({ showStyleBase }: Readonly<IStudioSourcesSe
 					)}
 				</tbody>
 			</table>
-			<div className="mod mhs">
+			<div className="my-1 mx-2">
 				<button className="btn btn-primary" onClick={onAddSource}>
 					<FontAwesomeIcon icon={faPlus} />
 				</button>
@@ -470,7 +470,7 @@ function SourceLayerEntry({ item, isExpanded, toggleExpanded, overrideHelper }: 
 								)}
 							</LabelAndOverrides>
 						</div>
-						<div className="mod alright">
+						<div className="m-1 me-2 text-end">
 							{item.defaults && (
 								<button className="btn btn-primary" onClick={doResetItem} title="Reset to defaults">
 									<FontAwesomeIcon icon={faSync} />

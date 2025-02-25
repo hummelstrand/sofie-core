@@ -151,7 +151,7 @@ export function RouteSetsTable({
 					)}
 				</tbody>
 			</table>
-			<div className="mod mhs">
+			<div className="my-1 mx-2">
 				<button className="btn btn-primary" onClick={addNewRouteSet}>
 					<FontAwesomeIcon icon={faPlus} />
 				</button>
@@ -385,7 +385,7 @@ function RouteSetRow({
 							overrideHelper={overrideHelper}
 							studioMappings={studioMappings}
 						/>
-						<div className="mod">
+						<div className="my-1 mx-2">
 							<button className="btn btn-secondary" onClick={() => addNewRouteInSet(routeSet.id)}>
 								<FontAwesomeIcon icon={faPlus} />
 							</button>
@@ -404,7 +404,7 @@ function RouteSetRow({
 							)}
 						</div>
 						<RouteSetAbPlayers routeSet={routeSet} overrideHelper={overrideHelper} />
-						<div className="mod">
+						<div className="my-1 mx-2">
 							<button className="btn btn-secondary" onClick={() => addNewAbPlayerInSet(routeSet.id)}>
 								<FontAwesomeIcon icon={faPlus} />
 							</button>

@@ -167,7 +167,7 @@ export default translateWithTracker<IDeviceSettingsProps, IDeviceSettingsState, 
 								</div>
 							</label>
 						</div>
-						<div className="col c12 rl-c6 alright">
+						<div className="col c12 rl-c6 text-end">
 							<div className="mbs">
 								<button
 									className="btn btn-secondary btn-tight"

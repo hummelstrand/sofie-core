@@ -329,7 +329,7 @@ export const ShowStyleVariantsSettings = ({
 
 	return (
 		<div>
-			<h2 className="mhn">{t('Show Style Variants')}</h2>
+			<h2 className="my-4">{t('Show Style Variants')}</h2>
 			<div>
 				<table className="table expando settings-studio-showStyleVariants-table">
 					{localVariants.map((variant: DBShowStyleVariant) => (
@@ -356,7 +356,7 @@ export const ShowStyleVariantsSettings = ({
 					))}
 				</table>
 			</div>
-			<div className="mod mhs">
+			<div className="my-1 mx-2">
 				<button className="btn btn-primary" onClick={onAddShowStyleVariant}>
 					<FontAwesomeIcon icon={faPlus} />
 				</button>

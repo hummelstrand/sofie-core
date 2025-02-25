@@ -209,7 +209,7 @@ export const HotkeyLegendSettings = withTranslation()(
 											></EditAttribute>
 										</label>
 									</div>
-									<div className="mod alright">
+									<div className="m-1 me-2 text-end">
 										<button className="btn btn-primary" onClick={() => this.finishEditItem(item)}>
 											<FontAwesomeIcon icon={faCheck} />
 										</button>
@@ -226,11 +226,11 @@ export const HotkeyLegendSettings = withTranslation()(
 			const { t } = this.props
 			return (
 				<div>
-					<h2 className="mhn">{t('Custom Hotkey Labels')}</h2>
+					<h2 className="my-4">{t('Custom Hotkey Labels')}</h2>
 					<table className="expando settings-studio-custom-config-table">
 						<tbody>{this.renderItems()}</tbody>
 					</table>
-					<div className="mod mhs">
+					<div className="my-1 mx-2">
 						<button className="btn btn-primary" onClick={this.onAddHotkeyLegend}>
 							<FontAwesomeIcon icon={faPlus} />
 						</button>

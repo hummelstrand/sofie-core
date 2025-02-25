@@ -6,8 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { EditAttribute } from '../../../lib/EditAttribute'
 import { StudioBaselineStatus } from './Baseline'
 import { ShowStyleBaseId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { DBShowStyleBase } from '@sofie-automation/corelib/dist/dataModel/ShowStyleBase'
-import { Studios } from '../../../collections'
+import { ShowStyleBases, Studios } from '../../../collections'
 import { useHistory } from 'react-router-dom'
 import { MeteorCall } from '../../../lib/meteorApi'
 import {
@@ -31,21 +30,30 @@ import { useMemo } from 'react'
 import { CheckboxControl } from '../../../lib/Components/Checkbox'
 import { TextInputControl } from '../../../lib/Components/TextInput'
 import { DropdownInputControl, DropdownInputOption } from '../../../lib/Components/DropdownInput'
+import { useTracker } from '../../../lib/ReactMeteorData/ReactMeteorData'
+import Button from 'react-bootstrap/Button'
 
 interface IStudioGenericPropertiesProps {
 	studio: DBStudio
-	availableShowStyleBases: Array<{
-		name: string
-		value: ShowStyleBaseId
-		showStyleBase: DBShowStyleBase
-	}>
 }
 
-export function StudioGenericProperties({
-	studio,
-	availableShowStyleBases,
-}: IStudioGenericPropertiesProps): JSX.Element {
+export function StudioGenericProperties({ studio }: IStudioGenericPropertiesProps): JSX.Element {
 	const { t } = useTranslation()
+
+	const availableShowStyleBases = useTracker(
+		() =>
+			ShowStyleBases.find()
+				.fetch()
+				.map((showStyle) => {
+					return {
+						name: `${showStyle.name}`,
+						value: showStyle._id,
+						showStyleBase: showStyle,
+					}
+				}),
+		[],
+		[]
+	)
 
 	const showStyleEditButtons: JSX.Element[] = []
 	for (const showStyleBaseId of studio.supportedShowStyleBase) {
@@ -63,7 +71,7 @@ export function StudioGenericProperties({
 
 	return (
 		<div className="properties-grid">
-			<h2 className="mhn mtn">{t('Generic Properties')}</h2>
+			<h2 className="mb-4">{t('Generic Properties')}</h2>
 			<label className="field">
 				<LabelActual label={t('Studio Name')} />
 				{!studio.name ? (
@@ -124,9 +132,9 @@ const NewShowStyleButton = React.memo(function NewShowStyleButton() {
 	}
 
 	return (
-		<button className="btn btn-primary mts" onClick={onShowStyleAdd}>
+		<Button variant="primary mt-2 me-2" onClick={onShowStyleAdd}>
 			New Show Style
-		</button>
+		</Button>
 	)
 })
 
@@ -139,9 +147,9 @@ const RedirectToShowStyleButton = React.memo(function RedirectToShowStyleButton(
 	const doRedirect = () => history.push('/settings/showStyleBase/' + props.id)
 
 	return (
-		<button className="btn mrs mts" onClick={doRedirect}>
+		<Button variant="light" className="mt-2 me-2" onClick={doRedirect}>
 			Edit {props.name}
-		</button>
+		</Button>
 	)
 })
 

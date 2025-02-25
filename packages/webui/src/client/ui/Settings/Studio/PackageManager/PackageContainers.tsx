@@ -160,7 +160,7 @@ export function PackageContainersTable({
 						)
 				)}
 			</table>
-			<div className="mod mhs">
+			<div className="my-1 mx-2">
 				<button className="btn btn-primary" onClick={addNewPackageContainer}>
 					<FontAwesomeIcon icon={faPlus} />
 				</button>
