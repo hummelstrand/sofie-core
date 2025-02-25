@@ -193,7 +193,7 @@ export default withTranslation()(
 
 					<label className="field">
 						<LabelActual label={t('Source Layers')} />
-						<div>
+						<div className="checkbox-enable-before">
 							<EditAttribute
 								modifiedClassName="bghl"
 								attribute={`filters.${index}.sourceLayerIds`}
@@ -223,7 +223,7 @@ export default withTranslation()(
 
 					<label className="field">
 						<LabelActual label={t('Source Layer Types')} />
-						<div>
+						<div className="checkbox-enable-before">
 							<EditAttribute
 								modifiedClassName="bghl"
 								attribute={`filters.${index}.sourceLayerTypes`}
@@ -253,7 +253,7 @@ export default withTranslation()(
 
 					<label className="field">
 						<LabelActual label={t('Output Channels')} />
-						<div>
+						<div className="checkbox-enable-before">
 							<EditAttribute
 								modifiedClassName="bghl"
 								attribute={`filters.${index}.outputLayerIds`}
@@ -283,7 +283,7 @@ export default withTranslation()(
 
 					<label className="field">
 						<LabelActual label={t('Label contains')} />
-						<div>
+						<div className="checkbox-enable-before">
 							<EditAttribute
 								modifiedClassName="bghl"
 								attribute={`filters.${index}.label`}
@@ -314,7 +314,7 @@ export default withTranslation()(
 
 					<label className="field">
 						<LabelActual label={t('Tags must contain')} />
-						<div>
+						<div className="checkbox-enable-before">
 							<EditAttribute
 								modifiedClassName="bghl"
 								attribute={`filters.${index}.tags`}
@@ -607,31 +607,33 @@ export default withTranslation()(
 
 					<label className="field">
 						<LabelActual label={t('Tags must contain')} />
-						<EditAttribute
-							modifiedClassName="bghl"
-							attribute={`filters.${index}.tags`}
-							obj={item}
-							type="checkbox"
-							collection={RundownLayouts}
-							className="mod mas"
-							mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
-							mutateUpdateValue={() => undefined}
-						/>
-						<EditAttribute
-							modifiedClassName="bghl"
-							attribute={`filters.${index}.tags`}
-							obj={item}
-							type="text"
-							collection={RundownLayouts}
-							className="input text-input input-l"
-							label={t('Filter Disabled')}
-							mutateDisplayValue={(v: string[] | undefined) =>
-								v === undefined || v.length === 0 ? undefined : v.join(', ')
-							}
-							mutateUpdateValue={(v: string | undefined) =>
-								v === undefined || v.length === 0 ? undefined : v.split(',').map((i) => i.trim())
-							}
-						/>
+						<div className="checkbox-enable-before">
+							<EditAttribute
+								modifiedClassName="bghl"
+								attribute={`filters.${index}.tags`}
+								obj={item}
+								type="checkbox"
+								collection={RundownLayouts}
+								className="mod mas"
+								mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
+								mutateUpdateValue={() => undefined}
+							/>
+							<EditAttribute
+								modifiedClassName="bghl"
+								attribute={`filters.${index}.tags`}
+								obj={item}
+								type="text"
+								collection={RundownLayouts}
+								className="input text-input input-l"
+								label={t('Filter Disabled')}
+								mutateDisplayValue={(v: string[] | undefined) =>
+									v === undefined || v.length === 0 ? undefined : v.join(', ')
+								}
+								mutateUpdateValue={(v: string | undefined) =>
+									v === undefined || v.length === 0 ? undefined : v.split(',').map((i) => i.trim())
+								}
+							/>
+						</div>
 					</label>
 
 					<label className="field">
@@ -657,30 +659,32 @@ export default withTranslation()(
 				<React.Fragment>
 					<label className="field">
 						<LabelActual label={t('Source Layers')} />
-						<EditAttribute
-							modifiedClassName="bghl"
-							attribute={`filters.${index}.sourceLayerIds`}
-							obj={item}
-							type="checkbox"
-							collection={RundownLayouts}
-							className="mod mas"
-							mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
-							mutateUpdateValue={() => undefined}
-						/>
-						<EditAttribute
-							modifiedClassName="bghl"
-							attribute={`filters.${index}.sourceLayerIds`}
-							obj={item}
-							options={Object.values<ISourceLayer | undefined>(this.props.sourceLayers)
-								.filter((s): s is ISourceLayer => !!s)
-								.sort((a, b) => a._rank - b._rank)
-								.map((l) => ({ name: l.name, value: l._id }))}
-							type="multiselect"
-							label={t('Disabled')}
-							collection={RundownLayouts}
-							className="input text-input input-l dropdown"
-							mutateUpdateValue={(v) => (v && v.length > 0 ? v : undefined)}
-						/>
+						<div className="checkbox-enable-before">
+							<EditAttribute
+								modifiedClassName="bghl"
+								attribute={`filters.${index}.sourceLayerIds`}
+								obj={item}
+								type="checkbox"
+								collection={RundownLayouts}
+								className="mod mas"
+								mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
+								mutateUpdateValue={() => undefined}
+							/>
+							<EditAttribute
+								modifiedClassName="bghl"
+								attribute={`filters.${index}.sourceLayerIds`}
+								obj={item}
+								options={Object.values<ISourceLayer | undefined>(this.props.sourceLayers)
+									.filter((s): s is ISourceLayer => !!s)
+									.sort((a, b) => a._rank - b._rank)
+									.map((l) => ({ name: l.name, value: l._id }))}
+								type="multiselect"
+								label={t('Disabled')}
+								collection={RundownLayouts}
+								className="input text-input input-l dropdown"
+								mutateUpdateValue={(v) => (v && v.length > 0 ? v : undefined)}
+							/>
+						</div>
 					</label>
 
 					{isDashboardLayout && this.renderDashboardLayoutSettings(item, index)}
@@ -1331,7 +1335,7 @@ export default withTranslation()(
 				<React.Fragment>
 					<label className="field">
 						{activeLayerTitle}
-						<div>
+						<div className="checkbox-enable-before">
 							<EditAttribute
 								modifiedClassName="bghl"
 								attribute={`filters.${index}.requiredLayerIds`}
@@ -1362,7 +1366,7 @@ export default withTranslation()(
 
 					<label className="field">
 						<LabelActual label={t('Also Require Source Layers')} />
-						<div>
+						<div className="checkbox-enable-before">
 							<EditAttribute
 								modifiedClassName="bghl"
 								attribute={`filters.${index}.additionalLayers`}
@@ -1425,7 +1429,7 @@ export default withTranslation()(
 					{!options?.x && (
 						<label className="field">
 							<LabelActual label={t('X')} />
-							<div>
+							<div className="secondary-control-after">
 								<EditAttribute
 									modifiedClassName="bghl"
 									attribute={`filters.${index}.x`}
@@ -1450,7 +1454,7 @@ export default withTranslation()(
 					{!options?.y && (
 						<label className="field">
 							<LabelActual label={t('Y')} />
-							<div>
+							<div className="secondary-control-after">
 								<EditAttribute
 									modifiedClassName="bghl"
 									attribute={`filters.${index}.y`}
@@ -1475,7 +1479,7 @@ export default withTranslation()(
 					{!options?.width && (
 						<label className="field">
 							<LabelActual label={t('Width')} />
-							<div>
+							<div className="secondary-control-after">
 								<EditAttribute
 									modifiedClassName="bghl"
 									attribute={`filters.${index}.width`}
@@ -1500,7 +1504,7 @@ export default withTranslation()(
 					{!options?.height && (
 						<label className="field">
 							<LabelActual label={t('Height')} />
-							<div>
+							<div className="secondary-control-after">
 								<EditAttribute
 									modifiedClassName="bghl"
 									attribute={`filters.${index}.height`}
@@ -1668,29 +1672,7 @@ export default withTranslation()(
 			const isDashboardLayout = RundownLayoutsAPI.isDashboardLayout(this.props.item)
 
 			return (
-				<div className="rundown-layout-editor-filter mod pan mas" key={this.props.filter._id}>
-					<button
-						className="action-btn right mod man pas"
-						onClick={() => this.onRemoveElement(this.props.item, this.props.filter)}
-					>
-						<FontAwesomeIcon icon={faTrash} />
-					</button>
-					{isRundownLayout && (
-						<button
-							className={ClassNames('action-btn right mod man pas', {
-								star: (this.props.filter as any).default,
-							})}
-							onClick={() =>
-								this.onToggleDefault(
-									this.props.item as RundownLayout,
-									this.props.index,
-									!(this.props.filter as any).default
-								)
-							}
-						>
-							<FontAwesomeIcon icon={faStar} />
-						</button>
-					)}
+				<div className="rundown-layout-editor-filter  card m-2 p-2 grid-buttons-right" key={this.props.filter._id}>
 					<div className="properties-grid">
 						<label className="field">
 							<LabelActual label={t('Type')} />
@@ -1712,6 +1694,27 @@ export default withTranslation()(
 							isRundownLayout,
 							isDashboardLayout
 						)}
+					</div>
+					<div>
+						{isRundownLayout && (
+							<button
+								className={ClassNames('action-btn right mod man pas', {
+									star: (this.props.filter as any).default,
+								})}
+								onClick={() =>
+									this.onToggleDefault(
+										this.props.item as RundownLayout,
+										this.props.index,
+										!(this.props.filter as any).default
+									)
+								}
+							>
+								<FontAwesomeIcon icon={faStar} />
+							</button>
+						)}
+						<button className="action-btn" onClick={() => this.onRemoveElement(this.props.item, this.props.filter)}>
+							<FontAwesomeIcon icon={faTrash} />
+						</button>
 					</div>
 				</div>
 			)

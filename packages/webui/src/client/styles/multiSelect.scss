@@ -51,7 +51,7 @@
 	}
 
 	&.form-select {
-		background: none;
+		background-image: none;
 	}
 
 	&.expco-expanded:not(.expco-popper) {
@@ -79,17 +79,15 @@
 }
 
 .expco.dropdown {
-	position: relative;
-	padding: 0px;
-
 	.expco-title {
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		vertical-align: middle;
-		height: 31px;
-		line-height: 31px;
 		padding-right: 18px;
+
+		// Enforce the correct height when empty
+		height: 1.1em;
 	}
 
 	.expco-expand.action-btn {

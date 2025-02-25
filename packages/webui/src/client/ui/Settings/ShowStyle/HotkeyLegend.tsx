@@ -14,6 +14,7 @@ import { UploadButton } from '../../../lib/uploadButton'
 import _ from 'underscore'
 import { ShowStyleBases } from '../../../collections'
 import { LabelActual } from '../../../lib/Components/LabelAndOverrides'
+import Button from 'react-bootstrap/esm/Button'
 
 interface IHotkeyLegendSettingsProps {
 	showStyleBase: DBShowStyleBase
@@ -210,9 +211,9 @@ export const HotkeyLegendSettings = withTranslation()(
 										</label>
 									</div>
 									<div className="m-1 me-2 text-end">
-										<button className="btn btn-primary" onClick={() => this.finishEditItem(item)}>
+										<Button variant="primary" onClick={() => this.finishEditItem(item)}>
 											<FontAwesomeIcon icon={faCheck} />
-										</button>
+										</Button>
 									</div>
 								</td>
 							</tr>
@@ -231,16 +232,16 @@ export const HotkeyLegendSettings = withTranslation()(
 						<tbody>{this.renderItems()}</tbody>
 					</table>
 					<div className="my-1 mx-2">
-						<button className="btn btn-primary" onClick={this.onAddHotkeyLegend}>
+						<Button variant="primary" className="mx-1" onClick={this.onAddHotkeyLegend}>
 							<FontAwesomeIcon icon={faPlus} />
-						</button>
+						</Button>
 
-						<button className="btn mls btn-secondary" onClick={() => this.exportHotkeyJSON()}>
+						<Button variant="outline-secondary" className="mx-1" onClick={() => this.exportHotkeyJSON()}>
 							<FontAwesomeIcon icon={faDownload} />
 							&nbsp;{t('Export')}
-						</button>
+						</Button>
 						<UploadButton
-							className="btn mls btn-secondary"
+							className="btn btn-outline-secondary mx-1"
 							accept="application/json,.json"
 							onChange={(e) => this.importHotKeyJSON(e)}
 							key={this.state.uploadFileKey}

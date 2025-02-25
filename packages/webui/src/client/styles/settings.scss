@@ -10,6 +10,22 @@
 	}
 }
 
+.checkbox-enable-before {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	column-gap: 0.25rem;
+
+	align-items: center;
+}
+
+.secondary-control-after {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	column-gap: 0.25rem;
+
+	align-items: center;
+}
+
 .settings-menu {
 	.settings-menu__settings-menu-item {
 		display: block;

@@ -38,6 +38,7 @@ import { OutputLayers, SourceLayers } from '@sofie-automation/corelib/dist/dataM
 import { RundownLayouts } from '../../collections'
 import { LabelActual } from '../../lib/Components/LabelAndOverrides'
 import { withTranslation } from 'react-i18next'
+import Button from 'react-bootstrap/esm/Button'
 
 export interface IProps {
 	showStyleBaseId: ShowStyleBaseId
@@ -207,13 +208,10 @@ const RundownLayoutEditorContent = withTranslation()(
 
 			return (
 				<React.Fragment>
-					<h4 className="mod mhs">{t('Action Buttons')}</h4>
+					<h4 className="my-2">{t('Action Buttons')}</h4>
 					{item.actionButtons &&
 						item.actionButtons.map((button, index) => (
-							<div className="rundown-layout-editor-filter mod pan mas" key={button._id}>
-								<button className="action-btn right mod man pas" onClick={() => this.onRemoveButton(item, button)}>
-									<FontAwesomeIcon icon={faTrash} />
-								</button>
+							<div className="rundown-layout-editor-filter card m-2 p-2 grid-buttons-right" key={button._id}>
 								<div className="properties-grid">
 									<label className="field">
 										<LabelActual label={t('Label')} />
@@ -300,6 +298,9 @@ const RundownLayoutEditorContent = withTranslation()(
 										/>
 									</label>
 								</div>
+								<button className="action-btn" onClick={() => this.onRemoveButton(item, button)}>
+									<FontAwesomeIcon icon={faTrash} />
+								</button>
 							</div>
 						))}
 				</React.Fragment>
@@ -362,7 +363,7 @@ const RundownLayoutEditorContent = withTranslation()(
 					)}
 					{RundownLayoutsAPI.isLayoutWithFilters(item) && layout?.supportedFilters.length ? (
 						<React.Fragment>
-							<h4 className="mod mhs">{layout?.filtersTitle ?? t('Filters')}</h4>
+							<h4 className="my-2">{layout?.filtersTitle ?? t('Filters')}</h4>
 							{item.filters.length === 0 ? (
 								<p className="text-s dimmed field-hint mhs">{t('There are no filters set up yet')}</p>
 							) : null}
@@ -455,36 +456,41 @@ const RundownLayoutEditorContent = withTranslation()(
 										</div>
 
 										{layout?.supportedFilters.length ? (
-											<div className="mod mls">
-												<button className="btn btn-secondary" onClick={() => this.onAddElement(item)}>
+											<div className="my-2">
+												<Button variant="outline-secondary" onClick={() => this.onAddElement(item)}>
 													<FontAwesomeIcon icon={faPlus} />
 													&nbsp;
 													{layout?.filtersTitle
 														? t('Add {{filtersTitle}}', { filtersTitle: layout?.filtersTitle })
 														: t(`Add filter`)}
-												</button>
+												</Button>
 											</div>
 										) : null}
 										{item.type === RundownLayoutType.DASHBOARD_LAYOUT ? (
 											<>
 												<div>{RundownLayoutsAPI.isDashboardLayout(item) ? this.renderActionButtons(item) : null}</div>
-												<div className="mod mls">
-													<button className="btn btn-primary right" onClick={() => this.finishEditItem(item)}>
-														<FontAwesomeIcon icon={faCheck} />
-													</button>
-													<button className="btn btn-secondary" onClick={() => this.onAddButton(item)}>
-														<FontAwesomeIcon icon={faPlus} />
-														&nbsp;
-														{t('Add button')}
-													</button>
+												<div className="my-2 grid-buttons-right">
+													<div>
+														<Button variant="outline-secondary" className="mx-1" onClick={() => this.onAddButton(item)}>
+															<FontAwesomeIcon icon={faPlus} />
+															&nbsp;
+															{t('Add button')}
+														</Button>
+													</div>
+
+													<div>
+														<Button variant="primary" className="mx-1" onClick={() => this.finishEditItem(item)}>
+															<FontAwesomeIcon icon={faCheck} />
+														</Button>
+													</div>
 												</div>
 											</>
 										) : (
 											<>
-												<div className="mod mls">
-													<button className="btn btn-primary right" onClick={() => this.finishEditItem(item)}>
+												<div className="my-2 text-end">
+													<Button variant="primary" onClick={() => this.finishEditItem(item)}>
 														<FontAwesomeIcon icon={faCheck} />
-													</button>
+													</Button>
 												</div>
 											</>
 										)}
@@ -577,11 +583,11 @@ const RundownLayoutEditorContent = withTranslation()(
 						<tbody>{this.renderItems()}</tbody>
 					</table>
 					<div className="my-1 mx-2">
-						<button className="btn btn-primary mx-1" onClick={this.onAddLayout}>
+						<Button variant="primary" className="mx-1" onClick={this.onAddLayout}>
 							<FontAwesomeIcon icon={faPlus} />
-						</button>
+						</Button>
 						<UploadButton
-							className="btn btn-secondary mx-1"
+							className="btn btn-outline-secondary mx-1"
 							onChange={(e) => this.onUploadFile(e)}
 							accept="application/json,.json"
 						>
