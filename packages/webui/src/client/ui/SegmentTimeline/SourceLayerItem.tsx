@@ -27,6 +27,7 @@ import {
 	IPreviewPopUpSession,
 	PreviewPopUpContext,
 } from '../PreviewPopUp/PreviewPopUpContext'
+import { useSelectedElementsContext } from '../RundownView/SelectedElementsContext'
 const LEFT_RIGHT_ANCHOR_SPACER = 15
 const MARGINAL_ANCHORED_WIDTH = 5
 
@@ -132,6 +133,8 @@ export const SourceLayerItem = (props: Readonly<ISourceLayerItemProps>): JSX.Ele
 		itemElementRef.current = e
 	}, [])
 
+	const selectElementContext = useSelectedElementsContext()
+
 	const highlightTimeout = useRef<undefined | NodeJS.Timeout>(undefined)
 	const onHighlight = useCallback(
 		(e: HighlightEvent) => {
@@ -167,7 +170,14 @@ export const SourceLayerItem = (props: Readonly<ISourceLayerItemProps>): JSX.Ele
 			e.preventDefault()
 			e.stopPropagation()
 
-			if (typeof onDoubleClick === 'function') {
+			if (studio?.settings.enableUserEdits && !studio?.settings.allowPieceDirectPlay) {
+				const pieceId = piece.instance.piece._id
+				if (!selectElementContext.isSelected(pieceId)) {
+					selectElementContext.clearAndSetSelection({ type: 'piece', elementId: pieceId })
+				} else {
+					selectElementContext.clearSelections()
+				}
+			} else if (typeof onDoubleClick === 'function') {
 				onDoubleClick(piece, e)
 			}
 		},
@@ -553,6 +563,8 @@ export const SourceLayerItem = (props: Readonly<ISourceLayerItemProps>): JSX.Ele
 					piece,
 					contentStatus,
 					'segment-timeline__piece',
+					selectElementContext.isSelected(piece.instance.piece._id) ||
+						selectElementContext.isSelected(part.instance.part._id),
 					layer.type,
 					part.partId,
 					highlight,

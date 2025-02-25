@@ -88,6 +88,11 @@ export interface IStudioSettings {
 	enableEvaluationForm: boolean
 
 	/**
+	 * Doubleclick changes behaviour as selector for userediting
+	 */
+	enableUserEdits?: boolean
+
+	/**
 	 * Override the piece content statuses with fake info - used for developing the UI
 	 */
 	mockPieceContentStatus?: boolean
