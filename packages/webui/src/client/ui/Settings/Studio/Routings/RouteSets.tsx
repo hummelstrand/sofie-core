@@ -51,6 +51,7 @@ import {
 import { Studios } from '../../../../collections'
 import { useToggleExpandHelper } from '../../../util/useToggleExpandHelper'
 import { RouteSetAbPlayers } from './RouteSetAbPlayers'
+import Button from 'react-bootstrap/esm/Button'
 
 interface RouteSetsTable {
 	studio: DBStudio
@@ -386,13 +387,13 @@ function RouteSetRow({
 							studioMappings={studioMappings}
 						/>
 						<div className="my-1 mx-2">
-							<button className="btn btn-secondary" onClick={() => addNewRouteInSet(routeSet.id)}>
+							<Button variant="outline-secondary" onClick={() => addNewRouteInSet(routeSet.id)}>
 								<FontAwesomeIcon icon={faPlus} />
-							</button>
+							</Button>
 							&nbsp;
 							{routeSet.defaults && (
-								<button
-									className="btn btn-primary"
+								<Button
+									variant="primary"
 									onClick={resyncRoutesTable}
 									title="Reset to default"
 									disabled={!routesIsOverridden}
@@ -400,18 +401,18 @@ function RouteSetRow({
 									{t('Reset')}
 									&nbsp;
 									<FontAwesomeIcon icon={faSync} />
-								</button>
+								</Button>
 							)}
 						</div>
 						<RouteSetAbPlayers routeSet={routeSet} overrideHelper={overrideHelper} />
 						<div className="my-1 mx-2">
-							<button className="btn btn-secondary" onClick={() => addNewAbPlayerInSet(routeSet.id)}>
+							<Button variant="outline-secondary" onClick={() => addNewAbPlayerInSet(routeSet.id)}>
 								<FontAwesomeIcon icon={faPlus} />
-							</button>
+							</Button>
 							&nbsp;
 							{routeSet.defaults && (
-								<button
-									className="btn btn-primary"
+								<Button
+									variant="primary"
 									onClick={resyncAbPlayerTable}
 									title="Reset to default"
 									disabled={!abPlayerIsOverridden}
@@ -419,12 +420,14 @@ function RouteSetRow({
 									{t('Reset')}
 									&nbsp;
 									<FontAwesomeIcon icon={faSync} />
-								</button>
+								</Button>
 							)}
 						</div>
-						<button className="btn btn-primary right" onClick={() => toggleExpanded(routeSet.id)}>
-							<FontAwesomeIcon icon={faCheck} />
-						</button>
+						<div className="text-end">
+							<Button variant="primary" onClick={() => toggleExpanded(routeSet.id)}>
+								<FontAwesomeIcon icon={faCheck} />
+							</Button>
+						</div>
 					</td>
 				</tr>
 			)}
@@ -587,10 +590,7 @@ function RenderRoutesRow({
 	const confirmRemoveRouteLocal = React.useCallback(() => confirmRemoveRoute(route), [confirmRemoveRoute, route])
 
 	return (
-		<div className="route-sets-editor mod pan mas">
-			<button className="action-btn right mod man pas" onClick={confirmRemoveRouteLocal}>
-				<FontAwesomeIcon icon={faTrash} />
-			</button>
+		<div className="route-sets-editor card m-2 p-2 grid-buttons-right">
 			<div className="properties-grid">
 				<LabelAndOverridesForDropdown
 					label={t('Original Layer')}
@@ -723,6 +723,9 @@ function RenderRoutesRow({
 					</>
 				) : null}
 			</div>
+			<button className="action-btn" onClick={confirmRemoveRouteLocal}>
+				<FontAwesomeIcon icon={faTrash} />
+			</button>
 		</div>
 	)
 }

@@ -1,5 +1,15 @@
 @import 'colorScheme';
 
+.grid-buttons-right {
+	display: grid;
+	grid-template-columns: 1fr auto;
+
+	button {
+		align-self: start;
+		margin: 0.25rem;
+	}
+}
+
 .settings-menu {
 	.settings-menu__settings-menu-item {
 		display: block;

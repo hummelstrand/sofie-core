@@ -17,6 +17,7 @@ import { TextInputControl } from '../../../../lib/Components/TextInput'
 import { DropdownInputControl, getDropdownInputOptions } from '../../../../lib/Components/DropdownInput'
 import { OverrideOpHelper, WrappedOverridableItemNormal } from '../../util/OverrideOpHelper'
 import { CheckboxControl } from '../../../../lib/Components/Checkbox'
+import Button from 'react-bootstrap/Button'
 
 interface AccessorTableRowProps {
 	packageContainer: WrappedOverridableItemNormal<StudioPackageContainer>
@@ -529,10 +530,10 @@ export function AccessorTableRow({
 								{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
 							</LabelAndOverridesForCheckbox>
 						</div>
-						<div className="mod">
-							<button className="btn btn-primary right" onClick={() => toggleExpanded(accessorId)}>
+						<div className="text-end">
+							<Button variant="primary" onClick={() => toggleExpanded(accessorId)}>
 								<FontAwesomeIcon icon={faCheck} />
-							</button>
+							</Button>
 						</div>
 					</td>
 				</tr>

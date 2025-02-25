@@ -138,27 +138,29 @@ export function PackageContainersTable({
 	return (
 		<>
 			<table className="table expando settings-studio-package-containers-table">
-				{packageContainersFromOverrides.map(
-					(packageContainer: WrappedOverridableItem<StudioPackageContainer>): React.JSX.Element =>
-						packageContainer.type == 'normal' ? (
-							<PackageContainerRow
-								key={packageContainer.id}
-								studio={studio}
-								packageContainer={packageContainer}
-								overrideHelper={overrideHelper}
-								toggleExpanded={toggleExpanded}
-								isExpanded={isExpanded}
-								confirmRemovePackageContainer={confirmRemovePackageContainer}
-								confirmReset={confirmReset}
-							/>
-						) : (
-							<PackageContainerDeletedRow
-								key={packageContainer.id}
-								packageContainer={packageContainer}
-								overrideHelper={overrideHelper}
-							/>
-						)
-				)}
+				<tbody>
+					{packageContainersFromOverrides.map(
+						(packageContainer: WrappedOverridableItem<StudioPackageContainer>): React.JSX.Element =>
+							packageContainer.type == 'normal' ? (
+								<PackageContainerRow
+									key={packageContainer.id}
+									studio={studio}
+									packageContainer={packageContainer}
+									overrideHelper={overrideHelper}
+									toggleExpanded={toggleExpanded}
+									isExpanded={isExpanded}
+									confirmRemovePackageContainer={confirmRemovePackageContainer}
+									confirmReset={confirmReset}
+								/>
+							) : (
+								<PackageContainerDeletedRow
+									key={packageContainer.id}
+									packageContainer={packageContainer}
+									overrideHelper={overrideHelper}
+								/>
+							)
+					)}
+				</tbody>
 			</table>
 			<div className="my-1 mx-2">
 				<button className="btn btn-primary" onClick={addNewPackageContainer}>
