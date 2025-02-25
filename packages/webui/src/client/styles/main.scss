@@ -40,7 +40,7 @@ input {
 // @import 'prompter';
 @import 'rundownList';
 // @import 'rundownSystemStatus';
-// @import 'settings';
+@import 'settings';
 // @import 'splitDropdown';
 @import 'statusbar';
 // @import 'statusNotification';
@@ -240,6 +240,7 @@ header {
 }
 
 .action-btn {
+	font-size: 0.875rem;
 	cursor: pointer;
 	background: transparent;
 	color: #636363;
@@ -317,7 +318,8 @@ header {
 
 	padding: 0.25rem;
 
-	h3 {
+	h3,
+	h4 {
 		margin: 0;
 	}
 

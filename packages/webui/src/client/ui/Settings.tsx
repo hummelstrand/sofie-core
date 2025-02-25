@@ -1,6 +1,8 @@
 import { useSubscription } from '../lib/ReactMeteorData/react-meteor-data'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import { ErrorBoundary } from '../lib/ErrorBoundary'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
 
 import StudioSettings from './Settings/StudioSettings'
 import DeviceSettings from './Settings/DeviceSettings'
@@ -23,37 +25,33 @@ export function Settings(): JSX.Element | null {
 
 	return (
 		<div className="mx-5 mt-5 has-statusbar">
-			<div className="mod mvl mhs">
-				<div className="row">
-					<div className="col c12 rm-c3 settings-menu">
-						<ErrorBoundary>
-							<SettingsMenu />
-						</ErrorBoundary>
-					</div>
-					<div className="col c12 rm-c9 settings-dialog">
-						<ErrorBoundary>
-							<Switch>
-								<Route path="/settings" exact component={WelcomeToSettings} />
-								<Route path="/settings/studio/:studioId" component={StudioSettings} />
-								<Route path="/settings/showStyleBase/:showStyleBaseId" component={ShowStyleSettings} />
-								<Route path="/settings/peripheralDevice/:deviceId" component={DeviceSettings} />
-								<Route
-									path="/settings/blueprint/:blueprintId"
-									render={(props) => (
-										<BlueprintSettings
-											blueprintId={protectString(decodeURIComponent(props.match.params.blueprintId))}
-										/>
-									)}
-								/>
-								<Route path="/settings/tools/snapshots" component={SnapshotsView} />
-								<Route path="/settings/tools/migration" component={MigrationView} />
-								<Route path="/settings/tools/system" component={SystemManagement} />
-								<Redirect to="/settings" />
-							</Switch>
-						</ErrorBoundary>
-					</div>
-				</div>
-			</div>
+			<Row>
+				<Col xs={12} sm={5} md={4} lg={3} className="settings-menu">
+					<ErrorBoundary>
+						<SettingsMenu />
+					</ErrorBoundary>
+				</Col>
+				<Col xs={12} sm={7} md={8} lg={9} className="settings-dialog">
+					<ErrorBoundary>
+						<Switch>
+							<Route path="/settings" exact component={WelcomeToSettings} />
+							<Route path="/settings/studio/:studioId" component={StudioSettings} />
+							<Route path="/settings/showStyleBase/:showStyleBaseId" component={ShowStyleSettings} />
+							<Route path="/settings/peripheralDevice/:deviceId" component={DeviceSettings} />
+							<Route
+								path="/settings/blueprint/:blueprintId"
+								render={(props) => (
+									<BlueprintSettings blueprintId={protectString(decodeURIComponent(props.match.params.blueprintId))} />
+								)}
+							/>
+							<Route path="/settings/tools/snapshots" component={SnapshotsView} />
+							<Route path="/settings/tools/migration" component={MigrationView} />
+							<Route path="/settings/tools/system" component={SystemManagement} />
+							<Redirect to="/settings" />
+						</Switch>
+					</ErrorBoundary>
+				</Col>
+			</Row>
 		</div>
 	)
 }

@@ -13,10 +13,7 @@ import { CorelibPubSub } from '@sofie-automation/corelib/dist/pubsub'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
-interface IStatusMenuProps {
-	match?: any
-}
-function StatusMenu(_props: Readonly<IStatusMenuProps>): JSX.Element {
+function StatusMenu(): JSX.Element {
 	const { t } = useTranslation()
 
 	return (
@@ -67,10 +64,7 @@ function StatusMenu(_props: Readonly<IStatusMenuProps>): JSX.Element {
 	)
 }
 
-interface IStatusProps {
-	match?: any
-}
-export default function Status(props: Readonly<IStatusProps>): JSX.Element {
+export default function Status(): JSX.Element {
 	useSubscription(CorelibPubSub.peripheralDevices, null)
 	useSubscription(MeteorPubSub.uiStudio, null)
 	useSubscription(CorelibPubSub.showStyleBases, null)
@@ -80,7 +74,7 @@ export default function Status(props: Readonly<IStatusProps>): JSX.Element {
 		<div className="mt-5 mx-5 has-statusbar">
 			<Row>
 				<Col xs={12} sm={4} md={3} lg={2}>
-					<StatusMenu match={props.match} />
+					<StatusMenu />
 				</Col>
 				<Col xs={12} sm={8} md={9} lg={10}>
 					<Switch>
