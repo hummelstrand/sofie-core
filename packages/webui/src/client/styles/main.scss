@@ -273,6 +273,10 @@ header {
 
 	a:not(:hover) {
 		text-decoration: none;
+		color: inherit;
+	}
+	a:hover {
+		color: inherit;
 	}
 }
 
