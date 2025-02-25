@@ -30,6 +30,7 @@ import { WrappedOverridableItemNormal, useOverrideOpHelper } from './util/Overri
 import { CheckboxControl } from '../../lib/Components/Checkbox'
 import { CombinedMultiLineTextInputControl, MultiLineTextInputControl } from '../../lib/Components/MultiLineTextInput'
 import { TextInputControl } from '../../lib/Components/TextInput'
+import Button from 'react-bootstrap/esm/Button'
 
 interface WithCoreSystemProps {
 	coreSystem: ICoreSystem
@@ -43,7 +44,7 @@ export default function SystemManagement(): JSX.Element | null {
 
 	if (!coreSystem) return null
 	return (
-		<div className="studio-edit mod mhl mvn">
+		<div className="studio-edit mx-4 mb-4">
 			<SystemManagementGeneral coreSystem={coreSystem} />
 
 			<SystemManagementBlueprint coreSystem={coreSystem} />
@@ -54,11 +55,7 @@ export default function SystemManagement(): JSX.Element | null {
 
 			<SystemManagementEvaluationsMessage coreSystem={coreSystem} />
 
-			<div className="row">
-				<div className="col c12 r1-c12">
-					<TriggeredActionsEditor showStyleBaseId={null} sourceLayers={emptyObject} outputLayers={emptyObject} />
-				</div>
-			</div>
+			<TriggeredActionsEditor showStyleBaseId={null} sourceLayers={emptyObject} outputLayers={emptyObject} />
 
 			<SystemManagementMonitoring coreSystem={coreSystem} />
 
@@ -75,7 +72,7 @@ function SystemManagementGeneral({ coreSystem }: Readonly<WithCoreSystemProps>) 
 
 	return (
 		<>
-			<h2 className="mhn mtn">{t('General')}</h2>
+			<h2 className="my-4">{t('General')}</h2>
 			<div className="properties-grid">
 				<label className="field">
 					<LabelActual label={t('Installation name')} />
@@ -139,7 +136,7 @@ function SystemManagementNotificationMessage({ coreSystem }: Readonly<WithCoreSy
 
 	return (
 		<>
-			<h2 className="mhn mtn">{t('System-wide Notification Message')}</h2>
+			<h2 className="my-4">{t('System-wide Notification Message')}</h2>
 			<div className="properties-grid">
 				<label className="field">
 					<LabelActual label={t('Message')} />
@@ -178,7 +175,7 @@ function SystemManagementSupportPanel({ coreSystem }: Readonly<WithCoreSystemPro
 
 	return (
 		<>
-			<h2 className="mhn mtn">{t('Support Panel')}</h2>
+			<h2 className="my-4">{t('Support Panel')}</h2>
 			<div className="properties-grid">
 				<LabelAndOverrides
 					label={t('Edit Support Panel')}
@@ -209,7 +206,7 @@ function SystemManagementEvaluationsMessage({ coreSystem }: Readonly<WithCoreSys
 
 	return (
 		<>
-			<h2 className="mhn mtn">{t('Evaluations')}</h2>
+			<h2 className="my-4">{t('Evaluations')}</h2>
 			<div className="properties-grid">
 				<LabelAndOverridesForCheckbox
 					label={t('Enabled')}
@@ -265,7 +262,7 @@ function SystemManagementMonitoring({ coreSystem }: Readonly<WithCoreSystemProps
 
 	return (
 		<>
-			<h2 className="mb-4">{t('Application Performance Monitoring')}</h2>
+			<h2 className="my-4">{t('Application Performance Monitoring')}</h2>
 			<div className="properties-grid">
 				<label className="field">
 					<LabelActual label={t('APM Enabled')} />
@@ -300,9 +297,7 @@ function SystemManagementMonitoring({ coreSystem }: Readonly<WithCoreSystemProps
 						{t('Note: Core needs to be restarted to apply these settings')}
 					</span>
 				</label>
-			</div>
 
-			<div className="properties-grid">
 				<label className="field">
 					<LabelActual label={t('Monitor blocked thread')} />
 					<div className="mdi">
@@ -336,7 +331,7 @@ function SystemManagementCronJobs({ coreSystem }: Readonly<WithCoreSystemProps>)
 
 	return (
 		<>
-			<h2 className="mb-4">{t('Cron jobs')}</h2>
+			<h2 className="my-4">{t('Cron jobs')}</h2>
 			<div className="properties-grid">
 				<LabelAndOverridesForCheckbox
 					label={t('Enable CasparCG restart job')}
@@ -423,16 +418,15 @@ function SystemManagementCleanup() {
 
 	return (
 		<>
-			<h2 className="mb-4">{t('Cleanup')}</h2>
+			<h2 className="my-4">{t('Cleanup')}</h2>
 			<div>
-				<button className="btn btn-default" onClick={cleanUpOldDatabaseIndexes}>
+				<Button className="mx-1" onClick={cleanUpOldDatabaseIndexes}>
 					{t('Cleanup old database indexes')}
-				</button>
-			</div>
-			<div>
-				<button className="btn btn-default" onClick={localCheckForOldDataAndCleanUp}>
+				</Button>
+
+				<Button className="mx-1" onClick={localCheckForOldDataAndCleanUp}>
 					{t('Cleanup old data')}
-				</button>
+				</Button>
 			</div>
 		</>
 	)
@@ -564,7 +558,7 @@ function SystemManagementHeapSnapshot() {
 	}, [])
 	return (
 		<>
-			<h2 className="mb-4">{t('Memory troubleshooting')}</h2>
+			<h2 className="my-4">{t('Memory troubleshooting')}</h2>
 			<div>
 				{active ? (
 					<span>{t('Preparing, please wait...')}</span>
@@ -575,14 +569,10 @@ function SystemManagementHeapSnapshot() {
 						<a className="btn btn-primary" href="/api/private/heapSnapshot/retrieve?areYouSure=yes" onClick={onConfirm}>
 							{t(`Yes, Take and Download Memory Heap Snapshot`)}
 						</a>
-						<button className="btn btn-default" onClick={onReset}>
-							{t(`No`)}
-						</button>
+						<Button onClick={onReset}>{t(`No`)}</Button>
 					</>
 				) : (
-					<button className="btn btn-primary" onClick={onAreYouSure}>
-						{t(`Take and Download Memory Heap Snapshot`)}
-					</button>
+					<Button onClick={onAreYouSure}>{t(`Take and Download Memory Heap Snapshot`)}</Button>
 				)}
 			</div>
 			<div>

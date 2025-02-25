@@ -143,7 +143,7 @@ export default translateWithTracker<IDeviceSettingsProps, IDeviceSettingsState, 
 			const latencies = getExpectedLatency(device)
 
 			return (
-				<div className="studio-edit mod mhl mvn">
+				<div className="studio-edit mx-4">
 					<div className="row">
 						<div className="col c12 rl-c6">
 							<h2 className="mhn mtn">{t('Generic Properties')}</h2>

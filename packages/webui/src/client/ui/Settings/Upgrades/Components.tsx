@@ -360,7 +360,7 @@ export function SystemUpgradeStatusButtons({ upgradeResult }: Readonly<SystemUpg
 				onClick={clickShowChanges}
 				disabled={!!upgradeResult.invalidReason || upgradeResult.changes.length === 0}
 			>
-				<FontAwesomeIcon icon={faEye} />
+				<FontAwesomeIcon icon={faEye} className="me-2" />
 				<span>{t('Show config changes')}</span>
 			</Button>
 			<Button
@@ -369,7 +369,7 @@ export function SystemUpgradeStatusButtons({ upgradeResult }: Readonly<SystemUpg
 				onClick={clickApply}
 				disabled={!!upgradeResult.invalidReason}
 			>
-				<FontAwesomeIcon icon={faDatabase} />
+				<FontAwesomeIcon icon={faDatabase} className="me-2" />
 				<span>{t('Apply Config')}</span>
 			</Button>
 		</>

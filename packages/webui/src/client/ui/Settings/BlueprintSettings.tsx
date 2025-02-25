@@ -252,7 +252,7 @@ export default translateWithTracker<IProps, IState, ITrackedProps>((props: IProp
 			const { t } = this.props
 
 			return (
-				<div className="studio-edit mod mhl mvn">
+				<div className="studio-edit mx-4">
 					<div className="properties-grid">
 						<label className="field">
 							<LabelActual label={t('Blueprint ID')} />

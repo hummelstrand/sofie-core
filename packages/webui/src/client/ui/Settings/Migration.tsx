@@ -258,7 +258,7 @@ export const MigrationView = translateWithTracker<IProps, IState, ITrackedProps>
 			const { t } = this.props
 
 			return (
-				<div className="studio-edit mod mhl mvs">
+				<div className="studio-edit mx-4">
 					<div>
 						<div>
 							<div>

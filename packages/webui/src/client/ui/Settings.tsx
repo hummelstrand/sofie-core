@@ -26,7 +26,7 @@ export function Settings(): JSX.Element | null {
 	return (
 		<div className="mx-5 mt-5 has-statusbar">
 			<Row>
-				<Col xs={12} sm={5} md={4} lg={3} className="settings-menu">
+				<Col xs={12} sm={5} md={4} lg={3} className="settings-menu mb-4">
 					<ErrorBoundary>
 						<SettingsMenu />
 					</ErrorBoundary>
