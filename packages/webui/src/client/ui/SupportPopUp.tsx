@@ -69,17 +69,17 @@ export function DocumentationLink(): JSX.Element {
 	const { t } = useTranslation()
 
 	return (
-		<div className="mod mhn mbn">
+		<div>
 			{getHelpMode() ? (
-				<div>
+				<p>
 					{t('Disable hints by adding this to the URL:')}&nbsp;
 					<a href="?help=0">?help=0</a>
-				</div>
+				</p>
 			) : (
-				<div>
+				<p>
 					{t('Enable hints by adding this to the URL:')}&nbsp;
 					<a href="?help=1">?help=1</a>
-				</div>
+				</p>
 			)}
 			<p>
 				{t('More documentation available at:')}&nbsp;

@@ -8,7 +8,7 @@ interface IToggleSwitchControlProps {
 	label?: string
 
 	value: boolean
-	handleUpdate: (value: boolean) => void
+	handleUpdate: (value: boolean, e: React.MouseEvent<HTMLElement>) => void
 }
 export function ToggleSwitchControl({
 	classNames,
@@ -21,10 +21,13 @@ export function ToggleSwitchControl({
 	const currentValue = useRef(value)
 	currentValue.current = value
 
-	const handleChange = useCallback(() => {
-		if (disabled) return
-		handleUpdate(!currentValue.current)
-	}, [handleUpdate, disabled])
+	const handleChange = useCallback(
+		(e: React.MouseEvent<HTMLElement>) => {
+			if (disabled) return
+			handleUpdate(!currentValue.current, e)
+		},
+		[handleUpdate, disabled]
+	)
 
 	return (
 		<Form.Check

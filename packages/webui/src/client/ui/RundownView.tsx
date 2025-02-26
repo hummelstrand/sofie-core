@@ -22,7 +22,7 @@ import Escape from './../lib/Escape'
 
 import * as i18next from 'i18next'
 import Tooltip from 'rc-tooltip'
-import { NavLink, Route, Prompt } from 'react-router-dom'
+import { NavLink, Route, Prompt, Link } from 'react-router-dom'
 import {
 	DBRundownPlaylist,
 	QuickLoopMarker,
@@ -172,6 +172,10 @@ import * as RundownResolver from '../lib/RundownResolver'
 import { MAGIC_TIME_SCALE_FACTOR } from './SegmentTimeline/Constants'
 import { SelectedElementProvider, SelectedElementsContext } from './RundownView/SelectedElementsContext'
 import { PropertiesPanel } from './UserEditOperations/PropertiesPanel'
+import Container from 'react-bootstrap/esm/Container'
+import Navbar from 'react-bootstrap/esm/Navbar'
+import { LinkContainer } from 'react-router-bootstrap'
+import Nav from 'react-bootstrap/esm/Nav'
 
 const REHEARSAL_MARGIN = 1 * 60 * 1000
 const HIDE_NOTIFICATIONS_AFTER_MOUNT: number | undefined = 5000
@@ -1162,8 +1166,11 @@ const RundownHeader = withTranslation()(
 							)}
 						</ContextMenu>
 					</Escape>
-					<div
-						className={ClassNames('header rundown', {
+					<Navbar
+						data-bs-theme="dark"
+						fixed="top"
+						expand
+						className={ClassNames('rundown-header', {
 							active: !!this.props.playlist.activationId,
 							'not-active': !this.props.playlist.activationId,
 							rehearsal: this.props.playlist.rehearsal,
@@ -1184,15 +1191,15 @@ const RundownHeader = withTranslation()(
 									noResetOnActivate ? this.activateRundown(e) : this.resetAndActivateRundown(e)
 								}
 							/>
-							<div className="row flex-row first-row super-dark">
+							<div className="header-row flex-row first-row super-dark">
 								<div className="flex-col left horizontal-align-left">
-									<div className="badge mod">
+									<div className="badge-sofie my-3 mx-4">
 										<Tooltip
 											overlay={t('Add ?studio=1 to the URL to enter studio mode')}
 											visible={getHelpMode() && !this.props.userPermissions.studio}
 											placement="bottom"
 										>
-											<div className="media-elem mrs sofie-logo" />
+											<div className="media-elem me-2 sofie-logo" />
 										</Tooltip>
 										<div className="bd mls">
 											<span className="logo-text"></span>
@@ -1236,7 +1243,8 @@ const RundownHeader = withTranslation()(
 								</div>
 							</div>
 						</ContextMenuTrigger>
-					</div>
+					</Navbar>
+
 					<ModalDialog
 						title={t('Error')}
 						acceptText={t('OK')}
@@ -1839,6 +1847,7 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 
 		componentDidMount(): void {
 			document.body.classList.add('dark', 'vertical-overflow-only')
+			document.body.setAttribute('data-bs-theme', 'dark')
 
 			rundownNotificationHandler.set(this.onRONotificationClick)
 
@@ -2104,6 +2113,7 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 
 		componentWillUnmount(): void {
 			document.body.classList.remove('dark', 'vertical-overflow-only')
+			document.body.removeAttribute('data-bs-theme')
 			window.removeEventListener('beforeunload', this.onBeforeUnload)
 
 			documentTitle.set(null)
