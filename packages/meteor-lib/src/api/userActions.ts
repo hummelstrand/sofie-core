@@ -122,7 +122,7 @@ export interface NewUserActionAPI {
 		userEvent: string,
 		eventTime: Time,
 		rundownPlaylistId: RundownPlaylistId,
-		actionDocId: AdLibActionId | RundownBaselineAdLibActionId,
+		actionDocId: AdLibActionId | RundownBaselineAdLibActionId | BucketAdLibActionId,
 		actionId: string,
 		userData: ActionUserData,
 		triggerMode?: string
@@ -168,7 +168,7 @@ export interface NewUserActionAPI {
 		eventTime: Time,
 		rundownPlaylistId: RundownPlaylistId,
 		partInstanceId: PartInstanceId,
-		bucketAdlibId: PieceId,
+		bucketAdlibId: BucketAdLibId,
 		queue?: boolean
 	): Promise<ClientAPI.ClientResponse<void>>
 	activateHold(

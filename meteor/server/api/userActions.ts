@@ -401,7 +401,7 @@ class ServerUserActionAPI
 		userEvent: string,
 		eventTime: Time,
 		rundownPlaylistId: RundownPlaylistId,
-		actionDocId: AdLibActionId | RundownBaselineAdLibActionId,
+		actionDocId: AdLibActionId | RundownBaselineAdLibActionId | BucketAdLibActionId,
 		actionId: string,
 		userData: ActionUserData,
 		triggerMode: string | null
@@ -561,7 +561,7 @@ class ServerUserActionAPI
 		eventTime: Time,
 		rundownPlaylistId: RundownPlaylistId,
 		partInstanceId: PartInstanceId,
-		bucketAdlibId: PieceId,
+		bucketAdlibId: BucketAdLibId,
 		queue: boolean | null
 	) {
 		return ServerClientAPI.runUserActionInLogForPlaylistOnWorker(
