@@ -22,8 +22,8 @@ interface IModalDialogAttributes {
 	secondaryText?: string
 	acceptText: string
 	onAccept?: (e: SomeEvent, inputResult: ModalInputResult) => void
-	onSecondary?: (e: SomeEvent | undefined, inputResult: ModalInputResult) => void
-	onDiscard?: (e: SomeEvent | undefined, inputResult: ModalInputResult) => void
+	onSecondary?: (e: SomeEvent, inputResult: ModalInputResult) => void
+	onDiscard?: (e: SomeEvent, inputResult: ModalInputResult) => void
 	inputs?: { [attribute: string]: ModalInput }
 	warning?: boolean
 	actions?: ModalAction[]
@@ -75,7 +75,7 @@ export function ModalDialog({
 		onAccept?.(e, inputResult.current)
 	}
 
-	function handleDiscard(e?: SomeEvent) {
+	function handleDiscard(e: SomeEvent) {
 		if (onDiscard) {
 			onDiscard(e, inputResult.current)
 			return
@@ -83,7 +83,7 @@ export function ModalDialog({
 		handleSecondary(e)
 	}
 
-	function handleSecondary(e: SomeEvent | undefined) {
+	function handleSecondary(e: SomeEvent) {
 		onSecondary?.(e, inputResult.current)
 	}
 
@@ -146,14 +146,13 @@ export function ModalDialog({
 				<div onKeyDown={onDialogKeyDown} onKeyUp={onDialogKeyUp}>
 					<Modal
 						show={show}
-						onHide={handleDiscard}
 						onEscapeKeyDown={handleDiscard}
 						backdrop="static"
 						keyboard
 						className={className}
 						scrollable
 					>
-						<Modal.Header closeVariant="white" className={warning ? 'modal-header-warn' : 'modal-header-info'}>
+						<Modal.Header className={warning ? 'modal-header-warn' : 'modal-header-info'}>
 							<Modal.Title className={'grid-buttons-right w-100'}>
 								<h2>{title}</h2>
 

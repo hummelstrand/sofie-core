@@ -22,7 +22,7 @@ import Escape from './../lib/Escape'
 
 import * as i18next from 'i18next'
 import Tooltip from 'rc-tooltip'
-import { NavLink, Route, Prompt, Link } from 'react-router-dom'
+import { NavLink, Route, Prompt } from 'react-router-dom'
 import {
 	DBRundownPlaylist,
 	QuickLoopMarker,
@@ -172,10 +172,7 @@ import * as RundownResolver from '../lib/RundownResolver'
 import { MAGIC_TIME_SCALE_FACTOR } from './SegmentTimeline/Constants'
 import { SelectedElementProvider, SelectedElementsContext } from './RundownView/SelectedElementsContext'
 import { PropertiesPanel } from './UserEditOperations/PropertiesPanel'
-import Container from 'react-bootstrap/esm/Container'
-import Navbar from 'react-bootstrap/esm/Navbar'
-import { LinkContainer } from 'react-router-bootstrap'
-import Nav from 'react-bootstrap/esm/Nav'
+import Navbar from 'react-bootstrap/Navbar'
 
 const REHEARSAL_MARGIN = 1 * 60 * 1000
 const HIDE_NOTIFICATIONS_AFTER_MOUNT: number | undefined = 5000

@@ -6162,6 +6162,7 @@ __metadata:
     "@types/react-datepicker": "npm:^3.1.8"
     "@types/react-dom": "npm:^18.3.5"
     "@types/react-router": "npm:^5.1.20"
+    "@types/react-router-bootstrap": "npm:^0"
     "@types/react-router-dom": "npm:^5.3.3"
     "@types/sha.js": "npm:^2.4.4"
     "@types/sinon": "npm:^10.0.20"
@@ -6198,6 +6199,7 @@ __metadata:
     react-intersection-observer: "npm:^9.15.1"
     react-moment: "npm:^0.9.7"
     react-popper: "npm:^2.3.0"
+    react-router-bootstrap: "npm:^0.25.0"
     react-router-dom: "npm:^5.3.4"
     react-timer-hoc: "npm:^2.3.0"
     sass: "npm:^1.83.4"
@@ -7816,16 +7818,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:>=16.9.11":
-  version: 19.0.10
-  resolution: "@types/react@npm:19.0.10"
-  dependencies:
-    csstype: "npm:^3.0.2"
-  checksum: 10/10b592d212ebe4b4e0bd42a95c58af3d8dfcb8b3fa4b412d686c2ff8810d5dd3e3a30ebedb31d7b738e33a39c43503e24fe4e6ca8a21d842870043793f4eda98
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^18.3.18":
+"@types/react@npm:*, @types/react@npm:>=16.9.11, @types/react@npm:^18.3.18":
   version: 18.3.18
   resolution: "@types/react@npm:18.3.18"
   dependencies:
@@ -22360,7 +22353,6 @@ asn1@evs-broadcast/node-asn1:
     "@types/jest": "npm:^29.5.14"
     "@types/node": "npm:^22.10.10"
     "@types/object-path": "npm:^0.11.4"
-    "@types/react-router-bootstrap": "npm:^0"
     "@types/underscore": "npm:^1.13.0"
     babel-jest: "npm:^29.7.0"
     copyfiles: "npm:^2.4.1"
@@ -22373,7 +22365,6 @@ asn1@evs-broadcast/node-asn1:
     nodemon: "npm:^2.0.22"
     open-cli: "npm:^8.0.0"
     pinst: "npm:^3.0.0"
-    react-router-bootstrap: "npm:^0.25.0"
     rimraf: "npm:^6.0.1"
     semver: "npm:^7.6.3"
     ts-jest: "npm:^29.2.5"
