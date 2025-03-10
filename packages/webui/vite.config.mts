@@ -65,6 +65,7 @@ export default defineConfig({
 				ws: true,
 			},
 		},
+		allowedHosts: true,
 	},
 
 	// TODO: old meteor recompile instructions?
