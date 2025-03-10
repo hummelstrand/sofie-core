@@ -164,6 +164,10 @@ $break-width: 35rem;
 			transition: 0s padding-right 1s;
 		}
 	}
+
+	.dark {
+		background: #343434;
+	}
 }
 
 body.vertical-overflow-only {
