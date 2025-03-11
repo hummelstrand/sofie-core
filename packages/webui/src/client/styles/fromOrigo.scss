@@ -51,6 +51,11 @@ h4,
 }
 
 h5,
+.h5 {
+	font-size: 0.875rem;
+}
+
+h5,
 .h5,
 .text-s,
 .text-s p,
@@ -206,6 +211,11 @@ header {
 	padding: 0;
 }
 
-.expco {
+.expco-expanded {
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
 }
