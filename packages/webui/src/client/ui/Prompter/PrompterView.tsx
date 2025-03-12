@@ -230,6 +230,7 @@ export class PrompterViewContent extends React.Component<Translated<IProps & ITr
 			'prompter-scrollbar',
 			this.configOptions.showScroll ? 'vertical-overflow-only' : 'no-overflow'
 		)
+		document.body.setAttribute('data-bs-theme', 'dark')
 		window.addEventListener('scroll', this.onWindowScroll)
 
 		this.triggerCheckCurrentTakeMarkers()
@@ -252,6 +253,7 @@ export class PrompterViewContent extends React.Component<Translated<IProps & ITr
 			'prompter-scrollbar',
 			this.configOptions.showScroll ? 'vertical-overflow-only' : 'no-overflow'
 		)
+		document.body.removeAttribute('data-bs-theme')
 		window.removeEventListener('scroll', this.onWindowScroll)
 	}
 

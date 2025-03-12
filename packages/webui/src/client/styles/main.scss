@@ -29,7 +29,6 @@ input {
 @import 'colorPicker';
 @import 'contextMenu';
 @import 'datePicker';
-// @import 'editAttribute';
 @import 'externalMessagesStatus';
 @import 'iconPicker';
 @import 'modalDialog';
@@ -38,7 +37,7 @@ input {
 @import 'propertiesPanel';
 @import 'overflowingContainer';
 @import 'pieceStatusIcon';
-// @import 'prompter';
+@import 'prompter';
 @import 'rundownList';
 @import 'rundownSystemStatus';
 @import 'settings';
@@ -49,7 +48,7 @@ input {
 @import 'systemStatus';
 @import 'testtools';
 @import 'tooltips';
-// @import 'utils';
+@import 'utils';
 @import 'elementSelected';
 
 @import 'countdown/overlay';
@@ -115,24 +114,24 @@ input {
 
 @import 'rundownView';
 
-// body {
-// 	overscroll-behavior: none;
-// 	touch-action: pan-x pan-y;
-// }
+body {
+	overscroll-behavior: none;
+	touch-action: pan-x pan-y;
+}
 
-// :fullscreen ::-webkit-scrollbar {
-// 	background: #252627;
-// }
+:fullscreen ::-webkit-scrollbar {
+	background: #252627;
+}
 
-// :fullscreen ::-webkit-scrollbar-thumb {
-// 	background: #555;
-// 	border: 3px solid #252627;
-// 	border-radius: 10px;
-// }
+:fullscreen ::-webkit-scrollbar-thumb {
+	background: #555;
+	border: 3px solid #252627;
+	border-radius: 10px;
+}
 
-// .scroll-sink {
-// 	overscroll-behavior: none;
-// }
+.scroll-sink {
+	overscroll-behavior: none;
+}
 
 // /* Don't show visited status, since people will browse around the app a lot */
 // a:visited {

@@ -28,7 +28,7 @@ import { useBlackBrowserTheme } from '../../../lib/useBlackBrowserTheme'
 import { useWakeLock } from './useWakeLock'
 import { catchError, useDebounce } from '../../../lib/lib'
 import { CorelibPubSub } from '@sofie-automation/corelib/dist/pubsub'
-import { useSetDocumentClass } from '../../util/useSetDocumentClass'
+import { useSetDocumentClass, useSetDocumentDarkTheme } from '../../util/useSetDocumentClass'
 
 interface IProps {
 	playlist: DBRundownPlaylist | undefined
@@ -148,8 +148,10 @@ export function CameraScreen({ playlist, studioId }: Readonly<IProps>): JSX.Elem
 	)
 
 	useSetDocumentClass('dark', 'xdark', 'vertical-overflow-only')
+	useSetDocumentDarkTheme()
+
 	useEffect(() => {
-		const containerEl = document.querySelector('#render-target > .container-fluid-custom.header-clear')
+		const containerEl = document.querySelector('#render-target > .container-fluid.header-clear')
 		if (containerEl) containerEl.classList.remove('header-clear')
 
 		return () => {
