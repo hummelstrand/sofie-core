@@ -317,40 +317,50 @@ const TimingDisplay = withTiming<ITimingDisplayProps, {}>()(function TimingDispl
 		!(timingDurations.breakIsLastRundown && layout.lastRundownIsNotBreak)
 
 	return (
-		<div className="timing mod">
-			<PlaylistStartTiming rundownPlaylist={rundownPlaylist} hideDiff={true} />
-			<RundownName rundownPlaylist={rundownPlaylist} currentRundown={currentRundown} rundownCount={rundownCount} />
-			<TimeOfDay />
-			{rundownPlaylist.currentPartInfo && (
-				<span className="timing-clock current-remaining">
-					<CurrentPartOrSegmentRemaining
-						currentPartInstanceId={rundownPlaylist.currentPartInfo.partInstanceId}
-						heavyClassName="overtime"
-						preferSegmentTime={true}
-					/>
-					<AutoNextStatus />
-					{rundownPlaylist.holdState && rundownPlaylist.holdState !== RundownHoldState.COMPLETE ? (
-						<div className="rundown__header-status rundown__header-status--hold">{t('Hold')}</div>
+		<div className="timing">
+			<div className="timing__header__left">
+				<PlaylistStartTiming rundownPlaylist={rundownPlaylist} hideDiff={true} />
+				<RundownName rundownPlaylist={rundownPlaylist} currentRundown={currentRundown} rundownCount={rundownCount} />
+			</div>
+			<div className="timing__header__center">
+				<TimeOfDay />
+			</div>
+			<div className="timing__header__right">
+				<div className="timing__header__right__left">
+					{rundownPlaylist.currentPartInfo && (
+						<span className="timing-clock current-remaining">
+							<CurrentPartOrSegmentRemaining
+								currentPartInstanceId={rundownPlaylist.currentPartInfo.partInstanceId}
+								heavyClassName="overtime"
+								preferSegmentTime={true}
+							/>
+							<AutoNextStatus />
+							{rundownPlaylist.holdState && rundownPlaylist.holdState !== RundownHoldState.COMPLETE ? (
+								<div className="rundown__header-status rundown__header-status--hold">{t('Hold')}</div>
+							) : null}
+						</span>
+					)}
+				</div>
+				<div className="timing__header__right__right">
+					{showNextBreakTiming ? (
+						<NextBreakTiming
+							rundownsBeforeBreak={timingDurations.rundownsBeforeNextBreak!}
+							breakText={layout?.nextBreakText}
+							lastChild={!showEndTiming}
+						/>
 					) : null}
-				</span>
-			)}
-			{showEndTiming ? (
-				<PlaylistEndTiming
-					rundownPlaylist={rundownPlaylist}
-					loop={isLoopRunning(rundownPlaylist)}
-					expectedStart={expectedStart}
-					expectedEnd={expectedEnd}
-					expectedDuration={expectedDuration}
-					endLabel={layout?.plannedEndText}
-				/>
-			) : null}
-			{showNextBreakTiming ? (
-				<NextBreakTiming
-					rundownsBeforeBreak={timingDurations.rundownsBeforeNextBreak!}
-					breakText={layout?.nextBreakText}
-					lastChild={!showEndTiming}
-				/>
-			) : null}
+					{showEndTiming ? (
+						<PlaylistEndTiming
+							rundownPlaylist={rundownPlaylist}
+							loop={isLoopRunning(rundownPlaylist)}
+							expectedStart={expectedStart}
+							expectedEnd={expectedEnd}
+							expectedDuration={expectedDuration}
+							endLabel={layout?.plannedEndText}
+						/>
+					) : null}
+				</div>
+			</div>
 		</div>
 	)
 })
@@ -1190,7 +1200,7 @@ const RundownHeader = withTranslation()(
 							/>
 							<div className="header-row flex-row first-row super-dark">
 								<div className="flex-col left horizontal-align-left">
-									<div className="badge-sofie my-3 mx-4">
+									<div className="badge-sofie mt-4 mb-3 mx-4">
 										<Tooltip
 											overlay={t('Add ?studio=1 to the URL to enter studio mode')}
 											visible={getHelpMode() && !this.props.userPermissions.studio}
