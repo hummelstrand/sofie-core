@@ -151,6 +151,7 @@ export function RundownList(): JSX.Element {
 				{subsReady ? (
 					<section className="my-5 rundown-list" role="treegrid">
 						<header className="rundown-list__header">
+							<span>{/* Spacer */}</span>
 							<span className="rundown-list-item__name" role="columnheader">
 								<Tooltip
 									overlay={t('Click on a rundown to control your studio')}

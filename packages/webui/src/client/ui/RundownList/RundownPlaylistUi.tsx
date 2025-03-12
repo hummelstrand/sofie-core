@@ -199,6 +199,7 @@ export function RundownPlaylistUi({
 		>
 			{/* Drop target { droptarget: isActiveDropZone } */}
 			<header className="rundown-playlist__header">
+				<span>{/* Spacer */}</span>
 				<span>
 					<h2 className="rundown-playlist__heading" role="rowheader">
 						<FontAwesomeIcon icon={faFolderOpen} />

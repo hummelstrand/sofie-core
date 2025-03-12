@@ -19,6 +19,7 @@
 	/* "column" width calculations */
 	--statusBarWidth: 2.1rem; //  the width of the floating right status bar
 	--componentWidth: calc(100% - var(--statusBarWidth));
+	--dragHandleWidth: calc(var(--defaultSpacing) + 1rem);
 	--nameColumnWidth: calc(var(--componentWidth) * var(--nameColumnSize));
 	--showStyleColumnWidth: calc(var(--componentWidth) * var(--showStyleColumnSize));
 	--airTimeColumnWidth: calc(var(--componentWidth) * var(--standardColumnSize));
@@ -36,6 +37,7 @@
 	.rundown-list__header {
 		display: grid;
 		grid-template-columns:
+			var(--dragHandleWidth)
 			var(--nameColumnWidth) var(--showStyleColumnWidth) var(--airTimeColumnWidth)
 			var(--durationColumnWidth) var(--expectedEndColumnWidth) var(--lastModifiedColumnWidth) var(
 				--layoutSelectionColumnWidth
@@ -48,32 +50,33 @@
 		vertical-align: middle;
 	}
 
+	.rundown-list-item__draghandle {
+		cursor: grab;
+		width: var(--defaultSpacing);
+		align-content: center;
+
+		button {
+			all: unset;
+			display: inline-flex;
+			align-self: center;
+			justify-content: center;
+			width: inherit;
+			overflow: hidden;
+
+			svg {
+				height: 1em;
+				width: 1em;
+				top: 0.125em;
+				position: relative;
+			}
+		}
+	}
+
 	.rundown-list-item__name {
 		display: inline-block;
 		align-self: center;
 		align-items: center;
 		letter-spacing: inherit;
-
-		.draghandle {
-			cursor: grab;
-			width: var(--defaultSpacing);
-
-			button {
-				all: unset;
-				display: inline-flex;
-				align-self: center;
-				justify-content: center;
-				width: inherit;
-				overflow: hidden;
-
-				svg {
-					height: 1em;
-					width: 1em;
-					top: 0.125em;
-					position: relative;
-				}
-			}
-		}
 
 		.rundown-name {
 			font-weight: bold;
@@ -198,6 +201,7 @@
 				display: grid;
 				// for the header, the first column spans the first four item columns
 				grid-template-columns:
+					var(--dragHandleWidth)
 					calc(var(--nameColumnWidth) + var(--showStyleColumnWidth)) var(--airTimeColumnWidth)
 					var(--durationColumnWidth) var(--expectedEndColumnWidth) var(--lastModifiedColumnWidth);
 
@@ -331,6 +335,7 @@
 		vertical-align: middle;
 		display: grid;
 		grid-template-columns:
+			var(--dragHandleWidth)
 			var(--nameColumnWidth) var(--showStyleColumnWidth) var(--airTimeColumnWidth)
 			var(--durationColumnWidth) var(--expectedEndColumnWidth) var(--lastModifiedColumnWidth) var(--layoutSelectionColumnWidth);
 
