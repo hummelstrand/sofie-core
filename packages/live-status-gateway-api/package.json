@@ -1,6 +1,6 @@
 {
 	"name": "@sofie-automation/live-status-gateway-api",
-	"version": "1.52.0-in-development",
+	"version": "1.53.0-in-development",
 	"description": "Library for types & values shared by core, workers and gateways",
 	"main": "dist/index.js",
 	"typings": "dist/index.d.ts",
@@ -45,10 +45,10 @@
 		"tslib": "^2.6.2"
 	},
 	"devDependencies": {
-		"@asyncapi/generator": "^1.17.25",
-		"@asyncapi/html-template": "^2.3.9",
+		"@asyncapi/generator": "^2.6.0",
+		"@asyncapi/html-template": "^3.1.0",
 		"@asyncapi/modelina": "^3.7.0",
-		"@asyncapi/nodejs-ws-template": "^0.9.36",
+		"@asyncapi/nodejs-ws-template": "^0.10.0",
 		"@asyncapi/parser": "^3.3.0"
 	},
 	"prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
@@ -60,5 +60,5 @@
 			"yarn lint:raw"
 		]
 	},
-	"packageManager": "yarn@3.5.0"
+	"packageManager": "yarn@4.6.0"
 }

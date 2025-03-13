@@ -136,4 +136,8 @@ export class RootChannel extends WebSocketTopicBase implements WebSocketTopic {
 			)
 		}
 	}
+
+	sendStatus(): void {
+		// no status here
+	}
 }

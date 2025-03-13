@@ -9,6 +9,7 @@ import {
 	IBlueprintPieceDB,
 	IBlueprintPieceInstance,
 	IBlueprintResolvedPieceInstance,
+	IBlueprintSegment,
 	OmitId,
 	SomeContent,
 	Time,
@@ -22,6 +23,7 @@ import {
 	convertPieceInstanceToBlueprints,
 	convertPieceToBlueprints,
 	convertResolvedPieceInstanceToBlueprints,
+	convertSegmentToBlueprints,
 	createBlueprintQuickLoopInfo,
 	getMediaObjectDuration,
 } from '../lib'
@@ -95,7 +97,15 @@ export class PartAndPieceInstanceActionService {
 		this.showStyleCompound = showStyle
 	}
 
-	private _getPartInstance(part: 'current' | 'next'): PlayoutPartInstanceModel | null {
+	#trackStateChange(part: 'current' | 'next', change: ActionPartChange): void {
+		if (part === 'current') {
+			this.currentPartState = Math.max(this.currentPartState, change)
+		} else {
+			this.nextPartState = Math.max(this.nextPartState, change)
+		}
+	}
+
+	#getPartInstance(part: 'current' | 'next'): PlayoutPartInstanceModel | null {
 		switch (part) {
 			case 'current':
 				return this._playoutModel.currentPartInstance
@@ -109,16 +119,16 @@ export class PartAndPieceInstanceActionService {
 	}
 
 	async getPartInstance(part: 'current' | 'next'): Promise<IBlueprintPartInstance | undefined> {
-		const partInstance = this._getPartInstance(part)
+		const partInstance = this.#getPartInstance(part)
 
 		return partInstance ? convertPartInstanceToBlueprints(partInstance.partInstance) : undefined
 	}
 	async getPieceInstances(part: 'current' | 'next'): Promise<IBlueprintPieceInstance[]> {
-		const partInstance = this._getPartInstance(part)
+		const partInstance = this.#getPartInstance(part)
 		return partInstance?.pieceInstances?.map((p) => convertPieceInstanceToBlueprints(p.pieceInstance)) ?? []
 	}
 	async getResolvedPieceInstances(part: 'current' | 'next'): Promise<IBlueprintResolvedPieceInstance[]> {
-		const partInstance = this._getPartInstance(part)
+		const partInstance = this.#getPartInstance(part)
 		if (!partInstance) {
 			return []
 		}
@@ -129,6 +139,14 @@ export class PartAndPieceInstanceActionService {
 			partInstance
 		)
 		return resolvedInstances.map(convertResolvedPieceInstanceToBlueprints)
+	}
+	getSegment(segment: 'current' | 'next'): IBlueprintSegment | undefined {
+		const partInstance = this.#getPartInstance(segment)
+		if (!partInstance) return undefined
+
+		const segmentModel = this._playoutModel.findSegment(partInstance.partInstance.segmentId)
+
+		return segmentModel?.segment ? convertSegmentToBlueprints(segmentModel?.segment) : undefined
 	}
 
 	async findLastPieceOnLayer(
@@ -244,7 +262,7 @@ export class PartAndPieceInstanceActionService {
 	}
 
 	async insertPiece(part: 'current' | 'next', rawPiece: IBlueprintPiece): Promise<IBlueprintPieceInstance> {
-		const partInstance = this._getPartInstance(part)
+		const partInstance = this.#getPartInstance(part)
 		if (!partInstance) {
 			throw new Error('Cannot insert piece when no active part')
 		}
@@ -270,11 +288,7 @@ export class PartAndPieceInstanceActionService {
 		// Do the work
 		const newPieceInstance = partInstance.insertAdlibbedPiece(piece, undefined)
 
-		if (part === 'current') {
-			this.currentPartState = Math.max(this.currentPartState, ActionPartChange.SAFE_CHANGE)
-		} else {
-			this.nextPartState = Math.max(this.nextPartState, ActionPartChange.SAFE_CHANGE)
-		}
+		this.#trackStateChange(part, ActionPartChange.SAFE_CHANGE)
 
 		return convertPieceInstanceToBlueprints(newPieceInstance.pieceInstance)
 	}
@@ -330,8 +344,8 @@ export class PartAndPieceInstanceActionService {
 
 		// setupPieceInstanceInfiniteProperties(pieceInstance)
 
-		this.nextPartState = Math.max(this.nextPartState, updatesNextPart)
-		this.currentPartState = Math.max(this.currentPartState, updatesCurrentPart)
+		this.#trackStateChange('next', updatesNextPart)
+		this.#trackStateChange('current', updatesCurrentPart)
 
 		return convertPieceInstanceToBlueprints(pieceInstance.pieceInstance)
 	}
@@ -340,7 +354,7 @@ export class PartAndPieceInstanceActionService {
 		part: 'current' | 'next',
 		props: Partial<IBlueprintMutatablePart>
 	): Promise<IBlueprintPartInstance> {
-		const partInstance = this._getPartInstance(part)
+		const partInstance = this.#getPartInstance(part)
 		if (!partInstance) {
 			throw new Error('PartInstance could not be found')
 		}
@@ -351,14 +365,7 @@ export class PartAndPieceInstanceActionService {
 			throw new Error('Some valid properties must be defined')
 		}
 
-		this.nextPartState = Math.max(
-			this.nextPartState,
-			part === 'next' ? ActionPartChange.SAFE_CHANGE : ActionPartChange.NONE
-		)
-		this.currentPartState = Math.max(
-			this.currentPartState,
-			part === 'current' ? ActionPartChange.SAFE_CHANGE : ActionPartChange.NONE
-		)
+		this.#trackStateChange(part, ActionPartChange.SAFE_CHANGE)
 
 		return convertPartInstanceToBlueprints(partInstance.partInstance)
 	}
@@ -450,8 +457,8 @@ export class PartAndPieceInstanceActionService {
 		)
 	}
 
-	async removePieceInstances(_part: 'next', pieceInstanceIds: string[]): Promise<string[]> {
-		const partInstance = this._getPartInstance('next')
+	async removePieceInstances(part: 'current' | 'next', pieceInstanceIds: string[]): Promise<string[]> {
+		const partInstance = this.#getPartInstance(part)
 		if (!partInstance) {
 			throw new Error('Cannot remove pieceInstances when no selected partInstance')
 		}
@@ -466,7 +473,7 @@ export class PartAndPieceInstanceActionService {
 			}
 		}
 
-		this.nextPartState = Math.max(this.nextPartState, ActionPartChange.SAFE_CHANGE)
+		this.#trackStateChange(part, ActionPartChange.SAFE_CHANGE)
 
 		return unprotectStringArray(removedPieceInstanceIds)
 	}
@@ -505,7 +512,7 @@ export class PartAndPieceInstanceActionService {
 		)
 
 		if (stoppedIds.length > 0) {
-			this.currentPartState = Math.max(this.currentPartState, ActionPartChange.SAFE_CHANGE)
+			this.#trackStateChange('current', ActionPartChange.SAFE_CHANGE)
 		}
 
 		return unprotectStringArray(stoppedIds)

@@ -8,13 +8,13 @@ import {
 	PieceId,
 	PieceInstanceId,
 	RundownBaselineAdLibActionId,
+	RundownId,
 	RundownPlaylistId,
 	SegmentId,
 } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { MongoFieldSpecifierOnesStrict } from '@sofie-automation/corelib/dist/mongo'
 import { ReadonlyDeep } from 'type-fest'
-import { CustomCollectionName, MeteorPubSub } from '@sofie-automation/meteor-lib/dist/api/pubsub'
-import { UIPieceContentStatus } from '@sofie-automation/meteor-lib/dist/api/rundownNotifications'
+import { UIPieceContentStatus } from '@sofie-automation/corelib/dist/dataModel/PieceContentStatus'
 import { DBRundownPlaylist } from '@sofie-automation/corelib/dist/dataModel/RundownPlaylist'
 import {
 	MediaObjects,
@@ -57,6 +57,9 @@ import { PieceContentStatusStudio } from '../checkPieceContentStatus'
 import { check, Match } from 'meteor/check'
 import { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
 import { triggerWriteAccessBecauseNoCheckNecessary } from '../../../security/securityVerify'
+import { CorelibPubSub } from '@sofie-automation/corelib/dist/pubsub'
+import { CustomCollectionName } from '@sofie-automation/corelib/dist/dataModel/Collections'
+import { PieceContentStatusMessageFactory } from '../messageFactory'
 
 interface UIPieceContentStatusesArgs {
 	readonly rundownPlaylistId: RundownPlaylistId
@@ -66,6 +69,8 @@ interface UIPieceContentStatusesState {
 	contentCache: ReadonlyDeep<ContentCache>
 
 	studio: PieceContentStatusStudio
+
+	rundownMessageFactories: Map<RundownId, PieceContentStatusMessageFactory>
 
 	pieceDependencies: Map<PieceId, PieceDependencies>
 	pieceInstanceDependencies: Map<PieceInstanceId, PieceDependencies>
@@ -120,81 +125,90 @@ async function setupUIPieceContentStatusesPublicationObservers(
 	})) as Pick<DBRundownPlaylist, RundownPlaylistFields> | undefined
 	if (!playlist) throw new Error(`RundownPlaylist "${args.rundownPlaylistId}" not found!`)
 
-	const rundownsObserver = await RundownsObserver.create(playlist.studioId, playlist._id, async (rundownIds) => {
-		logger.silly(`Creating new RundownContentObserver`)
+	const rundownsObserver = await RundownsObserver.createForPlaylist(
+		playlist.studioId,
+		playlist._id,
+		async (rundownIds) => {
+			logger.silly(`Creating new RundownContentObserver`)
 
-		// TODO - can this be done cheaper?
-		const contentCache = createReactiveContentCache()
-		triggerUpdate({ newCache: contentCache })
+			// TODO - can this be done cheaper?
+			const contentCache = createReactiveContentCache()
+			triggerUpdate({ newCache: contentCache })
 
-		const obs1 = await RundownContentObserver.create(rundownIds, contentCache)
+			const obs1 = await RundownContentObserver.create(rundownIds, contentCache)
 
-		const innerQueries = [
-			contentCache.Segments.find({}).observeChanges({
-				added: (id) => triggerUpdate({ updatedSegmentIds: [protectString(id)] }),
-				changed: (id) => triggerUpdate({ updatedSegmentIds: [protectString(id)] }),
-				removed: (id) => triggerUpdate({ updatedSegmentIds: [protectString(id)] }),
-			}),
-			contentCache.Parts.find({}).observeChanges({
-				added: (id) => triggerUpdate({ updatedPartIds: [protectString(id)] }),
-				changed: (id) => triggerUpdate({ updatedPartIds: [protectString(id)] }),
-				removed: (id) => triggerUpdate({ updatedPartIds: [protectString(id)] }),
-			}),
-			contentCache.Pieces.find({}).observeChanges({
-				added: (id) => triggerUpdate({ updatedPieceIds: [protectString(id)] }),
-				changed: (id) => triggerUpdate({ updatedPieceIds: [protectString(id)] }),
-				removed: (id) => triggerUpdate({ updatedPieceIds: [protectString(id)] }),
-			}),
-			contentCache.PartInstances.find({}).observeChanges({
-				added: (id) => triggerUpdate({ updatedPartInstanceIds: [protectString(id)] }),
-				changed: (id) => triggerUpdate({ updatedPartInstanceIds: [protectString(id)] }),
-				removed: (id) => triggerUpdate({ updatedPartInstanceIds: [protectString(id)] }),
-			}),
-			contentCache.PieceInstances.find({}).observeChanges({
-				added: (id) => triggerUpdate({ updatedPieceInstanceIds: [protectString(id)] }),
-				changed: (id) => triggerUpdate({ updatedPieceInstanceIds: [protectString(id)] }),
-				removed: (id) => triggerUpdate({ updatedPieceInstanceIds: [protectString(id)] }),
-			}),
-			contentCache.AdLibPieces.find({}).observeChanges({
-				added: (id) => triggerUpdate({ updatedAdlibPieceIds: [protectString(id)] }),
-				changed: (id) => triggerUpdate({ updatedAdlibPieceIds: [protectString(id)] }),
-				removed: (id) => triggerUpdate({ updatedAdlibPieceIds: [protectString(id)] }),
-			}),
-			contentCache.AdLibActions.find({}).observeChanges({
-				added: (id) => triggerUpdate({ updatedAdlibActionIds: [protectString(id)] }),
-				changed: (id) => triggerUpdate({ updatedAdlibActionIds: [protectString(id)] }),
-				removed: (id) => triggerUpdate({ updatedAdlibActionIds: [protectString(id)] }),
-			}),
-			contentCache.BaselineAdLibPieces.find({}).observeChanges({
-				added: (id) => triggerUpdate({ updatedBaselineAdlibPieceIds: [protectString(id)] }),
-				changed: (id) => triggerUpdate({ updatedBaselineAdlibPieceIds: [protectString(id)] }),
-				removed: (id) => triggerUpdate({ updatedBaselineAdlibPieceIds: [protectString(id)] }),
-			}),
-			contentCache.BaselineAdLibActions.find({}).observeChanges({
-				added: (id) => triggerUpdate({ updatedBaselineAdlibActionIds: [protectString(id)] }),
-				changed: (id) => triggerUpdate({ updatedBaselineAdlibActionIds: [protectString(id)] }),
-				removed: (id) => triggerUpdate({ updatedBaselineAdlibActionIds: [protectString(id)] }),
-			}),
-			contentCache.Rundowns.find({}).observeChanges({
-				added: () => triggerUpdate({ invalidateAll: true }),
-				changed: () => triggerUpdate({ invalidateAll: true }),
-				removed: () => triggerUpdate({ invalidateAll: true }),
-			}),
-			contentCache.ShowStyleSourceLayers.find({}).observeChanges({
-				added: () => triggerUpdate({ invalidateAll: true }),
-				changed: () => triggerUpdate({ invalidateAll: true }),
-				removed: () => triggerUpdate({ invalidateAll: true }),
-			}),
-		]
+			const innerQueries = [
+				contentCache.Segments.find({}).observeChanges({
+					added: (id) => triggerUpdate({ updatedSegmentIds: [protectString(id)] }),
+					changed: (id) => triggerUpdate({ updatedSegmentIds: [protectString(id)] }),
+					removed: (id) => triggerUpdate({ updatedSegmentIds: [protectString(id)] }),
+				}),
+				contentCache.Parts.find({}).observeChanges({
+					added: (id) => triggerUpdate({ updatedPartIds: [protectString(id)] }),
+					changed: (id) => triggerUpdate({ updatedPartIds: [protectString(id)] }),
+					removed: (id) => triggerUpdate({ updatedPartIds: [protectString(id)] }),
+				}),
+				contentCache.Pieces.find({}).observeChanges({
+					added: (id) => triggerUpdate({ updatedPieceIds: [protectString(id)] }),
+					changed: (id) => triggerUpdate({ updatedPieceIds: [protectString(id)] }),
+					removed: (id) => triggerUpdate({ updatedPieceIds: [protectString(id)] }),
+				}),
+				contentCache.PartInstances.find({}).observeChanges({
+					added: (id) => triggerUpdate({ updatedPartInstanceIds: [protectString(id)] }),
+					changed: (id) => triggerUpdate({ updatedPartInstanceIds: [protectString(id)] }),
+					removed: (id) => triggerUpdate({ updatedPartInstanceIds: [protectString(id)] }),
+				}),
+				contentCache.PieceInstances.find({}).observeChanges({
+					added: (id) => triggerUpdate({ updatedPieceInstanceIds: [protectString(id)] }),
+					changed: (id) => triggerUpdate({ updatedPieceInstanceIds: [protectString(id)] }),
+					removed: (id) => triggerUpdate({ updatedPieceInstanceIds: [protectString(id)] }),
+				}),
+				contentCache.AdLibPieces.find({}).observeChanges({
+					added: (id) => triggerUpdate({ updatedAdlibPieceIds: [protectString(id)] }),
+					changed: (id) => triggerUpdate({ updatedAdlibPieceIds: [protectString(id)] }),
+					removed: (id) => triggerUpdate({ updatedAdlibPieceIds: [protectString(id)] }),
+				}),
+				contentCache.AdLibActions.find({}).observeChanges({
+					added: (id) => triggerUpdate({ updatedAdlibActionIds: [protectString(id)] }),
+					changed: (id) => triggerUpdate({ updatedAdlibActionIds: [protectString(id)] }),
+					removed: (id) => triggerUpdate({ updatedAdlibActionIds: [protectString(id)] }),
+				}),
+				contentCache.BaselineAdLibPieces.find({}).observeChanges({
+					added: (id) => triggerUpdate({ updatedBaselineAdlibPieceIds: [protectString(id)] }),
+					changed: (id) => triggerUpdate({ updatedBaselineAdlibPieceIds: [protectString(id)] }),
+					removed: (id) => triggerUpdate({ updatedBaselineAdlibPieceIds: [protectString(id)] }),
+				}),
+				contentCache.BaselineAdLibActions.find({}).observeChanges({
+					added: (id) => triggerUpdate({ updatedBaselineAdlibActionIds: [protectString(id)] }),
+					changed: (id) => triggerUpdate({ updatedBaselineAdlibActionIds: [protectString(id)] }),
+					removed: (id) => triggerUpdate({ updatedBaselineAdlibActionIds: [protectString(id)] }),
+				}),
+				contentCache.Rundowns.find({}).observeChanges({
+					added: () => triggerUpdate({ invalidateAll: true }),
+					changed: () => triggerUpdate({ invalidateAll: true }),
+					removed: () => triggerUpdate({ invalidateAll: true }),
+				}),
+				contentCache.Blueprints.find({}).observeChanges({
+					added: () => triggerUpdate({ invalidateAll: true }),
+					changed: () => triggerUpdate({ invalidateAll: true }),
+					removed: () => triggerUpdate({ invalidateAll: true }),
+				}),
+				contentCache.ShowStyleSourceLayers.find({}).observeChanges({
+					added: () => triggerUpdate({ invalidateAll: true }),
+					changed: () => triggerUpdate({ invalidateAll: true }),
+					removed: () => triggerUpdate({ invalidateAll: true }),
+				}),
+			]
 
-		return () => {
-			obs1.dispose()
+			return () => {
+				obs1.dispose()
 
-			for (const query of innerQueries) {
-				query.stop()
+				for (const query of innerQueries) {
+					query.stop()
+				}
 			}
 		}
-	})
+	)
 
 	// Set up observers:
 	return [
@@ -315,6 +329,7 @@ async function manipulateUIPieceContentStatusesPublicationData(
 		!state.adlibActionDependencies ||
 		!state.baselineAdlibDependencies ||
 		!state.baselineActionDependencies ||
+		!state.rundownMessageFactories ||
 		invalidateAllStatuses
 	) {
 		state.pieceDependencies = new Map()
@@ -323,6 +338,7 @@ async function manipulateUIPieceContentStatusesPublicationData(
 		state.adlibActionDependencies = new Map()
 		state.baselineAdlibDependencies = new Map()
 		state.baselineActionDependencies = new Map()
+		state.rundownMessageFactories = new Map()
 
 		// force every piece to be regenerated
 		collection.remove(null)
@@ -332,6 +348,13 @@ async function manipulateUIPieceContentStatusesPublicationData(
 		regenerateAdlibActionIds = new Set(state.contentCache.AdLibActions.find({}).map((p) => p._id))
 		regenerateBaselineAdlibPieceIds = new Set(state.contentCache.BaselineAdLibPieces.find({}).map((p) => p._id))
 		regenerateBaselineAdlibActionIds = new Set(state.contentCache.BaselineAdLibActions.find({}).map((p) => p._id))
+
+		// prepare the message factories
+		for (const rundown of state.contentCache.Rundowns.find({})) {
+			const showStyle = state.contentCache.ShowStyleSourceLayers.findOne(rundown.showStyleBaseId)
+			const blueprint = showStyle && state.contentCache.Blueprints.findOne(showStyle.blueprintId)
+			state.rundownMessageFactories.set(rundown._id, new PieceContentStatusMessageFactory(blueprint))
+		}
 	} else {
 		regeneratePieceIds = new Set(updateProps.updatedPieceIds)
 		regeneratePieceInstanceIds = new Set(updateProps.updatedPieceInstanceIds)
@@ -367,12 +390,15 @@ async function manipulateUIPieceContentStatusesPublicationData(
 			regenerateBaselineAdlibActionIds,
 			state.baselineActionDependencies
 		)
+
+		// messageFactories don't need to be invalidated, that is only needed when updateProps.invalidateAll which won't reach here
 	}
 
 	await regenerateForPieceIds(
 		state.contentCache,
 		state.studio,
 		state.pieceDependencies,
+		state.rundownMessageFactories,
 		collection,
 		regeneratePieceIds
 	)
@@ -380,6 +406,7 @@ async function manipulateUIPieceContentStatusesPublicationData(
 		state.contentCache,
 		state.studio,
 		state.pieceInstanceDependencies,
+		state.rundownMessageFactories,
 		collection,
 		regeneratePieceInstanceIds
 	)
@@ -387,6 +414,7 @@ async function manipulateUIPieceContentStatusesPublicationData(
 		state.contentCache,
 		state.studio,
 		state.adlibPieceDependencies,
+		state.rundownMessageFactories,
 		collection,
 		regenerateAdlibPieceIds
 	)
@@ -394,6 +422,7 @@ async function manipulateUIPieceContentStatusesPublicationData(
 		state.contentCache,
 		state.studio,
 		state.adlibActionDependencies,
+		state.rundownMessageFactories,
 		collection,
 		regenerateAdlibActionIds
 	)
@@ -401,6 +430,7 @@ async function manipulateUIPieceContentStatusesPublicationData(
 		state.contentCache,
 		state.studio,
 		state.baselineAdlibDependencies,
+		state.rundownMessageFactories,
 		collection,
 		regenerateBaselineAdlibPieceIds
 	)
@@ -408,6 +438,7 @@ async function manipulateUIPieceContentStatusesPublicationData(
 		state.contentCache,
 		state.studio,
 		state.baselineActionDependencies,
+		state.rundownMessageFactories,
 		collection,
 		regenerateBaselineAdlibActionIds
 	)
@@ -469,7 +500,7 @@ function updatePartAndSegmentInfoForExistingDocs(
 }
 
 meteorCustomPublish(
-	MeteorPubSub.uiPieceContentStatuses,
+	CorelibPubSub.uiPieceContentStatuses,
 	CustomCollectionName.UIPieceContentStatuses,
 	async function (pub, rundownPlaylistId: RundownPlaylistId | null) {
 		check(rundownPlaylistId, Match.Maybe(String))
@@ -477,7 +508,7 @@ meteorCustomPublish(
 		triggerWriteAccessBecauseNoCheckNecessary()
 
 		if (!rundownPlaylistId) {
-			logger.info(`Pub.${CustomCollectionName.UISegmentPartNotes}: Not playlistId`)
+			logger.info(`Pub.${CustomCollectionName.UIPieceContentStatuses}: Not playlistId`)
 			return
 		}
 
@@ -487,7 +518,7 @@ meteorCustomPublish(
 			UIPieceContentStatusesState,
 			UIPieceContentStatusesUpdateProps
 		>(
-			`pub_${MeteorPubSub.uiPieceContentStatuses}_${rundownPlaylistId}`,
+			`pub_${CorelibPubSub.uiPieceContentStatuses}_${rundownPlaylistId}`,
 			{ rundownPlaylistId },
 			setupUIPieceContentStatusesPublicationObservers,
 			manipulateUIPieceContentStatusesPublicationData,

@@ -6,6 +6,7 @@ import {
 	IBlueprintPieceDB,
 	IBlueprintPieceInstance,
 	IBlueprintResolvedPieceInstance,
+	IBlueprintSegment,
 	IEventContext,
 	IShowStyleUserContext,
 } from '..'
@@ -49,6 +50,8 @@ export interface IOnSetAsNextContext extends IShowStyleUserContext, IEventContex
 	getPartInstanceForPreviousPiece(piece: IBlueprintPieceInstance): Promise<IBlueprintPartInstance>
 	/** Gets the Part for a Piece retrieved from findLastScriptedPieceOnLayer. This primarily allows for accessing metadata of the Part */
 	getPartForPreviousPiece(piece: IBlueprintPieceDB): Promise<IBlueprintPart | undefined>
+	/** Gets the Segment. This primarily allows for accessing metadata */
+	getSegment(segment: 'current' | 'next'): Promise<IBlueprintSegment | undefined>
 
 	/**
 	 * Creative actions
@@ -67,8 +70,8 @@ export interface IOnSetAsNextContext extends IShowStyleUserContext, IEventContex
 	/**
 	 * Destructive actions
 	 */
-	/** Remove piecesInstances by id. Returns ids of piecesInstances that were removed. Note: For now we only allow removing from the next, but this might change to include current if there is justification */
-	removePieceInstances(part: 'next', pieceInstanceIds: string[]): Promise<string[]>
+	/** Remove piecesInstances by id. Returns ids of piecesInstances that were removed. */
+	removePieceInstances(part: 'current' | 'next', pieceInstanceIds: string[]): Promise<string[]>
 
 	/**
 	 * Move the next part through the rundown. Can move by either a number of parts, or segments in either direction.
@@ -76,5 +79,5 @@ export interface IOnSetAsNextContext extends IShowStyleUserContext, IEventContex
 	 * Multiple calls of this inside one call to `onSetAsNext` will replace earlier calls.
 	 * @returns Whether a new Part was found using the provided offset
 	 */
-	moveNextPart(partDelta: number, segmentDelta: number): Promise<boolean>
+	moveNextPart(partDelta: number, segmentDelta: number, ignoreQuickLoop?: boolean): Promise<boolean>
 }

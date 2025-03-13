@@ -185,7 +185,7 @@ export enum StudioJobs {
 	BlueprintIgnoreFixUpConfigForStudio = 'blueprintIgnoreFixUpConfigForStudio',
 
 	/**
-	 * Activate AdlibTesting (Rehearsal Mode) mode for the Rundown containing the nexted Part.
+	 * Activate AdlibTesting for the Rundown containing the nexted part.
 	 */
 	ActivateAdlibTesting = 'activateAdlibTesting',
 
@@ -231,6 +231,7 @@ export interface StopPiecesOnSourceLayersProps extends RundownPlayoutPropsBase {
 export interface MoveNextPartProps extends RundownPlayoutPropsBase {
 	partDelta: number
 	segmentDelta: number
+	ignoreQuickLoop?: boolean
 }
 export type ActivateHoldProps = RundownPlayoutPropsBase
 export type DeactivateHoldProps = RundownPlayoutPropsBase
@@ -308,6 +309,8 @@ export type DebugSyncInfinitesForNextPartInstanceProps = RundownPlayoutPropsBase
 export interface GeneratePlaylistSnapshotProps extends RundownPlayoutPropsBase {
 	// Include all Instances, or just recent ones
 	full: boolean
+	// Include the Timeline
+	withTimeline: boolean
 }
 export interface GeneratePlaylistSnapshotResult {
 	/**

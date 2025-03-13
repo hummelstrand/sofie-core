@@ -14,6 +14,7 @@ import {
 	TSR,
 	IBlueprintPlayoutDevice,
 	StudioRouteSet,
+	IBlueprintSegment,
 } from '@sofie-automation/blueprints-integration'
 import { PartInstanceId, PeripheralDeviceId } from '@sofie-automation/corelib/dist/dataModel/Ids'
 import { ReadonlyDeep } from 'type-fest'
@@ -113,6 +114,10 @@ export class ActionExecutionContext extends ShowStyleUserContext implements IAct
 		return this.partAndPieceInstanceService.getResolvedPieceInstances(part)
 	}
 
+	async getSegment(segment: 'current' | 'next'): Promise<IBlueprintSegment | undefined> {
+		return this.partAndPieceInstanceService.getSegment(segment)
+	}
+
 	async findLastPieceOnLayer(
 		sourceLayerId0: string | string[],
 		options?: {
@@ -157,8 +162,14 @@ export class ActionExecutionContext extends ShowStyleUserContext implements IAct
 		return this.partAndPieceInstanceService.queuePart(rawPart, rawPieces)
 	}
 
-	async moveNextPart(partDelta: number, segmentDelta: number): Promise<void> {
-		const selectedPart = selectNewPartWithOffsets(this._context, this._playoutModel, partDelta, segmentDelta)
+	async moveNextPart(partDelta: number, segmentDelta: number, ignoreQuickloop?: boolean): Promise<void> {
+		const selectedPart = selectNewPartWithOffsets(
+			this._context,
+			this._playoutModel,
+			partDelta,
+			segmentDelta,
+			ignoreQuickloop
+		)
 		if (selectedPart) await setNextPartFromPart(this._context, this._playoutModel, selectedPart, true)
 	}
 
@@ -177,7 +188,7 @@ export class ActionExecutionContext extends ShowStyleUserContext implements IAct
 		return this.partAndPieceInstanceService.stopPieceInstances(pieceInstanceIds, timeOffset)
 	}
 
-	async removePieceInstances(part: 'next', pieceInstanceIds: string[]): Promise<string[]> {
+	async removePieceInstances(part: 'current' | 'next', pieceInstanceIds: string[]): Promise<string[]> {
 		return this.partAndPieceInstanceService.removePieceInstances(part, pieceInstanceIds)
 	}
 

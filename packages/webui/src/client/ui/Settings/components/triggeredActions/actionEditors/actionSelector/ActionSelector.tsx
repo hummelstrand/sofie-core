@@ -66,6 +66,9 @@ function getArguments(t: TFunction, action: SomeAction): string[] {
 			if (action.parts) {
 				result.push(t('Parts: {{delta}}', { delta: (action.parts > 0 ? '+' : '') + action.parts }))
 			}
+			if (action.ignoreQuickLoop) {
+				result.push(t('Ignore QuickLoop'))
+			}
 			break
 		case PlayoutActions.reloadRundownPlaylistData:
 			break
@@ -170,7 +173,7 @@ function actionToLabel(t: TFunction, action: SomeAction['action']): string {
 		case PlayoutActions.deactivateRundownPlaylist:
 			return t('Deactivate Rundown')
 		case PlayoutActions.activateAdlibTestingMode:
-			return t('Rehearsal Mode')
+			return t('AdLib Testing')
 		case PlayoutActions.disableNextPiece:
 			return t('Disable next Piece')
 		case PlayoutActions.hold:
@@ -317,6 +320,18 @@ function getActionParametersEditor(
 								parts: newVal,
 							})
 						}
+					/>
+
+					<ToggleSwitchControl
+						classNames={'form-control'}
+						value={!!action.ignoreQuickLoop}
+						label={t('Ignore QuickLoop')}
+						handleUpdate={(newVal) => {
+							onChange({
+								...action,
+								ignoreQuickLoop: newVal,
+							})
+						}}
 					/>
 				</div>
 			)

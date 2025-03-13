@@ -114,6 +114,13 @@ export async function handleGeneratePlaylistSnapshot(
 			rundownId: { $in: rundownIds },
 		})
 
+		const timeline =
+			playlist.activationId && props.withTimeline
+				? await context.directCollections.Timelines.findOne({
+						_id: playlist.studioId,
+				  })
+				: undefined
+
 		logger.info(`Snapshot generation done`)
 		return literal<CoreRundownPlaylistSnapshot>({
 			version: getSystemVersion(),
@@ -135,6 +142,7 @@ export async function handleGeneratePlaylistSnapshot(
 			expectedMediaItems,
 			expectedPlayoutItems,
 			expectedPackages,
+			timeline,
 		})
 	})
 
@@ -173,7 +181,6 @@ export async function handleRestorePlaylistSnapshot(
 			rundownId: rd._id,
 		}
 		rd.studioId = snapshot.playlist.studioId
-		rd.notifiedCurrentPlayingPartExternalId = undefined
 	}
 
 	// TODO: This is too naive. Ideally we should unset it if it isnt valid, as anything other than a match is likely to have issues.

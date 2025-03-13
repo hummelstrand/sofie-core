@@ -56,11 +56,9 @@ import { DatabasePersistedModel } from '../../../modelBase'
 import { ExpectedPackageDBFromStudioBaselineObjects } from '@sofie-automation/corelib/dist/dataModel/ExpectedPackages'
 import { ExpectedPlayoutItemStudio } from '@sofie-automation/corelib/dist/dataModel/ExpectedPlayoutItem'
 import { StudioBaselineHelper } from '../../../studio/model/StudioBaselineHelper'
-import { EventsJobs } from '@sofie-automation/corelib/dist/worker/events'
 import { QuickLoopService } from '../services/QuickLoopService'
 import { calculatePartTimings, PartCalculatedTimings } from '@sofie-automation/corelib/dist/playout/timings'
 import { PieceInstanceWithTimings } from '@sofie-automation/corelib/dist/playout/processAndPrune'
-import { stringifyError } from '@sofie-automation/shared-lib/dist/lib/stringifyError'
 import { NotificationsModelHelper } from '../../../notifications/NotificationsModelHelper'
 
 export class PlayoutModelReadonlyImpl implements PlayoutModelReadonly {
@@ -240,6 +238,16 @@ export class PlayoutModelReadonlyImpl implements PlayoutModelReadonly {
 		return undefined
 	}
 
+	getSegmentsBetweenQuickLoopMarker(start: QuickLoopMarker, end: QuickLoopMarker): SegmentId[] {
+		return this.quickLoopService.getSegmentsBetweenMarkers(start, end)
+	}
+	getPartsBetweenQuickLoopMarker(
+		start: QuickLoopMarker,
+		end: QuickLoopMarker
+	): { parts: PartId[]; segments: SegmentId[] } {
+		return this.quickLoopService.getPartsBetweenMarkers(start, end)
+	}
+
 	#isMultiGatewayMode: boolean | undefined = undefined
 	public get isMultiGatewayMode(): boolean {
 		if (this.#isMultiGatewayMode === undefined) {
@@ -273,7 +281,6 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 	#timelineHasChanged = false
 
 	#pendingPartInstanceTimingEvents = new Set<PartInstanceId>()
-	#pendingNotifyCurrentlyPlayingPartEvent = new Map<RundownId, string | null>()
 
 	get hackDeletedPartInstanceIds(): PartInstanceId[] {
 		const result: PartInstanceId[] = []
@@ -493,13 +500,11 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 		this.playlistImpl.nextPartInfo = null
 		this.playlistImpl.lastTakeTime = getCurrentTime()
 
-		if (!this.playlistImpl.holdState || this.playlistImpl.holdState === RundownHoldState.COMPLETE) {
-			this.playlistImpl.holdState = RundownHoldState.NONE
-		} else {
-			this.playlistImpl.holdState = this.playlistImpl.holdState + 1
-		}
-
 		this.#playlistHasChanged = true
+	}
+
+	resetHoldState(): void {
+		this.setHoldState(RundownHoldState.NONE)
 	}
 
 	deactivatePlaylist(): void {
@@ -518,14 +523,6 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 
 	queuePartInstanceTimingEvent(partInstanceId: PartInstanceId): void {
 		this.#pendingPartInstanceTimingEvents.add(partInstanceId)
-	}
-
-	queueNotifyCurrentlyPlayingPartEvent(rundownId: RundownId, partInstance: PlayoutPartInstanceModel | null): void {
-		if (partInstance && partInstance.partInstance.part.shouldNotifyCurrentPlayingPart) {
-			this.#pendingNotifyCurrentlyPlayingPartEvent.set(rundownId, partInstance.partInstance.part.externalId)
-		} else if (!partInstance) {
-			this.#pendingNotifyCurrentlyPlayingPartEvent.set(rundownId, null)
-		}
 	}
 
 	removeAllRehearsalPartInstances(): void {
@@ -675,6 +672,12 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 			this.context.saveRouteSetChanges(),
 		])
 
+		// Clean up deleted partInstances, since they have now been deleted by writePartInstancesAndPieceInstances
+		for (const [partInstanceId, partInstance] of this.allPartInstances) {
+			if (partInstance !== null) continue
+			this.allPartInstances.delete(partInstanceId)
+		}
+
 		this.#playlistHasChanged = false
 
 		// Execute deferAfterSave()'s
@@ -689,21 +692,6 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 		}
 		this.#pendingPartInstanceTimingEvents.clear()
 
-		for (const [rundownId, partExternalId] of this.#pendingNotifyCurrentlyPlayingPartEvent) {
-			// This is low-prio, defer so that it's executed well after publications has been updated,
-			// so that the playout gateway has had the chance to learn about the timeline changes
-			this.context
-				.queueEventJob(EventsJobs.NotifyCurrentlyPlayingPart, {
-					rundownId: rundownId,
-					isRehearsal: !!this.playlist.rehearsal,
-					partExternalId: partExternalId,
-				})
-				.catch((e) => {
-					logger.warn(`Failed to queue NotifyCurrentlyPlayingPart job: ${stringifyError(e)}`)
-				})
-		}
-		this.#pendingNotifyCurrentlyPlayingPartEvent.clear()
-
 		if (span) span.end()
 	}
 
@@ -713,14 +701,18 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 		this.#playlistHasChanged = true
 	}
 
-	setOnTimelineGenerateResult(
-		persistentState: unknown | undefined,
+	setAbResolvingState(
 		assignedAbSessions: Record<string, ABSessionAssignments>,
 		trackedAbSessions: ABSessionInfo[]
 	): void {
-		this.playlistImpl.previousPersistentState = persistentState
 		this.playlistImpl.assignedAbSessions = assignedAbSessions
 		this.playlistImpl.trackedAbSessions = trackedAbSessions
+
+		this.#playlistHasChanged = true
+	}
+
+	setBlueprintPersistentState(persistentState: unknown | undefined): void {
+		this.playlistImpl.previousPersistentState = persistentState
 
 		this.#playlistHasChanged = true
 	}
@@ -828,10 +820,6 @@ export class PlayoutModelImpl extends PlayoutModelReadonlyImpl implements Playou
 	updateQuickLoopState(): void {
 		this.playlistImpl.quickLoop = this.quickLoopService.getUpdatedProps()
 		this.#playlistHasChanged = true
-	}
-
-	getSegmentsBetweenQuickLoopMarker(start: QuickLoopMarker, end: QuickLoopMarker): SegmentId[] {
-		return this.quickLoopService.getSegmentsBetweenMarkers(start, end)
 	}
 
 	/** Notifications */

@@ -15,7 +15,7 @@ import { MOSDeviceActions } from './ingest/mosDevice/actions'
 import { MethodContextAPI } from './methodContext'
 import { ServerClientAPI } from './client'
 import { triggerWriteAccessBecauseNoCheckNecessary } from '../security/securityVerify'
-import { Bucket } from '@sofie-automation/meteor-lib/dist/collections/Buckets'
+import { Bucket } from '@sofie-automation/corelib/dist/dataModel/Bucket'
 import { BucketsAPI } from './buckets'
 import { BucketAdLib } from '@sofie-automation/corelib/dist/dataModel/BucketAdLibPiece'
 import { AdLibActionCommon } from '@sofie-automation/corelib/dist/dataModel/AdlibAction'
@@ -191,7 +191,8 @@ class ServerUserActionAPI
 		eventTime: Time,
 		rundownPlaylistId: RundownPlaylistId,
 		partDelta: number,
-		segmentDelta: number
+		segmentDelta: number,
+		ignoreQuickLoop: boolean | null
 	) {
 		return ServerClientAPI.runUserActionInLogForPlaylistOnWorker(
 			this,
@@ -208,6 +209,7 @@ class ServerUserActionAPI
 				playlistId: rundownPlaylistId,
 				partDelta: partDelta,
 				segmentDelta: segmentDelta,
+				ignoreQuickLoop: ignoreQuickLoop ?? undefined,
 			}
 		)
 	}
@@ -636,6 +638,9 @@ class ServerUserActionAPI
 		reason: string,
 		full: boolean
 	) {
+		if (!verifyHashedToken(hashedToken)) {
+			throw new Meteor.Error(401, `Idempotency token is invalid or has expired`)
+		}
 		return ServerClientAPI.runUserActionInLogForPlaylist(
 			this,
 			userEvent,
@@ -648,7 +653,7 @@ class ServerUserActionAPI
 			'storeRundownSnapshot',
 			{ playlistId, reason, full },
 			async (playlist) => {
-				return storeRundownPlaylistSnapshot(playlist, hashedToken, reason, full)
+				return storeRundownPlaylistSnapshot(playlist, { withArchivedDocuments: full }, reason)
 			}
 		)
 	}

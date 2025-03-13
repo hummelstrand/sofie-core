@@ -30,6 +30,8 @@ jobs:
           node-version-file: ".node-version"
       - name: Prepare Environment
         run: |
+          corepack enable
+
           cd packages
           yarn install
           yarn lerna run --scope \*\*/${{ matrix.package-name }} --include-dependencies --stream build
@@ -68,6 +70,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Prepare Environment
         run: |
+          corepack enable
+
           cd packages
           yarn install
           yarn lerna run --scope \*\*/${{ matrix.package-name }} --include-dependencies --stream build
@@ -108,6 +112,8 @@ jobs:
       - name: Prepare Environment
         if: ${{ steps.do-publish.outputs.publish }}
         run: |
+          corepack enable
+          
           cd packages
           yarn install
         env:

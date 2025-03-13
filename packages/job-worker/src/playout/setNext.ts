@@ -31,6 +31,7 @@ import {
 } from '../blueprints/context/services/PartAndPieceInstanceActionService'
 import { NoteSeverity } from '@sofie-automation/blueprints-integration'
 import { convertNoteToNotification } from '../notifications/util'
+import { PersistentPlayoutStateStore } from '../blueprints/context/services/PersistantStateStore'
 
 /**
  * Set or clear the nexted part, from a given PartInstance, or SelectNextPartResult
@@ -225,8 +226,14 @@ async function executeOnSetAsNextCallback(
 	playoutModel.clearAllNotifications(NOTIFICATION_CATEGORY)
 
 	try {
-		await blueprint.blueprint.onSetAsNext(onSetAsNextContext)
+		const blueprintPersistentState = new PersistentPlayoutStateStore(playoutModel.playlist.previousPersistentState)
+
+		await blueprint.blueprint.onSetAsNext(onSetAsNextContext, blueprintPersistentState)
 		await applyOnSetAsNextSideEffects(context, playoutModel, onSetAsNextContext)
+
+		if (blueprintPersistentState.hasChanges) {
+			playoutModel.setBlueprintPersistentState(blueprintPersistentState.getAll())
+		}
 
 		for (const note of onSetAsNextContext.notes) {
 			// Update the notifications. Even though these are related to a partInstance, they will be cleared on the next take
@@ -364,9 +371,11 @@ async function cleanupOrphanedItems(context: JobContext, playoutModel: PlayoutMo
 
 	const selectedPartInstancesSegmentIds = new Set<SegmentId>()
 
+	const previousPartInstance = playoutModel.previousPartInstance?.partInstance
 	const currentPartInstance = playoutModel.currentPartInstance?.partInstance
 	const nextPartInstance = playoutModel.nextPartInstance?.partInstance
 
+	if (previousPartInstance) selectedPartInstancesSegmentIds.add(previousPartInstance.segmentId)
 	if (currentPartInstance) selectedPartInstancesSegmentIds.add(currentPartInstance.segmentId)
 	if (nextPartInstance) selectedPartInstancesSegmentIds.add(nextPartInstance.segmentId)
 
@@ -376,7 +385,7 @@ async function cleanupOrphanedItems(context: JobContext, playoutModel: PlayoutMo
 
 	const alterSegmentsFromRundowns = new Map<RundownId, { deleted: SegmentId[]; hidden: SegmentId[] }>()
 	for (const segment of segments) {
-		// If the segment is orphaned and not the segment for the next or current partinstance
+		// If the segment is orphaned and not the segment for the previous, current or next partInstance
 		if (!selectedPartInstancesSegmentIds.has(segment.segment._id)) {
 			let rundownSegments = alterSegmentsFromRundowns.get(segment.segment.rundownId)
 			if (!rundownSegments) {

@@ -168,6 +168,25 @@ export interface PlayoutModelReadonly extends StudioPlayoutModelBaseReadonly {
 	getRundownIds(): RundownId[]
 
 	/**
+	 * Returns any segmentId's that are found between 2 quickloop markers, none will be returned if
+	 * the end is before the start.
+	 * @param start A quickloop marker
+	 * @param end A quickloop marker
+	 */
+	getSegmentsBetweenQuickLoopMarker(start: QuickLoopMarker, end: QuickLoopMarker): SegmentId[]
+
+	/**
+	 * Returns any segmentId's that are found between 2 quickloop markers, none will be returned if
+	 * the end is before the start.
+	 * @param start A quickloop marker
+	 * @param end A quickloop marker
+	 */
+	getPartsBetweenQuickLoopMarker(
+		start: QuickLoopMarker,
+		end: QuickLoopMarker
+	): { parts: PartId[]; segments: SegmentId[] }
+
+	/**
 	 * Search for a PieceInstance in the RundownPlaylist
 	 * @param id Id of the PieceInstance
 	 * @returns The found PieceInstance and its parent PartInstance
@@ -248,9 +267,14 @@ export interface PlayoutModel extends PlayoutModelReadonly, StudioPlayoutModelBa
 	cycleSelectedPartInstances(): void
 
 	/**
-	 * Update loop markers anytime something sinificant occurs that could result in entering or exiting the mode.
+	 * Update loop markers anytime something significant occurs that could result in entering or exiting the mode.
 	 */
 	updateQuickLoopState(): void
+
+	/*
+	 * Reset the hold state to a base state
+	 */
+	resetHoldState(): void
 
 	/**
 	 * Set the RundownPlaylist as deactivated
@@ -262,13 +286,6 @@ export interface PlayoutModel extends PlayoutModelReadonly, StudioPlayoutModelBa
 	 * @param partInstanceId Id of the PartInstance the event is in relation to
 	 */
 	queuePartInstanceTimingEvent(partInstanceId: PartInstanceId): void
-
-	/**
-	 * Queue a `NotifyCurrentlyPlayingPart` operation to be performed upon completion of this Playout operation
-	 * @param rundownId The Rundown to report the notification to
-	 * @param partInstance The PartInstance the event is in relation to
-	 */
-	queueNotifyCurrentlyPlayingPartEvent(rundownId: RundownId, partInstance: PlayoutPartInstanceModel | null): void
 
 	/**
 	 * Remove all loaded PartInstances marked as `rehearsal` from this RundownPlaylist
@@ -293,16 +310,20 @@ export interface PlayoutModel extends PlayoutModelReadonly, StudioPlayoutModelBa
 	setHoldState(newState: RundownHoldState): void
 
 	/**
-	 * Store the persistent results of the AB playback resolving and onTimelineGenerate
-	 * @param persistentState Blueprint owned state from onTimelineGenerate
+	 * Store the persistent results of the AB playback resolving
 	 * @param assignedAbSessions The applied AB sessions
 	 * @param trackedAbSessions The known AB sessions
 	 */
-	setOnTimelineGenerateResult(
-		persistentState: unknown | undefined,
+	setAbResolvingState(
 		assignedAbSessions: Record<string, ABSessionAssignments>,
 		trackedAbSessions: ABSessionInfo[]
 	): void
+
+	/**
+	 * Store the blueprint persistent state
+	 * @param persistentState Blueprint owned state
+	 */
+	setBlueprintPersistentState(persistentState: unknown | undefined): void
 
 	/**
 	 * Set a PartInstance as the nexted PartInstance
@@ -344,14 +365,6 @@ export interface PlayoutModel extends PlayoutModelReadonly, StudioPlayoutModelBa
 	 * @param marker
 	 */
 	setQuickLoopMarker(type: 'start' | 'end', marker: QuickLoopMarker | null): void
-
-	/**
-	 * Returns any segmentId's that are found between 2 quickloop markers, none will be returned if
-	 * the end is before the start.
-	 * @param start A quickloop marker
-	 * @param end A quickloop marker
-	 */
-	getSegmentsBetweenQuickLoopMarker(start: QuickLoopMarker, end: QuickLoopMarker): SegmentId[]
 
 	calculatePartTimings(
 		fromPartInstance: PlayoutPartInstanceModel | null,

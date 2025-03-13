@@ -27,7 +27,7 @@ import { PieceStatusCode } from '@sofie-automation/corelib/dist/dataModel/Piece'
 import { PeripheralDevicesAPI } from '../../lib/clientAPI'
 import { handleRundownReloadResponse } from '../RundownView'
 import { MeteorCall } from '../../lib/meteorApi'
-import { UIPieceContentStatus, UISegmentPartNote } from '@sofie-automation/meteor-lib/dist/api/rundownNotifications'
+import { UISegmentPartNote } from '@sofie-automation/meteor-lib/dist/api/rundownNotifications'
 import { isTranslatableMessage, translateMessage } from '@sofie-automation/corelib/dist/TranslatableMessage'
 import { NoteSeverity, StatusCode } from '@sofie-automation/blueprints-integration'
 import { getIgnorePieceContentStatus } from '../../lib/localStorage'
@@ -51,6 +51,7 @@ import { UserPermissionsContext, UserPermissions } from '../UserPermissions'
 import { PartInstance } from '@sofie-automation/meteor-lib/dist/collections/PartInstances'
 import { assertNever } from '@sofie-automation/corelib/dist/lib'
 import { DBNotificationTargetType } from '@sofie-automation/corelib/dist/dataModel/Notifications'
+import { UIPieceContentStatus } from '@sofie-automation/corelib/dist/dataModel/PieceContentStatus'
 
 export const onRONotificationClick = new ReactiveVar<((e: RONotificationEvent) => void) | undefined>(undefined)
 export const reloadRundownPlaylistClick = new ReactiveVar<((e: any) => void) | undefined>(undefined)
@@ -603,10 +604,6 @@ class RundownViewNotifier extends WithManagedTracker {
 
 				let newNotification: Notification | undefined = undefined
 				if (status !== PieceStatusCode.OK && status !== PieceStatusCode.UNKNOWN) {
-					const messagesStr = messages.length
-						? messages.map((msg) => translateMessage(msg, t)).join('; ')
-						: t('There is an unspecified problem with the source.')
-
 					const issueName = typeof issue.name === 'string' ? issue.name : translateMessage(issue.name, t)
 					let messageName = issue.segmentName || issueName
 					if (issue.segmentName && issueName) {
@@ -619,7 +616,15 @@ class RundownViewNotifier extends WithManagedTracker {
 						(
 							<>
 								<h5>{messageName}</h5>
-								<div>{messagesStr}</div>
+								<div>
+									{messages.map((msg) => (
+										<>
+											{translateMessage(msg, t)}
+											<br />
+										</>
+									))}
+									{messages.length === 0 && t('There is an unspecified problem with the source.')}
+								</div>
 							</>
 						),
 						issue.segmentId ? issue.segmentId : 'line_' + issue.partId,

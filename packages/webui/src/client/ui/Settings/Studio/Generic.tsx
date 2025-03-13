@@ -362,7 +362,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 			</LabelAndOverridesForCheckbox>
 
 			<LabelAndOverridesForCheckbox
-				label={t('Allow AdlibTesting (rehearsal) mode, for testing adlibs before taking the first Part')}
+				label={t('Enable AdLib Testing, for testing AdLibs before taking the first Part')}
 				item={wrappedItem}
 				itemKey={'allowAdlibTestingSegment'}
 				overrideHelper={overrideHelper}
@@ -381,21 +381,21 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 			</LabelAndOverridesForCheckbox>
 
 			<LabelAndOverridesForCheckbox
-				label={t('Enable Evaluation Form')}
+				label={t('Enable User Editing')}
 				item={wrappedItem}
-				itemKey={'enableEvaluationForm'}
+				itemKey={'enableUserEdits'}
 				overrideHelper={overrideHelper}
-				hint={t('This enables or disables the evaluationform in the UI - enabled is the default behavior')}
+				hint={t('This feature enables the use of the Properties Panel and the Edit Mode')}
 			>
 				{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
 			</LabelAndOverridesForCheckbox>
 
 			<LabelAndOverridesForCheckbox
-				label={t('Double click selection for properties panel')}
+				label={t('Enable Evaluation Form')}
 				item={wrappedItem}
-				itemKey={'enableUserEdits'}
+				itemKey={'enableEvaluationForm'}
 				overrideHelper={overrideHelper}
-				hint={t('This feature enables user edits')}
+				hint={t('This enables or disables the evaluationform in the UI - enabled is the default behavior')}
 			>
 				{(value, handleUpdate) => <CheckboxControl value={!!value} handleUpdate={handleUpdate} />}
 			</LabelAndOverridesForCheckbox>

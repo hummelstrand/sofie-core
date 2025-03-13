@@ -10,6 +10,7 @@ import { PeripheralDeviceId, RundownId, RundownPlaylistId } from '../core/model/
 import { PeripheralDeviceCommand } from '../core/model/PeripheralDeviceCommand'
 import { ExpectedPlayoutItemPeripheralDevice } from '../expectedPlayoutItem'
 import { DeviceTriggerMountedAction, PreviewWrappedAdLib } from '../input-gateway/deviceTriggerPreviews'
+import type { IngestRundownStatus } from '../ingest/rundownStatus'
 
 /**
  * Ids of possible DDP subscriptions for any PeripheralDevice.
@@ -51,6 +52,13 @@ export enum PeripheralDevicePubSub {
 	packageManagerPackageContainers = 'packageManagerPackageContainers',
 	/** Package manager: The expected packages in the Studio of the PeripheralDevice */
 	packageManagerExpectedPackages = 'packageManagerExpectedPackages',
+
+	// Ingest gateway:
+
+	/**
+	 * Ingest status of rundowns for a PeripheralDevice
+	 */
+	ingestDeviceRundownStatus = 'ingestDeviceRundownStatus',
 }
 
 /**
@@ -103,17 +111,22 @@ export interface PeripheralDevicePubSubTypes {
 	/** Custom publications for package-manager */
 	[PeripheralDevicePubSub.packageManagerPlayoutContext]: (
 		deviceId: PeripheralDeviceId,
-		token: string | undefined
+		token?: string
 	) => PeripheralDevicePubSubCollectionsNames.packageManagerPlayoutContext
 	[PeripheralDevicePubSub.packageManagerPackageContainers]: (
 		deviceId: PeripheralDeviceId,
-		token: string | undefined
+		token?: string
 	) => PeripheralDevicePubSubCollectionsNames.packageManagerPackageContainers
 	[PeripheralDevicePubSub.packageManagerExpectedPackages]: (
 		deviceId: PeripheralDeviceId,
 		filterPlayoutDeviceIds: PeripheralDeviceId[] | undefined,
-		token: string | undefined
+		token?: string
 	) => PeripheralDevicePubSubCollectionsNames.packageManagerExpectedPackages
+
+	[PeripheralDevicePubSub.ingestDeviceRundownStatus]: (
+		deviceId: PeripheralDeviceId,
+		token?: string | undefined
+	) => PeripheralDevicePubSubCollectionsNames.ingestRundownStatus
 }
 
 export enum PeripheralDevicePubSubCollectionsNames {
@@ -134,6 +147,8 @@ export enum PeripheralDevicePubSubCollectionsNames {
 	packageManagerPlayoutContext = 'packageManagerPlayoutContext',
 	packageManagerPackageContainers = 'packageManagerPackageContainers',
 	packageManagerExpectedPackages = 'packageManagerExpectedPackages',
+
+	ingestRundownStatus = 'ingestRundownStatus',
 }
 
 export type PeripheralDevicePubSubCollections = {
@@ -154,4 +169,6 @@ export type PeripheralDevicePubSubCollections = {
 	[PeripheralDevicePubSubCollectionsNames.packageManagerPlayoutContext]: PackageManagerPlayoutContext
 	[PeripheralDevicePubSubCollectionsNames.packageManagerPackageContainers]: PackageManagerPackageContainers
 	[PeripheralDevicePubSubCollectionsNames.packageManagerExpectedPackages]: PackageManagerExpectedPackage
+
+	[PeripheralDevicePubSubCollectionsNames.ingestRundownStatus]: IngestRundownStatus
 }

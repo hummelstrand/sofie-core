@@ -6,13 +6,14 @@ import {
 	RemoteContent,
 	EvsContent,
 } from '@sofie-automation/blueprints-integration'
-import CamInputIcon from './Renderers/CamInputIcon'
-import VTInputIcon from './Renderers/VTInputIcon'
+import { CamInputIcon } from './Renderers/CamInputIcon'
+import { VTInputIcon } from './Renderers/VTInputIcon'
 import SplitInputIcon from './Renderers/SplitInputIcon'
-import RemoteInputIcon from './Renderers/RemoteInputIcon'
-import LiveSpeakInputIcon from './Renderers/LiveSpeakInputIcon'
-import GraphicsInputIcon from './Renderers/GraphicsInputIcon'
-import UnknownInputIcon from './Renderers/UnknownInputIcon'
+import { RemoteInputIcon } from './Renderers/RemoteInputIcon'
+import { LiveSpeakInputIcon } from './Renderers/LiveSpeakInputIcon'
+import { RemoteSpeakInputIcon } from './Renderers/RemoteSpeakInputIcon'
+import { GraphicsInputIcon } from './Renderers/GraphicsInputIcon'
+import { UnknownInputIcon } from './Renderers/UnknownInputIcon'
 import { MeteorPubSub } from '@sofie-automation/meteor-lib/dist/api/pubsub'
 import { PieceInstance } from '@sofie-automation/corelib/dist/dataModel/PieceInstance'
 import { findPieceInstanceToShow, findPieceInstanceToShowFromInstances } from './utils'
@@ -49,16 +50,19 @@ export const PieceIcon = (props: {
 				const rmContent = piece ? (piece.content as RemoteContent | undefined) : undefined
 				return (
 					<RemoteInputIcon
-						inputIndex={rmContent ? rmContent.studioLabel : undefined}
+						inputIndex={rmContent ? rmContent.studioLabelShort || rmContent.studioLabel : undefined}
 						abbreviation={props.sourceLayer.abbreviation}
 					/>
 				)
+			}
+			case SourceLayerType.REMOTE_SPEAK: {
+				return <RemoteSpeakInputIcon abbreviation={props.sourceLayer.abbreviation} />
 			}
 			case SourceLayerType.LOCAL: {
 				const localContent = piece ? (piece.content as EvsContent | undefined) : undefined
 				return (
 					<LocalInputIcon
-						inputIndex={localContent ? localContent.studioLabel : undefined}
+						inputIndex={localContent ? localContent.studioLabelShort || localContent.studioLabel : undefined}
 						abbreviation={props.sourceLayer.abbreviation}
 					/>
 				)
@@ -71,7 +75,7 @@ export const PieceIcon = (props: {
 				const camContent = piece ? (piece.content as CameraContent | undefined) : undefined
 				return (
 					<CamInputIcon
-						inputIndex={camContent ? camContent.studioLabel : undefined}
+						inputIndex={camContent ? camContent.studioLabelShort || camContent.studioLabel : undefined}
 						abbreviation={props.sourceLayer.abbreviation}
 					/>
 				)
@@ -90,6 +94,7 @@ export const pieceIconSupportedLayers = new Set([
 	SourceLayerType.GRAPHICS,
 	SourceLayerType.LIVE_SPEAK,
 	SourceLayerType.REMOTE,
+	SourceLayerType.REMOTE_SPEAK,
 	SourceLayerType.SPLITS,
 	SourceLayerType.VT,
 	SourceLayerType.CAMERA,
