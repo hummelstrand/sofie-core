@@ -152,6 +152,8 @@ $defs:
       - activePieces
       - segments
       - adLibs
+      - buckets
+      - packages
   status:
     type: string
     title: SubscriptionStatus

@@ -1,5 +1,12 @@
 import { protectString, unprotectString } from '@sofie-automation/server-core-integration'
-import { makeMockLogger, makeMockSubscriber, makeTestParts, makeTestPlaylist, makeTestShowStyleBase } from './utils'
+import {
+	makeMockHandlers,
+	makeMockLogger,
+	makeMockSubscriber,
+	makeTestParts,
+	makeTestPlaylist,
+	makeTestShowStyleBase,
+} from './utils'
 import { AdLibsTopic } from '../adLibsTopic'
 import { ShowStyleBaseExt } from '../../collections/showStyleBaseHandler'
 import { AdLibAction } from '@sofie-automation/corelib/dist/dataModel/AdlibAction'

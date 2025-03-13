@@ -6,7 +6,7 @@
  */
 
 
-type Slash = PongEvent | HeartbeatEvent | SubscriptionStatusError | SubscriptionStatusSuccess | StudioEvent | ActivePlaylistEvent | ActivePiecesEvent | SegmentsEvent | AdLibsEvent;
+type Slash = PongEvent | HeartbeatEvent | SubscriptionStatusError | SubscriptionStatusSuccess | StudioEvent | ActivePlaylistEvent | ActivePiecesEvent | SegmentsEvent | AdLibsEvent | PackagesEvent | BucketsEvent;
 
 interface PongEvent {
   'event': 'pong';
@@ -50,6 +50,8 @@ enum SubscriptionName {
   ACTIVE_PIECES = "activePieces",
   SEGMENTS = "segments",
   AD_LIBS = "adLibs",
+  BUCKETS = "buckets",
+  RESERVED_PACKAGES = "packages",
 }
 
 /**
@@ -120,7 +122,7 @@ interface ActivePlaylistEvent {
    */
   'name': string;
   /**
-   * The set of rundownIds in the active playlist
+   * The set of rundownIds in the active playlist, in order
    */
   'rundownIds': string[];
   'currentPart': CurrentPartStatus | null;
@@ -541,4 +543,145 @@ interface GlobalAdLibStatus {
   'additionalProperties'?: Record<string, any>;
 }
 
-export {Slash, PongEvent, HeartbeatEvent, SubscriptionStatusError, SubscriptionDetails, SubscriptionName, SubscriptionStatus, SubscriptionStatusSuccess, StudioEvent, PlaylistStatus, PlaylistActivationStatus, ActivePlaylistEvent, CurrentPartStatus, PieceStatus, CurrentPartTiming, CurrentSegment, CurrentSegmentTiming, SegmentCountdownType, PartStatus, ActivePlaylistTiming, ActivePlaylistTimingMode, ActivePlaylistQuickLoop, QuickLoopMarker, QuickLoopMarkerType, ActivePiecesEvent, SegmentsEvent, Segment, SegmentTiming, AdLibsEvent, AdLibStatus, AdLibActionType, GlobalAdLibStatus};
+interface PackagesEvent {
+  'event': 'packages';
+  /**
+   * Unique id of the rundown playlist, or null if no playlist is active
+   */
+  'rundownPlaylistId': string | null;
+  /**
+   * The Package statuses for this playlist
+   */
+  'packages': PackageInfoStatus[];
+}
+
+interface PackageInfoStatus {
+  /**
+   * Name of the package
+   */
+  'packageName'?: string;
+  /**
+   * Status:
+   * * `unknown` - status not determined (yet)
+   * * `ok` - no faults, can be played
+   * * `source_broken` - the source is present, but should not be played due to a technical malfunction (file is broken, camera robotics failed, REMOTE input is just bars, etc.)
+   * * `source_has_issues` - technically it can be played, but some issues with it were detected
+   * * `source_missing` - the source (file, live input) is missing and cannot be played
+   * * `source_not_ready` - can't be played for a non-technical reason (e.g. a placeholder clip with no content)
+   * * `source_not_set` - missing a file path
+   * * `source_unknown_state` - reported, but unrecognized state
+   */
+  'status': PackageStatus;
+  /**
+   * Id of the Rundown that a Piece (or AdLib) expecting this package belongs to
+   */
+  'rundownId': string;
+  /**
+   * Id of the Part that a Piece (or AdLib) expecting this package belongs to. It could be an Id of a Part from the Active Playlist topic, or a Part not exposed otherwise by the LSG.
+   */
+  'partId'?: string;
+  /**
+   * Id of the Segment that a Piece (or AdLib) expecting this package belongs to
+   */
+  'segmentId'?: string;
+  /**
+   * Id of the Piece or AdLib that expects this package. It could be an Id of a Piece from the Active Pieces and Active Playlist topics, or an Id of an AdLib from the AdLibs topic. It could also be an Id of a Piece not exposed otherwise by the LSG, but still relevant, e.g. to summarize the status of packages within a specific Part/Segment.
+   */
+  'pieceOrAdLibId': string;
+  /**
+   * URL where the thumbnail can be accessed
+   */
+  'thumbnailUrl'?: string;
+  /**
+   * URL where the preview can be accessed
+   */
+  'previewUrl'?: string;
+}
+
+/**
+ * Status:
+ * * `unknown` - status not determined (yet)
+ * * `ok` - no faults, can be played
+ * * `source_broken` - the source is present, but should not be played due to a technical malfunction (file is broken, camera robotics failed, REMOTE input is just bars, etc.)
+ * * `source_has_issues` - technically it can be played, but some issues with it were detected
+ * * `source_missing` - the source (file, live input) is missing and cannot be played
+ * * `source_not_ready` - can't be played for a non-technical reason (e.g. a placeholder clip with no content)
+ * * `source_not_set` - missing a file path
+ * * `source_unknown_state` - reported, but unrecognized state
+ */
+enum PackageStatus {
+  UNKNOWN = "unknown",
+  OK = "ok",
+  SOURCE_BROKEN = "source_broken",
+  SOURCE_HAS_ISSUES = "source_has_issues",
+  SOURCE_MISSING = "source_missing",
+  SOURCE_NOT_READY = "source_not_ready",
+  SOURCE_NOT_SET = "source_not_set",
+  SOURCE_UNKNOWN_STATE = "source_unknown_state",
+}
+
+interface BucketsEvent {
+  'event': 'buckets';
+  /**
+   * Buckets available in the Studio
+   */
+  'buckets': BucketStatus[];
+}
+
+interface BucketStatus {
+  /**
+   * Unique id of the bucket
+   */
+  'id'?: string;
+  /**
+   * The user defined bucket name
+   */
+  'name'?: string;
+  /**
+   * The AdLibs in this bucket
+   */
+  'adLibs'?: BucketAdLibStatus[];
+  'additionalProperties'?: Record<string, any>;
+}
+
+interface BucketAdLibStatus {
+  /**
+   * Unique id of the AdLib
+   */
+  'id': string;
+  /**
+   * The user defined AdLib name
+   */
+  'name': string;
+  /**
+   * The source layer name for this AdLib
+   */
+  'sourceLayer': string;
+  /**
+   * The output layer name for this AdLib
+   */
+  'outputLayer'?: string;
+  /**
+   * The available action type names that can be used to modify the execution of the AdLib
+   */
+  'actionType': AdLibActionType[];
+  /**
+   * Tags attached to this AdLib
+   */
+  'tags'?: string[];
+  /**
+   * Optional arbitrary data
+   */
+  'publicData'?: any;
+  /**
+   * JSON schema definition of the adLib properties that can be modified using the adLibOptions property in executeAdLib
+   */
+  'optionsSchema'?: string;
+  /**
+   * Id of the adlib recognizable by the external source. Unique within a bucket.
+   */
+  'externalId': string;
+  'additionalProperties'?: Record<string, any>;
+}
+
+export {Slash, PongEvent, HeartbeatEvent, SubscriptionStatusError, SubscriptionDetails, SubscriptionName, SubscriptionStatus, SubscriptionStatusSuccess, StudioEvent, PlaylistStatus, PlaylistActivationStatus, ActivePlaylistEvent, CurrentPartStatus, PieceStatus, CurrentPartTiming, CurrentSegment, CurrentSegmentTiming, SegmentCountdownType, PartStatus, ActivePlaylistTiming, ActivePlaylistTimingMode, ActivePlaylistQuickLoop, QuickLoopMarker, QuickLoopMarkerType, ActivePiecesEvent, SegmentsEvent, Segment, SegmentTiming, AdLibsEvent, AdLibStatus, AdLibActionType, GlobalAdLibStatus, PackagesEvent, PackageInfoStatus, PackageStatus, BucketsEvent, BucketStatus, BucketAdLibStatus};

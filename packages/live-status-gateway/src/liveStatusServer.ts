@@ -127,7 +127,7 @@ export class LiveStatusServer {
 		rootChannel.addTopic(SubscriptionName.ACTIVE_PIECES, activePiecesTopic)
 		rootChannel.addTopic(SubscriptionName.SEGMENTS, segmentsTopic)
 		rootChannel.addTopic(SubscriptionName.AD_LIBS, adLibsTopic)
-		rootChannel.addTopic(SubscriptionName.PACKAGES, packageStatusTopic)
+		rootChannel.addTopic(SubscriptionName.RESERVED_PACKAGES, packageStatusTopic)
 		rootChannel.addTopic(SubscriptionName.BUCKETS, bucketsTopic)
 
 		const wss = new WebSocketServer({ port: 8080 })
