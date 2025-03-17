@@ -788,6 +788,9 @@ svg.icon {
 	margin-top: 0.1em;
 	margin-right: 0.1em;
 
+	display: flex;
+	justify-content: center;
+
 	grid-row: header / main-view;
 	grid-column: timeline / end;
 	@media screen and (max-width: $break-width) {
@@ -1917,6 +1920,7 @@ svg.icon {
 						transition: box-shadow 0.5s ease-out;
 						box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
 						cursor: default;
+						color: #fff;
 
 						.piece__status-icon {
 							> svg.type-warning {

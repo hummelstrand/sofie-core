@@ -118,6 +118,8 @@ input {
 body {
 	overscroll-behavior: none;
 	touch-action: pan-x pan-y;
+
+	letter-spacing: 0.5px;
 }
 
 :fullscreen ::-webkit-scrollbar {
