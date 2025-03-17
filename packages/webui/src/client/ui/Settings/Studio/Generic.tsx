@@ -407,14 +407,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 				overrideHelper={overrideHelper}
 				hint={t('How much preparation time to add to global pieces on the timeline before they are played')}
 			>
-				{(value, handleUpdate) => (
-					<IntInputControl
-						modifiedClassName="bghl"
-						classNames="input text-input input-l"
-						value={value}
-						handleUpdate={handleUpdate}
-					/>
-				)}
+				{(value, handleUpdate) => <IntInputControl value={value} handleUpdate={handleUpdate} />}
 			</LabelAndOverridesForInt>
 		</>
 	)
