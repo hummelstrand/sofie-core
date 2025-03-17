@@ -71,7 +71,7 @@ export function DatePickerFromTo({
 			<Button variant="link" className="action-btn mx-2 my-4" onClick={onClickPrevious}>
 				<FontAwesomeIcon icon={faChevronLeft} />
 			</Button>
-			<label className="mod mx-2 my-0">
+			<label className="mx-2 my-0">
 				{t('From')}
 				<div className="picker expco">
 					<DatePicker
@@ -83,7 +83,7 @@ export function DatePickerFromTo({
 					/>
 				</div>
 			</label>
-			<label className="mod mhs mvn">
+			<label className="mx-2 my-0">
 				{t('Until')}
 				<div className="picker expco">
 					<DatePicker

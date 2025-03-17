@@ -114,7 +114,6 @@ export default withTranslation()(
 										obj={item}
 										type="checkbox"
 										collection={RundownLayouts}
-										className="mod mas"
 									/>
 								</label>
 							)}
@@ -157,7 +156,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -185,7 +183,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 							</label>
 						</React.Fragment>
@@ -353,7 +350,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 							</label>
 						</React.Fragment>
@@ -368,7 +364,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 							</label>
 						</React.Fragment>
@@ -382,7 +377,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -396,7 +390,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 							</label>
 						</React.Fragment>
@@ -411,7 +404,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 							</label>
 
@@ -423,7 +415,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 							</label>
 
@@ -435,7 +426,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 							</label>
 
@@ -447,7 +437,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 							</label>
 
@@ -459,7 +448,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 							</label>
 
@@ -471,7 +459,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 							</label>
 
@@ -483,7 +470,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 							</label>
 
@@ -495,7 +481,6 @@ export default withTranslation()(
 									obj={item}
 									type="checkbox"
 									collection={RundownLayouts}
-									className="mod mas"
 								/>
 								<span className="text-s dimmed field-hint">
 									{t('Picks the first instance of an adLib per rundown, identified by uniqueness Id')}
@@ -614,7 +599,6 @@ export default withTranslation()(
 								obj={item}
 								type="checkbox"
 								collection={RundownLayouts}
-								className="mod mas"
 								mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
 								mutateUpdateValue={() => undefined}
 							/>
@@ -644,7 +628,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -666,7 +649,6 @@ export default withTranslation()(
 								obj={item}
 								type="checkbox"
 								collection={RundownLayouts}
-								className="mod mas"
 								mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
 								mutateUpdateValue={() => undefined}
 							/>
@@ -716,7 +698,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -728,7 +709,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -740,7 +720,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -786,7 +765,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -798,7 +776,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -844,7 +821,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -856,7 +832,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -868,7 +843,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -880,7 +854,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -892,7 +865,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -925,7 +897,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -966,7 +937,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -1001,7 +971,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -1037,7 +1006,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -1104,7 +1072,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -1205,7 +1172,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 						<span className="text-s dimmed field-hint">{t('Use color of primary piece as background of panel')}</span>
 					</label>
@@ -1315,7 +1281,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 					</label>
 
@@ -1342,7 +1307,6 @@ export default withTranslation()(
 								obj={item}
 								type="checkbox"
 								collection={RundownLayouts}
-								className="mod mas"
 								mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
 								mutateUpdateValue={() => undefined}
 							/>
@@ -1373,7 +1337,6 @@ export default withTranslation()(
 								obj={item}
 								type="checkbox"
 								collection={RundownLayouts}
-								className="mod mas"
 								mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
 								mutateUpdateValue={() => undefined}
 							/>
@@ -1405,7 +1368,6 @@ export default withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						/>
 						<span className="text-s dimmed field-hint">
 							{t('All additional source layers must have active pieces')}

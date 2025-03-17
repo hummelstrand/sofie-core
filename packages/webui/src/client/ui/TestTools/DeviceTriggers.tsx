@@ -110,7 +110,7 @@ function DeviceTriggersControls({ peripheralDeviceId }: Readonly<IDatastoreContr
 								</tr>
 								<tr>
 									<td colSpan={5}>
-										<ul className="mod mhn mvn">
+										<ul className="m-0">
 											{mountedTriggersPreviews
 												.filter((preview) => preview.actionId === entry.actionId)
 												.map((preview) => (

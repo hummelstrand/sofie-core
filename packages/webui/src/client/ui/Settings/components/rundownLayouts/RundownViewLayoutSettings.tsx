@@ -44,7 +44,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 					obj={item}
 					type="checkbox"
 					collection={RundownLayouts}
-					className="mod mas"
 				></EditAttribute>
 			</label>
 
@@ -89,7 +88,7 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 
 			<label className="field">
 				<LabelActual label={t('Live line countdown requires Source Layer')} />
-				<div>
+				<div className="checkbox-enable-before">
 					<EditAttribute
 						modifiedClassName="bghl"
 						attribute={`liveLineProps.requiredLayerIds`}
@@ -119,7 +118,7 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 
 			<label className="field">
 				<LabelActual label={t('Also Require Source Layers')} />
-				<div>
+				<div className="checkbox-enable-before">
 					<EditAttribute
 						modifiedClassName="bghl"
 						attribute={`liveLineProps.additionalLayers`}
@@ -155,7 +154,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 					obj={item}
 					type="checkbox"
 					collection={RundownLayouts}
-					className="mod mas"
 				/>
 				<span className="text-s dimmed field-hint">{t('All additional source layers must have active pieces')}</span>
 			</label>
@@ -168,7 +166,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 					obj={item}
 					type="checkbox"
 					collection={RundownLayouts}
-					className="mod mas"
 				></EditAttribute>
 				<span className="text-s dimmed field-hint">{t('Hide rundown divider between rundowns in a playlist')}</span>
 			</label>
@@ -181,13 +178,12 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 					obj={item}
 					type="checkbox"
 					collection={RundownLayouts}
-					className="mod mas"
 				></EditAttribute>
 			</label>
 
 			<label className="field">
 				<LabelActual label={t('Segment countdown requires source layer')} />
-				<div>
+				<div className="checkbox-enable-before">
 					<EditAttribute
 						modifiedClassName="bghl"
 						attribute={`countdownToSegmentRequireLayers`}
@@ -223,7 +219,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 					obj={item}
 					type="checkbox"
 					collection={RundownLayouts}
-					className="mod mas"
 				></EditAttribute>
 				<span className="text-s dimmed field-hint">
 					{t(
@@ -262,7 +257,7 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 
 			<label className="field">
 				<LabelActual label={t('Display piece duration for source layers')} />
-				<div>
+				<div className="checkbox-enable-before">
 					<EditAttribute
 						modifiedClassName="bghl"
 						attribute={`showDurationSourceLayers`}

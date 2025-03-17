@@ -22,7 +22,6 @@ export default function ShelfLayoutSettings(props: Readonly<IProps>): JSX.Elemen
 					obj={props.item}
 					type="checkbox"
 					collection={RundownLayouts}
-					className="mod mas"
 				></EditAttribute>
 			</label>
 
@@ -34,7 +33,6 @@ export default function ShelfLayoutSettings(props: Readonly<IProps>): JSX.Elemen
 					obj={props.item}
 					type="checkbox"
 					collection={RundownLayouts}
-					className="mod mas"
 				></EditAttribute>
 			</label>
 
@@ -59,7 +57,6 @@ export default function ShelfLayoutSettings(props: Readonly<IProps>): JSX.Elemen
 					options={RundownLayoutType}
 					type="checkbox"
 					collection={RundownLayouts}
-					className="mod mas"
 				></EditAttribute>
 			</label>
 
@@ -72,7 +69,6 @@ export default function ShelfLayoutSettings(props: Readonly<IProps>): JSX.Elemen
 					options={RundownLayoutType}
 					type="checkbox"
 					collection={RundownLayouts}
-					className="mod mas"
 				></EditAttribute>
 			</label>
 
@@ -85,7 +81,6 @@ export default function ShelfLayoutSettings(props: Readonly<IProps>): JSX.Elemen
 					options={RundownLayoutType}
 					type="checkbox"
 					collection={RundownLayouts}
-					className="mod mas"
 				></EditAttribute>
 				<span className="text-s dimmed field-hint">{t('Only custom trigger modes will be shown')}</span>
 			</label>

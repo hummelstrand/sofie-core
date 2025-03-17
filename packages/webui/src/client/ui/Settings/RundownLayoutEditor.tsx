@@ -349,7 +349,6 @@ const RundownLayoutEditorContent = withTranslation()(
 							obj={item}
 							type="checkbox"
 							collection={RundownLayouts}
-							className="mod mas"
 						></EditAttribute>
 					</label>
 					{isShelfLayout && <ShelfLayoutSettings item={item} />}
