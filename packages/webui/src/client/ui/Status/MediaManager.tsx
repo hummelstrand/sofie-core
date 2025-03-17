@@ -171,7 +171,7 @@ function MediaManagerWorkFlowItem(props: Readonly<IItemProps>): JSX.Element {
 
 	return (
 		<div
-			className={ClassNames('workflow mbs', {
+			className={ClassNames('workflow mb-2', {
 				expanded: isExpanded,
 
 				keyOk: keyFinishedOK,
@@ -405,16 +405,16 @@ export function MediaManagerStatus(): JSX.Element {
 
 	return (
 		<div className="mhl gutter media-manager-status">
-			<header className="mbs">
+			<header className="mb-2">
 				<h1>{t('Media Transfer Status')}</h1>
 			</header>
-			<div className="mod mvl text-end">
+			<div className="mx-2 my-4 text-end">
 				{userPermissions.studio || userPermissions.configure ? (
 					<React.Fragment>
-						<button className="btn btn-secondary mls" onClick={actionAbortAll}>
+						<button className="btn btn-secondary ms-1" onClick={actionAbortAll}>
 							{t('Abort All')}
 						</button>
-						<button className="btn btn-secondary mls" onClick={actionRestartAll}>
+						<button className="btn btn-secondary ms-1" onClick={actionRestartAll}>
 							{t('Restart All')}
 						</button>
 					</React.Fragment>

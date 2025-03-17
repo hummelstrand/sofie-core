@@ -530,13 +530,13 @@ export const TriggeredActionEntry: React.FC<IProps> = React.memo(function Trigge
 						))}
 						{previewItems.length === 0 ? (
 							previewContext?.rundownPlaylist ? (
-								<span className="placeholder dimmed">
+								<span className="dimmed">
 									{t('No Ad-Lib matches in the current state of Rundown: "{{rundownPlaylistName}}"', {
 										rundownPlaylistName: previewContext?.rundownPlaylist?.name,
 									})}
 								</span>
 							) : (
-								<span className="placeholder dimmed">{t('No matching Rundowns available to be used for preview')}</span>
+								<span className="dimmed">{t('No matching Rundowns available to be used for preview')}</span>
 							)
 						) : null}
 					</ul>
@@ -562,7 +562,7 @@ export const TriggeredActionEntry: React.FC<IProps> = React.memo(function Trigge
 									}
 								/>
 							</div>
-							<span className="mls text-s dimmed field-hint">{t('Optional description of the action')}</span>
+							<span className="text-s dimmed field-hint">{t('Optional description of the action')}</span>
 						</label>
 						<label className="field">
 							<LabelActual label={t('Style class names')} />
@@ -576,7 +576,7 @@ export const TriggeredActionEntry: React.FC<IProps> = React.memo(function Trigge
 									modifiedClassName="bghl"
 								/>
 							</div>
-							<span className="mls text-s dimmed field-hint">
+							<span className="text-s dimmed field-hint">
 								{t('Space separated list of style class names to use when displaying the action')}
 							</span>
 						</label>

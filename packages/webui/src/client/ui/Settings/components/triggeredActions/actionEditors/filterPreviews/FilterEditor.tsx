@@ -93,7 +93,7 @@ export const FilterEditor: React.FC<IProps> = function FilterEditor(props: IProp
 			</dl>
 			{opened ? (
 				<div
-					className="expco expco-expanded expco-popper mod pas expco-popper-rounded triggered-action-entry__action__filter-editor"
+					className="expco expco-expanded expco-popper expco-popper-rounded triggered-action-entry__action__filter-editor"
 					ref={setPopperElement}
 					style={styles.popper}
 					{...attributes.popper}

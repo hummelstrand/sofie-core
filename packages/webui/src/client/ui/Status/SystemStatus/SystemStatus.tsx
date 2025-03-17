@@ -28,7 +28,7 @@ export function SystemStatus(): JSX.Element {
 
 	return (
 		<div className="mhl gutter system-status">
-			<header className="mbs">
+			<header className="mb-2">
 				<h1>{t('System Status')}</h1>
 			</header>
 			<div className="my-5">

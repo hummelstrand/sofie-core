@@ -433,7 +433,7 @@ function TimelineChangesLog({ resolvedTl, timelineHash }: Readonly<TimelineChang
 	return (
 		<Row>
 			<Col xs={12}>
-				<div className="flex-row mbl">
+				<div className="flex-row mb-4">
 					<div className="col">
 						Id Filter: <FilterInput filterChanged={setIdFilter} />
 					</div>

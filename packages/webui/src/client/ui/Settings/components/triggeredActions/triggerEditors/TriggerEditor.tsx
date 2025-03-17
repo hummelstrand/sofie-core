@@ -172,7 +172,7 @@ export const TriggerEditor = function TriggerEditor({
 			{triggerPreview}
 			{opened ? (
 				<div
-					className="expco expco-expanded expco-popper mod pas expco-popper-rounded triggered-action-entry__trigger-editor"
+					className="expco expco-expanded expco-popper expco-popper-rounded triggered-action-entry__trigger-editor"
 					ref={setPopperElement}
 					style={styles.popper}
 					{...attributes.popper}

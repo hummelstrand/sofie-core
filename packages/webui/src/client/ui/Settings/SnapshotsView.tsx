@@ -326,7 +326,7 @@ const SnapshotsViewContent = withTranslation()(
 							<FontAwesomeIcon icon={faUpload} />
 							<span>{t('Upload Snapshot')}</span>
 						</UploadButton>
-						<span className="text-s vsubtle mls">{t('Upload a snapshot file')}</span>
+						<span className="text-s vsubtle ms-2">{t('Upload a snapshot file')}</span>
 					</p>
 					<p className="my-2">
 						<UploadButton
@@ -338,7 +338,7 @@ const SnapshotsViewContent = withTranslation()(
 							<FontAwesomeIcon icon={faUpload} />
 							<span>{t('Upload Snapshot (for debugging)')}</span>
 						</UploadButton>
-						<span className="text-s vsubtle mls">
+						<span className="text-s vsubtle ms-2">
 							{t(
 								'Upload a snapshot file (restores additional info not directly related to a Playlist / Rundown, such as Packages, PackageWorkStatuses etc'
 							)}
@@ -354,7 +354,7 @@ const SnapshotsViewContent = withTranslation()(
 							<FontAwesomeIcon icon={faUpload} />
 							<span>{t('Ingest from Snapshot')}</span>
 						</UploadButton>
-						<span className="text-s vsubtle mls">
+						<span className="text-s vsubtle ms-2">
 							{t('Reads the ingest (NRCS) data, and pipes it throught the blueprints')}
 						</span>
 					</p>

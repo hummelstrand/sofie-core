@@ -110,7 +110,7 @@ export const PackageContainerStatus: React.FC<{
 // 							</Tooltip>
 // 						</td>
 // 						<td>
-// 							<button className="btn btn-secondary mls" onClick={(e) => this.restartPackageContainer(e)}>
+// 							<button className="btn btn-secondary ms-1" onClick={(e) => this.restartPackageContainer(e)}>
 // 								{t('Restart')}
 // 							</button>
 // 						</td>

@@ -50,7 +50,7 @@ export function SwitchboardPopUp(props: Readonly<IProps>): JSX.Element {
 						{routeSets.length === 2 &&
 						routeSets[0][1].behavior === StudioRouteBehavior.ACTIVATE_ONLY &&
 						routeSets[1][1].behavior === StudioRouteBehavior.ACTIVATE_ONLY ? (
-							<div key={routeSets[0][0]} className="switchboard-pop-up-panel__group__controls dual mhm mbs">
+							<div key={routeSets[0][0]} className="switchboard-pop-up-panel__group__controls dual mx-4 mb-2">
 								<span
 									className={classNames({
 										'switchboard-pop-up-panel__group__controls__active': routeSets[0][1].active,

@@ -128,7 +128,7 @@ export default translateWithTracker<IDeviceSettingsProps, IDeviceSettingsState, 
 				<div className="studio-edit mx-4">
 					<div className="grid-buttons-right">
 						<div className="properties-grid">
-							<h2 className="mhn mtn">{t('Generic Properties')}</h2>
+							<h2>{t('Generic Properties')}</h2>
 							<label className="field">
 								<LabelActual label={t('Device Name')} />
 								{!device?.name ? (

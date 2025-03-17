@@ -511,7 +511,7 @@ function RenderRoutes({
 
 	return (
 		<>
-			<h4 className="mod mhs">{t('Routes')}</h4>
+			<h4 className="my-2">{t('Routes')}</h4>
 			{routeSet.computed?.routes?.length === 0 ? (
 				<p className="text-s dimmed field-hint mhs">{t('There are no routes set up yet')}</p>
 			) : null}
@@ -634,7 +634,7 @@ function RenderRoutesRow({
 				>
 					{(value, handleUpdate, options) => {
 						if (!rawRoute.mappedLayer) {
-							return <span className="mls">REMAP</span>
+							return <span className="ms-1">REMAP</span>
 						} else {
 							return (
 								<DropdownInputControl
@@ -658,9 +658,9 @@ function RenderRoutesRow({
 					{(value, handleUpdate, options) => {
 						if (rawRoute.routeType === StudioRouteType.REROUTE && rawRoute.mappedLayer) {
 							return deviceTypeFromMappedLayer !== undefined ? (
-								<span className="mls">{TSR.DeviceType[deviceTypeFromMappedLayer]}</span>
+								<span className="ms-1">{TSR.DeviceType[deviceTypeFromMappedLayer]}</span>
 							) : (
-								<span className="mls dimmed">{t('Original Layer not found')}</span>
+								<span className="ms-1 dimmed">{t('Original Layer not found')}</span>
 							)
 						} else {
 							return (

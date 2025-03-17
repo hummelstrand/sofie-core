@@ -134,8 +134,8 @@ export const ConfigManifestOAuthFlowComponent = withTranslation()(
 					{secretStatus.accessToken ? (
 						// If this is set, we have completed the authentication procedure.
 						// A reset button is provided to begin the flow again if authorization is revoked by the user.
-						<div className="mod mvs mhs">
-							<button className="btn btn-secondary btn-tight mrs" onClick={() => this.resetAppCredentials()}>
+						<div className="m-2">
+							<button className="btn btn-secondary btn-tight me-1" onClick={() => this.resetAppCredentials()}>
 								{t('Reset App Credentials')}
 							</button>
 
@@ -144,7 +144,7 @@ export const ConfigManifestOAuthFlowComponent = withTranslation()(
 							</button>
 						</div>
 					) : (
-						<div className="mod mvs mhs">
+						<div className="m-2">
 							{!secretStatus.credentials ? (
 								<label className="field">
 									<div className="mvs">{t('Application credentials')}</div>

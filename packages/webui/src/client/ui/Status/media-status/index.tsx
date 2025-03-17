@@ -70,7 +70,7 @@ export function MediaStatus(): JSX.Element | null {
 
 	return (
 		<div className="mhl gutter">
-			<header className="mbs">
+			<header className="mb-2">
 				<div className="media-status-table-search">
 					<Form.Control
 						className="media-status-table-search__search-input"
@@ -87,8 +87,8 @@ export function MediaStatus(): JSX.Element | null {
 				</div>
 				<h1>{t('Media Status')}</h1>
 			</header>
-			<div className="media-status-table-scrollbox mlm prs" ref={scrollBox} style={scrollBoxStyle}>
-				<table className="media-status-table mbl">
+			<div className="media-status-table-scrollbox" ref={scrollBox} style={scrollBoxStyle}>
+				<table className="media-status-table mb-5">
 					<MediaStatusListHeader sortOrder={sortOrder} sortBy={sortBy} onChange={onChangeSort} />
 					<tbody>
 						<MediaStatusComponent

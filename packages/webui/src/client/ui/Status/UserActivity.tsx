@@ -272,7 +272,7 @@ function UserActivity(): JSX.Element {
 
 	return (
 		<div className="mhl gutter">
-			<header className="mbs">
+			<header className="mb-2">
 				<h1>{t('User Activity Log')}</h1>
 			</header>
 			<div className="my-5">{renderUserActivity()}</div>

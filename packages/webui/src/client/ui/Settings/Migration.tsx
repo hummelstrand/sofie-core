@@ -224,13 +224,13 @@ export const MigrationView = translateWithTracker<IProps, IState, ITrackedProps>
 						}
 						return (
 							<div key={rank++}>
-								<h3 className="mhn mbsx mtl">{manualInput.label}</h3>
+								<h3 className="mb-1 mt-4">{manualInput.label}</h3>
 								<div>{manualInput.description}</div>
 								<div>
 									{manualInput.inputType && manualInput.attribute ? (
 										<EditAttribute
 											type={manualInput.inputType}
-											className="input-full mtxs"
+											className="input-full"
 											options={manualInput.dropdownOptions}
 											overrideDisplayValue={value}
 											updateFunction={(_edit, newValue: any) => {
@@ -333,9 +333,7 @@ export const MigrationView = translateWithTracker<IProps, IState, ITrackedProps>
 														<div key={c.sourceName}>
 															<h3 className="mhs">{c.sourceName}</h3>
 															{_.map(c._steps, (s) => (
-																<p className="mod mhs" key={s}>
-																	{s}
-																</p>
+																<p key={s}>{s}</p>
 															))}
 														</div>
 													))}
@@ -371,7 +369,7 @@ export const MigrationView = translateWithTracker<IProps, IState, ITrackedProps>
 										</p>
 										<div>{this.renderManualSteps()}</div>
 										<button
-											className="btn btn-primary mtm"
+											className="btn btn-primary mt-4"
 											onClick={() => {
 												doModalDialog({
 													title: t('Double-check Values'),

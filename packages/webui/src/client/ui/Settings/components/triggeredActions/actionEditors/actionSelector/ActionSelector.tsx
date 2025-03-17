@@ -225,7 +225,7 @@ function getActionParametersEditor(
 	switch (action.action) {
 		case PlayoutActions.activateRundownPlaylist:
 			return (
-				<div className="mts">
+				<div className="mt-2">
 					<ToggleSwitchControl
 						classNames="mb-2"
 						value={action.rehearsal}
@@ -263,7 +263,7 @@ function getActionParametersEditor(
 			return <SwitchRouteSetEditor action={action} onChange={onChange} />
 		case PlayoutActions.disableNextPiece:
 			return (
-				<div className="mts">
+				<div className="mt-2">
 					<ToggleSwitchControl
 						classNames="mb-2"
 						value={!!action.undo}
@@ -279,7 +279,7 @@ function getActionParametersEditor(
 			)
 		case PlayoutActions.hold:
 			return (
-				<div className="mts">
+				<div className="mt-2">
 					<ToggleSwitchControl
 						classNames="mb-2"
 						value={!!action.undo}
@@ -295,7 +295,7 @@ function getActionParametersEditor(
 			)
 		case PlayoutActions.moveNext:
 			return (
-				<div className="mts">
+				<div className="mt-2">
 					<label className="block">{t('Move Segments')}</label>
 					<IntInputControl
 						classNames="input text-input input-m mb-2"
@@ -346,7 +346,7 @@ function getActionParametersEditor(
 			return null
 		case ClientActions.shelf:
 			return (
-				<div className="mts">
+				<div className="mt-2">
 					<label className="block">{t('State')}</label>
 					<DropdownInputControl<typeof action.state>
 						classNames="input text-input input-m mb-2"
@@ -384,7 +384,7 @@ function getActionParametersEditor(
 			return null
 		case ClientActions.showEntireCurrentSegment:
 			return (
-				<div className="mts">
+				<div className="mt-2">
 					<ToggleSwitchControl
 						classNames="mb-2"
 						value={!!action.on}
@@ -400,7 +400,7 @@ function getActionParametersEditor(
 			)
 		case ClientActions.miniShelfQueueAdLib:
 			return (
-				<div className="mts">
+				<div className="mt-2">
 					<ToggleSwitchControl
 						classNames="mb-2"
 						value={!!action.forward}
@@ -416,7 +416,7 @@ function getActionParametersEditor(
 			)
 		case DeviceActions.modifyShiftRegister:
 			return (
-				<div className="mts">
+				<div className="mt-2">
 					<label className="block">{t('Register ID')}</label>
 					<IntInputControl
 						classNames="input text-input input-m mb-2"
@@ -575,7 +575,7 @@ export const ActionSelector = function ActionSelector({
 			</div>
 			{opened ? (
 				<div
-					className="expco expco-expanded expco-popper mod pas expco-popper-rounded triggered-action-entry__action-editor"
+					className="expco expco-expanded expco-popper expco-popper-rounded triggered-action-entry__action-editor"
 					ref={setPopperElement}
 					style={styles.popper}
 					{...attributes.popper}

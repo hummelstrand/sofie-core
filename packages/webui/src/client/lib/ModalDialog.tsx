@@ -215,7 +215,7 @@ export function ModalDialog({
 										<Button
 											key={i}
 											variant={!(action.classNames || '').match(/btn-/) ? 'outline-secondary' : undefined}
-											className={ClassNames('right mrs', action.classNames)}
+											className={ClassNames('right me-1', action.classNames)}
 											onClick={(e) => handleAction(e, action.on)}
 											onKeyDown={preventClickOnEnter}
 											onKeyUp={emulateClick}

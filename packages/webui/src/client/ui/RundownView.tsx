@@ -1208,9 +1208,6 @@ const RundownHeader = withTranslation()(
 										>
 											<div className="media-elem me-2 sofie-logo" />
 										</Tooltip>
-										<div className="bd mls">
-											<span className="logo-text"></span>
-										</div>
 									</div>
 								</div>
 								{this.props.layout && RundownLayoutsAPI.isDashboardLayout(this.props.layout) ? (
@@ -1242,7 +1239,7 @@ const RundownHeader = withTranslation()(
 									</>
 								)}
 								<div className="flex-col right horizontal-align-right">
-									<div className="links mod close">
+									<div className="links close">
 										<NavLink to="/rundowns" title={t('Exit')}>
 											<CoreIcon.NrkClose />
 										</NavLink>
@@ -2828,7 +2825,7 @@ const RundownViewContent = translateWithTracker<IPropsWithReady, IState, ITracke
 		renderSegmentsList() {
 			if (!this.props.playlist || !this.props.rundowns.length) {
 				return (
-					<div className="mod">
+					<div className="m-2">
 						<Spinner />
 					</div>
 				)

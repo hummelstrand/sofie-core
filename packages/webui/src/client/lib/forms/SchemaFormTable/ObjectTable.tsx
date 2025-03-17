@@ -384,7 +384,7 @@ function ImportExportButtons({ schema, overrideHelper, wrappedRows }: Readonly<I
 				<span className="inline-block">
 					<UploadButton
 						key={uploadFileKey}
-						className="btn btn-secondary mls"
+						className="btn btn-secondary"
 						onChange={importTable}
 						accept="application/json,.json"
 					>
@@ -394,7 +394,7 @@ function ImportExportButtons({ schema, overrideHelper, wrappedRows }: Readonly<I
 			</Tooltip>
 
 			<Tooltip overlay={t('Export')} placement="top">
-				<button className="btn btn-secondary mls" onClick={exportTable}>
+				<button className="btn btn-secondary" onClick={exportTable}>
 					<FontAwesomeIcon icon={faDownload} />
 				</button>
 			</Tooltip>

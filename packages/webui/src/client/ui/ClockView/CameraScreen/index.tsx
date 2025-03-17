@@ -239,14 +239,14 @@ export function CameraScreen({ playlist, studioId }: Readonly<IProps>): JSX.Elem
 
 	useWakeLock()
 
-	if (!studio && studioReady) return <h1 className="mod mal alc">{t("This studio doesn't exist.")}</h1>
+	if (!studio && studioReady) return <h1 className="m-4 text-center">{t("This studio doesn't exist.")}</h1>
 
 	if (!playlist && rundownsReady)
-		return <h1 className="mod mal alc">{t('There is no rundown active in this studio.')}</h1>
+		return <h1 className="m-4 text-center">{t('There is no rundown active in this studio.')}</h1>
 
 	if ((playlist && !piecesReadyOnce) || !playlist)
 		return (
-			<div className="mod mal alc">
+			<div className="m-4">
 				<Spinner />
 			</div>
 		)

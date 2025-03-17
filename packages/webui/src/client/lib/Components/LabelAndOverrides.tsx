@@ -8,6 +8,7 @@ import { OverrideOpHelperForItemContents, WrappedOverridableItemNormal } from '.
 import { DropdownInputOption, findOptionByValue } from './DropdownInput'
 import { hasOpWithPath } from './util'
 import Button from 'react-bootstrap/Button'
+import classNames from 'classnames'
 
 export interface LabelAndOverridesProps<T extends object, TValue> {
 	label: string
@@ -76,7 +77,11 @@ export function LabelAndOverrides<T extends object, TValue = any>({
 		<label className="field">
 			<LabelActual label={label} />
 
-			<div className="field-content">
+			<div
+				className={classNames('field-content', {
+					'checkbox-enable-before': showClearButton,
+				})}
+			>
 				{showClearButton && (
 					<Button
 						variant="primary"
@@ -84,7 +89,6 @@ export function LabelAndOverrides<T extends object, TValue = any>({
 						onClick={() => setValue(undefined)}
 						title={t('Clear value')}
 					>
-						&nbsp;
 						<FontAwesomeIcon icon={faSync} />
 					</Button>
 				)}

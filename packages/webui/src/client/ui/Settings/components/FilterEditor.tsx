@@ -197,7 +197,6 @@ export default withTranslation()(
 								obj={item}
 								type="checkbox"
 								collection={RundownLayouts}
-								className="mls mvxs"
 								mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
 								mutateUpdateValue={() => undefined}
 							/>
@@ -227,7 +226,6 @@ export default withTranslation()(
 								obj={item}
 								type="checkbox"
 								collection={RundownLayouts}
-								className="mls mvxs"
 								mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
 								mutateUpdateValue={() => undefined}
 							/>
@@ -257,7 +255,6 @@ export default withTranslation()(
 								obj={item}
 								type="checkbox"
 								collection={RundownLayouts}
-								className="mls mvxs"
 								mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
 								mutateUpdateValue={() => undefined}
 							/>
@@ -287,7 +284,6 @@ export default withTranslation()(
 								obj={item}
 								type="checkbox"
 								collection={RundownLayouts}
-								className="mls mvxs"
 								mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
 								mutateUpdateValue={() => undefined}
 							/>
@@ -318,7 +314,6 @@ export default withTranslation()(
 								obj={item}
 								type="checkbox"
 								collection={RundownLayouts}
-								className="mls mvxs"
 								mutateDisplayValue={(v) => (v === undefined || v.length === 0 ? false : true)}
 								mutateUpdateValue={() => undefined}
 							/>
@@ -1660,7 +1655,7 @@ export default withTranslation()(
 					<div>
 						{isRundownLayout && (
 							<button
-								className={ClassNames('action-btn right mod man pas', {
+								className={ClassNames('action-btn right', {
 									star: (this.props.filter as any).default,
 								})}
 								onClick={() =>

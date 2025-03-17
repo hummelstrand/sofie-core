@@ -474,7 +474,7 @@ export const TriggeredActionsEditor: React.FC<IProps> = function TriggeredAction
 							: null}
 
 						{!systemWideCollapsed && !parsedTriggerFilter && systemTriggeredActionIds?.length === 0 && (
-							<p className="mod mhn subtle">{t('No Action Triggers set up.')}</p>
+							<p className="my-2 subtle">{t('No Action Triggers set up.')}</p>
 						)}
 					</div>
 				</>
