@@ -94,7 +94,9 @@ export default React.memo(function RundownListItemView({
 						</button>
 					</Tooltip>
 				</span>
-			) : null}
+			) : (
+				<span></span>
+			)}
 			<span className="rundown-list-item__name" role="rowheader">
 				<div className="grid-buttons-right">
 					<span className="rundown-name">{rundownNameContent}</span>
