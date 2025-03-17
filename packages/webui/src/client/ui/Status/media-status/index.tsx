@@ -69,7 +69,7 @@ export function MediaStatus(): JSX.Element | null {
 	)
 
 	return (
-		<div className="mhl gutter">
+		<div>
 			<header className="mb-2">
 				<div className="media-status-table-search">
 					<Form.Control

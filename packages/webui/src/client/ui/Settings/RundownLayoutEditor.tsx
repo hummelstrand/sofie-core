@@ -364,7 +364,7 @@ const RundownLayoutEditorContent = withTranslation()(
 						<React.Fragment>
 							<h4 className="my-2">{layout?.filtersTitle ?? t('Filters')}</h4>
 							{item.filters.length === 0 ? (
-								<p className="text-s dimmed field-hint mhs">{t('There are no filters set up yet')}</p>
+								<p className="text-s dimmed field-hint mx-2">{t('There are no filters set up yet')}</p>
 							) : null}
 						</React.Fragment>
 					) : null}

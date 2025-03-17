@@ -88,7 +88,7 @@ export function AccessorTableRow({
 	if (Object.keys(packageContainer.computed?.container || {}).length === 0) {
 		return (
 			<tr>
-				<td className="mhn dimmed">{t('There are no Accessors set up.')}</td>
+				<td className="dimmed">{t('There are no Accessors set up.')}</td>
 			</tr>
 		)
 	}

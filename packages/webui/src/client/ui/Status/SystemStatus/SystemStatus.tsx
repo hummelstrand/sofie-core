@@ -27,7 +27,7 @@ export function SystemStatus(): JSX.Element {
 	const devicesHierarchy = convertDevicesIntoHeirarchy(devices)
 
 	return (
-		<div className="mhl gutter system-status">
+		<div className="system-status">
 			<header className="mb-2">
 				<h1>{t('System Status')}</h1>
 			</header>

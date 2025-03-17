@@ -80,21 +80,11 @@ export function StudioGenericProperties({ studio }: IStudioGenericPropertiesProp
 						{t('No name set')} <FontAwesomeIcon icon={faExclamationTriangle} />
 					</div>
 				) : null}
-				<div className="mdi">
-					<EditAttribute
-						modifiedClassName="bghl"
-						attribute="name"
-						obj={studio}
-						type="text"
-						collection={Studios}
-						className="mdinput"
-					/>
-					<span className="mdfx"></span>
-				</div>
+				<EditAttribute modifiedClassName="bghl" attribute="name" obj={studio} type="text" collection={Studios} />
 			</label>
 			<div className="field">
 				{t('Select Compatible Show Styles')}
-				<div className="mdi">
+				<div>
 					<EditAttribute
 						attribute="supportedShowStyleBase"
 						obj={studio}

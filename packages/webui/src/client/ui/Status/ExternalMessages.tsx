@@ -32,7 +32,7 @@ function ExternalMessages(): JSX.Element {
 	const [selectedStudioId, setSelectedStudioId] = useState<StudioId | null>(null)
 
 	return (
-		<div className="mhl gutter external-message-status">
+		<div className="external-message-status">
 			<header className="mb-2">
 				<h1>{t('Message Queue')}</h1>
 			</header>
@@ -76,7 +76,7 @@ function ExternalMessagesInStudio({ studioId }: Readonly<IExternalMessagesInStud
 	}, [])
 
 	return (
-		<div className="mhl gutter external-message-status">
+		<div className="external-message-status">
 			<div className="paging alc">
 				<DatePickerFromTo from={dateFrom} to={dateTo} onChange={handleChangeDate} />
 			</div>

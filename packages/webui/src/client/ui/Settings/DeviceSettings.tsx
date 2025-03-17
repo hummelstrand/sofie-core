@@ -136,17 +136,13 @@ export default translateWithTracker<IDeviceSettingsProps, IDeviceSettingsState, 
 										{t('No name set')} <FontAwesomeIcon icon={faExclamationTriangle} />
 									</div>
 								) : null}
-								<div className="mdi">
-									<EditAttribute
-										modifiedClassName="bghl"
-										attribute="name"
-										obj={device}
-										type="text"
-										collection={PeripheralDevices}
-										className="mdinput"
-									></EditAttribute>
-									<span className="mdfx"></span>
-								</div>
+								<EditAttribute
+									modifiedClassName="bghl"
+									attribute="name"
+									obj={device}
+									type="text"
+									collection={PeripheralDevices}
+								></EditAttribute>
 							</label>
 
 							<label className="field">

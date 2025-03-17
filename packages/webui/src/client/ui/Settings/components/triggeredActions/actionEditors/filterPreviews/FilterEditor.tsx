@@ -98,7 +98,7 @@ export const FilterEditor: React.FC<IProps> = function FilterEditor(props: IProp
 					style={styles.popper}
 					{...attributes.popper}
 				>
-					{props.description && <p className="man">{props.description}</p>}
+					{props.description && <p className="m-0">{props.description}</p>}
 
 					<DropdownInputControl
 						classNames="input text-input input-m mb-2"

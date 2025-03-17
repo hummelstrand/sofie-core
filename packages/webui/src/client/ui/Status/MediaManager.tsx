@@ -404,7 +404,7 @@ export function MediaManagerStatus(): JSX.Element {
 	const expandedHelper = useToggleExpandHelper()
 
 	return (
-		<div className="mhl gutter media-manager-status">
+		<div className="media-manager-status">
 			<header className="mb-2">
 				<h1>{t('Media Transfer Status')}</h1>
 			</header>

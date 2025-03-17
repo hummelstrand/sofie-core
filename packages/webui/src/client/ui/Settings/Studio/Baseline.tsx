@@ -56,7 +56,7 @@ export function StudioBaselineStatus({ studioId }: Readonly<IStudioBaselineStatu
 	return (
 		<div className="field">
 			<LabelActual label={t('Studio Baseline needs update: ')}></LabelActual>
-			<div className="mhn field-content">
+			<div className="field-content">
 				{needsUpdate ? (
 					<Tooltip
 						overlay={t('Baseline needs reload, this studio may not work until reloaded')}

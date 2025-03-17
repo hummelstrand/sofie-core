@@ -159,7 +159,7 @@ export const ExpectedPackagesStatus: React.FC<{}> = function ExpectedPackagesSta
 	}
 
 	return (
-		<div className="mhl gutter package-status">
+		<div className="package-status">
 			<header className="mb-4">
 				<h1>{t('Package Status')}</h1>
 			</header>

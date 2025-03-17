@@ -33,7 +33,6 @@ export function ShowStyleGenericProperties({
 						obj={showStyleBase}
 						type="text"
 						collection={ShowStyleBases}
-						className="mdinput"
 					></EditAttribute>
 				</div>
 				<div></div>

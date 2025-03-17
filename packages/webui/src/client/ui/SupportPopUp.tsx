@@ -32,7 +32,7 @@ export function SupportPopUp({ children }: Readonly<React.PropsWithChildren<IPro
 
 	return (
 		<div className="support-pop-up-panel" role="dialog">
-			<h2 className="mhn mvn">{t('Help & Support')}</h2>
+			<h2 className="m-0">{t('Help & Support')}</h2>
 			{children && <div className="support-pop-up-panel__actions">{children}</div>}
 			{!supportMessage && <DocumentationLink />}
 			<div dangerouslySetInnerHTML={supportMessageHTML} />

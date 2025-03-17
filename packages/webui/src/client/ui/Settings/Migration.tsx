@@ -331,7 +331,7 @@ export const MigrationView = translateWithTracker<IProps, IState, ITrackedProps>
 												<td colSpan={2}>
 													{this.state.migration.chunks.map((c) => (
 														<div key={c.sourceName}>
-															<h3 className="mhs">{c.sourceName}</h3>
+															<h3 className="mx-2">{c.sourceName}</h3>
 															{_.map(c._steps, (s) => (
 																<p key={s}>{s}</p>
 															))}
@@ -364,7 +364,7 @@ export const MigrationView = translateWithTracker<IProps, IState, ITrackedProps>
 									</div>
 								) : (
 									<div>
-										<p className="mhn mvs">
+										<p className="my-2">
 											{t('The migration procedure needs some help from you in order to complete, see below:')}
 										</p>
 										<div>{this.renderManualSteps()}</div>

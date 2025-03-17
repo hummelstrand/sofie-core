@@ -182,7 +182,7 @@ export const VariantListItem = ({
 									</span>
 								</label>
 
-								<h3 className="mhn">{t('Blueprint Configuration')}</h3>
+								<h3 className="my-2">{t('Blueprint Configuration')}</h3>
 
 								<label className="field">
 									<LabelActual label={t('Config preset')} />
@@ -196,7 +196,6 @@ export const VariantListItem = ({
 										mutateDisplayValue={(v) => v || ''}
 										mutateUpdateValue={(v) => (v === '' ? undefined : v)}
 										collection={ShowStyleVariants}
-										className="mdinput"
 									/>
 									<div>
 										{!showStyleVariant.blueprintConfigPresetId && (

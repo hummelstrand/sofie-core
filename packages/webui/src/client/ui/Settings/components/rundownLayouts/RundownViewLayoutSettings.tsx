@@ -95,7 +95,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 						obj={item}
 						type="checkbox"
 						collection={RundownLayouts}
-						className="mhs mvxs"
 						mutateDisplayValue={(v) => !(v === undefined || v.length === 0)}
 						mutateUpdateValue={() => undefined}
 					/>
@@ -125,7 +124,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 						obj={item}
 						type="checkbox"
 						collection={RundownLayouts}
-						className="mhs mvxs"
 						mutateDisplayValue={(v) => !(v === undefined || v.length === 0)}
 						mutateUpdateValue={() => undefined}
 					/>
@@ -190,7 +188,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 						obj={item}
 						type="checkbox"
 						collection={RundownLayouts}
-						className="mhs mvxs"
 						mutateDisplayValue={(v) => !(v === undefined || v.length === 0)}
 						mutateUpdateValue={() => undefined}
 					/>
@@ -264,7 +261,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 						obj={item}
 						type="checkbox"
 						collection={RundownLayouts}
-						className="mhs mvxs"
 						mutateDisplayValue={(v) => !(v === undefined || v.length === 0)}
 						mutateUpdateValue={() => undefined}
 					/>

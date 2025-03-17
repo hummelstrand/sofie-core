@@ -129,7 +129,7 @@ export function RouteSetsTable({
 				<tbody>
 					{routeSetsFromOverrides.length === 0 ? (
 						<tr>
-							<td className="mhn dimmed">{t('There are no Route Sets set up.')}</td>
+							<td className="dimmed">{t('There are no Route Sets set up.')}</td>
 						</tr>
 					) : (
 						routeSetsFromOverrides.map((routeSet: WrappedOverridableItem<StudioRouteSet>) =>
@@ -513,7 +513,7 @@ function RenderRoutes({
 		<>
 			<h4 className="my-2">{t('Routes')}</h4>
 			{routeSet.computed?.routes?.length === 0 ? (
-				<p className="text-s dimmed field-hint mhs">{t('There are no routes set up yet')}</p>
+				<p className="text-s dimmed field-hint mx-2">{t('There are no routes set up yet')}</p>
 			) : null}
 			{routesBuffer.map((route, index) => (
 				<RenderRoutesRow

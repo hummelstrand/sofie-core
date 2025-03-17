@@ -441,7 +441,7 @@ export const TriggeredActionsEditor: React.FC<IProps> = function TriggeredAction
 					<div className={classNames('my-2', parsedTriggerFilter ? 'mt-0' : undefined)}>
 						{!parsedTriggerFilter ? (
 							<h3
-								className="mhn mvs clickable disable-select"
+								className="my-3 clickable disable-select"
 								onClick={() => setSystemWideCollapsed(!systemWideCollapsed)}
 								role="button"
 								tabIndex={0}

@@ -271,7 +271,7 @@ function UserActivity(): JSX.Element {
 	}, [location, location.hash, highlighted, logItems.length])
 
 	return (
-		<div className="mhl gutter">
+		<div>
 			<header className="mb-2">
 				<h1>{t('User Activity Log')}</h1>
 			</header>

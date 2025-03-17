@@ -147,8 +147,8 @@ export const ConfigManifestOAuthFlowComponent = withTranslation()(
 						<div className="m-2">
 							{!secretStatus.credentials ? (
 								<label className="field">
-									<div className="mvs">{t('Application credentials')}</div>
-									<div className="mdi">
+									<div className="my-2">{t('Application credentials')}</div>
+									<div>
 										<div>{t(device.configManifest.deviceOAuthFlow!.credentialsHelp)}</div>
 										<div>
 											<a href={device.configManifest.deviceOAuthFlow!.credentialsURL} target="_blank" rel="noreferrer">
@@ -156,20 +156,19 @@ export const ConfigManifestOAuthFlowComponent = withTranslation()(
 											</a>
 										</div>
 
-										<div className="mdi mvs">
+										<div className="my-2">
 											<input
 												type="file"
 												accept="application/json,.json"
 												onChange={(e) => this.onUploadCredentialsFile(e)}
 											/>
-											<span className="mdfx"></span>
 										</div>
 									</div>
 								</label>
 							) : (
 								<label className="field">
 									<div>
-										<div className="mvs">
+										<div className="my-2">
 											{device.accessTokenUrl ? (
 												<a className="btn btn-primary" href={device.accessTokenUrl} target="_blank" rel="noreferrer">
 													{t('Authorize App Access')}
@@ -178,7 +177,7 @@ export const ConfigManifestOAuthFlowComponent = withTranslation()(
 												t('Waiting for gateway to generate URL...')
 											)}
 										</div>
-										<div className="mvs">
+										<div className="my-2">
 											<button className="btn btn-secondary btn-tight" onClick={() => this.resetAppCredentials()}>
 												{t('Reset App Credentials')}
 											</button>

@@ -315,11 +315,10 @@ function PackageContainerRow({
 									/>
 								)}
 							</LabelAndOverridesForMultiSelect>
-							<div className="mdi"></div>
 						</div>
 						<div>
 							<div className="settings-studio-accessors">
-								<h3 className="mhn">{t('Accessors')}</h3>
+								<h3>{t('Accessors')}</h3>
 								<AccessorsTable packageContainer={packageContainer} overrideHelper={overrideHelper} />
 							</div>
 						</div>

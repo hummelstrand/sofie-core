@@ -76,52 +76,41 @@ function SystemManagementGeneral({ coreSystem }: Readonly<WithCoreSystemProps>) 
 			<div className="properties-grid">
 				<label className="field">
 					<LabelActual label={t('Installation name')} />
-					<div className="mdi">
-						<EditAttribute
-							modifiedClassName="bghl"
-							attribute="name"
-							obj={coreSystem}
-							type="text"
-							collection={CoreSystem}
-							className="mdinput"
-						/>
-						<span className="mdfx"></span>
-					</div>
+					<EditAttribute
+						modifiedClassName="bghl"
+						attribute="name"
+						obj={coreSystem}
+						type="text"
+						collection={CoreSystem}
+					/>
 					<span className="text-s dimmed field-hint">
 						{t('This name will be shown in the title bar of the window')}
 					</span>
 				</label>
 				<label className="field">
 					<LabelActual label={t('Logo')} />
-					<div className="mdi">
-						<EditAttribute
-							modifiedClassName="bghl"
-							attribute="logo"
-							obj={coreSystem}
-							type="dropdown"
-							options={{ ...SofieLogo }}
-							collection={CoreSystem}
-							className="mdinput"
-						/>
-					</div>
+					<EditAttribute
+						modifiedClassName="bghl"
+						attribute="logo"
+						obj={coreSystem}
+						type="dropdown"
+						options={{ ...SofieLogo }}
+						collection={CoreSystem}
+					/>
 					<span className="text-s dimmed field-hint">
 						{t('Sofie logo to be displayed in the header. Requires a page refresh.')}
 					</span>
 				</label>
 				<label className="field">
 					<LabelActual label={t('Logging level')} />
-					<div className="mdi">
-						<EditAttribute
-							modifiedClassName="bghl"
-							attribute="logLevel"
-							obj={coreSystem}
-							type="dropdown"
-							options={{ ...LogLevel, 'Use fallback': undefined }}
-							collection={CoreSystem}
-							className="mdinput"
-						/>
-						<span className="mdfx"></span>
-					</div>
+					<EditAttribute
+						modifiedClassName="bghl"
+						attribute="logLevel"
+						obj={coreSystem}
+						type="dropdown"
+						options={{ ...LogLevel, 'Use fallback': undefined }}
+						collection={CoreSystem}
+					/>
 					<span className="text-s dimmed field-hint">
 						{t('This affects how much is logged to the console on the server')}
 					</span>
@@ -140,28 +129,22 @@ function SystemManagementNotificationMessage({ coreSystem }: Readonly<WithCoreSy
 			<div className="properties-grid">
 				<label className="field">
 					<LabelActual label={t('Message')} />
-					<div className="mdi">
-						<EditAttribute
-							modifiedClassName="bghl"
-							attribute="systemInfo.message"
-							obj={coreSystem}
-							type="text"
-							collection={CoreSystem}
-							className="mdinput"
-						/>
-						<span className="mdfx"></span>
-					</div>
+					<EditAttribute
+						modifiedClassName="bghl"
+						attribute="systemInfo.message"
+						obj={coreSystem}
+						type="text"
+						collection={CoreSystem}
+					/>
 				</label>
 				<label className="field">
 					<LabelActual label={t('Enabled')} />
-					<div className="mdi">
-						<EditAttribute
-							attribute="systemInfo.enabled"
-							obj={coreSystem}
-							type="checkbox"
-							collection={CoreSystem}
-						></EditAttribute>
-					</div>
+					<EditAttribute
+						attribute="systemInfo.enabled"
+						obj={coreSystem}
+						type="checkbox"
+						collection={CoreSystem}
+					></EditAttribute>
 				</label>
 			</div>
 		</>
@@ -266,28 +249,22 @@ function SystemManagementMonitoring({ coreSystem }: Readonly<WithCoreSystemProps
 			<div className="properties-grid">
 				<label className="field">
 					<LabelActual label={t('APM Enabled')} />
-					<div className="mdi">
-						<EditAttribute
-							attribute="apm.enabled"
-							obj={coreSystem}
-							type="checkbox"
-							collection={CoreSystem}
-						></EditAttribute>
-					</div>
+					<EditAttribute
+						attribute="apm.enabled"
+						obj={coreSystem}
+						type="checkbox"
+						collection={CoreSystem}
+					></EditAttribute>
 				</label>
 				<label className="field">
 					<LabelActual label={t('APM Transaction Sample Rate')} />
-					<div className="mdi">
-						<EditAttribute
-							modifiedClassName="bghl"
-							attribute="apm.transactionSampleRate"
-							obj={coreSystem}
-							type="float"
-							collection={CoreSystem}
-							className="mdinput"
-						/>
-						<span className="mdfx"></span>
-					</div>
+					<EditAttribute
+						modifiedClassName="bghl"
+						attribute="apm.transactionSampleRate"
+						obj={coreSystem}
+						type="float"
+						collection={CoreSystem}
+					/>
 					<span className="text-s dimmed field-hint">
 						{t(
 							'How many of the transactions to monitor. Set to -1 to log nothing (max performance), 0.5 to log 50% of the transactions, 1 to log all transactions'
@@ -300,17 +277,13 @@ function SystemManagementMonitoring({ coreSystem }: Readonly<WithCoreSystemProps
 
 				<label className="field">
 					<LabelActual label={t('Monitor blocked thread')} />
-					<div className="mdi">
-						<EditAttribute
-							modifiedClassName="bghl"
-							attribute="enableMonitorBlockedThread"
-							obj={coreSystem}
-							type="checkbox"
-							collection={CoreSystem}
-							className="mdinput"
-						/>
-						<span className="mdfx"></span>
-					</div>
+					<EditAttribute
+						modifiedClassName="bghl"
+						attribute="enableMonitorBlockedThread"
+						obj={coreSystem}
+						type="checkbox"
+						collection={CoreSystem}
+					/>
 					<span className="text-s dimmed field-hint">
 						{t(
 							'Enables internal monitoring of blocked main thread. Logs when there is an issue, but (unverified) might cause issues in itself.'

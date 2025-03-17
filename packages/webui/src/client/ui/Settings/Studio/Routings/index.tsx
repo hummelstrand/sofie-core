@@ -45,18 +45,18 @@ export function StudioRoutings({
 			{!manifest && <span>{t('Add a playout device to the studio in order to configure the route sets')}</span>}
 			{manifest && (
 				<>
-					<p className="mhn mvs text-s dimmed field-hint">
+					<p className="my-2 text-s dimmed field-hint">
 						{t(
 							'Controls for exposed Route Sets will be displayed to the producer within the Rundown View in the Switchboard.'
 						)}
 					</p>
-					<h3 className="my-2">{t('Exclusivity Groups')}</h3>
+					<h3 className="my-4">{t('Exclusivity Groups')}</h3>
 					<ExclusivityGroupsTable
 						studio={studio}
 						routeSetsFromOverrides={routeSetsFromOverrides}
 						exclusivityGroupsFromOverrides={exclusivityGroupsFromOverrides}
 					/>
-					<h3 className="my-2">{t('Route Sets')}</h3>
+					<h3 className="my-4">{t('Route Sets')}</h3>
 					<RouteSetsTable
 						studio={studio}
 						routeSetsFromOverrides={routeSetsFromOverrides}
