@@ -3,6 +3,7 @@ import { CoreSystem, PeripheralDevices, Studios, TriggeredActions } from '../col
 import {
 	convertObjectIntoOverrides,
 	ObjectOverrideSetOp,
+	ObjectWithOverrides,
 	wrapDefaultObject,
 } from '@sofie-automation/corelib/dist/settings/objectWithOverrides'
 import {
@@ -81,6 +82,7 @@ export const addSteps = addMigrationSteps('1.52.0', [
 				// .abPlayers in the overrides:
 				for (const override of studio.routeSetsWithOverrides.overrides) {
 					if (override.op === 'set') {
+						if (override.path.includes('.')) continue // Only include overrides at the top level
 						const value = override.value as StudioRouteSet
 
 						if (!value.abPlayers) {
@@ -112,6 +114,7 @@ export const addSteps = addMigrationSteps('1.52.0', [
 				// .abPlayers in the overrides:
 				for (const override of newRouteSetsWithOverrides.overrides) {
 					if (override.op === 'set') {
+						if (override.path.includes('.')) continue // Only include overrides at the top level
 						const value = override.value as StudioRouteSet
 
 						if (!value.abPlayers) {
@@ -268,7 +271,9 @@ export const addSteps = addMigrationSteps('1.52.0', [
 				//@ts-expect-error settings is typed as Record<string, StudioRouteSet>
 				const oldSettings = studio.settings
 
-				const newSettings = wrapDefaultObject<IStudioSettings>(oldSettings || {})
+				const newSettings = convertObjectIntoOverrides(
+					oldSettings || {}
+				) as unknown as ObjectWithOverrides<IStudioSettings>
 
 				await Studios.updateAsync(studio._id, {
 					$set: {
@@ -304,7 +309,7 @@ export const addSteps = addMigrationSteps('1.52.0', [
 			for (const system of systems) {
 				const oldSystem = system as ICoreSystem as PartialOldICoreSystem
 
-				const newSettings = wrapDefaultObject<ICoreSystemSettings>({
+				const newSettings = convertObjectIntoOverrides({
 					cron: {
 						casparCGRestart: {
 							enabled: false,
@@ -316,7 +321,7 @@ export const addSteps = addMigrationSteps('1.52.0', [
 					},
 					support: oldSystem.support ?? { message: '' },
 					evaluationsMessage: oldSystem.evaluations ?? { enabled: false, heading: '', message: '' },
-				})
+				}) as unknown as ObjectWithOverrides<ICoreSystemSettings>
 
 				await CoreSystem.updateAsync(system._id, {
 					$set: {

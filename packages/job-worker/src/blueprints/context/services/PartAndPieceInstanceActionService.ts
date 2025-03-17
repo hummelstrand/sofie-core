@@ -9,6 +9,7 @@ import {
 	IBlueprintPieceDB,
 	IBlueprintPieceInstance,
 	IBlueprintResolvedPieceInstance,
+	IBlueprintSegment,
 	OmitId,
 	SomeContent,
 	Time,
@@ -22,6 +23,7 @@ import {
 	convertPieceInstanceToBlueprints,
 	convertPieceToBlueprints,
 	convertResolvedPieceInstanceToBlueprints,
+	convertSegmentToBlueprints,
 	createBlueprintQuickLoopInfo,
 	getMediaObjectDuration,
 } from '../lib'
@@ -138,6 +140,14 @@ export class PartAndPieceInstanceActionService {
 		)
 		return resolvedInstances.map(convertResolvedPieceInstanceToBlueprints)
 	}
+	getSegment(segment: 'current' | 'next'): IBlueprintSegment | undefined {
+		const partInstance = this.#getPartInstance(segment)
+		if (!partInstance) return undefined
+
+		const segmentModel = this._playoutModel.findSegment(partInstance.partInstance.segmentId)
+
+		return segmentModel?.segment ? convertSegmentToBlueprints(segmentModel?.segment) : undefined
+	}
 
 	async findLastPieceOnLayer(
 		sourceLayerId0: string | string[],
@@ -244,6 +254,9 @@ export class PartAndPieceInstanceActionService {
 			startRundownId: { $in: this._playoutModel.getRundownIds() },
 		})
 		if (!pieceDB) throw new Error(`Cannot find Piece ${piece._id}`)
+
+		if (!pieceDB.startPartId || !pieceDB.startSegmentId)
+			throw new Error(`Piece ${piece._id} does not belong to a part`)
 
 		const rundown = this._playoutModel.getRundown(pieceDB.startRundownId)
 		const segment = rundown?.getSegment(pieceDB.startSegmentId)
@@ -525,6 +538,7 @@ export async function applyActionSideEffects(
 		await syncPlayheadInfinitesForNextPartInstance(
 			context,
 			playoutModel,
+			undefined,
 			playoutModel.currentPartInstance,
 			playoutModel.nextPartInstance
 		)

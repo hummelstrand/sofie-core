@@ -20,17 +20,12 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Classnames from 'classnames'
-import { createSyncPeripheralDeviceCustomPublicationMongoCollection } from '../../collections/lib'
 import { StudioId } from '@sofie-automation/corelib/dist/dataModel/Ids'
-import { PeripheralDevicePubSubCollectionsNames } from '@sofie-automation/shared-lib/dist/pubsub/peripheralDevice'
+import { StudioTimeline } from './collections'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
-
-export const StudioTimeline = createSyncPeripheralDeviceCustomPublicationMongoCollection(
-	PeripheralDevicePubSubCollectionsNames.studioTimeline
-)
 
 interface TimelineViewRouteParams {
 	studioId: string | undefined
@@ -260,6 +255,12 @@ function renderTimelineState(state: TimelineState, filter: RegExp | string | und
 			<td>{(o.classes ?? []).join('<br />')}</td>
 			<td style={{ whiteSpace: 'pre' }}>
 				<pre>{JSON.stringify(o.content, undefined, '\t')}</pre>
+				<pre>
+					{
+						//@ts-expect-error - abSessions is not in the type but are still in the object if used:
+						o.abSessions && 'AB-Sessions:' + '\n' + JSON.stringify(o.abSessions, undefined, '\t')
+					}
+				</pre>
 			</td>
 		</tr>
 	))

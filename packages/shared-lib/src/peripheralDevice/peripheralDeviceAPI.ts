@@ -24,6 +24,11 @@ export interface PiecePlaybackStartedResult extends PiecePlaybackCallbackData {
 }
 export type PiecePlaybackStoppedResult = PiecePlaybackStartedResult
 
+export interface TriggerRegenerationCallbackData {
+	rundownPlaylistId: RundownPlaylistId
+	regenerationToken: string
+}
+
 export type PlayoutChangedResults = {
 	rundownPlaylistId: RundownPlaylistId
 	changes: PlayoutChangedResult[]
@@ -33,6 +38,7 @@ export enum PlayoutChangedType {
 	PART_PLAYBACK_STOPPED = 'partPlaybackStopped',
 	PIECE_PLAYBACK_STARTED = 'piecePlaybackStarted',
 	PIECE_PLAYBACK_STOPPED = 'piecePlaybackStopped',
+	TRIGGER_REGENERATION = 'triggerRegeneration',
 }
 export type PlayoutChangedResult = {
 	objId: string
@@ -41,6 +47,7 @@ export type PlayoutChangedResult = {
 		| PlayoutChangedType.PART_PLAYBACK_STOPPED
 		| PlayoutChangedType.PIECE_PLAYBACK_STARTED
 		| PlayoutChangedType.PIECE_PLAYBACK_STOPPED
+		| PlayoutChangedType.TRIGGER_REGENERATION
 } & (
 	| {
 			type: PlayoutChangedType.PART_PLAYBACK_STARTED
@@ -57,6 +64,10 @@ export type PlayoutChangedResult = {
 	| {
 			type: PlayoutChangedType.PIECE_PLAYBACK_STOPPED
 			data: Omit<PiecePlaybackStoppedResult, 'rundownPlaylistId'>
+	  }
+	| {
+			type: PlayoutChangedType.TRIGGER_REGENERATION
+			data: Omit<TriggerRegenerationCallbackData, 'rundownPlaylistId'>
 	  }
 )
 

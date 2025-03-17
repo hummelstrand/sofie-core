@@ -5,7 +5,7 @@ import classNames from 'classnames'
 import { PieceUi } from '../../ui/SegmentContainer/withResolvedSegment'
 import { RundownUtils } from '../rundown'
 import { ReadonlyDeep } from 'type-fest'
-import { PieceContentStatusObj } from '@sofie-automation/meteor-lib/dist/api/pieceContentStatus'
+import { PieceContentStatusObj } from '@sofie-automation/corelib/dist/dataModel/PieceContentStatus'
 
 export function pieceUiClassNames(
 	pieceInstance: PieceUi,
@@ -32,10 +32,12 @@ export function pieceUiClassNames(
 				: undefined,
 
 		'super-infinite':
+			!innerPiece.enable.isAbsolute &&
 			innerPiece.lifespan !== PieceLifespan.WithinPart &&
 			innerPiece.lifespan !== PieceLifespan.OutOnSegmentChange &&
 			innerPiece.lifespan !== PieceLifespan.OutOnSegmentEnd,
 		'infinite-starts':
+			!innerPiece.enable.isAbsolute &&
 			innerPiece.lifespan !== PieceLifespan.WithinPart &&
 			innerPiece.lifespan !== PieceLifespan.OutOnSegmentChange &&
 			innerPiece.lifespan !== PieceLifespan.OutOnSegmentEnd &&

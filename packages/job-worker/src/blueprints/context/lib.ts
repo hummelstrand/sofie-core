@@ -2,7 +2,11 @@ import { AdLibAction } from '@sofie-automation/corelib/dist/dataModel/AdlibActio
 import { AdLibPiece } from '@sofie-automation/corelib/dist/dataModel/AdLibPiece'
 import { DBPart } from '@sofie-automation/corelib/dist/dataModel/Part'
 import { DBPartInstance } from '@sofie-automation/corelib/dist/dataModel/PartInstance'
-import { deserializePieceTimelineObjectsBlob, PieceGeneric } from '@sofie-automation/corelib/dist/dataModel/Piece'
+import {
+	deserializePieceTimelineObjectsBlob,
+	Piece,
+	PieceGeneric,
+} from '@sofie-automation/corelib/dist/dataModel/Piece'
 import {
 	PieceInstance,
 	PieceInstancePiece,
@@ -39,6 +43,7 @@ import {
 	IBlueprintPieceInstance,
 	IBlueprintResolvedPieceInstance,
 	IBlueprintRundownDB,
+	IBlueprintRundownPieceDB,
 	IBlueprintRundownPlaylist,
 	IBlueprintSegmentDB,
 	IBlueprintSegmentRundown,
@@ -120,6 +125,7 @@ export const PlayoutMutatablePartSampleKeys = allKeysOfObject<PlayoutMutatablePa
 	expectedDuration: true,
 	holdMode: true,
 	shouldNotifyCurrentPlayingPart: true,
+	ingestNotifyPartExternalId: true,
 	ingestNotifyPartReady: true,
 	ingestNotifyItemsReady: true,
 	classes: true,
@@ -257,6 +263,27 @@ export function convertPieceToBlueprints(piece: ReadonlyDeep<PieceInstancePiece>
 }
 
 /**
+ * Convert a Rundown owned Piece into IBlueprintAdLibPieceDB, for passing into the blueprints
+ * Note: This does not check whether has the correct ownership
+ * @param piece the Piece to convert
+ * @returns a cloned complete and clean IBlueprintRundownPieceDB
+ */
+export function convertRundownPieceToBlueprints(piece: ReadonlyDeep<Piece>): IBlueprintRundownPieceDB {
+	const obj: Complete<IBlueprintRundownPieceDB> = {
+		...convertPieceGenericToBlueprintsInner(piece),
+		_id: unprotectString(piece._id),
+		enable: {
+			...piece.enable,
+			start: piece.enable.start === 'now' ? 0 : piece.enable.start,
+			isAbsolute: true,
+		},
+		virtual: piece.virtual,
+		notInVision: piece.notInVision,
+	}
+	return obj
+}
+
+/**
  * Convert a DBPart into IBlueprintPartDB, for passing into the blueprints
  * @param part the Part to convert
  * @returns a cloned complete and clean IBlueprintPartDB
@@ -283,6 +310,7 @@ export function convertPartToBlueprints(part: ReadonlyDeep<DBPart>): IBlueprintP
 		expectedDuration: part.expectedDuration,
 		holdMode: part.holdMode,
 		shouldNotifyCurrentPlayingPart: part.shouldNotifyCurrentPlayingPart,
+		ingestNotifyPartExternalId: part.ingestNotifyPartExternalId,
 		ingestNotifyPartReady: part.ingestNotifyPartReady,
 		ingestNotifyItemsReady: clone<IngestPartNotifyItemReady[] | undefined>(part.ingestNotifyItemsReady),
 		classes: clone<string[] | undefined>(part.classes),
