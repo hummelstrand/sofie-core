@@ -549,8 +549,6 @@ export const TriggeredActionEntry: React.FC<IProps> = React.memo(function Trigge
 									obj={triggeredAction}
 									collection={TriggeredActions}
 									attribute="name"
-									className="input text-input input-l pan"
-									modifiedClassName="bghl"
 									mutateDisplayValue={(val) => (typeof val === 'object' ? undefined : val)}
 									mutateUpdateValue={(val) =>
 										val === '' && typeof triggeredAction.name === 'object' ? triggeredAction.name : val
@@ -572,8 +570,6 @@ export const TriggeredActionEntry: React.FC<IProps> = React.memo(function Trigge
 									obj={triggeredAction}
 									collection={TriggeredActions}
 									attribute="styleClassNames"
-									className="input text-input input-l pan"
-									modifiedClassName="bghl"
 								/>
 							</div>
 							<span className="text-s dimmed field-hint">

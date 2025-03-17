@@ -39,7 +39,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 			<label className="field">
 				<LabelActual label={t('Expose as user selectable layout')} />
 				<EditAttribute
-					modifiedClassName="bghl"
 					attribute={'exposeAsSelectableLayout'}
 					obj={item}
 					type="checkbox"
@@ -50,39 +49,33 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 			<label className="field">
 				<LabelActual label={t('Shelf Layout')} />
 				<EditAttribute
-					modifiedClassName="bghl"
 					attribute={'shelfLayout'}
 					obj={item}
 					options={filterLayouts(layouts, RundownLayoutsAPI.isLayoutForShelf)}
 					type="dropdown"
 					collection={RundownLayouts}
-					className="input text-input input-l dropdown"
 				></EditAttribute>
 			</label>
 
 			<label className="field">
 				<LabelActual label={t('Mini Shelf Layout')} />
 				<EditAttribute
-					modifiedClassName="bghl"
 					attribute={'miniShelfLayout'}
 					obj={item}
 					options={filterLayouts(layouts, RundownLayoutsAPI.isLayoutForMiniShelf)}
 					type="dropdown"
 					collection={RundownLayouts}
-					className="input text-input input-l dropdown"
 				></EditAttribute>
 			</label>
 
 			<label className="field">
 				<LabelActual label={t('Rundown Header Layout')} />
 				<EditAttribute
-					modifiedClassName="bghl"
 					attribute={'rundownHeaderLayout'}
 					obj={item}
 					options={filterLayouts(layouts, RundownLayoutsAPI.isLayoutForRundownHeader)}
 					type="dropdown"
 					collection={RundownLayouts}
-					className="input text-input input-l dropdown"
 				></EditAttribute>
 			</label>
 
@@ -90,7 +83,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 				<LabelActual label={t('Live line countdown requires Source Layer')} />
 				<div className="checkbox-enable-before">
 					<EditAttribute
-						modifiedClassName="bghl"
 						attribute={`liveLineProps.requiredLayerIds`}
 						obj={item}
 						type="checkbox"
@@ -99,14 +91,12 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 						mutateUpdateValue={() => undefined}
 					/>
 					<EditAttribute
-						modifiedClassName="bghl"
 						attribute={`liveLineProps.requiredLayerIds`}
 						obj={item}
 						options={sourceLayerOptions}
 						type="multiselect"
 						label={t('Disabled')}
 						collection={RundownLayouts}
-						className="input text-input input-l dropdown"
 						mutateUpdateValue={(v) => (v && v.length > 0 ? v : undefined)}
 					/>
 				</div>
@@ -119,7 +109,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 				<LabelActual label={t('Also Require Source Layers')} />
 				<div className="checkbox-enable-before">
 					<EditAttribute
-						modifiedClassName="bghl"
 						attribute={`liveLineProps.additionalLayers`}
 						obj={item}
 						type="checkbox"
@@ -128,14 +117,12 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 						mutateUpdateValue={() => undefined}
 					/>
 					<EditAttribute
-						modifiedClassName="bghl"
 						attribute={`liveLineProps.additionalLayers`}
 						obj={item}
 						options={sourceLayerOptions}
 						type="multiselect"
 						label={t('Disabled')}
 						collection={RundownLayouts}
-						className="input text-input input-l dropdown"
 						mutateUpdateValue={(v) => (v && v.length > 0 ? v : undefined)}
 					/>
 				</div>
@@ -147,7 +134,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 			<label className="field">
 				<LabelActual label={t('Require All Additional Source Layers')} />
 				<EditAttribute
-					modifiedClassName="bghl"
 					attribute={`liveLineProps.requireAllAdditionalSourcelayers`}
 					obj={item}
 					type="checkbox"
@@ -159,7 +145,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 			<label className="field">
 				<LabelActual label={t('Hide Rundown Divider')} />
 				<EditAttribute
-					modifiedClassName="bghl"
 					attribute={'hideRundownDivider'}
 					obj={item}
 					type="checkbox"
@@ -171,7 +156,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 			<label className="field">
 				<LabelActual label={t('Show Breaks as Segments')} />
 				<EditAttribute
-					modifiedClassName="bghl"
 					attribute={'showBreaksAsSegments'}
 					obj={item}
 					type="checkbox"
@@ -183,7 +167,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 				<LabelActual label={t('Segment countdown requires source layer')} />
 				<div className="checkbox-enable-before">
 					<EditAttribute
-						modifiedClassName="bghl"
 						attribute={`countdownToSegmentRequireLayers`}
 						obj={item}
 						type="checkbox"
@@ -192,14 +175,12 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 						mutateUpdateValue={() => undefined}
 					/>
 					<EditAttribute
-						modifiedClassName="bghl"
 						attribute={`countdownToSegmentRequireLayers`}
 						obj={item}
 						options={sourceLayerOptions}
 						type="multiselect"
 						label={t('Disabled')}
 						collection={RundownLayouts}
-						className="input text-input input-l dropdown"
 						mutateUpdateValue={(v) => (v && v.length > 0 ? v : undefined)}
 					/>
 				</div>
@@ -211,7 +192,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 			<label className="field">
 				<LabelActual label={t('Fixed duration in Segment header')} />
 				<EditAttribute
-					modifiedClassName="bghl"
 					attribute={'fixedSegmentDuration'}
 					obj={item}
 					type="checkbox"
@@ -227,28 +207,24 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 			<label className="field">
 				<LabelActual label={t('Select visible Source Layers')} />
 				<EditAttribute
-					modifiedClassName="bghl"
 					attribute={'visibleSourceLayers'}
 					obj={item}
 					options={sourceLayerOptions}
 					type="multiselect"
 					mutateUpdateValue={undefinedOnEmptyArray}
 					collection={RundownLayouts}
-					className="input text-input input-l dropdown"
 				></EditAttribute>
 			</label>
 
 			<label className="field">
 				<LabelActual label={t('Select visible Output Groups')} />
 				<EditAttribute
-					modifiedClassName="bghl"
 					attribute={'visibleOutputLayers'}
 					obj={item}
 					options={sourceLayerOptions}
 					type="multiselect"
 					mutateUpdateValue={undefinedOnEmptyArray}
 					collection={RundownLayouts}
-					className="input text-input input-l dropdown"
 				></EditAttribute>
 			</label>
 
@@ -256,7 +232,6 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 				<LabelActual label={t('Display piece duration for source layers')} />
 				<div className="checkbox-enable-before">
 					<EditAttribute
-						modifiedClassName="bghl"
 						attribute={`showDurationSourceLayers`}
 						obj={item}
 						type="checkbox"
@@ -265,14 +240,12 @@ export default function RundownViewLayoutSettings({ sourceLayers, item, layouts 
 						mutateUpdateValue={() => undefined}
 					/>
 					<EditAttribute
-						modifiedClassName="bghl"
 						attribute={`showDurationSourceLayers`}
 						obj={item}
 						options={sourceLayerOptions}
 						type="multiselect"
 						label={t('Disabled')}
 						collection={RundownLayouts}
-						className="input text-input input-l dropdown"
 						mutateUpdateValue={(v) => (v && v.length > 0 ? v : undefined)}
 					/>
 				</div>

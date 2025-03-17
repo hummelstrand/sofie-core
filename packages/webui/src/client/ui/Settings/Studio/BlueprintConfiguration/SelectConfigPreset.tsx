@@ -39,7 +39,6 @@ export function SelectConfigPreset({ studio, blueprint }: Readonly<SelectConfigP
 			<LabelActual label={t('Blueprint config preset')} />
 
 			<EditAttribute
-				modifiedClassName="bghl"
 				attribute="blueprintConfigPresetId"
 				obj={studio}
 				type="dropdown"
@@ -47,7 +46,6 @@ export function SelectConfigPreset({ studio, blueprint }: Readonly<SelectConfigP
 				mutateDisplayValue={(v) => v || ''}
 				mutateUpdateValue={(v) => (v === '' ? undefined : v)}
 				collection={Studios}
-				className="input text-input input-l"
 			/>
 			<div>
 				{!studio.blueprintConfigPresetId && (

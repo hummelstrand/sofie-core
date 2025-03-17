@@ -101,7 +101,7 @@ export const FilterEditor: React.FC<IProps> = function FilterEditor(props: IProp
 					{props.description && <p className="m-0">{props.description}</p>}
 
 					<DropdownInputControl
-						classNames="input text-input input-m mb-2"
+						classNames="mb-2"
 						value={props.field}
 						options={getDropdownInputOptions(props.fields)}
 						// placeholder={props.fieldLabel}
@@ -109,8 +109,7 @@ export const FilterEditor: React.FC<IProps> = function FilterEditor(props: IProp
 					/>
 
 					<EditAttribute
-						className={props.type === 'toggle' ? 'mb-2' : 'input text-input input-m mb-2'}
-						modifiedClassName="bghl"
+						className="mb-2"
 						type={props.type}
 						label={props.valueLabel}
 						options={props.values}

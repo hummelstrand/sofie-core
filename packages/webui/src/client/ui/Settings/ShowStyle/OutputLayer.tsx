@@ -271,24 +271,11 @@ function OutputLayerEntry({ item, isExpanded, toggleExpanded, overrideHelper }: 
 					<td colSpan={4}>
 						<div className="properties-grid">
 							<LabelAndOverrides label={t('Channel Name')} item={item} itemKey={'name'} overrideHelper={overrideHelper}>
-								{(value, handleUpdate) => (
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverrides>
 							<label className="field">
 								<LabelActual label={t('Internal ID')} />
-								<TextInputControl
-									modifiedClassName="bghl"
-									classNames="input text-input input-l"
-									value={item.id}
-									handleUpdate={doChangeItemId}
-									disabled={!!item.defaults}
-								/>
+								<TextInputControl value={item.id} handleUpdate={doChangeItemId} disabled={!!item.defaults} />
 							</label>
 							<LabelAndOverridesForCheckbox
 								label={t('Is PGM Output')}
@@ -304,14 +291,7 @@ function OutputLayerEntry({ item, isExpanded, toggleExpanded, overrideHelper }: 
 								itemKey={'_rank'}
 								overrideHelper={overrideHelper}
 							>
-								{(value, handleUpdate) => (
-									<IntInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <IntInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverridesForInt>
 							<LabelAndOverridesForCheckbox
 								label={t('Is collapsed by default')}

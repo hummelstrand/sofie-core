@@ -417,13 +417,7 @@ function StudioMappingsEntry({
 						<div className="properties-grid">
 							<label className="field">
 								<LabelActual label={t('Layer ID')} />
-								<TextInputControl
-									modifiedClassName="bghl"
-									classNames="input text-input input-l"
-									value={item.id}
-									handleUpdate={doChangeItemId}
-									disabled={!!item.defaults}
-								/>
+								<TextInputControl value={item.id} handleUpdate={doChangeItemId} disabled={!!item.defaults} />
 								<span className="text-s dimmed field-hint">{t('ID of the timeline-layer to map to some output')}</span>
 							</label>
 
@@ -434,14 +428,7 @@ function StudioMappingsEntry({
 								itemKey={'layerName'}
 								overrideHelper={overrideHelper}
 							>
-								{(value, handleUpdate) => (
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverrides>
 
 							<LabelAndOverridesForDropdown
@@ -453,12 +440,7 @@ function StudioMappingsEntry({
 								options={deviceTypeOptions}
 							>
 								{(value, handleUpdate, options) => (
-									<DropdownInputControl
-										classNames="input text-input input-l"
-										options={options}
-										value={value + ''}
-										handleUpdate={handleUpdate}
-									/>
+									<DropdownInputControl options={options} value={value + ''} handleUpdate={handleUpdate} />
 								)}
 							</LabelAndOverridesForDropdown>
 
@@ -469,14 +451,7 @@ function StudioMappingsEntry({
 								itemKey={'deviceId'}
 								overrideHelper={overrideHelper}
 							>
-								{(value, handleUpdate) => (
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverrides>
 
 							<LabelAndOverridesForDropdown
@@ -487,12 +462,7 @@ function StudioMappingsEntry({
 								options={getDropdownInputOptions(LookaheadMode)}
 							>
 								{(value, handleUpdate, options) => (
-									<DropdownInputControl
-										classNames="input text-input input-l"
-										options={options}
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
+									<DropdownInputControl options={options} value={value} handleUpdate={handleUpdate} />
 								)}
 							</LabelAndOverridesForDropdown>
 
@@ -502,14 +472,7 @@ function StudioMappingsEntry({
 								itemKey={'lookaheadDepth'}
 								overrideHelper={overrideHelper}
 							>
-								{(value, handleUpdate) => (
-									<IntInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <IntInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverridesForInt>
 
 							<LabelAndOverridesForInt
@@ -520,14 +483,7 @@ function StudioMappingsEntry({
 								itemKey={'lookaheadMaxSearchDistance'}
 								overrideHelper={overrideHelper}
 							>
-								{(value, handleUpdate) => (
-									<IntInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <IntInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverridesForInt>
 
 							{mappingTypeOptions.length > 0 && (
@@ -541,12 +497,7 @@ function StudioMappingsEntry({
 										options={mappingTypeOptions}
 									>
 										{(value, handleUpdate, options) => (
-											<DropdownInputControl
-												classNames="input text-input input-l"
-												options={options}
-												value={value + ''}
-												handleUpdate={handleUpdate}
-											/>
+											<DropdownInputControl options={options} value={value + ''} handleUpdate={handleUpdate} />
 										)}
 									</LabelAndOverridesForDropdown>
 

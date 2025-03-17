@@ -42,13 +42,11 @@ export function SelectBlueprint({ showStyleBase }: Readonly<SelectBlueprintProps
 			<LabelActual label={t('Blueprint')} />
 
 			<EditAttribute
-				modifiedClassName="bghl"
 				attribute="blueprintId"
 				obj={showStyleBase}
 				type="dropdown"
 				options={blueprintOptions}
 				collection={ShowStyleBases}
-				className="input text-input input-l"
 			/>
 			<div>
 				{!showStyleBase.blueprintId ? (

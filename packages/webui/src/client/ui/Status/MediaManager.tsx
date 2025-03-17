@@ -179,7 +179,7 @@ function MediaManagerWorkFlowItem(props: Readonly<IItemProps>): JSX.Element {
 				error: finishedError,
 			})}
 		>
-			<div className="workflow__header pas">
+			<div className="workflow__header">
 				<div className="workflow__header__progress">
 					<VelocityReact.VelocityComponent
 						animation={finishedOK ? iconEnterAnimation : iconLeaveAnimation}
@@ -247,8 +247,8 @@ function MediaManagerWorkFlowItem(props: Readonly<IItemProps>): JSX.Element {
 					<div className="workflow__header__current-task workflow__step">
 						{currentTask && (
 							<React.Fragment>
-								<div className="workflow__step__action pts">{actionLabel(t, currentTask.action)}</div>
-								<div className="workflow__step__status pts">{workStepStatusLabel(t, currentTask)}</div>
+								<div className="workflow__step__action">{actionLabel(t, currentTask.action)}</div>
+								<div className="workflow__step__status">{workStepStatusLabel(t, currentTask)}</div>
 							</React.Fragment>
 						)}
 					</div>
@@ -309,8 +309,8 @@ function MediaManagerWorkFlowItem(props: Readonly<IItemProps>): JSX.Element {
 									})}
 									key={unprotectString(step._id)}
 								>
-									<div className="workflow__step__action pas">{actionLabel(t, step.action)}</div>
-									<div className="workflow__step__status pas">{workStepStatusLabel(t, step)}</div>
+									<div className="workflow__step__action">{actionLabel(t, step.action)}</div>
+									<div className="workflow__step__status">{workStepStatusLabel(t, step)}</div>
 									<div className="workflow__step__progress progress-bar">
 										<div
 											className="pb-indicator"
@@ -320,7 +320,7 @@ function MediaManagerWorkFlowItem(props: Readonly<IItemProps>): JSX.Element {
 										/>
 									</div>
 									{step.messages && step.messages.length > 0 && (
-										<ul className="workflow__step__messages pas man">
+										<ul className="workflow__step__messages">
 											{step.messages.map((k, key) => (
 												<li key={key}>{k}</li>
 											))}

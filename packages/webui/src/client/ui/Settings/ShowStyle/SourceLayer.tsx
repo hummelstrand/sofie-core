@@ -300,14 +300,7 @@ function SourceLayerEntry({ item, isExpanded, toggleExpanded, overrideHelper }: 
 					<td colSpan={4}>
 						<div className="properties-grid">
 							<LabelAndOverrides label={t('Source Name')} item={item} itemKey={'name'} overrideHelper={overrideHelper}>
-								{(value, handleUpdate) => (
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverrides>
 							<LabelAndOverrides
 								label={t('Source Abbreviation')}
@@ -315,24 +308,11 @@ function SourceLayerEntry({ item, isExpanded, toggleExpanded, overrideHelper }: 
 								itemKey={'abbreviation'}
 								overrideHelper={overrideHelper}
 							>
-								{(value, handleUpdate) => (
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverrides>
 							<label className="field">
 								<LabelActual label={t('Internal ID')} />
-								<TextInputControl
-									modifiedClassName="bghl"
-									classNames="input text-input input-l"
-									value={item.id}
-									handleUpdate={doChangeItemId}
-									disabled={!!item.defaults}
-								/>
+								<TextInputControl value={item.id} handleUpdate={doChangeItemId} disabled={!!item.defaults} />
 							</label>
 							<LabelAndOverridesForDropdown
 								label={t('Source Type')}
@@ -342,12 +322,7 @@ function SourceLayerEntry({ item, isExpanded, toggleExpanded, overrideHelper }: 
 								options={getDropdownInputOptions(SourceLayerType)}
 							>
 								{(value, handleUpdate, options) => (
-									<DropdownInputControl
-										classNames="focusable-main input-l"
-										options={options}
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
+									<DropdownInputControl options={options} value={value} handleUpdate={handleUpdate} />
 								)}
 							</LabelAndOverridesForDropdown>
 							<LabelAndOverridesForCheckbox
@@ -380,14 +355,7 @@ function SourceLayerEntry({ item, isExpanded, toggleExpanded, overrideHelper }: 
 								itemKey={'_rank'}
 								overrideHelper={overrideHelper}
 							>
-								{(value, handleUpdate) => (
-									<IntInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <IntInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverridesForInt>
 							<LabelAndOverridesForCheckbox
 								label={t('Treat as Main content')}
@@ -460,14 +428,7 @@ function SourceLayerEntry({ item, isExpanded, toggleExpanded, overrideHelper }: 
 								itemKey={'exclusiveGroup'}
 								overrideHelper={overrideHelper}
 							>
-								{(value, handleUpdate) => (
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverrides>
 						</div>
 						<div className="m-1 me-2 text-end">

@@ -117,14 +117,7 @@ function AbPlayerRow({
 					itemKey={'poolName'}
 					overrideHelper={tableOverrideHelper}
 				>
-					{(value, handleUpdate) => (
-						<TextInputControl
-							modifiedClassName="bghl"
-							classNames="input text-input input-l"
-							value={value}
-							handleUpdate={handleUpdate}
-						/>
-					)}
+					{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 				</LabelAndOverrides>
 				<LabelAndOverrides
 					label={t('Pool PlayerId')}
@@ -132,14 +125,7 @@ function AbPlayerRow({
 					itemKey={'playerId'}
 					overrideHelper={tableOverrideHelper}
 				>
-					{(value, handleUpdate) => (
-						<TextInputControl
-							modifiedClassName="bghl"
-							classNames="input text-input input-l"
-							value={value}
-							handleUpdate={handleUpdate}
-						/>
-					)}
+					{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 				</LabelAndOverrides>
 			</div>
 			<button className="action-btn" onClick={confirmRemoveRouteLocal}>

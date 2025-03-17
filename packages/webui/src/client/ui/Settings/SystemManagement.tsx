@@ -76,13 +76,7 @@ function SystemManagementGeneral({ coreSystem }: Readonly<WithCoreSystemProps>) 
 			<div className="properties-grid">
 				<label className="field">
 					<LabelActual label={t('Installation name')} />
-					<EditAttribute
-						modifiedClassName="bghl"
-						attribute="name"
-						obj={coreSystem}
-						type="text"
-						collection={CoreSystem}
-					/>
+					<EditAttribute attribute="name" obj={coreSystem} type="text" collection={CoreSystem} />
 					<span className="text-s dimmed field-hint">
 						{t('This name will be shown in the title bar of the window')}
 					</span>
@@ -90,7 +84,6 @@ function SystemManagementGeneral({ coreSystem }: Readonly<WithCoreSystemProps>) 
 				<label className="field">
 					<LabelActual label={t('Logo')} />
 					<EditAttribute
-						modifiedClassName="bghl"
 						attribute="logo"
 						obj={coreSystem}
 						type="dropdown"
@@ -104,7 +97,6 @@ function SystemManagementGeneral({ coreSystem }: Readonly<WithCoreSystemProps>) 
 				<label className="field">
 					<LabelActual label={t('Logging level')} />
 					<EditAttribute
-						modifiedClassName="bghl"
 						attribute="logLevel"
 						obj={coreSystem}
 						type="dropdown"
@@ -129,13 +121,7 @@ function SystemManagementNotificationMessage({ coreSystem }: Readonly<WithCoreSy
 			<div className="properties-grid">
 				<label className="field">
 					<LabelActual label={t('Message')} />
-					<EditAttribute
-						modifiedClassName="bghl"
-						attribute="systemInfo.message"
-						obj={coreSystem}
-						type="text"
-						collection={CoreSystem}
-					/>
+					<EditAttribute attribute="systemInfo.message" obj={coreSystem} type="text" collection={CoreSystem} />
 				</label>
 				<label className="field">
 					<LabelActual label={t('Enabled')} />
@@ -168,14 +154,7 @@ function SystemManagementSupportPanel({ coreSystem }: Readonly<WithCoreSystemPro
 					overrideHelper={overrideHelper}
 					hint={t('HTML that will be shown in the Support Panel')}
 				>
-					{(value, handleUpdate) => (
-						<CombinedMultiLineTextInputControl
-							modifiedClassName="bghl"
-							classNames="input text-input input-l"
-							value={value}
-							handleUpdate={handleUpdate}
-						/>
-					)}
+					{(value, handleUpdate) => <CombinedMultiLineTextInputControl value={value} handleUpdate={handleUpdate} />}
 				</LabelAndOverrides>
 			</div>
 		</>
@@ -208,14 +187,7 @@ function SystemManagementEvaluationsMessage({ coreSystem }: Readonly<WithCoreSys
 					itemKey={'evaluationsMessage.heading'}
 					overrideHelper={overrideHelper}
 				>
-					{(value, handleUpdate) => (
-						<TextInputControl
-							modifiedClassName="bghl"
-							classNames="input text-input input-l"
-							value={value}
-							handleUpdate={handleUpdate}
-						/>
-					)}
+					{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 				</LabelAndOverrides>
 
 				<LabelAndOverrides
@@ -226,14 +198,7 @@ function SystemManagementEvaluationsMessage({ coreSystem }: Readonly<WithCoreSys
 					overrideHelper={overrideHelper}
 					hint={t('Message shown to users in the Evaluations form')}
 				>
-					{(value, handleUpdate) => (
-						<CombinedMultiLineTextInputControl
-							modifiedClassName="bghl"
-							classNames="input text-input input-l"
-							value={value}
-							handleUpdate={handleUpdate}
-						/>
-					)}
+					{(value, handleUpdate) => <CombinedMultiLineTextInputControl value={value} handleUpdate={handleUpdate} />}
 				</LabelAndOverrides>
 			</div>
 		</>
@@ -258,13 +223,7 @@ function SystemManagementMonitoring({ coreSystem }: Readonly<WithCoreSystemProps
 				</label>
 				<label className="field">
 					<LabelActual label={t('APM Transaction Sample Rate')} />
-					<EditAttribute
-						modifiedClassName="bghl"
-						attribute="apm.transactionSampleRate"
-						obj={coreSystem}
-						type="float"
-						collection={CoreSystem}
-					/>
+					<EditAttribute attribute="apm.transactionSampleRate" obj={coreSystem} type="float" collection={CoreSystem} />
 					<span className="text-s dimmed field-hint">
 						{t(
 							'How many of the transactions to monitor. Set to -1 to log nothing (max performance), 0.5 to log 50% of the transactions, 1 to log all transactions'
@@ -278,7 +237,6 @@ function SystemManagementMonitoring({ coreSystem }: Readonly<WithCoreSystemProps
 				<label className="field">
 					<LabelActual label={t('Monitor blocked thread')} />
 					<EditAttribute
-						modifiedClassName="bghl"
 						attribute="enableMonitorBlockedThread"
 						obj={coreSystem}
 						type="checkbox"
@@ -334,14 +292,7 @@ function SystemManagementCronJobs({ coreSystem }: Readonly<WithCoreSystemProps>)
 					overrideHelper={overrideHelper}
 					hint={t('(Comma separated list. Empty - will store snapshots of all Rundown Playlists)')}
 				>
-					{(value, handleUpdate) => (
-						<MultiLineTextInputControl
-							modifiedClassName="bghl"
-							classNames="input text-input input-l"
-							value={value}
-							handleUpdate={handleUpdate}
-						/>
-					)}
+					{(value, handleUpdate) => <MultiLineTextInputControl value={value} handleUpdate={handleUpdate} />}
 				</LabelAndOverridesForMultiLineText>
 			</div>
 		</>

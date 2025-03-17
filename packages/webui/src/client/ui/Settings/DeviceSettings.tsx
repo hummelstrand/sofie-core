@@ -136,19 +136,12 @@ export default translateWithTracker<IDeviceSettingsProps, IDeviceSettingsState, 
 										{t('No name set')} <FontAwesomeIcon icon={faExclamationTriangle} />
 									</div>
 								) : null}
-								<EditAttribute
-									modifiedClassName="bghl"
-									attribute="name"
-									obj={device}
-									type="text"
-									collection={PeripheralDevices}
-								></EditAttribute>
+								<EditAttribute attribute="name" obj={device} type="text" collection={PeripheralDevices}></EditAttribute>
 							</label>
 
 							<label className="field">
 								<LabelActual label={t('Disable version check')} />
 								<EditAttribute
-									modifiedClassName="bghl"
 									attribute="disableVersionChecks"
 									obj={device}
 									type="checkbox"
@@ -233,14 +226,7 @@ function IngestDeviceCoreConfig({ device }: Readonly<IngestDeviceCoreConfigProps
 	return (
 		<label className="field">
 			<LabelActual label={t('NRCS Name')} />
-			<EditAttribute
-				modifiedClassName="bghl"
-				attribute="nrcsName"
-				obj={device}
-				type="text"
-				collection={PeripheralDevices}
-				className="form-control input text-input input-l"
-			/>
+			<EditAttribute attribute="nrcsName" obj={device} type="text" collection={PeripheralDevices} />
 		</label>
 	)
 }

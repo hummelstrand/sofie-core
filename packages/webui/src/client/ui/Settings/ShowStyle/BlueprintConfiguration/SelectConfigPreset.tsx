@@ -47,7 +47,6 @@ export function SelectConfigPreset({ showStyleBase }: Readonly<SelectConfigPrese
 			<LabelActual label={t('Blueprint config preset')} />
 
 			<EditAttribute
-				modifiedClassName="bghl"
 				attribute="blueprintConfigPresetId"
 				obj={showStyleBase}
 				type="dropdown"
@@ -55,7 +54,6 @@ export function SelectConfigPreset({ showStyleBase }: Readonly<SelectConfigPrese
 				mutateDisplayValue={(v) => v || ''}
 				mutateUpdateValue={(v) => (v === '' ? undefined : v)}
 				collection={ShowStyleBases}
-				className="input text-input input-l"
 			/>
 			<div>
 				{!showStyleBase.blueprintConfigPresetId && (

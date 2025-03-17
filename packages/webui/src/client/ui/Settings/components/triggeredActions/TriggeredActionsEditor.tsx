@@ -406,7 +406,6 @@ export const TriggeredActionsEditor: React.FC<IProps> = function TriggeredAction
 			<h2 className="mb-4">{t('Action Triggers')}</h2>
 			<div className="my-2">
 				<Form.Control
-					className="input text-input input-m"
 					placeholder={t('Find Trigger...')}
 					value={triggerFilter}
 					onChange={(e) => setTriggerFilter(e.target.value)}

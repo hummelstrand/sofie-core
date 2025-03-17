@@ -87,7 +87,7 @@ export const HotkeyEditor = function HotkeyEditor({ trigger, modified, readonly,
 		<>
 			<Form.Control
 				type="text"
-				className={classNames('input text-input input-m mb-2', {
+				className={classNames('mb-2', {
 					bghl: modified,
 				})}
 				ref={setInput}

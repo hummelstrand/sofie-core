@@ -84,13 +84,11 @@ function SelectBlueprint({ coreSystem }: Readonly<SelectBlueprintProps>): JSX.El
 			<LabelActual label={t('Blueprint')} />
 
 			<EditAttribute
-				modifiedClassName="bghl"
 				attribute="blueprintId"
 				obj={coreSystem}
 				type="dropdown"
 				options={blueprintOptions}
 				collection={CoreSystem}
-				className="input text-input input-l"
 			/>
 
 			<div>

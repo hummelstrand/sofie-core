@@ -159,19 +159,16 @@ export const VariantListItem = ({
 								<label className="field">
 									<LabelActual label={t('Name')} />
 									<EditAttribute
-										modifiedClassName="bghl"
 										attribute={'name'}
 										obj={showStyleVariant}
 										type="text"
 										collection={ShowStyleVariants}
-										className="input text-input input-l"
 									></EditAttribute>
 								</label>
 
 								<label className="field">
 									<LabelActual label={t('Can Generate Adlib Testing Rundown')} />
 									<EditAttribute
-										modifiedClassName="bghl"
 										attribute={'canGenerateAdlibTestingRundown'}
 										obj={showStyleVariant}
 										type="checkbox"
@@ -188,7 +185,6 @@ export const VariantListItem = ({
 									<LabelActual label={t('Config preset')} />
 
 									<EditAttribute
-										modifiedClassName="bghl"
 										attribute="blueprintConfigPresetId"
 										obj={showStyleVariant}
 										type="dropdown"

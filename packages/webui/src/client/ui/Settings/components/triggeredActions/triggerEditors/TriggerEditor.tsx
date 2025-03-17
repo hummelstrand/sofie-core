@@ -178,7 +178,7 @@ export const TriggerEditor = function TriggerEditor({
 					{...attributes.popper}
 				>
 					<DropdownInputControl
-						classNames="form-control input text-input input-m mb-2"
+						classNames="mb-2"
 						value={localTrigger.type}
 						options={getTriggerTypes(t)}
 						handleUpdate={onChangeType}

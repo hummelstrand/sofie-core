@@ -298,8 +298,7 @@ function getActionParametersEditor(
 				<div className="mt-2">
 					<label className="block">{t('Move Segments')}</label>
 					<IntInputControl
-						classNames="input text-input input-m mb-2"
-						modifiedClassName="bghl"
+						classNames="mb-2"
 						value={action.segments}
 						placeholder={t('By Segments')}
 						handleUpdate={(newVal) =>
@@ -311,8 +310,7 @@ function getActionParametersEditor(
 					/>
 					<label className="block">{t('Move Parts')}</label>
 					<IntInputControl
-						classNames="input text-input input-m mb-2"
-						modifiedClassName="bghl"
+						classNames="mb-2"
 						value={action.parts}
 						placeholder={t('By Parts')}
 						handleUpdate={(newVal) =>
@@ -349,7 +347,7 @@ function getActionParametersEditor(
 				<div className="mt-2">
 					<label className="block">{t('State')}</label>
 					<DropdownInputControl<typeof action.state>
-						classNames="input text-input input-m mb-2"
+						classNames="mb-2"
 						value={action.state}
 						// placholder={t('State')}
 						options={[
@@ -419,8 +417,7 @@ function getActionParametersEditor(
 				<div className="mt-2">
 					<label className="block">{t('Register ID')}</label>
 					<IntInputControl
-						classNames="input text-input input-m mb-2"
-						modifiedClassName="bghl"
+						classNames="mb-2"
 						value={action.register}
 						handleUpdate={(newVal) =>
 							onChange({
@@ -432,7 +429,7 @@ function getActionParametersEditor(
 
 					<label className="block">{t('Operation')}</label>
 					<DropdownInputControl<typeof action.operation>
-						classNames="input text-input input-m mb-2"
+						classNames="mb-2"
 						value={action.operation}
 						options={[
 							{
@@ -461,8 +458,7 @@ function getActionParametersEditor(
 
 					<label className="block">{t('Value')}</label>
 					<IntInputControl
-						classNames="input text-input input-m mb-2"
-						modifiedClassName="bghl"
+						classNames="mb-2"
 						value={action.value}
 						handleUpdate={(newVal) =>
 							onChange({
@@ -473,8 +469,7 @@ function getActionParametersEditor(
 					/>
 					<label className="block">{t('Minimum register limit')}</label>
 					<IntInputControl
-						classNames="input text-input input-m mb-2"
-						modifiedClassName="bghl"
+						classNames="mb-2"
 						value={action.limitMin}
 						handleUpdate={(newVal) =>
 							onChange({
@@ -485,8 +480,7 @@ function getActionParametersEditor(
 					/>
 					<label className="block">{t('Maximum register limit')}</label>
 					<IntInputControl
-						classNames="input text-input input-m mb-2"
-						modifiedClassName="bghl"
+						classNames="mb-2"
 						value={action.limitMax}
 						handleUpdate={(newVal) =>
 							onChange({
@@ -581,7 +575,7 @@ export const ActionSelector = function ActionSelector({
 					{...attributes.popper}
 				>
 					<DropdownInputControl
-						classNames="input text-input input-m mb-2"
+						classNames="mb-2"
 						value={action.action}
 						options={getAvailableActions(t)}
 						// placeholder={t('Action')}

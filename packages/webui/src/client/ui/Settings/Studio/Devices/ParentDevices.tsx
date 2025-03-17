@@ -405,14 +405,7 @@ function ParentDeviceEditRow({
 			<td colSpan={99}>
 				<div className="properties-grid">
 					<LabelAndOverrides label={t('Name')} item={item} overrideHelper={overrideHelper} itemKey={'name'}>
-						{(value, handleUpdate) => (
-							<TextInputControl
-								modifiedClassName="bghl"
-								classNames="input text-input input-l"
-								value={value}
-								handleUpdate={handleUpdate}
-							/>
-						)}
+						{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 					</LabelAndOverrides>
 
 					<AssignPeripheralDeviceConfigId
@@ -465,7 +458,6 @@ function AssignPeripheralDeviceConfigId({
 			<LabelActual label={'Peripheral Device'} />
 			<div className="field-content">
 				<DropdownInputControl<PeripheralDeviceId | undefined>
-					classNames="input text-input input-l"
 					options={peripheralDeviceOptions}
 					value={value}
 					handleUpdate={handleUpdate}

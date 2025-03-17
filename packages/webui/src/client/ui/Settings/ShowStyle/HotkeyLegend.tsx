@@ -190,23 +190,19 @@ export const HotkeyLegendSettings = withTranslation()(
 										<label className="field">
 											<LabelActual label={t('Key')} />
 											<EditAttribute
-												modifiedClassName="bghl"
 												attribute={'hotkeyLegend.' + index + '.key'}
 												obj={this.props.showStyleBase}
 												type="text"
 												collection={ShowStyleBases}
-												className="input text-input input-l"
 											></EditAttribute>
 										</label>
 										<label className="field">
 											<LabelActual label={t('Value')} />
 											<EditAttribute
-												modifiedClassName="bghl"
 												attribute={'hotkeyLegend.' + index + '.label'}
 												obj={this.props.showStyleBase}
 												type="text"
 												collection={ShowStyleBases}
-												className="input text-input input-l"
 											></EditAttribute>
 										</label>
 									</div>

@@ -275,8 +275,6 @@ function PackageContainerRow({
 							<label className="field">
 								<LabelActual label={t('Package Container ID')} />
 								<TextInputControl
-									modifiedClassName="bghl"
-									classNames="input text-input input-l"
 									value={packageContainer.id}
 									handleUpdate={updatePackageContainerId}
 									disabled={!!packageContainer.defaults}
@@ -289,14 +287,7 @@ function PackageContainerRow({
 								itemKey={'container.label'}
 								overrideHelper={overrideHelper}
 							>
-								{(value, handleUpdate) => (
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverrides>
 							<LabelAndOverridesForMultiSelect
 								label={t('Playout devices which uses this package container')}
@@ -307,12 +298,7 @@ function PackageContainerRow({
 								options={availablePlayoutDevicesOptions}
 							>
 								{(value, handleUpdate, options) => (
-									<MultiSelectInputControl
-										classNames="input text-input input-l"
-										options={options}
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
+									<MultiSelectInputControl options={options} value={value} handleUpdate={handleUpdate} />
 								)}
 							</LabelAndOverridesForMultiSelect>
 						</div>

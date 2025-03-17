@@ -294,13 +294,7 @@ function RouteSetRow({
 						<div className="properties-grid">
 							<label className="field">
 								<LabelActual label={t('Route Set ID')} />
-								<TextInputControl
-									modifiedClassName="bghl"
-									classNames="input text-input input-l"
-									value={routeSet.id}
-									handleUpdate={updateRouteSetId}
-									disabled={!!routeSet.defaults}
-								/>
+								<TextInputControl value={routeSet.id} handleUpdate={updateRouteSetId} disabled={!!routeSet.defaults} />
 							</label>
 							<LabelAndOverridesForDropdown
 								label={t('Default State')}
@@ -311,12 +305,7 @@ function RouteSetRow({
 								options={getDropdownInputOptions(DEFAULT_ACTIVE_OPTIONS)}
 							>
 								{(value, handleUpdate, options) => (
-									<DropdownInputControl
-										classNames="input text-input input-l"
-										options={options}
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
+									<DropdownInputControl options={options} value={value} handleUpdate={handleUpdate} />
 								)}
 							</LabelAndOverridesForDropdown>
 							<LabelAndOverridesForCheckbox
@@ -333,14 +322,7 @@ function RouteSetRow({
 								itemKey={'name'}
 								overrideHelper={overrideHelper}
 							>
-								{(value, handleUpdate) => (
-									<TextInputControl
-										modifiedClassName="bghl"
-										classNames="input text-input input-l"
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
-								)}
+								{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 							</LabelAndOverrides>
 
 							<LabelAndOverridesForDropdown
@@ -352,12 +334,7 @@ function RouteSetRow({
 								options={exclusivityGroupOptions}
 							>
 								{(value, handleUpdate, options) => (
-									<DropdownInputControl
-										classNames="input text-input input-l"
-										options={options}
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
+									<DropdownInputControl options={options} value={value} handleUpdate={handleUpdate} />
 								)}
 							</LabelAndOverridesForDropdown>
 
@@ -370,12 +347,7 @@ function RouteSetRow({
 								options={getDropdownInputOptions(StudioRouteBehavior)}
 							>
 								{(value, handleUpdate, options) => (
-									<DropdownInputControl
-										classNames="input text-input input-l"
-										options={options}
-										value={value}
-										handleUpdate={handleUpdate}
-									/>
+									<DropdownInputControl options={options} value={value} handleUpdate={handleUpdate} />
 								)}
 							</LabelAndOverridesForDropdown>
 						</div>
@@ -600,12 +572,7 @@ function RenderRoutesRow({
 					options={getDropdownInputOptions(Object.keys(studioMappings))}
 				>
 					{(value, handleUpdate, options) => (
-						<DropdownInputControl
-							classNames="input text-input input-l"
-							options={options}
-							value={value}
-							handleUpdate={handleUpdate}
-						/>
+						<DropdownInputControl options={options} value={value} handleUpdate={handleUpdate} />
 					)}
 				</LabelAndOverridesForDropdown>
 
@@ -615,14 +582,7 @@ function RenderRoutesRow({
 					itemKey={'outputMappedLayer'}
 					overrideHelper={tableOverrideHelper}
 				>
-					{(value, handleUpdate) => (
-						<TextInputControl
-							modifiedClassName="bghl"
-							classNames="input text-input input-l"
-							value={value}
-							handleUpdate={handleUpdate}
-						/>
-					)}
+					{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 				</LabelAndOverrides>
 
 				<LabelAndOverridesForDropdown
@@ -636,14 +596,7 @@ function RenderRoutesRow({
 						if (!rawRoute.mappedLayer) {
 							return <span className="ms-1">REMAP</span>
 						} else {
-							return (
-								<DropdownInputControl
-									classNames="input text-input input-l"
-									options={options}
-									value={value}
-									handleUpdate={handleUpdate}
-								/>
-							)
+							return <DropdownInputControl options={options} value={value} handleUpdate={handleUpdate} />
 						}
 					}}
 				</LabelAndOverridesForDropdown>
@@ -663,14 +616,7 @@ function RenderRoutesRow({
 								<span className="ms-1 dimmed">{t('Original Layer not found')}</span>
 							)
 						} else {
-							return (
-								<DropdownInputControl
-									classNames="input text-input input-l"
-									options={options}
-									value={value}
-									handleUpdate={handleUpdate}
-								/>
-							)
+							return <DropdownInputControl options={options} value={value} handleUpdate={handleUpdate} />
 						}
 					}}
 				</LabelAndOverridesForDropdown>
@@ -684,12 +630,7 @@ function RenderRoutesRow({
 						options={mappingTypeOptions}
 					>
 						{(value, handleUpdate, options) => (
-							<DropdownInputControl
-								classNames="input text-input input-l"
-								options={options}
-								value={value}
-								handleUpdate={handleUpdate}
-							/>
+							<DropdownInputControl options={options} value={value} handleUpdate={handleUpdate} />
 						)}
 					</LabelAndOverridesForDropdown>
 				)}
@@ -703,14 +644,7 @@ function RenderRoutesRow({
 							overrideHelper={tableOverrideHelper}
 							showClearButton={true}
 						>
-							{(value, handleUpdate) => (
-								<TextInputControl
-									modifiedClassName="bghl"
-									classNames="input text-input input-l"
-									value={value}
-									handleUpdate={handleUpdate}
-								/>
-							)}
+							{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 						</LabelAndOverrides>
 
 						<DeviceMappingSettings

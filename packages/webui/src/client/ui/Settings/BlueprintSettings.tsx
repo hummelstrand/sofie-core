@@ -265,14 +265,7 @@ export default translateWithTracker<IProps, IState, ITrackedProps>((props: IProp
 							<LabelActual label={t('Blueprint Name')} />
 
 							<div className="field-content">
-								<EditAttribute
-									modifiedClassName="bghl"
-									attribute="name"
-									obj={blueprint}
-									type="text"
-									collection={Blueprints}
-									className="mdinput"
-								/>
+								<EditAttribute attribute="name" obj={blueprint} type="text" collection={Blueprints} />
 							</div>
 							<div></div>
 							<div>
@@ -330,7 +323,6 @@ export default translateWithTracker<IProps, IState, ITrackedProps>((props: IProp
 							<LabelActual label={t('Disable version check')} />
 							<div className="field-content">
 								<EditAttribute
-									modifiedClassName="bghl"
 									attribute="disableVersionChecks"
 									obj={blueprint}
 									type="checkbox"

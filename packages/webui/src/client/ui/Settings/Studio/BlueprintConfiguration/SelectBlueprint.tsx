@@ -51,7 +51,6 @@ export function SelectBlueprint({ studio }: Readonly<SelectBlueprintProps>): JSX
 			<LabelActual label={t('Blueprint')} />
 
 			<EditAttribute
-				modifiedClassName="bghl"
 				attribute="blueprintId"
 				obj={studio}
 				type="dropdown"
@@ -59,7 +58,6 @@ export function SelectBlueprint({ studio }: Readonly<SelectBlueprintProps>): JSX
 				mutateDisplayValue={(v) => v || ''}
 				mutateUpdateValue={(v) => (v === '' ? undefined : v)}
 				collection={Studios}
-				className="input text-input input-l"
 			/>
 			<div>
 				{!studio.blueprintId ? (

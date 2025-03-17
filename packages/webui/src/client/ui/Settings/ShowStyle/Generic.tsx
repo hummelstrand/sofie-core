@@ -27,13 +27,7 @@ export function ShowStyleGenericProperties({
 				<LabelActual label={t('Show Style Base Name')} />
 
 				<div className="field-content">
-					<EditAttribute
-						modifiedClassName="bghl"
-						attribute="name"
-						obj={showStyleBase}
-						type="text"
-						collection={ShowStyleBases}
-					></EditAttribute>
+					<EditAttribute attribute="name" obj={showStyleBase} type="text" collection={ShowStyleBases}></EditAttribute>
 				</div>
 				<div></div>
 				<div>

@@ -40,7 +40,7 @@ export const DeviceEditor = function DeviceEditor({ trigger, modified, readonly,
 		<>
 			<Form.Control
 				type="text"
-				className={classNames('input text-input input-m mb-2', {
+				className={classNames('mb-2', {
 					bghl: modified,
 				})}
 				value={trigger.deviceId ?? ''}
@@ -54,7 +54,7 @@ export const DeviceEditor = function DeviceEditor({ trigger, modified, readonly,
 			/>
 			<Form.Control
 				type="text"
-				className={classNames(' input text-input input-m mb-2', {
+				className={classNames('mb-2', {
 					bghl: modified,
 				})}
 				value={trigger.triggerId ?? ''}

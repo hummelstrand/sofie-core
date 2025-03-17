@@ -216,85 +216,71 @@ const RundownLayoutEditorContent = withTranslation()(
 									<label className="field">
 										<LabelActual label={t('Label')} />
 										<EditAttribute
-											modifiedClassName="bghl"
 											attribute={`actionButtons.${index}.label`}
 											obj={item}
 											type="text"
 											collection={RundownLayouts}
-											className="input text-input input-l"
 										/>
 									</label>
 
 									<label className="field">
 										<LabelActual label={t('Toggled Label')} />
 										<EditAttribute
-											modifiedClassName="bghl"
 											attribute={`actionButtons.${index}.labelToggled`}
 											obj={item}
 											type="text"
 											collection={RundownLayouts}
-											className="input text-input input-l"
 										/>
 									</label>
 
 									<label className="field">
 										<LabelActual label={t('Type')} />
 										<EditAttribute
-											modifiedClassName="bghl"
 											attribute={`actionButtons.${index}.type`}
 											obj={item}
 											type="dropdown"
 											options={ActionButtonType}
 											collection={RundownLayouts}
-											className="input text-input input-l"
 										/>
 									</label>
 
 									<label className="field">
 										<LabelActual label={t('X')} />
 										<EditAttribute
-											modifiedClassName="bghl"
 											attribute={`actionButtons.${index}.x`}
 											obj={item}
 											type="int"
 											collection={RundownLayouts}
-											className="input text-input input-l"
 										/>
 									</label>
 
 									<label className="field">
 										<LabelActual label={t('Y')} />
 										<EditAttribute
-											modifiedClassName="bghl"
 											attribute={`actionButtons.${index}.y`}
 											obj={item}
 											type="int"
 											collection={RundownLayouts}
-											className="input text-input input-l"
 										/>
 									</label>
 
 									<label className="field">
 										<LabelActual label={t('Width')} />
 										<EditAttribute
-											modifiedClassName="bghl"
 											attribute={`actionButtons.${index}.width`}
 											obj={item}
 											type="float"
 											collection={RundownLayouts}
-											className="input text-input input-l"
 										/>
 									</label>
 
 									<label className="field">
 										<LabelActual label={t('Height')} />
 										<EditAttribute
-											modifiedClassName="bghl"
 											attribute={`actionButtons.${index}.height`}
 											obj={item}
 											type="float"
 											collection={RundownLayouts}
-											className="input text-input input-l"
 										/>
 									</label>
 								</div>
@@ -318,33 +304,23 @@ const RundownLayoutEditorContent = withTranslation()(
 				<React.Fragment>
 					<label className="field">
 						<LabelActual label={t('Icon')} />
-						<EditAttribute
-							modifiedClassName="bghl"
-							attribute={'icon'}
-							obj={item}
-							type="iconpicker"
-							collection={RundownLayouts}
-							className="input text-input input-s"
-						></EditAttribute>
+						<EditAttribute attribute={'icon'} obj={item} type="iconpicker" collection={RundownLayouts}></EditAttribute>
 					</label>
 
 					<label className="field">
 						<LabelActual label={t('Icon color')} />
 						<EditAttribute
-							modifiedClassName="bghl"
 							attribute={'iconColor'}
 							obj={item}
 							options={defaultColorPickerPalette}
 							type="colorpicker"
 							collection={RundownLayouts}
-							className="input text-input input-s"
 						></EditAttribute>
 					</label>
 
 					<label className="field">
 						<LabelActual label={t('Use as default')} />
 						<EditAttribute
-							modifiedClassName="bghl"
 							attribute={'isDefaultLayout'}
 							obj={item}
 							type="checkbox"
@@ -431,24 +407,20 @@ const RundownLayoutEditorContent = withTranslation()(
 											<label className="field">
 												<LabelActual label={t('Name')} />
 												<EditAttribute
-													modifiedClassName="bghl"
 													attribute={'name'}
 													obj={item}
 													type="text"
 													collection={RundownLayouts}
-													className="input text-input input-l"
 												></EditAttribute>
 											</label>
 											<label className="field">
 												<LabelActual label={t('Type')} />
 												<EditAttribute
-													modifiedClassName="bghl"
 													attribute={'type'}
 													obj={item}
 													options={this.props.layoutTypes}
 													type="dropdown"
 													collection={RundownLayouts}
-													className="input text-input input-l"
 												></EditAttribute>
 											</label>
 											{this.renderElements(item, layout)}

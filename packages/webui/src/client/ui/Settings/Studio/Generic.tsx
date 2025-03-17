@@ -80,7 +80,7 @@ export function StudioGenericProperties({ studio }: IStudioGenericPropertiesProp
 						{t('No name set')} <FontAwesomeIcon icon={faExclamationTriangle} />
 					</div>
 				) : null}
-				<EditAttribute modifiedClassName="bghl" attribute="name" obj={studio} type="text" collection={Studios} />
+				<EditAttribute attribute="name" obj={studio} type="text" collection={Studios} />
 			</label>
 			<div className="field">
 				{t('Select Compatible Show Styles')}
@@ -217,14 +217,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 				itemKey={'frameRate'}
 				overrideHelper={overrideHelper}
 			>
-				{(value, handleUpdate) => (
-					<IntInputControl
-						modifiedClassName="bghl"
-						classNames="input text-input input-l"
-						value={value}
-						handleUpdate={handleUpdate}
-					/>
-				)}
+				{(value, handleUpdate) => <IntInputControl value={value} handleUpdate={handleUpdate} />}
 			</LabelAndOverridesForInt>
 
 			<LabelAndOverridesForInt
@@ -233,14 +226,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 				itemKey={'minimumTakeSpan'}
 				overrideHelper={overrideHelper}
 			>
-				{(value, handleUpdate) => (
-					<IntInputControl
-						modifiedClassName="bghl"
-						classNames="input text-input input-l"
-						value={value}
-						handleUpdate={handleUpdate}
-					/>
-				)}
+				{(value, handleUpdate) => <IntInputControl value={value} handleUpdate={handleUpdate} />}
 			</LabelAndOverridesForInt>
 
 			<LabelAndOverridesForCheckbox
@@ -258,14 +244,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 				itemKey={'mediaPreviewsUrl'}
 				overrideHelper={overrideHelper}
 			>
-				{(value, handleUpdate) => (
-					<TextInputControl
-						modifiedClassName="bghl"
-						classNames="input text-input input-l"
-						value={value}
-						handleUpdate={handleUpdate}
-					/>
-				)}
+				{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 			</LabelAndOverrides>
 
 			<LabelAndOverrides
@@ -274,14 +253,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 				itemKey={'slackEvaluationUrls'}
 				overrideHelper={overrideHelper}
 			>
-				{(value, handleUpdate) => (
-					<TextInputControl
-						modifiedClassName="bghl"
-						classNames="input text-input input-l"
-						value={value}
-						handleUpdate={handleUpdate}
-					/>
-				)}
+				{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 			</LabelAndOverrides>
 
 			<LabelAndOverrides
@@ -290,14 +262,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 				itemKey={'supportedMediaFormats'}
 				overrideHelper={overrideHelper}
 			>
-				{(value, handleUpdate) => (
-					<TextInputControl
-						modifiedClassName="bghl"
-						classNames="input text-input input-l"
-						value={value}
-						handleUpdate={handleUpdate}
-					/>
-				)}
+				{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 			</LabelAndOverrides>
 
 			<LabelAndOverrides
@@ -306,14 +271,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 				itemKey={'supportedAudioStreams'}
 				overrideHelper={overrideHelper}
 			>
-				{(value, handleUpdate) => (
-					<TextInputControl
-						modifiedClassName="bghl"
-						classNames="input text-input input-l"
-						value={value}
-						handleUpdate={handleUpdate}
-					/>
-				)}
+				{(value, handleUpdate) => <TextInputControl value={value} handleUpdate={handleUpdate} />}
 			</LabelAndOverrides>
 
 			<LabelAndOverridesForCheckbox
@@ -331,14 +289,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 				itemKey={'multiGatewayNowSafeLatency'}
 				overrideHelper={overrideHelper}
 			>
-				{(value, handleUpdate) => (
-					<IntInputControl
-						modifiedClassName="bghl"
-						classNames="input text-input input-l"
-						value={value}
-						handleUpdate={handleUpdate}
-					/>
-				)}
+				{(value, handleUpdate) => <IntInputControl value={value} handleUpdate={handleUpdate} />}
 			</LabelAndOverridesForInt>
 
 			<LabelAndOverridesForCheckbox
@@ -416,12 +367,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 				options={autoNextOptions}
 			>
 				{(value, handleUpdate, options) => (
-					<DropdownInputControl
-						classNames="focusable-main input-l"
-						options={options}
-						value={value}
-						handleUpdate={handleUpdate}
-					/>
+					<DropdownInputControl options={options} value={value} handleUpdate={handleUpdate} />
 				)}
 			</LabelAndOverridesForDropdown>
 
@@ -431,14 +377,7 @@ function StudioSettings({ studio }: { studio: DBStudio }): JSX.Element {
 				itemKey={'fallbackPartDuration'}
 				overrideHelper={overrideHelper}
 			>
-				{(value, handleUpdate) => (
-					<IntInputControl
-						modifiedClassName="bghl"
-						classNames="input text-input input-l"
-						value={value}
-						handleUpdate={handleUpdate}
-					/>
-				)}
+				{(value, handleUpdate) => <IntInputControl value={value} handleUpdate={handleUpdate} />}
 			</LabelAndOverridesForInt>
 
 			<LabelAndOverridesForCheckbox
